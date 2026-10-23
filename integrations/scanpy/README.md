@@ -46,17 +46,19 @@ not in this workspace or the documentation:
 | --- | --- |
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
 | [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures, plot-specific validation and native display/save handling. |
-| [_guards.py](../../src/genome_spy/integrations/scanpy/_guards.py) | Shared option guards and lazy optional dependency/version checks used directly by the plotting functions and builder. |
+| [_guards.py](../../src/genome_spy/integrations/scanpy/_guards.py) | Shared option guards and lazy optional dependency/version checks used directly by plotting functions and builders. |
+| [_grouped_builder.py](../../src/genome_spy/integrations/scanpy/_grouped_builder.py) | Concrete group ordering, tree/totals replacement and axis state shared by DotPlot and MatrixPlot. |
 | [_dotplot_builder.py](../../src/genome_spy/integrations/scanpy/_dotplot_builder.py) | Mutable DotPlot chains over detached summaries, shared tree/layout helpers and the native dotplot renderer. |
+| [_matrixplot_builder.py](../../src/genome_spy/integrations/scanpy/_matrixplot_builder.py) | Mutable MatrixPlot styles/guides over detached means or supplied summaries and the native tile renderer. |
 | [_ranked_data.py](../../src/genome_spy/integrations/scanpy/_ranked_data.py) | Stored ranking checks, public Scanpy result selection, statistic color tables and detached rank-label positions. No expression access or analysis. |
 | [_ranking_chart.py](../../src/genome_spy/integrations/scanpy/_ranking_chart.py) | Native score labels, axes and multi-panel layout shared by ranking, PCA loadings/variance and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared scalar/numeric-table validation, raw/layer resolution and resident-expression checks; reused by preparation and chart modules. |
-| [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Selected values, feature slots/brackets and summaries. Shared scale_values serves cells and group means; heatmap adds cell permutations/group spans and an early size guard. No chart authoring. |
+| [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Selected values, feature slots/brackets, group counts and summaries. Shared scale_values serves cells and group means; heatmap adds cell permutations/group spans and an early size guard. No chart authoring. |
 | [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) | Shared schemes, CSS colors, continuous color bounds, fonts and point units for every plot; categorical/continuous preparation and explicit embedding style settings live here too. |
 | [_dendrogram_data.py](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py) | Read stored Scanpy results, delegate missing trees to sc.tl.dendrogram and share leaf/marker permutations. |
 | [_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py) | Shared native orthogonal links from stored branches, including gapped side tracks; no clustering. |
 | [_correlation_chart.py](../../src/genome_spy/integrations/scanpy/_correlation_chart.py) | Native correlation tiles, numbers, labels, hover and optional tree. |
-| [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Dotplot/matrixplot share index slots, labels, brackets, sizing, guides and attached-tree layout; correlation reuses index coordinates. |
+| [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Dotplot/matrixplot share index slots, labels, brackets, sizing, guides, native totals and attached-tree layout; correlation reuses index coordinates. |
 | [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
 | [_matrix_chart.py](../../src/genome_spy/integrations/scanpy/_matrix_chart.py) | Supplied numeric matrix and time-series heatmap tiles, axes, labels and color guide; shared numeric validation and grid interactions, without AnnData access. |
 | [_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py) | Supplied-profile point order, color subsets, masks and bounds; shared numeric/color checks, without analysis or chart authoring. |

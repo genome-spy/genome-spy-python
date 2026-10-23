@@ -20,9 +20,9 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     feature_gaps,
     plot_dimensions,
     summary_records,
+    totals_track,
 )
 from genome_spy.integrations.scanpy._style import (
-    FONT,
     POINTS_TO_PIXELS as _PT,
     color_bounds,
     native_scheme,
@@ -302,84 +302,10 @@ def build_dotplot(
         tree=tree,
         zoom=bool(zoom),
         tree_size=tree_size,
-        group_track=_totals_track(
-            totals, swapped=swap_axes, size=tree_size, hover=hover
+        group_track=totals_track(
+            totals, swapped=swap_axes, size=tree_size, hover=hover, name="dotplot"
         )
         if totals is not None
         else None,
     )
     return chart
-
-
-def _totals_track(
-    totals: pd.DataFrame, *, swapped: bool, size: float, hover: bool
-) -> gs.LayerChart:
-    """Draw detached group counts on the same native index scale as the dots."""
-    table = [
-        {
-            "slot": i,
-            "count": int(row["count"]),
-            "color": row["color"],
-            "group": str(group),
-            "label": f"{round(row['count'] / 1000, 1)}k"
-            if row["count"] >= 1000
-            else str(int(row["count"])),
-        }
-        for i, (group, row) in enumerate(totals.iterrows())
-    ]
-    chart = gs.Chart(table)
-    bars = chart.mark_rect(
-        stroke="black",
-        strokeWidth=_PT,
-        tooltip={"handler": "default"} if hover else None,
-    ).encode(
-        color=gs.Color("group:N")
-        .scale(
-            type="ordinal",
-            domain=[row["group"] for row in table],
-            range=totals["color"].tolist(),
-        )
-        .legend(None),
-    )
-    text = chart.encode(text="label:N")
-    if hover:
-        bars = bars.encode(
-            tooltip=[
-                gs.Tooltip("group:N", title="Group"),
-                gs.Tooltip("count:Q", title="Cells"),
-            ]
-        )
-    high = float(totals["count"].max()) * 1.4
-    if swapped:
-        count = (
-            gs.Y("count:Q").scale(domain=[0, high], nice=False, zoom=False).axis(None)
-        )
-        bars = bars.encode(
-            x=gs.X("slot:I", band=0.65).axis(None),
-            y=count,
-            y2=gs.datum(0),
-        )
-        text = text.mark_text(
-            font=FONT,
-            size=8 * _PT,
-            tooltip=None,
-            align="center",
-            baseline="bottom",
-            yOffset=-4,
-        ).encode(x=gs.X("slot:I").axis(None), y=count)
-        return gs.layer(bars, text).properties(height=size, name="dotplot-totals")
-    count_x = gs.X("count:Q").scale(domain=[0, high], nice=False, zoom=False).axis(None)
-    bars = bars.encode(
-        y=gs.Y("slot:I", band=0.65).axis(None),
-        x=count_x,
-        x2=gs.datum(0),
-    )
-    text = text.mark_text(
-        font=FONT,
-        size=8 * _PT,
-        tooltip=None,
-        align="left",
-        baseline="middle",
-        xOffset=4,
-    ).encode(y=gs.Y("slot:I").axis(None), x=count_x)
-    return gs.layer(bars, text).properties(width=size, name="dotplot-totals")

@@ -30,6 +30,7 @@ class FeatureGroup:
 class GroupedExpression:
     values: pd.DataFrame
     feature_groups: tuple[FeatureGroup, ...]
+    counts: pd.Series
 
 
 MAX_HEATMAP_VALUES = 250_000
@@ -249,13 +250,17 @@ def grouped_expression(
     if categories_order is not None:
         groups = groups.reorder_categories(list(categories_order))
 
+    counts = pd.CategoricalIndex(groups).value_counts(sort=False)
+
     # Repeated genes keep separate positions in the final plot.
     if not read_values:
         index = pd.CategoricalIndex(
             [], categories=groups.categories, name="_".join(keys)
         )
         return GroupedExpression(
-            pd.DataFrame(index=index, columns=names, dtype=float), feature_groups
+            pd.DataFrame(index=index, columns=names, dtype=float),
+            feature_groups,
+            counts,
         )
     table = frame.loc[:, names].copy()
     table.index = pd.CategoricalIndex(groups, name="_".join(keys))
@@ -268,7 +273,7 @@ def grouped_expression(
                 "Grouped plotting: log=True requires values greater than -1."
             )
         table = np.log1p(table)
-    return GroupedExpression(table, feature_groups)
+    return GroupedExpression(table, feature_groups, counts)
 
 
 def _cutoff(value: float) -> None:

@@ -993,7 +993,7 @@ visibility/titles/width. Constructor-only `dot_size_df` supplies labeled fractio
 Only dot coloring ships in this bounded slice; square-background styling remains
 a separate M13 increment with its own contrast/geometry/guide checks. Padding
 below 0.5 and broader Matplotlib color/normalization forms remain explicit limits.
-There is no generic builder base, method dispatcher or chart-spec rewriting.
+There is no universal builder framework, method dispatcher or chart-spec rewriting.
 The builder and public functions import shared guards directly from `_guards`,
 so the builder does not depend on the public plotting facade.
 
@@ -1005,7 +1005,17 @@ Verify actual upstream chains, supplied/repeated slots, no expression rereads,
 tree/totals replacement, navigation, independent composition, offline output and
 both canonical workflows. Reuse parent resource evidence only with an explicit
 account of the unchanged workload; measure constructor retention/render snapshots.
-`MatrixPlot` is the next independent builder; `StackedViolin` follows M08/C01.
+M13.b adds `MatrixPlot` over the existing one-pass matrix summaries and native
+tile renderer. Supplied `values_df` stays authoritative and is never read back
+from expression or scaled. Both builders share concrete group-order/tree/totals
+state in `_grouped_builder`, native totals tracks in `_grouped_chart`, and option
+guards in `_guards`. Styles remain local to each family. Matrix chains cover
+scheme/edge styles, color-guide visibility/title/width, tree/totals replacement,
+sorting and transpose, with detached snapshots and the same native delivery.
+Verify actual upstream chains, supplied/repeated slots, no expression rereads,
+shared DotPlot regressions, independent composition, the canonical expression
+workflow and construction plus retained snapshots on the grouped resource fixture.
+`StackedViolin` follows M08/C01; remaining dot styles stay separate increments.
 
 Target shape: `gsc.pl.DotPlot(pbmc, markers, "louvain").add_dendrogram().swap_axes().style(dot_edge_color="black")`.
 Acceptance: chained and equivalent functional plots share statistics/chart code,

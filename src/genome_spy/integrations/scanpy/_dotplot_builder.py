@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Literal, Self
 
+from genome_spy.integrations.scanpy._grouped_builder import _GroupedPlot
 from genome_spy.integrations.scanpy._guards import (
     _check_grid_zoom,
     _check_kwargs,
@@ -18,10 +19,9 @@ if TYPE_CHECKING:
     import pandas as pd
 
     from genome_spy import TopLevelSpec
-    from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 
 
-class DotPlot:
+class DotPlot(_GroupedPlot):
     """Build a grouped dotplot with Scanpy-style method chains.
 
     Read selected expression once at construction. Methods mutate this builder
@@ -155,16 +155,14 @@ class DotPlot:
             dot_color_df=dot_color_df,
             dot_size_df=dot_size_df,
         )
-        self._adata = adata
-        self._groupby = [groupby] if isinstance(groupby, str) else list(groupby)
-        self._feature_groups = prepared.feature_groups
-        self._counts = prepared.values.index.value_counts(sort=False)
-        self._order = list(self._colors.index)
-        self._tree: DendrogramData | None = None
-        self._extra: Literal["dendrogram", "totals"] | None = None
-        self._extra_size = 80.0
-        self._total_colors: list[str] = []
-        self._swapped = False
+        super().__init__(
+            adata,
+            groupby,
+            self._colors,
+            prepared.feature_groups,
+            prepared.counts,
+            context=context,
+        )
         self._standard_scale = standard_scale
         self._value_title = (
             "Color value" if dot_color_df is not None else "Mean expression"
@@ -185,130 +183,6 @@ class DotPlot:
             "cmap": kwds.get("cmap", "Reds"),
             "linewidth": kwds.get("linewidth", 0.2),
         }
-
-    def swap_axes(self, *, swap_axes: bool | None = True) -> Self:
-        """Place groups on x and features on y, or restore the original orientation.
-
-        Args:
-            swap_axes: True transposes the plot; False or None restores it.
-
-        Returns:
-            This builder for further chaining.
-
-        Raises:
-            TypeError: If swap_axes is not boolean or None.
-
-        Example:
-            >>> chart = plot.swap_axes().to_chart()
-        """
-        if swap_axes is not None and not isinstance(swap_axes, bool):
-            raise TypeError("gsc.pl.DotPlot: swap_axes must be boolean or None.")
-        self._swapped = bool(swap_axes)
-        return self
-
-    def add_dendrogram(
-        self,
-        *,
-        show: bool | None = True,
-        dendrogram_key: str | None = None,
-        size: float | None = 0.8,
-    ) -> Self:
-        """Attach the shared group tree, replacing totals while retaining its order.
-
-        Args:
-            show: False or None hides the group decoration, preserving ordering.
-            dendrogram_key: Stored Scanpy tree key, or the default grouping key.
-            size: Tree track size in inches at 100 logical pixels/inch.
-
-        Returns:
-            This builder for further chaining.
-
-        Raises:
-            TypeError: If flags or the tree key have invalid types.
-            ValueError: If the tree or size is invalid.
-
-        Example:
-            >>> chart = plot.add_dendrogram().swap_axes().to_chart()
-        """
-        from genome_spy.integrations.scanpy._dendrogram_data import attached_dendrogram
-
-        self._check_show(show)
-        if not show:
-            self._extra = None
-            return self
-        size_pixels = self._track_size(size)
-        if dendrogram_key is not None and (
-            not isinstance(dendrogram_key, str) or not dendrogram_key
-        ):
-            raise TypeError(
-                "gsc.pl.DotPlot: dendrogram_key must be a nonempty string or None."
-            )
-        tree = attached_dendrogram(
-            self._adata, self._groupby, dendrogram_key or True, len(self._colors)
-        )
-        if tree is not None:
-            self._tree = tree
-            self._order = list(tree.order)
-            self._extra = "dendrogram"
-            self._extra_size = size_pixels
-        return self
-
-    def add_totals(
-        self,
-        *,
-        show: bool | None = True,
-        sort: Literal["ascending", "descending"] | None = None,
-        size: float | None = 0.8,
-        color: str | Sequence[str] | None = None,
-    ) -> Self:
-        """Show group counts with native bars, replacing the dendrogram track.
-
-        Args:
-            show: False or None hides the decoration while preserving ordering.
-            sort: Sort groups by cell count, or retain their current order.
-            size: Track size in inches at 100 logical pixels/inch.
-            color: One CSS color or one per displayed group; default salmon.
-
-        Returns:
-            This builder for further chaining.
-
-        Raises:
-            TypeError: If show or color has an invalid type.
-            ValueError: If sort, size or the number of colors is invalid.
-            NotImplementedError: If colors are not opaque CSS colors.
-
-        Example:
-            >>> chart = plot.add_totals(sort="descending", color="salmon").to_chart()
-        """
-        from genome_spy.integrations.scanpy._style import native_color
-
-        self._check_show(show)
-        if not show:
-            self._extra = None
-            return self
-        size_pixels = self._track_size(size)
-        if sort not in (None, "ascending", "descending"):
-            raise ValueError(
-                "gsc.pl.DotPlot: sort must be 'ascending', 'descending', or None."
-            )
-        color = "salmon" if color is None else color
-        if isinstance(color, str):
-            colors = [color] * len(self._counts)
-        elif isinstance(color, Sequence):
-            colors = list(color)
-        else:
-            raise TypeError("gsc.pl.DotPlot: color requires a CSS color or sequence.")
-        if len(colors) != len(self._counts):
-            raise ValueError("gsc.pl.DotPlot: totals need one color per group.")
-        colors = [native_color(c, "color", context="gsc.pl.DotPlot") for c in colors]
-        if sort is not None:
-            self._order = list(
-                self._counts.sort_values(ascending=sort == "ascending").index
-            )
-        self._total_colors = colors
-        self._extra = "totals"
-        self._extra_size = size_pixels
-        return self
 
     def style(
         self,
@@ -438,24 +312,11 @@ class DotPlot:
         Example:
             >>> combined = plot.to_chart() | another_chart
         """
-        import pandas as pd
-
-        from genome_spy.integrations.scanpy._dendrogram_data import reorder_grouped
         from genome_spy.integrations.scanpy._dotplot_chart import build_dotplot
         from genome_spy.integrations.scanpy._grouped_data import scale_values
 
-        colors, fractions, groups = self._colors, self._fractions, self._feature_groups
-        if self._tree is not None:
-            colors, groups, slots = reorder_grouped(
-                self._tree, colors, groups, swapped=False
-            )
-            fractions = fractions.loc[list(self._tree.order)].iloc[:, slots]
-        colors, fractions = colors.loc[self._order], fractions.loc[self._order]
-        totals = None
-        if self._extra == "totals":
-            totals = pd.DataFrame(
-                {"count": self._counts.loc[self._order], "color": self._total_colors}
-            )
+        colors, groups, slots = self._displayed()
+        fractions = self._fractions.loc[self._order].iloc[:, slots]
         if self._swapped:
             colors, fractions = colors.T, fractions.T
         colors = scale_values(colors, self._standard_scale)
@@ -467,7 +328,7 @@ class DotPlot:
             value_title=self._value_title,
             tree=self._tree if self._extra == "dendrogram" else None,
             tree_size=self._extra_size,
-            totals=totals,
+            totals=self._totals(),
             **self._options,
         )
 
@@ -491,19 +352,3 @@ class DotPlot:
                 "gsc.pl.DotPlot: return_axes is omitted; use to_chart() for the native chart."
             )
         self.to_chart().display()
-
-    @staticmethod
-    def _check_show(show: bool | None) -> None:
-        if show is not None and not isinstance(show, bool):
-            raise TypeError("gsc.pl.DotPlot: show flags must be boolean or None.")
-
-    @staticmethod
-    def _track_size(size: float | None) -> float:
-        from genome_spy.integrations.scanpy._data import number
-
-        value = number(size, "size/width", context="gsc.pl.DotPlot")
-        if value == 0:
-            raise ValueError(
-                "gsc.pl.DotPlot: size/width must be positive; use show=False to hide it."
-            )
-        return value * 100

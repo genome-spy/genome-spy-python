@@ -8,6 +8,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 from genome_spy.integrations.scanpy._dotplot_builder import DotPlot
+from genome_spy.integrations.scanpy._matrixplot_builder import MatrixPlot
 from genome_spy.integrations.scanpy._guards import (
     _check_grid_zoom,
     _check_kwargs,
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "DotPlot",
+    "MatrixPlot",
     "clustermap",
     "correlation_matrix",
     "dendrogram",
@@ -1428,76 +1430,41 @@ def matrixplot(
         raise ValueError(f"{context}: standard_scale must be 'var', 'group', or None.")
     _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._dendrogram_data import (
-        attached_dendrogram,
-        reorder_grouped,
-    )
-    from genome_spy.integrations.scanpy._grouped_data import (
-        grouped_expression,
-        matrixplot_statistics,
-    )
-    from genome_spy.integrations.scanpy._matrixplot_chart import build_matrixplot
-
-    # Supplied means replace expression values, so do not log-transform them.
-    prepared = grouped_expression(
+    plot = MatrixPlot(
         adata,
         var_names,
         groupby,
         use_raw=use_raw,
-        log=log if values_df is None else False,
-        read_values=values_df is None,
+        log=log,
         num_categories=num_categories,
         categories_order=categories_order,
+        title=title,
+        figsize=figsize,
         gene_symbols=gene_symbols,
-        layer=layer,
         var_group_positions=var_group_positions,
         var_group_labels=var_group_labels,
-    )
-
-    # Compute means once, or keep the user's supplied summary table.
-    colors = matrixplot_statistics(
-        prepared.values,
+        var_group_rotation=var_group_rotation,
+        layer=layer,
         standard_scale=standard_scale,
         values_df=values_df,
-        categories_order=categories_order,
-        swap_axes=swap_axes,
-    )
-
-    # Move the group rows and matching marker brackets together.
-    feature_groups = prepared.feature_groups
-    count = colors.shape[1] if swap_axes else colors.shape[0]
-    tree = attached_dendrogram(adata, groupby, dendrogram, count)
-    if tree is not None:
-        colors, feature_groups, _ = reorder_grouped(
-            tree, colors, feature_groups, swapped=bool(swap_axes)
-        )
-
-    # Supplied values keep their meaning even when standard_scale is requested.
-    value_title = "Value" if values_df is not None else "Mean expression"
-    if values_df is None and standard_scale is not None:
-        value_title += " (scaled)"
-    chart = build_matrixplot(
-        colors,
-        feature_groups,
-        swap_axes=swap_axes,
-        title=title,
-        colorbar_title=colorbar_title,
-        cmap=cmap,
         vmin=vmin,
         vmax=vmax,
-        edgecolor=kwds.get("edgecolor", "gray"),
-        linewidth=kwds.get("linewidth", 0.1),
-        rotation=var_group_rotation,
+        vcenter=vcenter,
+        norm=norm,
         hover=hover,
         zoom=zoom,
         show_values=show_values,
-        value_title=value_title,
         width=width,
         height=height,
-        figsize=figsize,
-        tree=tree,
+        cmap=cmap,
+        **kwds,
     )
-    return _finish_plot(chart, show, sc)
+    plot.swap_axes(swap_axes=swap_axes).legend(title=colorbar_title)
+    if dendrogram:
+        plot.add_dendrogram(
+            dendrogram_key=dendrogram if isinstance(dendrogram, str) else None
+        )
+    return _finish_plot(plot.to_chart(), show, sc)
 
 
 def heatmap(

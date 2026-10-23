@@ -314,33 +314,31 @@ def test_unsupported_arguments_fail_before_dependencies_or_data(
         gsc.pl.umap(object(), **options)
 
 
-@pytest.mark.parametrize("builder", [False, True])
-def test_wrong_version_has_an_actionable_error(monkeypatch, builder) -> None:
+@pytest.mark.parametrize("context", ["umap", "DotPlot", "MatrixPlot"])
+def test_wrong_version_has_an_actionable_error(monkeypatch, context) -> None:
     monkeypatch.setattr(_guards, "version", lambda _: "1.12.0")
-    context = "DotPlot" if builder else "umap"
     with pytest.raises(
         ImportError,
         match=rf"gsc.pl.{context} supports Scanpy 1.11.5; found 1.12.0",
     ):
-        if builder:
-            gsc.pl.DotPlot(object(), ["g1"], "group")
+        if context != "umap":
+            getattr(gsc.pl, context)(object(), ["g1"], "group")
         else:
             gsc.pl.umap(object(), show=False)
 
 
-@pytest.mark.parametrize("builder", [False, True])
+@pytest.mark.parametrize("context", ["umap", "DotPlot", "MatrixPlot"])
 def test_missing_optional_dependency_has_an_actionable_error(
-    monkeypatch, builder
+    monkeypatch, context
 ) -> None:
     def missing(_):
         raise _guards.PackageNotFoundError("scanpy")
 
     monkeypatch.setattr(_guards, "version", missing)
-    context = "DotPlot" if builder else "umap"
     with pytest.raises(
         ImportError, match=rf"gsc.pl.{context} requires genome-spy-python\[scanpy\]"
     ):
-        if builder:
-            gsc.pl.DotPlot(object(), ["g1"], "group")
+        if context != "umap":
+            getattr(gsc.pl, context)(object(), ["g1"], "group")
         else:
             gsc.pl.umap(object(), show=False)

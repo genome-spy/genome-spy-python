@@ -32,7 +32,8 @@ dotplot/matrixplot/heatmap wrappers.
 Full public Scanpy plotting coverage is the destination; the inventory below
 records remaining work. Stored PCA loadings and variance ratios share the ranking panels;
 PCA overview composes these with the existing embedding chart. The native
-`DotPlot` builder supports the documented chains below; other builders remain planned.
+`DotPlot` and `MatrixPlot` builders support the documented chains below;
+`StackedViolin` remains planned.
 
 ## Shared 2D embeddings
 
@@ -712,12 +713,53 @@ computed. It performs no analysis or AnnData/cache writes.
 | `edgecolor`, `linewidth` in kwargs | Scalar opaque CSS edge color and nonnegative width in points; defaults are gray and 0.1. `edgecolor="none"` disables edges. Plural aliases error: Scanpy 1.11.5 overwrites those forwarded forms with its defaults; use the singular forms explicitly. Other pcolor kwargs error. |
 | `zoom`, `show_values` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Enable fitted two-decimal plotted values; see [shared grid interactions](#shared-grid-interactions). |
 | `hover` | Enabled by default; show gene, group and displayed mean/scaled mean or supplied value. `hover=False` disables picking without changing tile geometry. Summary tiles do not identify individual cells. |
-| `show`, `save`, `ax`, `return_fig`, `dendrogram`, `norm`, `vcenter` | Same native delivery boundary as dotplot. Trees accept True or a stored key; norm/vcenter error. The MatrixPlot builder and its styling methods are M13. Brushes remain deferred. |
+| `show`, `save`, `ax`, `return_fig`, `dendrogram`, `norm`, `vcenter` | Same native delivery boundary as dotplot. Trees accept True or a stored key; norm/vcenter error. MatrixPlot chains are described below. Brushes remain deferred. |
 
 Native palette interpolation, fonts and guide layout have the same documented
 fidelity boundaries as dotplot. Complete-chart checks cover labels, brackets,
 plot and guide placement; registered tile comparisons use 150 export DPI and
 DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
+
+### MatrixPlot builder
+
+```python
+plot = gsc.pl.MatrixPlot(
+    pbmc, marker_genes, "bulk_labels", standard_scale="var", zoom="xy",
+)
+chart = (
+    plot.add_dendrogram().swap_axes()
+    .style(cmap="Blues", edge_color="navy", edge_lw=0.6)
+    .legend(title="Scaled group mean", width=1.8)
+    .to_chart()
+)
+chart.display()
+counts = plot.add_totals(sort="descending", color="steelblue").to_chart()
+```
+
+The constructor shares functional matrixplot's data access, one-pass scaling
+and tile renderer. It reads selected expression once, or copies `values_df`
+without reading expression values, averaging or scaling. Real group counts come
+from the same grouping metadata even when values are supplied. Methods mutate
+the builder and return it; `.to_chart()` creates a detached native snapshot.
+The earlier `chart` keeps its tree and ordering after totals replace the track.
+
+Tree, totals and axis methods have the same arguments and ordering behavior as
+the [DotPlot builder](#dotplot-builder). `.style(cmap=..., edge_color=..., edge_lw=...)`
+updates only supplied styles. Native schemes and opaque CSS colors follow the
+functional matrixplot limits; `edge_color="none"` removes edges. Explicit None
+uses portable defaults: viridis, black edges and 1.5-point width. Matplotlib
+rcParams and colormap objects are not consulted. Constructor kwargs accept the
+functional names `cmap`, `edgecolor` and `linewidth`.
+
+`.legend(show=True, title="Expression\nlevel in group", width=1.5)` controls the
+native color guide. Width sets its gradient length and figsize allowance at
+100 logical pixels/inch; False/None hides it and releases the allowance. The
+constructor's initial title is "Mean expression in group", as in Scanpy.
+Guide typography/layout and palette interpolation retain the functional limits.
+`.show()` displays once through anywidget, independently of Scanpy autoshow and
+autosave. `show(return_axes=True)` errors; use `.to_chart()` and the native chart's
+configuration, composition and HTML/JSON saving methods. Matplotlib figure/artist
+methods and public constant customization remain outside this preview.
 
 (shared-grid-interactions)=
 ## Shared grid interactions

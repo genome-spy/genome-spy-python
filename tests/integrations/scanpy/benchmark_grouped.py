@@ -28,11 +28,11 @@ def main() -> None:
     parser.add_argument(
         "--builder",
         action="store_true",
-        help="Measure DotPlot construction and three native chart snapshots.",
+        help="Measure DotPlot/MatrixPlot construction and three native chart snapshots.",
     )
     args = parser.parse_args()
-    if args.builder and (args.plot != "dotplot" or args.ranked):
-        parser.error("--builder requires --plot dotplot without --ranked")
+    if args.builder and (args.plot == "heatmap" or args.ranked):
+        parser.error("--builder requires --plot dotplot/matrixplot without --ranked")
     import anndata as ad
     import numpy as np
     import pandas as pd
@@ -104,8 +104,8 @@ def main() -> None:
             if args.plot != "heatmap":
                 options["values_to_plot"] = "scores"
         if args.builder:
-            family = "DotPlot"
-            plot = gsc.pl.DotPlot(
+            family = "DotPlot" if args.plot == "dotplot" else "MatrixPlot"
+            plot = getattr(gsc.pl, family)(
                 adata, *positional, width=1400, height=1600, zoom=True
             )
             if args.dendrogram:

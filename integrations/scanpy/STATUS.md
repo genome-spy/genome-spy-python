@@ -96,15 +96,15 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and forty-three expression/ranked/QC/profile/simulation/DPT/PAGA/builder code cells. Public availability does not mean
+code cells and forty-five expression/ranked/QC/profile/simulation/DPT/PAGA/builder code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next independent builder: M13.b MatrixPlot**, reusing the existing matrixplot
-summaries, ordering and native tile renderer. The [M13.a DotPlot builder preview](#m13a-native-dotplot-builder)
-is verified within its documented scope. Square-background dot styling remains
-a separate M13 increment; StackedViolin follows M08/C01. Coordinate shared
+**The M13.a DotPlot and M13.b MatrixPlot builder previews are closed** within
+their documented scope. Both reuse family summaries/renderers and share group
+ordering, trees and totals. Square-background dot styling remains
+a separate M13 increment; the next builder, StackedViolin, follows M08/C01. Coordinate shared
 plan/export/notebook edits with the other chat before starting another slice.
 The [PAGA path heatmap](#m11d-paga-path-heatmaps)
 preview is implemented; native data/chart/workflow/interaction/resource checks
@@ -250,7 +250,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
 | M11 trajectories/graphs/series | In progress; supplied-series/simulation, DPT-expression and both adjacency previews closed; PAGA/compare available and path heatmap implemented | DPT/PAGA direct-reference gates, comparison corrections and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
-| M13 builders | In progress; DotPlot preview closed | DotPlot constructor and documented chains share the functional path, with upstream/native/workflow/resource checks. MatrixPlot/StackedViolin and remaining DotPlot style forms stay open; method coverage is recorded separately. |
+| M13 builders | In progress; DotPlot and MatrixPlot previews closed | Both share concrete group layout and their existing functional statistics/renderers, with upstream/native/workflow/resource checks. StackedViolin and remaining styles/constants stay open. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
 
 ## M05.e shared grid interactions
@@ -3550,8 +3550,8 @@ The bounded builder preview is **Closed**. The
 detached group summaries and small explicit chain state; functional `dotplot`
 delegates the same path. Both reuse grouped expression/statistics, stored/public
 Scanpy tree preparation, marker permutations, native grouped layout and the
-existing dot/guide renderer. No generic builder base, upstream plotting object,
-private chart rewriting or custom renderer is introduced.
+existing dot/guide renderer. No upstream plotting object, private chart rewriting
+or custom renderer is introduced.
 
 The self-containment correction moves the existing kwargs, dimensions/flags,
 grid zoom and lazy Scanpy dependency guards into
@@ -3621,14 +3621,86 @@ Verification (2026-10-23):
 Remaining M13 scope: square-background dot coloring, padding below 0.5,
 public constant customization, broader style forms and the MatrixPlot/StackedViolin
 builders. Parent storage/palette/typography/export restrictions retain M14 owners.
-The next independent builder is MatrixPlot; this bounded preview does not close
+MatrixPlot is delivered separately in M13.b; this bounded preview does not close
 M13. Clearance: **retain**.
+
+## M13.b native MatrixPlot builder
+
+The bounded preview is **Closed**. The
+[builder](../../src/genome_spy/integrations/scanpy/_matrixplot_builder.py) and
+functional `matrixplot` share selected-expression extraction, one-pass means and
+scaling, authoritative supplied values and the existing native tile renderer.
+Construction snapshots means and counts once. Supplied `values_df` validates
+features on zero rows and reads only grouping metadata for actual cell counts;
+it does not read cell expression or recompute/scale supplied values.
+
+DotPlot and MatrixPlot share their concrete ordering/tree/totals/transpose state
+in [`_grouped_builder.py`](../../src/genome_spy/integrations/scanpy/_grouped_builder.py).
+Both import guards from `_guards` and use native totals tracks in `_grouped_chart`.
+There is no method dispatcher, placeholder rendering base or private spec rewrite.
+Styles and statistics stay in their family modules. Matrix styles cover native
+schemes and CSS edge color/width; native color guides support visibility, title
+and width. Tree/totals replacement, sorting, hiding while retaining established
+order and axis orientation follow the shared DotPlot contract. Each to_chart
+returns a detached native chart; show displays once with the existing widget.
+Matplotlib figure/artist methods are omitted; return_axes=True errors explicitly.
+
+Verification (2026-10-23):
+
+- [46 builder cases](../../tests/integrations/scanpy/test_matrixplot_builder.py)
+  check pinned constructor/method defaults, actual upstream chains, feature/tree
+  permutations, style/bounds, real sorted totals, supplied repeated slots,
+  no expression rereads, detached snapshots, guide width and contextual errors.
+  The 139 existing DotPlot/functional matrixplot cases and 261 shared contract
+  checks also pass.
+- The combined Scanpy Python run passes **2,111 cases**, with the two known
+  upstream expected failures (C15/C16), excluding notebook/browser files. This
+  includes the other chat's PAGA path lines and all grouped-helper callers.
+- **10 focused headless builder cases pass** across
+  [shared totals/composition checks](../../tests/integrations/scanpy/browser/test_dotplot_builder.py)
+  and [MatrixPlot tree/style checks](../../tests/integrations/scanpy/browser/test_matrixplot_builder.py).
+  They verify labels, guides, tile geometry, WebGL edge paint, totals paint/hover,
+  zoom alignment, independent native compositions and offline HTML. Core's SVG
+  tile export omits edge strokes; WebGL pixel checks cover those styles directly.
+  HTML/JSON delivery uses the unchanged native runtime.
+- **132 distinct headless browser cases are verified**, with the existing C12/C13
+  expected failures retained: 122 parent dot/matrix/tree/grid cases and the
+  10 focused builder cases above. One parent crosshair check had a 1.6-pixel
+  post-zoom timing mismatch; the unchanged check and all remaining cases pass
+  on focused rerun. The refactor produces identical DotPlot crosshair specs in
+  both orientations; no ruler code or tolerance was changed.
+- **Both clean canonical workflows pass**, including the new display-argument
+  regression assertion. The combined live expression workflow ran all **45
+  nonempty code cells** without Python errors and attached all **38 native chart
+  canvases**, including both MatrixPlot snapshots. All four DotPlot/MatrixPlot
+  builder displays now use the same inline bundle and hidden controls as the
+  rest of the notebook; their previous default displays depended on remote bundle
+  loading. Canonical notebook source is committed without outputs/widget state;
+  local edits and the combined live execution remain in the working copy.
+- The [grouped resource generator](../../tests/integrations/scanpy/benchmark_grouped.py)
+  now accepts `--plot matrixplot --builder --dendrogram --browser`. Its seed-0
+  workload has 100,000 cells × 20,000 sparse genes, 40 selected genes, 50 groups
+  and 2,000 summary tiles. Construction plus three retained snapshots densifies
+  exactly one 100,000 × 40 selection. Observed cold preparation is 5.05 s,
+  serialization 0.41 s, traced peak/retention 142/79 MiB, RSS 397 MiB and JSON
+  144 KiB. Native first paint is 1.90 s including dispatch; hover/wheel responses
+  are about 0.10/0.26 s, with 8.8 MB live JS heap after collection. These are
+  laptop observations, not portable timing limits. Parent M03/M04 data/storage,
+  palette and tile-layout evidence is reused for unchanged code paths; this new
+  workload covers builder retention, counts and repeated snapshots directly.
+- Ruff formatting/lint and mypy pass. Full repository tests and docs build have
+  not been run for this slice.
+
+Remaining M13 scope: StackedViolin follows M08/C01; square-background dot styles,
+padding below 0.5 and public constant customization remain separate increments.
+Broader storage/style/normalization/palette/typography/export limits retain M14
+owners. Clearance: **retain**.
 
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 39 plotting functions/builders are available as partial previews; 9 plot/builder
+helpers. 40 plotting functions/builders are available as partial previews; 8 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -3636,7 +3708,7 @@ No placeholder functions are exported for planned work.
 | Public entry | Availability | Delivery milestone |
 | --- | --- | --- |
 | `DotPlot` | Partial native builder available; bounded preview verified | M13.a; square-background styling and broader options remain M13/M14 |
-| `MatrixPlot` | Not implemented | M13 (after M03/M04) |
+| `MatrixPlot` | Partial native builder available; bounded preview verified | M13.b; broader styles/constants remain M13/M14 |
 | `StackedViolin` | Not implemented | M13 (after M08) |
 | `clustermap` | Partial bounded preview available | M05.c; remaining options/transport M05.d/M14 |
 | `correlation_matrix` | Partial preview available | M04 preview; normalization/options M14 |
@@ -3729,7 +3801,7 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Grouped source/categories/repeated slots, log/means/scaling, supplied values_df, native tiles/guides/edges/hover | Tested preview; exact forms in user contract | M03 preview retained |
 | Dendrogram ordering/attachment and compatible stored trees | Verified leaf/marker reordering and native branches | M04 preview retained |
 | Optional zoom and fitted plotted values | Shared native grid helpers, annotations follow live index scales | M05.e |
-| MatrixPlot builder, semantic styling/legend chains | Not implemented | M13 |
+| MatrixPlot builder, semantic styling/legend chains | Native means/supplied values, group tracks, tile styles and color-guide chains verified | [M13.b](#m13b-native-matrixplot-builder); broader forms/constants remain M13/M14 |
 | norm/vcenter, remaining pcolor kwargs, backed/lazy/sparse arrays and image export | Explicit restrictions/errors | M14.c |
 
 | Tree/correlation parameter group | Current support | Completion owner |
@@ -3768,11 +3840,11 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 
 | Builder surface (all three classes) | Current state | Completion evidence required |
 | --- | --- | --- |
-| Constructor signatures/defaults and native result delivery | DotPlot implemented with pinned defaults, native keyword additions and detached to_chart snapshots | [Constructor/chain tests](../../tests/integrations/scanpy/test_dotplot_builder.py); other classes remain M13 |
-| add_dendrogram/add_totals/swap_axes | DotPlot implemented; native aligned tree or count track, sorting/colors and orientation | [Actual upstream chains and native browser checks](../../tests/integrations/scanpy/browser/test_dotplot_builder.py); other classes remain M13 |
-| style/legend and useful public defaults/constants | DotPlot dot styles and native guide controls implemented; square backgrounds and public constant customization remain open | Shared native renderer and chain tests; other classes remain M13 |
-| get_axes/figure/artist access | Intentional renderer boundary; no Matplotlib objects are offered | Use DotPlot.to_chart for native configuration/composition; other classes remain M13 |
-| make_figure/show(return_axes)/savefig | DotPlot omits Matplotlib make_figure/savefig; show(return_axes=True) errors with the native alternative | Native to_chart, show and chart.save contract/tests; other classes remain M13 |
+| Constructor signatures/defaults and native result delivery | DotPlot and MatrixPlot implemented with pinned defaults, native keyword additions and detached to_chart snapshots | [DotPlot tests](../../tests/integrations/scanpy/test_dotplot_builder.py), [MatrixPlot tests](../../tests/integrations/scanpy/test_matrixplot_builder.py); StackedViolin remains M13 |
+| add_dendrogram/add_totals/swap_axes | DotPlot and MatrixPlot share aligned tree/count tracks, sorting/colors and orientation | [Actual upstream chains and native browser checks](../../tests/integrations/scanpy/browser/test_dotplot_builder.py); StackedViolin remains M13 |
+| style/legend and useful public defaults/constants | DotPlot dot styles, MatrixPlot scheme/edge styles and native guide controls implemented; square backgrounds and public constant customization remain open | Shared native renderers and chain tests; StackedViolin remains M13 |
+| get_axes/figure/artist access | Intentional renderer boundary; no Matplotlib objects are offered | Use builder.to_chart for native configuration/composition; StackedViolin remains M13 |
+| make_figure/show(return_axes)/savefig | DotPlot and MatrixPlot omit Matplotlib make_figure/savefig; show(return_axes=True) errors with the native alternative | Native to_chart, show and chart.save contract/tests; StackedViolin remains M13 |
 
 ## Native capability ledger
 

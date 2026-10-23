@@ -250,9 +250,13 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
 
 def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     charts = []
-    monkeypatch.setattr(
-        TopLevelSpec, "display", lambda chart, **kwargs: charts.append(chart)
-    )
+    display_options = []
+
+    def display(chart, **kwargs):
+        charts.append(chart)
+        display_options.append(kwargs)
+
+    monkeypatch.setattr(TopLevelSpec, "display", display)
     namespace = {}
     dpt_calls = []
     paga, paga_calls = sc.tl.paga, []
@@ -332,7 +336,10 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_path_lines"],
         namespace["builder_tree_chart"],
         namespace["builder_totals_chart"],
+        namespace["matrix_builder_tree_chart"],
+        namespace["matrix_builder_totals_chart"],
     ]
+    assert display_options == [{"inline": True, "controls": False}] * len(charts)
     builder_tree = namespace["builder_tree_chart"].to_dict()
     builder_totals = namespace["builder_totals_chart"].to_dict()
     assert builder_tree["surround"]["top"][0]["name"] == "dotplot-tree"
@@ -344,6 +351,16 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert [row["count"] for row in totals] == list(counts)
     assert sum(row["count"] for row in totals) == 700
     assert namespace["dotplot_builder"].to_chart().to_dict() == builder_totals
+    matrix_tree = namespace["matrix_builder_tree_chart"].to_dict()
+    matrix_totals = namespace["matrix_builder_totals_chart"].to_dict()
+    assert matrix_tree["surround"]["top"][0]["name"] == "matrixplot-tree"
+    track = matrix_totals["surround"]["top"][0]
+    assert track["name"] == "matrixplot-totals"
+    totals = matrix_totals["datasets"][track["layer"][0]["data"]["name"]]
+    assert [row["group"] for row in totals] == list(counts.index)
+    assert [row["count"] for row in totals] == list(counts)
+    assert namespace["matrixplot_builder"].to_chart().to_dict() == matrix_totals
+    assert "matrixplot-totals" not in json.dumps(matrix_tree)
     assert paga_calls == [{"groups": "bulk_labels"}]
     path_values = namespace["path_values"]
     assert list(path_values.columns) == [

@@ -1,4 +1,4 @@
-"""Headless native DotPlot chains, totals alignment, composition and export."""
+"""Headless native grouped-builder chains, totals, composition and export."""
 
 from io import BytesIO
 import xml.etree.ElementTree as ET
@@ -15,8 +15,8 @@ from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
 from tests.integrations.scanpy.helpers import index_position
 
 
-def builder():
-    return gsc.pl.DotPlot(
+def builder(family="DotPlot"):
+    plot = getattr(gsc.pl, family)(
         make_tree_adata(),
         {"First": ["g2", "g1"], "Again": "g2"},
         "group",
@@ -24,7 +24,10 @@ def builder():
         hover=True,
         width=360,
         height=260,
-    ).style(
+    )
+    if family == "MatrixPlot":
+        return plot.style(cmap="viridis", edge_color="navy", edge_lw=0.7)
+    return plot.style(
         cmap="viridis",
         dot_edge_color="navy",
         dot_edge_lw=0.7,
@@ -78,9 +81,12 @@ def test_tree_chain_renders_complete_labels_guides_and_native_styling(page, swap
 
 
 @pytest.mark.parametrize("swapped", [False, True])
-def test_totals_paint_counts_and_remain_aligned_while_zooming(page, swapped, tmp_path):
+@pytest.mark.parametrize("family", ["DotPlot", "MatrixPlot"])
+def test_totals_paint_counts_and_remain_aligned_while_zooming(
+    page, swapped, tmp_path, family
+):
     chart = (
-        builder()
+        builder(family)
         .add_totals(sort="descending", color="steelblue", size=1)
         .swap_axes(swap_axes=swapped)
         .legend(show=False)
@@ -88,7 +94,10 @@ def test_totals_paint_counts_and_remain_aligned_while_zooming(page, swapped, tmp
     )
     spec = chart.to_dict()
     bounds = render(page, chart, scale_prefix="counts")
-    track = page.evaluate("api.views.getLayoutBounds({scope:[],view:'dotplot-totals'})")
+    track = page.evaluate(
+        "name=>api.views.getLayoutBounds({scope:[],view:name})",
+        f"{family.lower()}-totals",
+    )
     assert track["height" if swapped else "width"] == pytest.approx(100, abs=1)
     assert track["width" if swapped else "height"] == pytest.approx(
         bounds["width" if swapped else "height"], abs=0.01
@@ -141,8 +150,9 @@ def test_totals_paint_counts_and_remain_aligned_while_zooming(page, swapped, tmp
     assert any(element.text == "2" for element in texts)
 
 
-def test_native_snapshots_compose_and_navigate_independently(page, tmp_path):
-    plot = builder()
+@pytest.mark.parametrize("family", ["DotPlot", "MatrixPlot"])
+def test_native_snapshots_compose_and_navigate_independently(page, tmp_path, family):
+    plot = builder(family)
     left = plot.legend(show=False).to_chart()
     right = plot.swap_axes().legend(show=False).to_chart()
     assert all(

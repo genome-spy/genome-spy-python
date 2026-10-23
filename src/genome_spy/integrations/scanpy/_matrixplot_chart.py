@@ -16,6 +16,7 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     index_scales,
     plot_dimensions,
     summary_records,
+    totals_track,
 )
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 
@@ -51,6 +52,10 @@ def build_matrixplot(
     height: float | None,
     figsize: tuple[float, float] | None,
     tree: DendrogramData | None = None,
+    tree_size: float = 80,
+    totals: pd.DataFrame | None = None,
+    show_colorbar: bool = True,
+    legend_width: float = 150,
 ) -> gs.TopLevelSpec:
     """Build a native tile chart from displayed means and marker groups.
 
@@ -78,6 +83,7 @@ def build_matrixplot(
         height=height,
         figsize=figsize,
         context=context,
+        legend_width=legend_width,
     )
     low, high, _ = color_bounds(
         colors.to_numpy(dtype=float, na_value=float("nan")),
@@ -87,7 +93,7 @@ def build_matrixplot(
     )
     # Tiles fill their slots; missing means leave an empty slot with its label.
     x, y = grouped_axes(rows, columns, xpadding=0, ypadding=0)
-    x, y = zoom_axes(x, y, enabled=zoom, name="matrixplot")
+    x, y = zoom_axes(x, y, enabled=zoom, name=None)
     scales = index_scales(x, y)
     # The surround owns the scale definitions; marks retain fields and ticks.
     x, y = (
@@ -115,7 +121,11 @@ def build_matrixplot(
                 clamp=True,
                 scheme=scheme,
             )
-            .legend(color_legend(colorbar_title)),
+            .legend(
+                color_legend(colorbar_title).gradientLength(legend_width)
+                if show_colorbar
+                else None
+            ),
         )
     )
     if hover:
@@ -142,4 +152,10 @@ def build_matrixplot(
         name="matrixplot",
         tree=tree,
         zoom=bool(zoom),
+        tree_size=tree_size,
+        group_track=totals_track(
+            totals, swapped=swap_axes, size=tree_size, hover=hover, name="matrixplot"
+        )
+        if totals is not None
+        else None,
     )
