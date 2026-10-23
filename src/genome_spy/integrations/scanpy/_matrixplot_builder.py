@@ -147,7 +147,6 @@ class MatrixPlot(_GroupedPlot):
             standard_scale=standard_scale,
             values_df=values_df,
             categories_order=categories_order,
-            swap_axes=False,
         )
         super().__init__(
             adata,

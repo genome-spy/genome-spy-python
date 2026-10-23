@@ -1012,6 +1012,7 @@ state in `_grouped_builder`, native totals tracks in `_grouped_chart`, and optio
 guards in `_guards`. Styles remain local to each family. Matrix chains cover
 scheme/edge styles, color-guide visibility/title/width, tree/totals replacement,
 sorting and transpose, with detached snapshots and the same native delivery.
+Matrix summaries stay in group-by-feature order; `to_chart()` owns transposition.
 Verify actual upstream chains, supplied/repeated slots, no expression rereads,
 shared DotPlot regressions, independent composition, the canonical expression
 workflow and construction plus retained snapshots on the grouped resource fixture.

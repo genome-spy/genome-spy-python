@@ -339,12 +339,11 @@ def matrixplot_statistics(
     standard_scale: Literal["var", "group"] | None,
     values_df: pd.DataFrame | None,
     categories_order: Sequence[str] | None,
-    swap_axes: bool,
 ) -> pd.DataFrame:
-    """Return the displayed matrix from grouped cell values or supplied means.
+    """Return group-by-feature means from cell values or supplied summaries.
 
-    Scale computed means once, preserve supplied values, and transpose if requested
-    so chart construction receives the final row and column order.
+    Scale computed means once and preserve supplied values. The builder owns
+    display transposition.
     """
     # Supplied means replace computed means and must not be scaled again.
     if values_df is not None:
@@ -363,7 +362,7 @@ def matrixplot_statistics(
         numeric_values(means, context="gsc.pl.matrixplot: values_df")
         if categories_order is not None:
             means = means.loc[list(categories_order)]
-        return means.T if swap_axes else means
+        return means
 
     # Only observed groups have means; empty categories need an explicit cleanup.
     means = group_means(values)
@@ -374,8 +373,7 @@ def matrixplot_statistics(
             "gsc.pl.matrixplot: unused categories have no statistics; "
             "remove unused categories explicitly before plotting."
         )
-    means = scale_values(means, standard_scale)
-    return means.T if swap_axes else means
+    return scale_values(means, standard_scale)
 
 
 def dotplot_summaries(

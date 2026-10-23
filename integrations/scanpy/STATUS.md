@@ -3634,6 +3634,13 @@ Construction snapshots means and counts once. Supplied `values_df` validates
 features on zero rows and reads only grouping metadata for actual cell counts;
 it does not read cell expression or recompute/scale supplied values.
 
+The review cleanup removes the unused transpose argument and branches from
+`matrixplot_statistics`. Summaries stay in group-by-feature order; only
+`MatrixPlot.to_chart()` applies the requested orientation.
+Cleanup verification (2026-10-23): all **98 MatrixPlot builder/function cases**,
+Ruff formatting/lint and mypy pass. Browser/notebook runs were not repeated for
+this removal of unused code; rendering and examples are unchanged.
+
 DotPlot and MatrixPlot share their concrete ordering/tree/totals/transpose state
 in [`_grouped_builder.py`](../../src/genome_spy/integrations/scanpy/_grouped_builder.py).
 Both import guards from `_guards` and use native totals tracks in `_grouped_chart`.
