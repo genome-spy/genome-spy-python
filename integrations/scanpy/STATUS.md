@@ -3454,6 +3454,16 @@ Scanpy tree preparation, marker permutations, native grouped layout and the
 existing dot/guide renderer. No generic builder base, upstream plotting object,
 private chart rewriting or custom renderer is introduced.
 
+The self-containment correction moves the existing kwargs, dimensions/flags,
+grid zoom and lazy Scanpy dependency guards into
+[`_guards.py`](../../src/genome_spy/integrations/scanpy/_guards.py). The builder
+and public functions import them directly; the builder no longer imports `pl`.
+Validation behavior and native rendering are unchanged.
+Correction verification (2026-10-23): **2,016 Python cases pass**, with the two
+known upstream expected failures, including missing/incompatible dependency
+checks through both public functions and the builder. Ruff formatting/lint and
+mypy pass. Browser and notebook runs were skipped for this guard-only refactor.
+
 Constructor defaults match the pinned class except omitted `ax` and the documented
 native hover/navigation/dimensions. Supplied `dot_size_df` is copied and checked
 against group labels, repeated feature slots and finite [0, 1] fractions.

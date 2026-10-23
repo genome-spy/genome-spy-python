@@ -12,6 +12,7 @@ import pytest
 import genome_spy as gs
 from genome_spy.integrations.scanpy import pl
 import genome_spy.integrations.scanpy as gsc
+from genome_spy.integrations.scanpy import _guards
 
 FIXTURES = Path(__file__).with_name("fixtures")
 EMBEDDINGS = {
@@ -313,16 +314,33 @@ def test_unsupported_arguments_fail_before_dependencies_or_data(
         gsc.pl.umap(object(), **options)
 
 
-def test_wrong_version_has_an_actionable_error(monkeypatch) -> None:
-    monkeypatch.setattr(pl, "version", lambda _: "1.12.0")
-    with pytest.raises(ImportError, match="supports Scanpy 1.11.5; found 1.12.0"):
-        gsc.pl.umap(object(), show=False)
+@pytest.mark.parametrize("builder", [False, True])
+def test_wrong_version_has_an_actionable_error(monkeypatch, builder) -> None:
+    monkeypatch.setattr(_guards, "version", lambda _: "1.12.0")
+    context = "DotPlot" if builder else "umap"
+    with pytest.raises(
+        ImportError,
+        match=rf"gsc.pl.{context} supports Scanpy 1.11.5; found 1.12.0",
+    ):
+        if builder:
+            gsc.pl.DotPlot(object(), ["g1"], "group")
+        else:
+            gsc.pl.umap(object(), show=False)
 
 
-def test_missing_optional_dependency_has_an_actionable_error(monkeypatch) -> None:
+@pytest.mark.parametrize("builder", [False, True])
+def test_missing_optional_dependency_has_an_actionable_error(
+    monkeypatch, builder
+) -> None:
     def missing(_):
-        raise pl.PackageNotFoundError("scanpy")
+        raise _guards.PackageNotFoundError("scanpy")
 
-    monkeypatch.setattr(pl, "version", missing)
-    with pytest.raises(ImportError, match=r"genome-spy-python\[scanpy\]"):
-        gsc.pl.umap(object(), show=False)
+    monkeypatch.setattr(_guards, "version", missing)
+    context = "DotPlot" if builder else "umap"
+    with pytest.raises(
+        ImportError, match=rf"gsc.pl.{context} requires genome-spy-python\[scanpy\]"
+    ):
+        if builder:
+            gsc.pl.DotPlot(object(), ["g1"], "group")
+        else:
+            gsc.pl.umap(object(), show=False)

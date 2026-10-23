@@ -45,7 +45,8 @@ not in this workspace or the documentation:
 | Source | Responsibility |
 | --- | --- |
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
-| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures and plot-specific validation; common kwargs checks, optional dependency/version setup and native display/save handling. |
+| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures, plot-specific validation and native display/save handling. |
+| [_guards.py](../../src/genome_spy/integrations/scanpy/_guards.py) | Shared option guards and lazy optional dependency/version checks used directly by the plotting functions and builder. |
 | [_dotplot_builder.py](../../src/genome_spy/integrations/scanpy/_dotplot_builder.py) | Mutable DotPlot chains over detached summaries, shared tree/layout helpers and the native dotplot renderer. |
 | [_ranked_data.py](../../src/genome_spy/integrations/scanpy/_ranked_data.py) | Stored ranking checks, public Scanpy result selection, statistic color tables and detached rank-label positions. No expression access or analysis. |
 | [_ranking_chart.py](../../src/genome_spy/integrations/scanpy/_ranking_chart.py) | Native score labels, axes and multi-panel layout shared by ranking, PCA loadings/variance and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |

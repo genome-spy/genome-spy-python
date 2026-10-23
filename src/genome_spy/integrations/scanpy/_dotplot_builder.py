@@ -5,6 +5,12 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Literal, Self
 
+from genome_spy.integrations.scanpy._guards import (
+    _check_grid_zoom,
+    _check_kwargs,
+    _check_point_options,
+    _require_scanpy,
+)
 from genome_spy.schemapi import Undefined, UndefinedType
 
 if TYPE_CHECKING:
@@ -101,13 +107,6 @@ class DotPlot:
         height: float | None = None,
         **kwds: Any,
     ) -> None:
-        from genome_spy.integrations.scanpy.pl import (
-            _check_grid_zoom,
-            _check_kwargs,
-            _check_point_options,
-            _require_scanpy,
-        )
-
         context = "gsc.pl.DotPlot"
         _check_kwargs(kwds, {"cmap", "linewidth"}, context=context)
         for name, value in {"vcenter": vcenter, "norm": norm}.items():
