@@ -2197,7 +2197,8 @@ def paga_path(
         then optionally normalize each key. Reuse shared Scanpy data access and
         native matrix tiles with original group bands and numeric annotations.
         Analysis remains explicit; no embeddings, PAGA or DPT are recomputed.
-        This preview requires two keys and two smoothed cells. Native Greys
+        Heatmaps require two keys and two smoothed cells. Lines use native
+        round-cap rules with minor stroke differences. Native Greys
         differs from Scanpy's white-to-black annotation palette.
 
     Args:
@@ -2205,13 +2206,13 @@ def paga_path(
         nodes: Ordered group names or integer category indices; repeats are kept.
         keys: Gene or numeric observation keys, retaining supplied order.
         use_raw: Use raw when available, otherwise X, as in Scanpy.
-        annotations: Numeric observation tracks; at most one in this preview.
-        color_map: Native GenomeSpy scheme; None uses viridis.
+        annotations: Observation tracks; heatmaps support one numeric track. Lines show no tracks.
+        color_map: Native heatmap scheme; None uses viridis. Inactive for lines.
         color_maps_annotations: Native schemes by annotation key; defaults to Greys.
         palette_groups: CSS colors in full category order; None reuses saved/default colors.
         n_avg: Full-window running average across concatenated cells.
         groups_key: Group column; None reads uns['paga']['groups'].
-        xlim: Inactive for heatmaps, as in Scanpy.
+        xlim: Slice smoothed line samples, resetting x to zero; inactive for heatmaps.
         title: Optional chart title.
         left_margin: Only None; native layout reserves label space automatically.
         ytick_fontsize: Gene and track label size in points.
@@ -2219,18 +2220,18 @@ def paga_path(
         show_node_names: Label the supplied groups on their color band.
         show_yticks: Show key and track names.
         show_colorbar: Show the native expression color guide.
-        legend_fontsize: Inactive for heatmaps, as in Scanpy.
-        legend_fontweight: Inactive for heatmaps, as in Scanpy.
+        legend_fontsize: Line legend font size in points or a standard name; inactive for heatmaps.
+        legend_fontweight: Inactive, as in Scanpy.
         normalize_to_zero_one: Normalize each smoothed profile to zero through one.
-        as_heatmap: Only True; connected-line mode needs a separate native audit.
+        as_heatmap: True shows tiles and tracks; False connects adjacent samples with rules.
         return_data: Return the prepared table with the chart, or after display.
         show: Use Scanpy autoshow when unset; False returns the native chart.
         save: Only None/False; use native HTML/JSON export.
         hover: Include value and annotation tooltips.
         zoom: True navigates y; "xy" navigates both axes and aligned tracks.
-        show_values: Show numeric values when tiles have enough room.
-        width: Native heatmap area width in pixels.
-        height: Native heatmap area height in pixels.
+        show_values: Show fitted tile values; requires as_heatmap=True.
+        width: Native plot area width in pixels.
+        height: Native plot area height in pixels.
 
     Returns:
         A chart for show=False, otherwise None. With return_data=True, return
@@ -2240,8 +2241,8 @@ def paga_path(
         ImportError: If the optional supported Scanpy version is unavailable.
         TypeError: If option types, groups or values are unsupported.
         ValueError: If metadata, node indices, bounds or window size are invalid.
-        NotImplementedError: If line mode, categorical/multiple annotation tracks,
-            custom margins, image saving or nonnative colors are requested.
+        NotImplementedError: If categorical/multiple heatmap tracks, repeated line
+            keys, custom margins, image saving or nonnative heatmap colors are requested.
 
     Example:
         >>> chart = gsc.pl.paga_path(adata, nodes=[0, 1], keys=["CD3D", "CD79A"], show=False)
@@ -2262,21 +2263,24 @@ def paga_path(
             raise TypeError(f"{context}: {name} must be boolean.")
     _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
-    if not as_heatmap:
-        raise NotImplementedError(f"{context}: as_heatmap=False is not supported yet.")
+    if not as_heatmap and show_values:
+        raise NotImplementedError(f"{context}: show_values requires as_heatmap=True.")
     if left_margin is not None:
         raise NotImplementedError(
             f"{context}: left_margin is unsupported; use native layout."
         )
     if title is not None and not isinstance(title, str):
         raise TypeError(f"{context}: title must be a string or None.")
-    if not isinstance(color_maps_annotations, Mapping):
+    if as_heatmap and not isinstance(color_maps_annotations, Mapping):
         raise TypeError(f"{context}: color_maps_annotations must be a mapping.")
     from genome_spy.integrations.scanpy._paga_path_data import (
         prepare_paga_path,
         running_average,
     )
-    from genome_spy.integrations.scanpy._paga_path_chart import build_paga_path
+    from genome_spy.integrations.scanpy._paga_path_chart import (
+        build_paga_path,
+        build_paga_path_lines,
+    )
     from genome_spy.integrations.scanpy._style import _palette
 
     prepared = prepare_paga_path(
@@ -2288,35 +2292,49 @@ def paga_path(
         n_avg=n_avg,
         groups_key=groups_key,
         normalize_to_zero_one=normalize_to_zero_one,
+        as_heatmap=as_heatmap,
     )
-    categories = adata.obs[prepared.group_key].cat.categories
-    if palette_groups is not None and (
-        isinstance(palette_groups, str) or len(palette_groups) < len(categories)
-    ):
-        raise ValueError(
-            f"{context}: palette_groups needs CSS colors for all categories."
+    if as_heatmap:
+        categories = adata.obs[prepared.group_key].cat.categories
+        if palette_groups is not None and (
+            isinstance(palette_groups, str) or len(palette_groups) < len(categories)
+        ):
+            raise ValueError(
+                f"{context}: palette_groups needs CSS colors for all categories."
+            )
+        palette, _ = _palette(
+            adata, prepared.group_key, categories, palette_groups, context=context
         )
-    palette, _ = _palette(
-        adata, prepared.group_key, categories, palette_groups, context=context
-    )
-    chart = build_paga_path(
-        prepared,
-        categories=list(map(str, categories)),
-        palette=palette,
-        color_map=color_map,
-        color_maps_annotations=color_maps_annotations,
-        title=title,
-        ytick_fontsize=ytick_fontsize,
-        title_fontsize=title_fontsize,
-        show_node_names=show_node_names,
-        show_yticks=show_yticks,
-        show_colorbar=show_colorbar,
-        hover=hover,
-        zoom=zoom,
-        show_values=show_values,
-        width=width,
-        height=height,
-    )
+        chart = build_paga_path(
+            prepared,
+            categories=list(map(str, categories)),
+            palette=palette,
+            color_map=color_map,
+            color_maps_annotations=color_maps_annotations,
+            title=title,
+            ytick_fontsize=ytick_fontsize,
+            title_fontsize=title_fontsize,
+            show_node_names=show_node_names,
+            show_yticks=show_yticks,
+            show_colorbar=show_colorbar,
+            hover=hover,
+            zoom=zoom,
+            show_values=show_values,
+            width=width,
+            height=height,
+        )
+    else:
+        chart = build_paga_path_lines(
+            prepared,
+            xlim=xlim,
+            title=title,
+            title_fontsize=title_fontsize,
+            legend_fontsize=legend_fontsize,
+            hover=hover,
+            zoom=zoom,
+            width=width,
+            height=height,
+        )
     shown = _finish_plot(chart, show, sc)
     if not return_data:
         return shown

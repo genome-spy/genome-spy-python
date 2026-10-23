@@ -1196,7 +1196,7 @@ margins, `plot=False`, outlines, directed graphs and the other parent rendering
 restrictions remain unsupported. Native layout and fonts retain the existing
 renderer boundary; this is not full `paga_compare` parameter compatibility.
 
-### PAGA path heatmaps
+### PAGA path heatmaps and lines
 
 Use a supplied sequence of groups and explicitly computed pseudotime:
 
@@ -1243,20 +1243,47 @@ display. Columns contain the plotted keys, averaged numeric group codes, and
 that failure separately from the plotted data.
 
 This preview requires two keys and two smoothed samples, with at most one numeric
-annotation. Categorical/multiple annotation tracks, custom margins and connected
-lines reject clearly. `xlim` and legend font options are inactive in heatmap mode,
+annotation. Categorical/multiple heatmap annotation tracks and custom margins
+reject clearly. `xlim` and legend font options are inactive in heatmap mode,
 matching Scanpy. Native CSS group colors and color schemes use shared helpers.
 Native Greys uses RGB 226 through 30; Scanpy's Greys uses white through black.
 This native palette difference is an accepted preview limit. Values and color
 normalization retain Scanpy's behavior.
 
-`as_heatmap=False` is not implemented yet. Native rules with round caps are
-suitable for the planned line preview: a side-by-side comparison found minor
-edge/end differences at notebook size and under zoom. Exact Matplotlib joins
-are not required. The implementation will preserve sample order and missing-value
-breaks using native transforms and rules, without extra join marks or custom
-geometry. See the
-[native capability audit](../../../integrations/scanpy/STATUS.md#m11d-paga-path-connected-line-audit).
+Set `as_heatmap=False` to show the same prepared profiles as lines:
+
+```python
+lines = gsc.pl.paga_path(
+    path_cells,
+    nodes=["CD34+", "CD14+ Monocyte", "Dendritic"],
+    keys=["LYZ", "FCER1A", "CST3", "FCGR3A", "NKG7", "CD3D"],
+    n_avg=25,
+    normalize_to_zero_one=True,
+    as_heatmap=False,
+    zoom="xy",
+    show=False,
+)
+lines.display(inline=True, controls=False)
+```
+
+Native window/lead transforms connect adjacent samples with round-cap rules.
+Missing values leave gaps. Hover reports both sample values; zoom and pan use
+the same shared navigation helpers. No extra join marks or custom geometry are
+added. Corners, line ends and browser antialiasing have minor differences from
+Scanpy; see the [native comparison](../../../integrations/scanpy/STATUS.md#m11d-paga-path-connected-line-audit).
+
+`xlim=(start, stop)` slices the smoothed, normalized samples by position, including
+negative Python slice bounds. Displayed x coordinates restart at zero; returned
+data stays uncropped. Native category10 colors follow key order and cycle after
+ten keys. The built-in legend uses standard category symbols on the left;
+`legend_fontsize` sets its size. A single key instead has a ylabel and no legend.
+One-sample and empty crops are valid. Repeated line keys and `show_values=True`
+fail clearly.
+
+Annotation bands and heatmap color/guide options do not style lines. Numeric or
+categorical annotations can still be prepared, preserving the same returned
+pseudotime and group columns. The existing resident-data/value limit and explicit
+analysis contract apply to both modes.
 
 ### PAGA adjacency matrices
 

@@ -1,4 +1,4 @@
-"""Native PAGA path heatmaps with shared tiles, labels and navigation."""
+"""Native PAGA path tiles and rules with shared data, styles and navigation."""
 
 from collections.abc import Mapping
 from typing import Any, Literal
@@ -7,16 +7,21 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._data import coordinate_domain, number
 from genome_spy.integrations.scanpy._grid_interactions import with_values, zoom_axes
 from genome_spy.integrations.scanpy._grouped_chart import _slot_labels
 from genome_spy.integrations.scanpy._matrix_chart import matrix_tiles
-from genome_spy.integrations.scanpy._paga_path_data import CONTEXT, PagaPathData
+from genome_spy.integrations.scanpy._paga_path_data import (
+    CONTEXT,
+    PagaPathData,
+    path_line_values,
+)
 from genome_spy.integrations.scanpy._style import (
     FONT,
     POINTS_TO_PIXELS as PT,
     color_bounds,
     native_scheme,
+    _font_size,
 )
 
 
@@ -226,3 +231,123 @@ def build_paga_path(
             )
         )
     return chart.configure_legend(labelFont=FONT, labelFontSize=10 * PT)
+
+
+def build_paga_path_lines(
+    data: PagaPathData,
+    *,
+    xlim: tuple[int | None, int | None],
+    title: str | None,
+    title_fontsize: float | None,
+    legend_fontsize: float | str | None,
+    hover: bool,
+    zoom: bool | Literal["xy"],
+    width: float | None,
+    height: float | None,
+) -> gs.TopLevelSpec:
+    """Connect adjacent prepared samples with native rules, keeping gaps and series separate."""
+    values = path_line_values(data.values, xlim)
+    if not values.columns.is_unique:
+        raise NotImplementedError(f"{CONTEXT}: line mode requires distinct keys.")
+    width = number(496 if width is None else width, "width", context=CONTEXT)
+    height = number(369.6 if height is None else height, "height", context=CONTEXT)
+    title_size = (
+        number(
+            12 if title_fontsize is None else title_fontsize,
+            "title_fontsize",
+            context=CONTEXT,
+        )
+        * PT
+    )
+    legend_size = _font_size(legend_fontsize)
+    if min(width, height, title_size, legend_size) <= 0:
+        raise ValueError(f"{CONTEXT}: dimensions and font sizes must be positive.")
+    samples, columns = values.shape
+    keys = list(values.columns)
+    table = pd.DataFrame(
+        {
+            "_sample": np.tile(np.arange(samples), columns),
+            "_value": values.to_numpy().T.ravel(),
+            "_key": np.repeat(keys, samples),
+        }
+    )
+    visible = table.loc[np.isfinite(table["_value"])]
+    # Empty or all-missing crops retain the usual empty-axis limits.
+    x_values = visible["_sample"].to_numpy() if len(visible) else np.zeros(1)
+    y_values = visible["_value"].to_numpy() if len(visible) else np.zeros(1)
+    x, y = zoom_axes(
+        gs.X("_sample:Q")
+        .scale(domain=list(coordinate_domain(x_values, 0.05)), zero=False, nice=False)
+        .axis(title=data.group_key, domain=False),
+        gs.Y("_value:Q")
+        .scale(domain=list(coordinate_domain(y_values, 0.05)), zero=False, nice=False)
+        .axis(
+            title=f"{keys[0]} (a.u.)" if columns == 1 else None,
+            labels=False,
+            ticks=False,
+            domain=False,
+        ),
+        enabled=zoom,
+        name=None,
+    )
+    guide = gs.Legend(title=None, orient="left", symbolSize=64) if columns > 1 else None
+    lines = (
+        gs.Chart(table)
+        .transform_window(
+            ops=["lead", "lead"],
+            fields=["_sample", "_value"],
+            as_=["_next_sample", "_next_value"],
+            groupby=["_key"],
+            sort={"field": "_sample"},
+        )
+        # Keep missing rows until after lead so gaps never become connecting edges.
+        .transform_filter(
+            "isValid(datum._value) && isValid(datum._next_value) && isValid(datum._next_sample)"
+        )
+        .mark_rule(
+            size=1.5 * PT,
+            strokeCap="round",
+            clip=True,
+            tooltip={"handler": "default"} if hover else None,
+        )
+        .encode(
+            x=x,
+            x2="_next_sample:Q",
+            y=y,
+            y2="_next_value:Q",
+            color=gs.Color("_key:N")
+            .scale(type="ordinal", domain=keys, scheme="category10")
+            .legend(guide),
+        )
+    )
+    if hover:
+        lines = lines.encode(
+            tooltip=[
+                gs.Tooltip("_key:N", title="Key"),
+                gs.Tooltip("_sample:Q", title="Sample", format="d"),
+                gs.Tooltip("_value:Q", title="Value", format=".4g"),
+                gs.Tooltip("_next_sample:Q", title="Next sample", format="d"),
+                gs.Tooltip("_next_value:Q", title="Next value", format=".4g"),
+            ]
+        )
+    chart = lines.properties(
+        width=width,
+        height=height,
+        name="paga-path-lines",
+        view={"stroke": "black", "strokeWidth": 0.8 * PT},
+    )
+    if title is not None:
+        chart = chart.properties(
+            title=gs.Title(
+                text=title, font=FONT, fontSize=title_size, fontWeight="normal"
+            )
+        )
+    return chart.configure_legend(
+        labelFont=FONT, labelFontSize=legend_size
+    ).configure_axis(
+        labelFont=FONT,
+        titleFont=FONT,
+        labelFontSize=10 * PT,
+        titleFontSize=10 * PT,
+        titleFontWeight="normal",
+    )

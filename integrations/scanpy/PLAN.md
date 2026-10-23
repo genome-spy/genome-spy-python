@@ -916,7 +916,7 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   aligned and return (chart, frame) for show=False/return_data=True, or frame
   after display. The preview requires two keys/two smoothed cells, at most one
   numeric annotation and 250,000 selected cell–key/annotation values. Reject
-  line mode, categorical/multiple annotation tracks and custom margins clearly;
+  categorical/multiple heatmap annotation tracks and custom margins clearly;
   xlim and legend font options are inactive in heatmap mode as upstream.
   Verify ordered/normalized/raw/sparse values, repeated nodes, annotations,
   native return shapes, analysis/mutation guards, complete registered charts,
@@ -926,7 +926,7 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   Retain native Greys as an accepted fidelity limit: assert its 226/30 endpoints
   separately from Scanpy's 255/0 endpoints, while checking identical annotation
   values/domains, geometry and native pixel mapping. Do not substitute a palette.
-  The line-mode audit is complete; implementation is Ready with native
+  The line-mode preview reuses shared preparation and native
   window/lead and rules using round caps. Exact joins/end caps are not required;
   the observed minor stroke/rasterization differences are a documented visual
   limit, not a C04 blocker. Do not add custom join geometry or extra marks to
@@ -936,6 +936,12 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   scoping heatmap-only shape restrictions separately. Acceptance includes bends,
   end caps, missing-value breaks, crop order, observed hover/zoom and the packaged
   workflow before notebook publication.
+  Native category10 colors follow the key order and repeat after ten keys.
+  Use the built-in color legend with its standard category symbols; show a key
+  ylabel instead for a single key. Keep returned data uncropped. Single-sample
+  and empty line crops are valid; repeated line keys and show_values=True fail
+  clearly. Numeric/categorical annotations may be prepared for return_data but
+  do not create line-mode tracks. No embedding, DPT or PAGA analysis is rerun.
 
 Acceptance: hand-sized graphs/path arrays cover thresholds, direction, duplicate
 edges, gaps and smoothing; saved coordinates/arrays are honored. No hidden PAGA

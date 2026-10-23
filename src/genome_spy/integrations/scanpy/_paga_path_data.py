@@ -34,6 +34,23 @@ def running_average(values: np.ndarray, window: int) -> np.ndarray:
     return summed[window - 1 :] / window
 
 
+def path_line_values(
+    values: pd.DataFrame, xlim: tuple[int | None, int | None]
+) -> pd.DataFrame:
+    """Crop prepared profiles by sample position; leave full values for return_data."""
+    if (
+        not isinstance(xlim, (tuple, list))
+        or len(xlim) != 2
+        or any(
+            bound is not None
+            and (isinstance(bound, bool) or not isinstance(bound, Integral))
+            for bound in xlim
+        )
+    ):
+        raise TypeError(f"{CONTEXT}: xlim needs two integer or None slice bounds.")
+    return values.iloc[slice(*xlim)]
+
+
 def prepare_paga_path(
     adata: Any,
     nodes: Sequence[str | int],
@@ -44,6 +61,7 @@ def prepare_paga_path(
     n_avg: int,
     groups_key: str | None,
     normalize_to_zero_one: bool,
+    as_heatmap: bool = True,
 ) -> PagaPathData:
     """Return detached profiles, original group bands and smoothed annotations in supplied path order."""
     from anndata import AnnData
@@ -106,7 +124,7 @@ def prepare_paga_path(
         raise ValueError(
             f"{CONTEXT}: n_avg must be an integer between 1 and the path cell count."
         )
-    if len(keys) < 2 or len(order) - n_avg + 1 < 2:
+    if as_heatmap and (len(keys) < 2 or len(order) - n_avg + 1 < 2):
         raise NotImplementedError(
             f"{CONTEXT}: this preview requires at least two keys and two smoothed cells."
         )
@@ -114,7 +132,7 @@ def prepare_paga_path(
         raise ValueError(
             f"{CONTEXT}: at most {MAX_HEATMAP_VALUES:,} path cell–key values are supported; subset explicitly."
         )
-    if len(annotations) > 1:
+    if as_heatmap and len(annotations) > 1:
         raise NotImplementedError(
             f"{CONTEXT}: multiple annotation tracks are not supported yet."
         )
@@ -123,10 +141,12 @@ def prepare_paga_path(
             raise ValueError(
                 f"{CONTEXT}: each annotation must name an observation column."
             )
-        if isinstance(adata.obs[name].dtype, pd.CategoricalDtype):
+        if as_heatmap and isinstance(adata.obs[name].dtype, pd.CategoricalDtype):
             raise NotImplementedError(
                 f"{CONTEXT}: categorical annotation tracks are not supported yet."
             )
+    if len(set(annotations)) != len(annotations):
+        raise ValueError(f"{CONTEXT}: annotations must name distinct columns.")
 
     # Select columns before path rows so AnnData cannot copy unrequested genes.
     table = grouped_expression(
@@ -137,9 +157,11 @@ def prepare_paga_path(
         observation_positions=order,
     ).values
     values = numeric_values(table, context=CONTEXT)
-    annotation_values = numeric_values(
-        adata.obs.loc[:, list(annotations)].iloc[order], context=CONTEXT
-    )
+    annotation_table = adata.obs.loc[:, list(annotations)].iloc[order].copy()
+    for name in annotation_table:
+        if isinstance(annotation_table[name].dtype, pd.CategoricalDtype):
+            annotation_table[name] = annotation_table[name].cat.codes
+    annotation_values = numeric_values(annotation_table, context=CONTEXT)
     if n_avg > 1:
         values = running_average(values, n_avg)
         annotation_values = running_average(annotation_values, n_avg)

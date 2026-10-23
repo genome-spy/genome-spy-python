@@ -211,6 +211,7 @@ for using the integration. Notebook examples use real packaged data; synthetic
 fixtures remain useful for independently checking missing values, duplicate
 labels/coordinates, raw/layer differences, sparse allocation, and exact edges.
 
-The expression workflow also includes PAGA path heatmaps: Scanpy explicitly
-computes pseudotime, then native tiles and side tracks display a supplied group
-order. Plotting reuses stored data and does not infer a trajectory.
+The expression workflow also includes PAGA path heatmaps and lines. Scanpy
+explicitly computes pseudotime; both plots reuse the same ordered, smoothed
+profiles. Native tiles/tracks or round-cap rules display the supplied group
+order, without inferring a trajectory. Lines include hover and optional zoom.

@@ -329,6 +329,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_comparison"],
         namespace["independent_comparisons"],
         namespace["paga_path_chart"],
+        namespace["paga_path_lines"],
         namespace["builder_tree_chart"],
         namespace["builder_totals_chart"],
     ]
@@ -356,6 +357,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         "distance",
     ]
     assert len(path_values) == 358
+    line_spec = namespace["paga_path_lines"].to_dict()
+    assert line_spec["mark"]["type"] == "rule"
+    assert line_spec["mark"]["strokeCap"] == "round"
+    assert line_spec["encoding"]["color"]["scale"]["domain"] == namespace["path_genes"]
+    line_rows = next(iter(line_spec["datasets"].values()))
+    np.testing.assert_allclose(
+        np.array([r["_value"] for r in line_rows]).reshape(6, 358).T,
+        path_values[namespace["path_genes"]],
+    )
     np.testing.assert_allclose(path_values.iloc[:, :6].min(), 0)
     np.testing.assert_allclose(path_values.iloc[:, :6].max(), 1)
     pbmc = namespace["pbmc"]

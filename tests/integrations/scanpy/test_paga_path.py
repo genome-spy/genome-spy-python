@@ -113,7 +113,11 @@ def test_values_tracks_labels_and_return_data_match_public_scanpy(
 @pytest.mark.parametrize(
     "options,error,match",
     [
-        ({"as_heatmap": False}, NotImplementedError, "as_heatmap=False"),
+        (
+            {"as_heatmap": False, "show_values": True},
+            NotImplementedError,
+            "show_values",
+        ),
         ({"left_margin": 0.2}, NotImplementedError, "left_margin"),
         ({"n_avg": 0}, ValueError, "n_avg"),
         ({"n_avg": 5}, ValueError, "n_avg"),
@@ -199,7 +203,8 @@ def test_selected_sparse_genes_only_are_densified_without_mutation(monkeypatch):
 
 
 @pytest.mark.parametrize("use_raw", [False, True], ids=["X", "raw"])
-def test_dense_path_reads_selected_columns_before_reordering_rows(use_raw):
+@pytest.mark.parametrize("as_heatmap", [True, False], ids=["heatmap", "lines"])
+def test_dense_path_reads_selected_columns_before_reordering_rows(use_raw, as_heatmap):
     copied_widths = []
 
     class SelectedColumnsOnly(np.ndarray):
@@ -225,6 +230,7 @@ def test_dense_path_reads_selected_columns_before_reordering_rows(use_raw):
         ["beta", "alpha", "beta"],
         ["g2", "g1"],
         use_raw=use_raw,
+        as_heatmap=as_heatmap,
         return_data=True,
         show=False,
     )

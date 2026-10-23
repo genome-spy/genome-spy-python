@@ -96,7 +96,7 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and forty-two expression/ranked/QC/profile/simulation/DPT/PAGA/builder code cells. Public availability does not mean
+code cells and forty-three expression/ranked/QC/profile/simulation/DPT/PAGA/builder code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
@@ -112,8 +112,9 @@ are verified, with C16 retaining the broken upstream default return_data gate.
 Native Greys is an explicitly accepted fidelity limit. The
 [connected-line capability audit](#m11d-paga-path-connected-line-audit) is complete;
 native rules are suitable for a bounded line-mode preview. Exact join matching
-is a visual limit, not a C04 blocker. Line-mode implementation is Ready; its
-production data/chart/interaction/workflow checks remain outstanding. The
+is a visual limit, not a C04 blocker. The [line preview](#m11d-paga-path-lines)
+is implemented with native data/chart/interaction/workflow/resource checks verified;
+C16 retains the broken upstream default return_data gate. The
 [comparison corrections](#comparison-palette-and-composition-corrections) are
 verified and closed; their parent restrictions remain explicit below.
 
@@ -211,7 +212,7 @@ C12 remains a separate upstream straight-link issue.
 | M11.d adjacency heatmaps | Closed (bounded legacy-key heatmap preview) | [Shared matrix renderer and direct references](#m11d-paga-adjacency-heatmaps) | Stripplot increment delivered below; shared font/tick/layout/storage differences remain M14. Full M11.d stays open. |
 | M11.d adjacency strips | Closed (bounded legacy-key stripplot preview) | [Shared data/native points and direct references](#m11d-paga-adjacency-strips) | Broader storage/styling/export limits remain M14; full M11.d stays open. |
 | M11.d path heatmap | Implemented; native checks verified, C16 parent gate blocked | [Preparation/native chart and verification](#m11d-paga-path-heatmaps) | Connected-line mode retains C04; categorical/multiple annotations and singular shapes retain M14. |
-| M11.d path lines | Audit Closed; implementation Ready | [Native rule comparison and public Scanpy audit](#m11d-paga-path-connected-line-audit) | Implement with shared preparation and native window/lead/rules; verify gaps, crop order, guides, hover/zoom and workflow. C04 retains a minor join/end-cap visual limit. |
+| M11.d path lines | Implemented; native checks verified, C16 parent gate blocked | [Shared preparation and native rules](#m11d-paga-path-lines) | Exact caps/joins and native category symbols are visual limits; repeated line keys and broader source/style/export cases retain M14. |
 | M11.d comparison panels | Closed (corrected bounded preview) | [Palette, native coordinates and independent composition](#comparison-palette-and-composition-corrections) | Regular-label/parent restrictions remain M11/M14; paga_path heatmap is in progress separately. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
@@ -3444,13 +3445,14 @@ cells without Python errors. Ruff and mypy pass. Native chart construction is un
 The preview requires two keys/two smoothed samples, at most one numeric track,
 finite stored pseudotime and resident expression. Categorical/multiple tracks,
 singular shapes, custom margins and broader source/style/export options retain
-M14 owners. Connected-line mode is Ready after the native rule comparison below.
+M14 owners. Connected-line mode is implemented below after the native rule comparison.
 Full repository tests and docs build were not rerun. Clearance: **retain**;
 the native preview does not close the full path family or M11.d.
 
 ## M11.d PAGA path connected-line audit
 
-Audit **Closed** (2026-10-23); implementation **Ready using native rules**. Installed
+Audit **Closed** (2026-10-23); the [native rule implementation](#m11d-paga-path-lines)
+follows below. Installed
 genome-spy-python 0.7.0/Core 1.2.0 has rect, point, rule, tick, text, link and
 arrow marks. The schema rejects line/path marks and strokeJoin on rules/links.
 The [native rule documentation](https://genomespy.app/docs/grammar/mark/rule/)
@@ -3485,14 +3487,61 @@ these four checks, including browser rasterization differences. Visual inspectio
 found the normal and zoomed differences minor; this does not claim identical
 stroke geometry. Comparison images and scripts remain local temporary evidence.
 
-Reuse existing ordering, source access, averages and normalization for production,
-then verify bends/end caps, missing-value breaks, cropped coordinates,
-legend/single-key labels, observed hover/zoom and resources before adding the
-notebook example. The six reference checks, three native cap probes and **72
-existing path tests pass**, with the known C16 expected failure. as_heatmap=False
-still fails clearly until implementation. Full tests, docs build and notebook
-execution were not repeated for this documentation-only audit. Clearance:
-**retain**; support and full M11.d remain open.
+The six reference checks, three native cap probes and 72 existing path checks
+passed at the audit checkpoint, with the known C16 expected failure. The
+implementation and fresh verification below supersede its earlier Ready state.
+Clearance: **retain**; full M11.d remains open.
+
+## M11.d PAGA path lines
+
+Implemented (2026-10-23); native semantic/chart/workflow/interaction/resource
+checks verified, **C16 direct default return_data gate remains blocked**. The
+[public function](../../src/genome_spy/integrations/scanpy/pl.py) keeps its pinned
+signature. [Preparation](../../src/genome_spy/integrations/scanpy/_paga_path_data.py)
+reuses the same selected raw/X/obs columns, ordered/repeated groups, full-window
+averages and per-key normalization. A pure crop helper applies Python slice
+bounds afterward; displayed sample coordinates restart at zero and return_data
+remains uncropped. Single keys, one sample and empty crops are valid.
+
+The [renderer](../../src/genome_spy/integrations/scanpy/_paga_path_chart.py) reuses
+numeric bounds, font and zoom helpers with native window/lead, filters and
+round-cap rules. Filtering follows lead so missing rows never become bridges.
+Key order controls draw order and native category10 colors. The built-in left
+color legend uses standard category symbols; a single key has a ylabel instead.
+No extra join marks, geometry, listeners, Core patch, runtime Matplotlib calls
+or analysis are introduced. Minor caps/joins/rasterization differences and native
+legend symbols are explicit visual limits.
+
+**125 path Python checks pass**, including 51 line cases plus heatmap regressions
+and both dense X/raw column-copy guards. Direct Scanpy references cover dense,
+CSR/CSC, raw fallback, views, repeated nodes, mixed obs/gene keys, slicing after
+smoothing/normalization, missing values, domains, labels and working return_data.
+The earlier broader run also passed shared grouped-data and display contracts.
+**Nineteen browser checks pass** (eight line and eleven heatmap), including
+registered complete charts, native guide labels/colors, missing-value breaks,
+hover/disabled hover, y/both-axis zoom, independent composition/pan and offline
+HTML. Both clean workflows pass; the expression delivery check requires inline
+chart display. The final combined live expression workflow ran all 45 nonempty
+cells and attached all 38 charts, including the coordinated MatrixPlot examples,
+without Python errors. Only PAGA source cells belong to this increment; outputs
+and widget state remain local. Ruff and mypy pass.
+
+A seed-0 sparse workload has 100,000 observations by 20,000 genes, 19,025 stored
+entries, two 5,000-cell path groups and twenty selected genes. At n_avg=25 with
+normalization it sends 199,520 sample/key rows for 199,500 native segments.
+Preparation took **0.032 s**, chart construction including preparation **0.093 s**,
+validated JSON **10.849 s**, peak traced allocation **134.10 MiB**, and transport
+**11,312,855 bytes**. Native 800-by-320 browser rendering took **9.128 s**, with
+**168.80 MiB JS heap before GC**. Imports/source allocation are excluded; these
+local observations show that serialization/transport remains a material cost.
+
+Repeated line keys, custom margins, fitted tile values in line mode and broader
+source/style/export options fail clearly or retain M14 owners. Numeric/categorical
+annotations can still prepare returned metadata but add no tracks. C16 remains
+separate from native correctness. Remaining PAGA work includes stored directed
+transitions and other M11.c options; the next independent PAGA task is their
+native rendering audit. Full repository tests and docs build were not rerun.
+Clearance: **retain**; the full path family and M11.d remain open.
 
 ## M13.a native DotPlot builder
 
@@ -3608,7 +3657,7 @@ No placeholder functions are exported for planned work.
 | `paga` | Stored undirected graphs with group/numeric/gene/degree colors and optional largest-component views | M11.c; C15 direct component reference and other color/directed/export modes open |
 | `paga_adjacency` | Partial legacy-key heatmap/stripplot preview available | M11.d; broader storage/styling/export M14 |
 | `paga_compare` | Partial aligned preview; confirmed corrections open | M11.d palette/composition corrections; regular-label/parent limits M14 |
-| `paga_path` | Partial stored-path heatmap preview; native checks verified | M11.d; C16 direct return_data gate, line mode and broader annotations remain open |
+| `paga_path` | Partial stored-path heatmap and native rule-line previews; native checks verified | M11.d; C16 direct return_data gate and broader source/annotation/style options remain open |
 | `pca` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `pca_loadings` | Stored-loadings preview available | M07.c loadings increment; shared ranking preparation/renderer |
 | `pca_overview` | Composed stored-PCA preview available | M07.c overview increment; existing three parent plots |
@@ -3738,7 +3787,7 @@ affected slice.
 | C01 | No native filled-area/polygon primitive in bundled schema | Full violin/stacked/tracks M08/M09 | Released filled geometry and density/profile chart tests; no custom trial geometry promotion |
 | C02 | No native raster/image primitive | Full spatial M12 | Released image capability with crop/aspect/zoom registration tests |
 | C03 | No native 3D projection | 3D embedding options M07/M14 | Released capability or explicit product scope decision; keep unresolved until then |
-| C04 | No general joined-path mark; exact shared-join/end-cap parity is a visual limit | PAGA path line preview Ready with native window/lead/rules and minor documented stroke differences; other connected cases require their own audit | Verify gaps, crop/order, hover/zoom and resources for each entry. A released path mark may improve stroke parity but is not required for PAGA path. Native rules also support independent undirected PAGA edges. |
+| C04 | No general joined-path mark; exact shared-join/end-cap parity is a visual limit | PAGA path lines use verified native window/lead/rules with minor documented stroke differences; other connected cases require their own audit | A released path mark may improve stroke parity but is not required for PAGA path. Keep per-entry gap/order/interaction checks. Native rules also support independent undirected PAGA edges. |
 | C05 | Font/text-outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Core 1.2 typed surround/facet APIs and native index gaps available; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example; verify viewport/scale/guide ownership, required heatmap group gaps and existing navigation/selection contracts |
 | C07 | Python linkage + shared native orthogonal branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Stored parent/child edges project into equal summary slots or unequal cell-group centers. Complete SVG elbows, four orientations, zero heights, resize and navigation pass; recheck later families. |
