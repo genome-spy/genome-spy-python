@@ -1250,10 +1250,12 @@ Native Greys uses RGB 226 through 30; Scanpy's Greys uses white through black.
 This native palette difference is an accepted preview limit. Values and color
 normalization retain Scanpy's behavior.
 
-`as_heatmap=False` remains unsupported in Core 1.2.0. Native rules can draw
-individual segments, but do not expose the joined paths with round joins and
-separate outer caps used by Scanpy. The adapter does not approximate these with
-extra join marks or custom geometry. See the
+`as_heatmap=False` is not implemented yet. Native rules with round caps are
+suitable for the planned line preview: a side-by-side comparison found minor
+edge/end differences at notebook size and under zoom. Exact Matplotlib joins
+are not required. The implementation will preserve sample order and missing-value
+breaks using native transforms and rules, without extra join marks or custom
+geometry. See the
 [native capability audit](../../../integrations/scanpy/STATUS.md#m11d-paga-path-connected-line-audit).
 
 ### PAGA adjacency matrices

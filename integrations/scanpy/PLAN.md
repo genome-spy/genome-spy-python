@@ -926,11 +926,11 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   Retain native Greys as an accepted fidelity limit: assert its 226/30 endpoints
   separately from Scanpy's 255/0 endpoints, while checking identical annotation
   values/domains, geometry and native pixel mapping. Do not substitute a palette.
-  The line-mode audit is complete; implementation remains blocked by C04.
-  Native window/lead and rules can create adjacent segments, but do not supply
-  joined paths with Scanpy's round joins and projecting outer caps. Recheck a
-  released native joined-path capability before implementation; do not add custom
-  stitching or join geometry. Reuse path data preparation, applying xlim after
+  The line-mode audit is complete; implementation is Ready with native
+  window/lead and rules using round caps. Exact joins/end caps are not required;
+  the observed minor stroke/rasterization differences are a documented visual
+  limit, not a C04 blocker. Do not add custom join geometry or extra marks to
+  imitate Matplotlib. Reuse path data preparation, applying xlim after
   smoothing/normalization and resetting cropped x coordinates to zero. Annotations
   do not render tracks. Support single-key labels and native multi-key legends,
   scoping heatmap-only shape restrictions separately. Acceptance includes bends,
