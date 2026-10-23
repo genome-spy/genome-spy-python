@@ -856,6 +856,18 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   ordered paths, `n_avg` window/end behavior, annotations, source selection and
   `normalize_to_zero_one`. Specify native return shapes for `return_data` and
   no-plot modes instead of returning fake axes.
+  The adjacency heatmap preview reads the legacy top-level uns keys exactly;
+  modern uns['paga'] matrices must be assigned explicitly by the caller. Reuse
+  bounded sparse access and the numeric matrix renderer, adding native points
+  at x=tree row, y=tree column, including asymmetric/diagonal inputs. Preserve
+  nonzero selection without thresholds or ordering changes; zeros stay excluded.
+  Keep original numeric group axes and shared native color guides, hover, zoom
+  and fitted values. Accept matching resident SciPy sparse matrices/arrays up to
+  250,000 values; check shape/size before densification and never read expression.
+  Direct public references cover tiles, points, missing/constant values, guide
+  bins and export DPI; observe hover/navigation/HTML and measure a larger matrix.
+  as_heatmap=False remains a separate M11.d stripplot increment. This heatmap
+  preview does not close the full adjacency entry or M11.d.
 
 Acceptance: hand-sized graphs/path arrays cover thresholds, direction, duplicate
 edges, gaps and smoothing; saved coordinates/arrays are honored. No hidden PAGA

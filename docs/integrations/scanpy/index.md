@@ -1104,6 +1104,40 @@ the same stored coordinates.
 The broader PAGA milestone remains open; see the maintained
 [status and remaining scope](../../../integrations/scanpy/STATUS.md#current-work-queue).
 
+### PAGA adjacency matrices
+
+`paga_adjacency` retains Scanpy's legacy top-level `uns` keys. Make modern PAGA
+results available under those keys explicitly, then plot the same input:
+
+```python
+pbmc.uns["connectivities"] = pbmc.uns["paga"]["connectivities"]
+pbmc.uns["connectivities_tree"] = pbmc.uns["paga"]["connectivities_tree"]
+chart = gsc.pl.paga_adjacency(pbmc, zoom="xy", show=False)
+chart.display(inline=True, controls=False)
+```
+
+The assignments share stored sparse matrices; they do not rerun analysis or copy
+expression. `adjacency` and `adjacency_tree` select other top-level keys. Both
+must contain resident SciPy sparse matrices or arrays with the same nonempty
+square shape, limited to 250,000 values. Shape and size checks precede
+densification; only the selected group adjacency becomes dense. Expression,
+embeddings, group palettes and cached layouts are untouched.
+
+Color shows adjacency values in their supplied row/column order, with missing
+entries blank. The native matrix color guide defaults to viridis; `color_map`
+accepts native schemes. Black native points mark nonzero tree entries, including
+diagonal or negative entries. As in Scanpy, a tree entry `(row, column)` appears
+at **x=row, y=column**, even for asymmetric input. No thresholding, clustering or
+category reordering occurs. The axes retain numeric group indices.
+
+`hover=True` shows cell values and source/target indices for tree points.
+`zoom=True` navigates y; `zoom="xy"` navigates both axes. Points keep their pixel
+sizes and remain aligned with the tiles. `show_values=True` uses the shared fitted
+cell labels. `width` and `height` set the matrix area; defaults fit square cells
+within 400 pixels. Standard native display and HTML/JSON delivery apply. The
+`as_heatmap=False` stripplot mode rejects clearly and remains planned; fonts,
+automatic tick density and outer spacing retain the shared matrix preview's limits.
+
 ## Clustermap compatibility
 
 ```python
@@ -1447,9 +1481,9 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Trajectories and graphs | paga_adjacency, paga_compare, paga_path; broader paga options |
+| Trajectories and graphs | paga_compare, paga_path; adjacency stripplot and broader paga options |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
@@ -1555,6 +1589,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.dpt_timeseries
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.paga
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.paga_adjacency
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

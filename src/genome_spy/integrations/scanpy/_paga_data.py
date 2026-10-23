@@ -12,6 +12,45 @@ from genome_spy.integrations.scanpy._style import _palette, native_color
 CONTEXT = "gsc.pl.paga"
 
 
+def adjacency_values(
+    adata: Any, adjacency: str, adjacency_tree: str
+) -> tuple[np.ndarray, pd.DataFrame]:
+    """Read two stored adjacency matrices; return bounded dense values and tree-point positions."""
+    from anndata import AnnData
+    from scipy import sparse
+
+    context = "gsc.pl.paga_adjacency"
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: adata must be AnnData.")
+    matrices = []
+    for key in (adjacency, adjacency_tree):
+        if not isinstance(key, str):
+            raise TypeError(f"{context}: adjacency keys must be strings.")
+        matrix = adata.uns.get(key)
+        if not sparse.issparse(matrix):
+            raise ValueError(
+                f"{context}: stored sparse uns[{key!r}] is required; "
+                "supply the top-level adjacency matrices explicitly."
+            )
+        matrices.append(matrix)
+    source, tree = matrices
+    count = source.shape[0]
+    if source.shape != (count, count) or not count or count * count > 250_000:
+        raise ValueError(
+            f"{context}: adjacency must be square with 1–250,000 values; subset explicitly."
+        )
+    if tree.shape != source.shape:
+        raise ValueError(f"{context}: adjacency_tree must match the adjacency shape.")
+    tree = tree.tocsr()
+    weights = numeric_values(pd.DataFrame(tree.data), context=context)
+    if not np.isfinite(weights).all():
+        raise ValueError(f"{context}: adjacency_tree weights must be finite.")
+    # Scanpy places a tree entry (row, column) at x=row, y=column.
+    rows, columns = tree.nonzero()
+    points = pd.DataFrame({"_x": rows, "_y": columns})
+    return source.toarray(), points
+
+
 def _graph(adata: Any, key: str, count: int, threshold: float) -> tuple[Any, Any]:
     """Return a layout-ready sparse source and thresholded graph without changing stored data."""
     import networkx as nx

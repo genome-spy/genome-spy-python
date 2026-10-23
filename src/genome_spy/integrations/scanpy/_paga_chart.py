@@ -1,6 +1,6 @@
 """Native group nodes, labels and weighted straight edges for stored PAGA graphs."""
 
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,60 @@ from genome_spy.integrations.scanpy._style import (
 )
 
 CONTEXT = "gsc.pl.paga"
+
+
+def build_paga_adjacency(
+    values: np.ndarray,
+    points: pd.DataFrame,
+    *,
+    color_map: Any,
+    hover: bool,
+    zoom: bool | Literal["xy"],
+    show_values: bool,
+    width: float | None,
+    height: float | None,
+) -> gs.TopLevelSpec:
+    """Reuse the numeric matrix renderer, adding fixed-size native points for stored tree edges."""
+    from genome_spy.integrations.scanpy._matrix_chart import build_matrix
+
+    overlay = (
+        gs.Chart(points)
+        .mark_point(
+            filled=True,
+            color="black",
+            size=PT**2,
+            stroke="black",
+            strokeWidth=PT,
+            inwardStroke=False,
+            clip=True,
+            tooltip={"handler": "default"} if hover else None,
+        )
+        .encode(x="_x:I", y="_y:I")
+    )
+    if hover:
+        overlay = overlay.encode(
+            tooltip=[
+                gs.Tooltip("_x:Q", title="Source group", format="d"),
+                gs.Tooltip("_y:Q", title="Target group", format="d"),
+            ]
+        )
+    return build_matrix(
+        values,
+        xlabel=None,
+        ylabel=None,
+        xticks=None,
+        yticks=None,
+        title=None,
+        colorbar_shrink=0.5,
+        color_map=color_map,
+        hover=hover,
+        zoom=zoom,
+        show_values=show_values,
+        width=width,
+        height=height,
+        context="gsc.pl.paga_adjacency",
+        overlay=overlay,
+    )
 
 
 def build_paga(

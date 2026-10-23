@@ -31,6 +31,7 @@ __all__ = [
     "dpt_groups_pseudotime",
     "dpt_timeseries",
     "paga",
+    "paga_adjacency",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2020,6 +2021,88 @@ def matrix(
         yticks=yticks,
         title=title,
         colorbar_shrink=colorbar_shrink,
+        color_map=color_map,
+        hover=hover,
+        zoom=zoom,
+        show_values=show_values,
+        width=width,
+        height=height,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def paga_adjacency(
+    adata: AnnData,
+    *,
+    adjacency: str = "connectivities",
+    adjacency_tree: str = "connectivities_tree",
+    as_heatmap: bool = True,
+    color_map: Any = None,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Display stored PAGA adjacency as a numeric matrix with tree-edge points.
+
+    Description:
+        Read top-level uns matrices, as Scanpy's legacy entry does. Reuse native
+        matrix tiles, color guides and navigation without reading expression,
+        computing PAGA or changing AnnData. Black dots mark tree nonzero entries
+        at x=row, y=column, preserving Scanpy's orientation. Stripplot mode is
+        outside this heatmap preview.
+
+    Args:
+        adata: AnnData containing the explicitly stored adjacency matrices.
+        adjacency: Top-level uns key for the sparse numeric matrix.
+        adjacency_tree: Top-level uns key for the sparse tree matrix.
+        as_heatmap: Only True is supported in this preview.
+        color_map: Native GenomeSpy color scheme; None uses viridis.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use native HTML/JSON export.
+        hover: Include matrix-value and tree-edge tooltips.
+        zoom: True enables y navigation; "xy" enables both axes.
+        show_values: Show numeric values when cells have enough room.
+        width: Native matrix width in pixels.
+        height: Native matrix height in pixels.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional supported Scanpy version is unavailable.
+        TypeError: If AnnData, keys, matrix values or native options have unsupported types.
+        ValueError: If matrices are missing, mismatched, infinite or too large.
+        NotImplementedError: If stripplot mode, image saving or a nonnative
+            color scheme is requested.
+
+    Example:
+        >>> adata.uns["connectivities"] = adata.uns["paga"]["connectivities"]
+        >>> adata.uns["connectivities_tree"] = adata.uns["paga"]["connectivities_tree"]
+        >>> chart = gsc.pl.paga_adjacency(adata, show=False)
+    """
+    context = "gsc.pl.paga_adjacency"
+    for name, value in {
+        "as_heatmap": as_heatmap,
+        "hover": hover,
+        "show_values": show_values,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    if not as_heatmap:
+        raise NotImplementedError(f"{context}: as_heatmap=False is not supported yet.")
+    _check_grid_zoom(zoom, context=context)
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._paga_data import adjacency_values
+    from genome_spy.integrations.scanpy._paga_chart import build_paga_adjacency
+
+    values, points = adjacency_values(adata, adjacency, adjacency_tree)
+    chart = build_paga_adjacency(
+        values,
+        points,
         color_map=color_map,
         hover=hover,
         zoom=zoom,

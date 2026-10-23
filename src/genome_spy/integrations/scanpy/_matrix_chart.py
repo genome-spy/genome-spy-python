@@ -54,6 +54,7 @@ def build_matrix(
     highlights_x: Collection[float] = (),
     context: str = "gsc.pl.matrix",
     xtick_labels: Mapping[float, str] | None = None,
+    overlay: gs.Chart | None = None,
 ) -> gs.TopLevelSpec:
     """Return native tiles, labels and a color guide from a resident numeric matrix.
 
@@ -205,6 +206,8 @@ def build_matrix(
             y2=gs.Y2("_y1:Q"),
         )
     center = with_values(tiles, "_value") if show_values else tiles
+    if overlay is not None:
+        center = gs.layer(center, overlay)
     if len(highlights_x):
         center = gs.layer(center, vertical_highlights(highlights_x, 0, rows))
     center = center.properties(width=width, height=height, name=f"{name}-cells")

@@ -323,6 +323,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_gene"],
         namespace["paga_degree"],
         namespace["paga_component"],
+        namespace["paga_adjacency"],
     ]
     assert paga_calls == [{"groups": "bulk_labels"}]
     pbmc = namespace["pbmc"]
@@ -381,6 +382,22 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         [[r["_x"], r["_y"]] for r in rows], pbmc.uns["paga"]["pos"][keep]
     )
     assert pbmc.uns["paga"]["pos"].shape == (10, 2)
+    adjacency_spec = namespace["paga_adjacency"].to_dict()
+    marks = leaf_marks(adjacency_spec)
+    cells = next(
+        rows for rows in adjacency_spec["datasets"].values() if "_value" in rows[0]
+    )
+    np.testing.assert_array_equal(
+        np.array([r["_value"] for r in cells]).reshape(10, 10),
+        pbmc.uns["paga"]["connectivities"].toarray(),
+    )
+    tree_points = adjacency_spec["datasets"][marks[-1]["data"]["name"]]
+    rows, columns = pbmc.uns["paga"]["connectivities_tree"].nonzero()
+    assert tree_points == [
+        {"_x": int(x), "_y": int(y)} for x, y in zip(rows, columns, strict=True)
+    ]
+    assert pbmc.uns["connectivities"] is pbmc.uns["paga"]["connectivities"]
+    assert pbmc.uns["connectivities_tree"] is pbmc.uns["paga"]["connectivities_tree"]
     assert dpt_calls == [
         ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),
         ("diffmap", {"random_state": 0}),

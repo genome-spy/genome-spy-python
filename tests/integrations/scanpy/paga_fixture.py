@@ -8,6 +8,27 @@ from scipy.sparse import csr_matrix
 POSITIONS = np.array([[0.0, 0.0], [1.3, 0.2], [0.7, 1.4], [-0.4, 0.8]])
 
 
+def make_adjacency(storage="csr", case="default"):
+    """Return asymmetric legacy adjacency tables, independent of observation/expression axes."""
+    from scipy import sparse
+
+    values = np.array([[0, 0.2, 0.6], [0.4, 0, 0.8], [0.7, 0.1, 0]])
+    tree = np.array([[0, 0, 0.6], [0.4, 0, 0], [0, 0, 0]])
+    if case == "empty_tree":
+        tree[:] = 0
+    elif case == "constant":
+        values[:] = 0.5
+    elif case == "missing":
+        values[0, 1] = np.nan
+    elif case == "singleton":
+        values, tree = np.array([[0.5]]), np.array([[1.0]])
+    factory = getattr(sparse, storage + "_matrix")
+    return AnnData(
+        sparse.csr_matrix((5, 20_000)),
+        uns={"connectivities": factory(values), "connectivities_tree": factory(tree)},
+    )
+
+
 def make_paga(case="default"):
     """Return a stored graph; cached positions intentionally differ from requested layouts."""
     categories = ["A", "B", "C", "D"]
