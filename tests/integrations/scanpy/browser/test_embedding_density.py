@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import name_embedding_scales
 from tests.integrations.scanpy.browser.test_embedding import assert_complete_chart
 from tests.integrations.scanpy.browser.test_umap import render, move_to
 from tests.integrations.scanpy.embedding_density_fixture import make_density
@@ -97,7 +98,7 @@ def test_hover_reports_stored_density_and_shared_zoom_including_background_cells
         show=False,
     )
     spec = chart.to_dict()
-    bounds = render(page, chart)
+    bounds = render(page, name_embedding_scales(chart.to_dict(), "umap"))
     encoding = points(units(spec)[0])["encoding"]
     domains = [encoding[axis]["scale"]["domain"] for axis in ("x", "y")]
     for index in (0, 1):

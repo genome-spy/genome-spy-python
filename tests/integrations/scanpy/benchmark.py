@@ -208,8 +208,9 @@ def _measure_browser(spec, coordinates, output, labels):
     from playwright.sync_api import sync_playwright
     from genome_spy._embed import bundled_module_url
     from genome_spy._utils import compact_json
-    from tests.integrations.scanpy.helpers import points, units
+    from tests.integrations.scanpy.helpers import points, units, name_embedding_scales
 
+    name_embedding_scales(spec, "benchmark")
     for i, unit in enumerate(units(spec)):
         unit["name"] = f"panel-{i}"
     # Load the native HTML through a file rather than copying large JSON through automation.

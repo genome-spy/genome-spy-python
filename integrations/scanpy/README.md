@@ -25,7 +25,8 @@ metadata, after explicit Scanpy preparation in the expression notebook.
 heatmap/point renderers for expression profiles.
 `gsc.pl.paga(...)` renders stored undirected group connectivity with native graph
 marks. `gsc.pl.paga_compare(...)` composes it with stored embedding points
-and shared coordinates, using explicit normal on-data labels. Scanpy computes PAGA explicitly; its public no-plot API supplies missing
+and shared coordinates, using explicit normal on-data labels. Its palette applies
+to both panels; separate comparisons compose with independent navigation. Scanpy computes PAGA explicitly; its public no-plot API supplies missing
 layout coordinates without reading expression or creating figures.
 `gsc.pl.paga_adjacency(...)` reads explicitly assigned top-level adjacency/tree
 matrices, showing native matrix tiles or connectivity strips with as_heatmap=False.

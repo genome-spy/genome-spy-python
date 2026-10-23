@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from genome_spy.integrations.scanpy._data import matrix_array, number, numeric_values
-from genome_spy.integrations.scanpy._style import _palette, native_color
+from genome_spy.integrations.scanpy._style import ColorData, _palette, native_color
 
 CONTEXT = "gsc.pl.paga"
 
@@ -189,7 +189,8 @@ def paga_nodes(
     dashed: Any,
     use_raw: bool,
     indices: np.ndarray | None = None,
-) -> tuple[pd.DataFrame, bool]:
+    palette: Any = None,
+) -> tuple[pd.DataFrame, bool, ColorData | None]:
     """Return node values, labels and areas, plus Scanpy's automatic colorbar choice."""
     categories = adata.obs[key].cat.categories
     count = len(categories)
@@ -203,7 +204,10 @@ def paga_nodes(
         raise ValueError(f"{CONTEXT}: labels requires one string label per group.")
     if any(not isinstance(label, str) for label in labels):
         raise TypeError(f"{CONTEXT}: labels must be strings.")
-    colors, colorbar = _node_colors(adata, key, color, solid, dashed, use_raw)
+    colors, colorbar = _node_colors(adata, key, color, solid, dashed, use_raw, palette)
+    color_data = colors if isinstance(colors, ColorData) else None
+    if color_data is not None:
+        colors = color_data.values
     sizes = numeric_values(
         pd.DataFrame(adata.uns.get(f"{key}_sizes", np.ones(count))), context=CONTEXT
     ).ravel()
@@ -245,7 +249,7 @@ def paga_nodes(
             .to_numpy(),
         }
     )
-    return nodes, colorbar
+    return nodes, colorbar, color_data
 
 
 def largest_component(graph: Any) -> np.ndarray:
@@ -258,7 +262,13 @@ def largest_component(graph: Any) -> np.ndarray:
 
 
 def _node_colors(
-    adata: Any, key: str, color: Any, solid: Any, dashed: Any, use_raw: bool
+    adata: Any,
+    key: str,
+    color: Any,
+    solid: Any,
+    dashed: Any,
+    use_raw: bool,
+    palette: Any,
 ) -> tuple[Any, bool]:
     """Return per-group colors and the default guide flag from a color key or CSS colors."""
     from genome_spy.integrations.scanpy._grouped_data import (
@@ -270,11 +280,15 @@ def _node_colors(
     count = len(categories)
     if color is None or isinstance(color, str) and color == key:
         cached = adata.uns.get(f"{key}_colors")
-        if cached is not None and len(cached) != count:
+        if palette is None and cached is not None and len(cached) != count:
             raise ValueError(
                 f"{CONTEXT}: cached group palette must match the group count."
             )
-        colors, _ = _palette(adata, key, categories, None, context=CONTEXT)
+        colors, scheme = _palette(adata, key, categories, palette, context=CONTEXT)
+        if scheme is not None:
+            return ColorData(
+                np.arange(count), tuple(range(count)), (), scheme, (), True
+            ), False
         return colors, False
     if not isinstance(color, str):
         if isinstance(color, (Sequence, np.ndarray)) and len(color) == count:

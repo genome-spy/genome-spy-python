@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import name_embedding_scales
 from tests.integrations.scanpy.browser.test_embedding import assert_complete_chart
 from tests.integrations.scanpy.browser.test_umap import render, move_to
 from tests.integrations.scanpy.helpers import points
@@ -101,7 +102,7 @@ def test_scatter_hover_zoom_and_offline_html_use_existing_embedding_interactions
     )
     spec = chart.to_dict()
     point = points(spec)
-    bounds = render(page, chart)
+    bounds = render(page, name_embedding_scales(chart.to_dict(), "scatter"))
     row = next(iter(spec["datasets"].values()))[4 if axis == "obs" else 1]
     domains = [point["encoding"][a]["scale"]["domain"] for a in ("x", "y")]
     move_to(page, bounds, row["_coord_0"], row["_coord_1"], *domains, row["_obs_label"])

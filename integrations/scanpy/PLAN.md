@@ -890,6 +890,17 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   comparisons, native parent reuse, mutation/expression/analysis guards, complete
   aligned charts including out-of-range supplied positions, observed cell/node
   hover and shared navigation/offline HTML, packaged workflow and seeded resources.
+  Comparison review corrections: share the existing category-palette resolver
+  through the native PAGA palette addition, preserving cached colors and full
+  category domains under component filtering. CSS lists/mappings and native
+  schemes must paint the same groups identically in both panels; do not sample
+  colormaps, copy AnnData or temporarily mutate palette caches. Embeddings use
+  native scale identity; independent comparisons must render and navigate without
+  caller-provided names. PAGA declares x/y at its layer root so children inherit
+  coordinates and comparison can use native encode without private layer access.
+  Acceptance adds direct public palette comparisons, rendered scheme/CSS/component
+  colors, independent pair zoom/pan/offline composition, parent regression checks,
+  and a packaged notebook palette/composition example.
   This bounded comparison does not close paga_path or the full M11.d milestone.
   Review reopened two M11.d corrections: custom category palettes must reach both
   parent plots, and independently composed zoomable comparisons must avoid global

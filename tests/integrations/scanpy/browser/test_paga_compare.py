@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render, move_to
 from tests.integrations.scanpy.browser.test_heatmap import hover_at
@@ -11,11 +12,11 @@ from tests.integrations.scanpy.helpers import points
 from tests.integrations.scanpy.test_paga_compare import make_compare
 
 
-def point_coordinates(page):
+def point_coordinates(page, names=("panel-0", "panel-1")):
     """Read plot circles inside named panels, excluding their sibling legend views."""
     root = svg_root(page)
     result = []
-    for name in ("panel-0", "panel-1"):
+    for name in names:
         panel = next(group for group in root.iter() if group.get("data-name") == name)
         group = next(
             group for group in panel.iter() if group.get("data-mark-type") == "point"
@@ -24,6 +25,65 @@ def point_coordinates(page):
             np.array([[float(p.get("cx")), float(p.get("cy"))] for p in group])
         )
     return result
+
+
+@pytest.mark.parametrize("palette", [["red", "blue", "green", "orange"], "set1"])
+@pytest.mark.parametrize("component", [False, True])
+def test_category_colors_match_between_cells_and_nodes_including_filtered_graphs(
+    page, palette, component
+):
+    a = make_compare()
+    chart = gsc.pl.paga_compare(
+        a,
+        palette=palette,
+        single_component=component,
+        threshold=0.2,
+        legend_fontweight="normal",
+        size=36,
+        width=380,
+        height=300,
+        show=False,
+    )
+    spec = chart.to_dict()
+    render(page, chart)
+    root = svg_root(page)
+    panels = [
+        next(g for g in root.iter() if g.get("data-name") == f"panel-{i}")
+        for i in (0, 1)
+    ]
+    dots = [
+        next(g for g in panel.iter() if g.get("data-mark-type") == "point")
+        for panel in panels
+    ]
+    boxes = [
+        page.evaluate("i=>api.views.getLayoutBounds({scope:[],view:`panel-${i}`})", i)
+        for i in (0, 1)
+    ]
+    domains = [
+        points(spec["hconcat"][0])["encoding"][axis]["scale"]["domain"]
+        for axis in ("x", "y")
+    ]
+    coordinates = point_coordinates(page)
+    nodes = next(
+        rows for rows in spec["datasets"].values() if rows and "_cells" in rows[0]
+    )
+    colors = []
+    for node in nodes:
+        row = np.flatnonzero(a.obs["cluster"] == node["_group"])[0]
+        positions = [a.obsm["X_umap"][row, :2], [node["_x"], node["_y"]]]
+        fills = []
+        for i, (x, y) in enumerate(positions):
+            box = boxes[i]
+            target = [
+                box["x"] + (x - domains[0][0]) / np.ptp(domains[0]) * box["width"],
+                box["y"] + (domains[1][1] - y) / np.ptp(domains[1]) * box["height"],
+            ]
+            index = np.argmin(np.linalg.norm(coordinates[i] - target, axis=1))
+            assert np.linalg.norm(coordinates[i][index] - target) < 1
+            fills.append(dots[i][index].get("fill", dots[i].get("fill")))
+        assert fills[0] == fills[1] and fills[0] is not None
+        colors.append(fills[0])
+    assert len(set(colors)) == len(nodes)
 
 
 @pytest.mark.parametrize("color", [None, "score"])
@@ -133,7 +193,6 @@ def test_observation_and_group_hover_shared_zoom_pan_and_offline_html(page, tmp_
     ), (
         before,
         zoomed,
-        page.evaluate("api.getScaleResolutionByName('umap-x-0').getDomain()"),
     )
     page.mouse.down()
     page.mouse.move(x + 12, y + 10, steps=5)
@@ -150,3 +209,58 @@ def test_observation_and_group_hover_shared_zoom_pan_and_offline_html(page, tmp_
     page.goto(output.as_uri())
     page.locator("canvas").wait_for(state="visible")
     assert page.locator(".message-box").count() == 0
+
+
+def test_composed_comparisons_keep_navigation_inside_their_own_pair(page, tmp_path):
+    chart = gsc.pl.paga_compare(
+        make_compare(),
+        legend_fontweight="normal",
+        zoom=True,
+        width=280,
+        height=220,
+        show=False,
+    )
+    combined = (
+        gs.vconcat(chart, chart)
+        .resolve_scale(default="independent")
+        .resolve_legend(default="independent")
+    )
+    bounds = render(page, combined)
+    names = tuple(f"panel-{i}" for i in range(4))
+
+    def positions():
+        locations = point_coordinates(page, names)
+        boxes = [
+            page.evaluate("name=>api.views.getLayoutBounds({scope:[],view:name})", name)
+            for name in names
+        ]
+        return [
+            rows - [box["x"], box["y"]]
+            for rows, box in zip(locations, boxes, strict=True)
+        ]
+
+    before = positions()
+    canvas = page.locator("canvas").first.bounding_box()
+    x, y = canvas["x"] + bounds["x"] + 140, canvas["y"] + bounds["y"] + 110
+    page.mouse.move(x, y)
+    page.mouse.wheel(0, -20)
+    page.wait_for_timeout(350)
+    zoomed = positions()
+    for i in (0, 1):
+        assert np.ptp(zoomed[i][:, 0]) > np.ptp(before[i][:, 0])
+    for i in (2, 3):
+        np.testing.assert_allclose(zoomed[i], before[i], atol=0.2)
+    page.mouse.down()
+    page.mouse.move(x + 10, y + 8, steps=5)
+    page.mouse.up()
+    page.wait_for_timeout(250)
+    panned = positions()
+    assert all(not np.array_equal(panned[i], zoomed[i]) for i in (0, 1))
+    for i in (2, 3):
+        np.testing.assert_allclose(panned[i], before[i], atol=0.2)
+    output = tmp_path / "independent-comparisons.html"
+    combined.save(output, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(output.as_uri())
+    page.locator("canvas").wait_for(state="visible")
+    assert not page.locator(".message-box").count()

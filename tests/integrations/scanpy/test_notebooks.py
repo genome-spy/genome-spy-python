@@ -327,6 +327,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_stripplot"],
         namespace["adjacency_panels"],
         namespace["paga_comparison"],
+        namespace["independent_comparisons"],
     ]
     assert paga_calls == [{"groups": "bulk_labels"}]
     pbmc = namespace["pbmc"]
@@ -339,6 +340,13 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(comparison["hconcat"]) == 2
     assert comparison["resolve"]["scale"]["x"] == "shared"
     assert comparison["resolve"]["scale"]["y"] == "shared"
+    graph_points = next(
+        m for m in leaf_marks(comparison["hconcat"][1]) if m["mark"]["type"] == "point"
+    )
+    assert graph_points["encoding"]["fill"]["scale"]["scheme"] == "tableau10"
+    paired = namespace["independent_comparisons"].to_dict()
+    assert len(paired["vconcat"]) == 2
+    assert paired["resolve"]["scale"]["default"] == "independent"
     comparison_nodes = next(
         rows for rows in comparison["datasets"].values() if rows and "_cells" in rows[0]
     )

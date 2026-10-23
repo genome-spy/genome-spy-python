@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import name_embedding_scales
 from tests.integrations.scanpy.browser.test_umap import render, move_to
 from tests.integrations.scanpy.browser.test_grid_interactions import pointer
 from tests.integrations.scanpy.helpers import points, units
@@ -97,7 +98,7 @@ def test_overview_hover_navigation_and_offline_html_keep_diagnostics_fixed(
     a = make_pca_adata()
     chart = gsc.pl.pca_overview(a, color=["group", "g1"], zoom=True, show=False)
     spec = chart.to_dict()
-    bounds = render(page, chart)
+    bounds = render(page, name_embedding_scales(chart.to_dict(), "pca"))
     panel = points(units(spec)[0])
     domains = [panel["encoding"][axis]["scale"]["domain"] for axis in ("x", "y")]
     move_to(page, bounds, 2, 4, *domains, "cell2")

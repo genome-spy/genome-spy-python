@@ -30,6 +30,44 @@ def make_compare():
     return a
 
 
+@pytest.mark.parametrize(
+    "palette",
+    [
+        ["#111111", "#222222", "#333333", "#444444"],
+        {"D": "orange", "B": "blue", "A": "red", "C": "green"},
+        ["red", "blue"],
+    ],
+)
+def test_custom_palette_matches_scanpy_in_both_panels_without_changing_saved_colors(
+    palette,
+):
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import to_rgba
+
+    reference = make_compare()
+    axes = sc.pl.paga_compare(
+        reference, palette=palette, legend_fontweight="normal", show=False
+    )
+    expected = reference.uns["cluster_colors"]
+    plt.close(axes[0].figure)
+    a = make_compare()
+    before = deepcopy(a.uns["cluster_colors"])
+    spec = gsc.pl.paga_compare(
+        a, palette=palette, legend_fontweight="normal", show=False
+    ).to_dict()
+    embedding, graph = spec["hconcat"]
+    cells = points(embedding)["encoding"]["color"]["scale"]["range"]
+    nodes = next(m for m in leaf_marks(graph) if m["mark"]["type"] == "point")
+    graph_colors = nodes["encoding"]["fill"]["scale"]["range"]
+    np.testing.assert_allclose(
+        [to_rgba(c) for c in cells], [to_rgba(c) for c in expected]
+    )
+    np.testing.assert_allclose(
+        [to_rgba(c) for c in graph_colors], [to_rgba(c) for c in expected]
+    )
+    assert a.uns["cluster_colors"] == before
+
+
 def test_signature_preserves_every_upstream_parameter_and_default():
     upstream = inspect.signature(sc.pl.paga_compare).parameters
     native = inspect.signature(gsc.pl.paga_compare).parameters
@@ -41,6 +79,67 @@ def test_signature_preserves_every_upstream_parameter_and_default():
         native[name].kind is inspect.Parameter.KEYWORD_ONLY
         for name in set(native) - set(upstream)
     )
+
+
+@pytest.mark.parametrize("component", [False, True])
+def test_native_named_palette_has_one_full_category_domain_in_both_panels(component):
+    a = make_compare()
+    before = deepcopy(a.uns["cluster_colors"])
+    spec = gsc.pl.paga_compare(
+        a,
+        palette="set1",
+        single_component=component,
+        threshold=0.2,
+        legend_fontweight="normal",
+        show=False,
+    ).to_dict()
+    embedding, graph = spec["hconcat"]
+    nodes = next(m for m in leaf_marks(graph) if m["mark"]["type"] == "point")
+    assert points(embedding)["encoding"]["color"]["scale"]["scheme"] == "set1"
+    assert nodes["encoding"]["fill"]["scale"] == {
+        "type": "ordinal",
+        "domain": [0, 1, 2, 3],
+        "scheme": "set1",
+    }
+    assert nodes["encoding"]["fill"]["field"] == "_color"
+    assert a.uns["cluster_colors"] == before
+
+
+def test_explicit_palette_does_not_validate_or_replace_stale_saved_palette():
+    a = make_compare()
+    a.uns["cluster_colors"] = ["invalid"]
+    spec = gsc.pl.paga_compare(
+        a, palette="set1", legend_fontweight="normal", show=False
+    ).to_dict()
+    assert len(spec["hconcat"]) == 2
+    assert a.uns["cluster_colors"] == ["invalid"]
+
+
+def test_paga_coordinate_ownership_is_native_inheritance(monkeypatch):
+    from genome_spy.integrations.scanpy import pl
+
+    original = pl.paga
+    captured = []
+
+    def parent(*args, **kwargs):
+        chart = original(*args, **kwargs)
+        spec = chart.to_dict()
+        assert set(spec["encoding"]) == {"x", "y"}
+        assert all(not ({"x", "y"} & mark["encoding"].keys()) for mark in spec["layer"])
+        captured.append(chart)
+        return chart
+
+    monkeypatch.setattr(pl, "paga", parent)
+    comparison = pl.paga_compare(
+        make_compare(), legend_fontweight="normal", show=False
+    ).to_dict()
+    expected = (
+        captured[0]
+        .encode(x=gs.X("_x:Q").axis(None), y=gs.Y("_y:Q").axis(None))
+        .to_dict(include_schema=False)
+    )
+    expected.pop("datasets")
+    assert comparison["hconcat"][1] == expected
 
 
 @pytest.mark.parametrize("components", [None, "2,3"])

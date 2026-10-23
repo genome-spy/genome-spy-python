@@ -2088,7 +2088,8 @@ def paga_compare(
             remains unsupported with the bundled regular font atlas.
         legend_fontoutline: Unsupported label outlines.
         color_map: Native continuous embedding scheme; graph cmap is independent.
-        palette: Embedding category palette; graph uses its saved group palette.
+        palette: CSS category colors/mapping or native scheme, shared by embedding
+            and graph when color is the stored PAGA grouping.
         frameon: Draw the native panel frames.
         size: Embedding point areas in square points.
         title: Common title when title_graph is None; otherwise embedding title.
@@ -2234,6 +2235,7 @@ def paga_compare(
     graph = paga(
         adata,
         colors=color,
+        palette=palette if color == key else None,
         labels=labels,
         pos=pos,
         frameon=frameon,
@@ -2247,14 +2249,8 @@ def paga_compare(
         **paga_graph_params,
     )
     assert embedding_chart is not None and isinstance(graph, gs.LayerChart)
-    # Only the embedding contributes coordinate limits to the shared native scales.
-    graph = graph._copy(
-        deep=False,
-        layer=[
-            mark.encode(x=gs.X("_x:Q").axis(None), y=gs.Y("_y:Q").axis(None))
-            for mark in graph._kwds["layer"]
-        ],
-    )
+    # The graph inherits the embedding limits instead of contributing its own.
+    graph = graph.encode(x=gs.X("_x:Q").axis(None), y=gs.Y("_y:Q").axis(None))
     chart = (
         gs.hconcat(embedding_chart, graph)
         .resolve_scale(
@@ -2400,6 +2396,7 @@ def paga(
     zoom: bool = False,
     width: float | None = None,
     height: float | None = None,
+    palette: Any = None,
     **kwargs: Any,
 ) -> TopLevelSpec | None:
     """Draw stored undirected PAGA connectivity graphs with native nodes and edges.
@@ -2459,6 +2456,8 @@ def paga(
         zoom: Enable native x/y wheel zoom and pan.
         width: Native plot width in pixels, default 548.
         height: Native plot height in pixels, default 384.
+        palette: Native addition: CSS category colors/mapping or native scheme
+            for group colors. None reuses saved colors; inactive for other colors.
         **kwargs: Unsupported keywords fail clearly, including ax/cax.
 
     Returns:
@@ -2552,7 +2551,7 @@ def paga(
                         f"{context}: single_component requires dashed_edges=None on disconnected graphs."
                     )
                 indices = kept
-        nodes, automatic_colorbar = paga_nodes(
+        nodes, automatic_colorbar, color_data = paga_nodes(
             adata,
             key,
             positions,
@@ -2564,6 +2563,7 @@ def paga(
             dashed=dashed,
             use_raw=use_raw,
             indices=indices,
+            palette=palette,
         )
         if indices is not None:
             solid = solid.subgraph(indices)
@@ -2599,6 +2599,7 @@ def paga(
             height=height,
             cmap=cmap,
             colorbar=colorbar is None and automatic_colorbar,
+            color_data=color_data,
         )
     if add_pos:
         adata.uns["paga"]["pos"] = positions.copy()

@@ -96,22 +96,22 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and thirty-seven expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
+code cells and thirty-eight expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Active next: M11.d PAGA comparison review corrections**, authorized in the
-coordinated chat. Reuse resolved category palettes in both parents; remove fixed
-global embedding scale names so zoomable comparisons compose independently.
-Move coordinate ownership into native parent authoring instead of private
-graph-layer rewriting. The [comparison record](#m11d-paga-comparison) retains prior
-delivery evidence and records the reopened checks.
+**Active: M11.d paga_path default heatmap**, being audited and implemented in the
+coordinated chat. Reuse stored-result access, native matrix/annotation helpers and
+public Scanpy semantics; verify path order, smoothing, normalization, annotations
+and native return_data before exposing the entry. Connected paths remain a
+separate capability audit under C04. The [comparison corrections](#comparison-palette-and-composition-corrections)
+are verified and closed; their parent restrictions remain explicit below.
 
 The [adjacency heatmap](#m11d-paga-adjacency-heatmaps) and
 [stripplot](#m11d-paga-adjacency-strips) previews are delivered within their declared
-bounds. After the comparison corrections, audit the unstarted paga_path against
-public Scanpy and released native capabilities, including C04 for connected paths.
+bounds. PAGA path heatmap work follows their retained evidence and the corrected
+comparison preview; its public entry is not yet available.
 Broader adjacency storage/styling/export coverage retains M14 owners.
 The
 [undirected group-graph preview](#m11c-stored-undirected-paga-graphs) is closed within its declared bounds;
@@ -201,7 +201,7 @@ C12 remains a separate upstream straight-link issue.
 | M11.c largest-component views | Implemented; semantic/subsetted-reference/chart/workflow/interaction/resource checks verified | [Shared filtering and retained evidence](#paga-single-component-filtering) | C15 blocks direct disconnected parent-call comparison in Scanpy 1.11.5; keep this gate open. |
 | M11.d adjacency heatmaps | Closed (bounded legacy-key heatmap preview) | [Shared matrix renderer and direct references](#m11d-paga-adjacency-heatmaps) | Stripplot increment delivered below; shared font/tick/layout/storage differences remain M14. Full M11.d stays open. |
 | M11.d adjacency strips | Closed (bounded legacy-key stripplot preview) | [Shared data/native points and direct references](#m11d-paga-adjacency-strips) | Broader storage/styling/export limits remain M14; full M11.d stays open. |
-| M11.d comparison panels | Implemented; review corrections reopened | [Prior delivery and confirmed corrections](#m11d-paga-comparison) | Palette parity and independent zoomable composition are being fixed in the coordinated chat. Regular-label/parent restrictions remain M11/M14; paga_path remains M11.d. |
+| M11.d comparison panels | Closed (corrected bounded preview) | [Palette, native coordinates and independent composition](#comparison-palette-and-composition-corrections) | Regular-label/parent restrictions remain M11/M14; paga_path heatmap is in progress separately. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -3138,14 +3138,10 @@ repository suite and docs build were not rerun. Clearance: **retain**.
 
 ## M11.d PAGA comparison
 
-Implemented; review corrections reopened (2026-10-23). The bounded delivery in
-a9f4d2b passed the semantic, chart, interaction, workflow and resource checks
-retained below. Later review reproduced custom-palette mismatch between parents
-and duplicate embedding scale names when independently composing zoomable
-comparisons. Those M11.d corrections are explicitly authorized and in progress
-in the coordinated chat, along with replacing private graph-layer rewriting by
-native coordinate ownership. Keep earlier evidence; reverify these cases and
-affected parent paths before closing the corrected slice.
+Closed (2026-10-23) for the corrected bounded preview. The initial delivery in
+a9f4d2b and its evidence are retained below. Review reopened palette parity,
+independent composition and native coordinate ownership; the verified correction
+record follows that initial evidence.
 
 [`paga_compare`](../../src/genome_spy/integrations/scanpy/pl.py) composes the
 existing embedding and PAGA entries. No new renderer, graph layout, analysis,
@@ -3194,6 +3190,47 @@ storage/rendering restrictions, custom margins, multiple color/component pairs,
 plot=False and broader graph options retain M11/M14 owners. The unstarted PAGA
 path retains M11.d; adjacency stripplot delivery is recorded below. Full repository
 tests and the docs build were not rerun. Clearance: **retain**.
+
+### Comparison palette and composition corrections
+
+Closed (2026-10-23). Group palettes now pass through PAGA's shared `_palette`
+resolver via an explicit native `palette` addition. CSS sequences/mappings retain
+Scanpy ordering and cycling; native schemes keep the existing ColorData model
+and a full group-index domain through component filtering. Neither path reads or
+rewrites the saved palette when a replacement is supplied. Numeric/gene/degree
+colors keep their existing path and ignore this categorical option.
+
+The embedding renderer no longer assigns fixed scale names. Native resolution
+keeps linked panels together while separate comparisons remain independent.
+Explicit names now appear only in validation specs that inspect native scale
+getters. The PAGA renderer declares x/y once at its layer root, so marks inherit
+coordinates; comparison uses ordinary encode to inherit embedding limits. There
+is no private layer traversal, AnnData copy, palette sampling, new dependency,
+custom geometry or browser handler in this correction.
+
+Verification: **610 targeted Python checks passed, one existing upstream xfail**;
+**134 browser checks passed** (94 embedding/scatter/PCA/density/outline, 36 existing
+comparison/PAGA, four new rendered palette/component cases). The comparison
+regressions first reproduced mismatched palette colors and the old duplicate-name
+browser failure. They now verify public Scanpy CSS palette parity, native scheme
+domains, stale-cache preservation, inherited graph authoring, and independent
+pair zoom/pan/offline HTML. Parent browser checks retain registered geometry,
+hover, brushing, navigation/reset, guides and offline delivery. Both clean-source
+workflow tests passed (44.55 s). The live working notebook restarted and executed
+**38 code cells / 32 charts with no Python errors**, including native tableau10
+colors and the independently composed pairs. User-local edits/outputs remain;
+committed notebook source excludes execution and widget state. Ruff and mypy pass.
+
+The original 100,000-cell resource observation is retained for unchanged embedding
+access, metadata-only PAGA preparation and transport. Coordinate ownership/name
+changes add no data copy; palette preparation is bounded by the group count and
+only adds group-index scheme metadata. Full-size timing was not repeated for
+these correctness fixes. A 1,000-cell benchmark smoke check also passed all 16 known-ID hover probes
+and navigation with explicitly named validation scales. All screenshots and
+benchmark artifacts stay temporary.
+The full repository suite and documentation build were not rerun. Parent scope,
+normal on-data labels and the broader integration remain open as recorded above.
+Clearance: **retain**.
 
 ## M11.d PAGA adjacency heatmaps
 

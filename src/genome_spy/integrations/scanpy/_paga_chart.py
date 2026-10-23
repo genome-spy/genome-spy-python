@@ -12,6 +12,7 @@ from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
 from genome_spy.integrations.scanpy._style import (
     FONT,
     POINTS_TO_PIXELS as PT,
+    ColorData,
     color_bounds,
 )
 
@@ -139,6 +140,7 @@ def build_paga(
     height: float | None,
     cmap: str,
     colorbar: bool,
+    color_data: ColorData | None = None,
 ) -> gs.TopLevelSpec:
     """Return native graph layers with shared coordinates, fixed marker sizes and optional navigation."""
     width = number(548 if width is None else width, "width", context=CONTEXT)
@@ -194,8 +196,6 @@ def build_paga(
                 else Undefined,
             )
             .encode(
-                x=x,
-                y=y,
                 x2="_x2:Q",
                 y2="_y2:Q",
                 size=gs.Size("_width:Q")
@@ -217,11 +217,16 @@ def build_paga(
                 ]
             )
         charts.append(rules)
-    numeric = pd.api.types.is_numeric_dtype(nodes["_color"])
+    numeric = color_data is None and pd.api.types.is_numeric_dtype(nodes["_color"])
     colors: dict[str, Any]
     fill, stroke = gs.Fill("_id:N"), gs.Stroke("_id:N")
     legend = None
-    if numeric:
+    if color_data is not None:
+        fill, stroke = gs.Fill("_color:N"), gs.Stroke("_color:N")
+        colors = dict(
+            type="ordinal", domain=list(color_data.domain), scheme=color_data.scheme
+        )
+    elif numeric:
         low, high, constant = color_bounds(
             nodes["_color"].to_numpy(),
             None,
@@ -269,8 +274,6 @@ def build_paga(
             tooltip={"handler": "default"} if hover else None,
         )
         .encode(
-            x=x,
-            y=y,
             key=gs.Key("_id"),
             fill=fill.scale(**colors).legend(legend),
             stroke=stroke.scale(**colors).legend(None),
@@ -301,10 +304,11 @@ def build_paga(
             clip=True,
             tooltip=None,
         )
-        .encode(x=x, y=y, text="_label:N")
+        .encode(text="_label:N")
     )
     result = (
         gs.layer(*charts, points, labels)
+        .encode(x=x, y=y)
         .resolve_scale(size="independent")
         .properties(
             width=width,

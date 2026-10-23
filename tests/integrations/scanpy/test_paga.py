@@ -33,6 +33,7 @@ def test_signature_retains_scanpy_defaults_except_omitted_matplotlib_axes():
         "zoom",
         "width",
         "height",
+        "palette",
         "kwargs",
     }
 

@@ -41,8 +41,31 @@ def leaf_marks(spec: dict[str, Any]) -> list[dict[str, Any]]:
         ]
         return [mark for child in [spec["spec"], *sides] for mark in leaf_marks(child)]
     if "layer" in spec:
-        return [mark for child in spec["layer"] for mark in leaf_marks(child)]
+        return [
+            {
+                **mark,
+                "encoding": {**spec.get("encoding", {}), **mark.get("encoding", {})},
+            }
+            for child in spec["layer"]
+            for mark in leaf_marks(child)
+        ]
     return [spec]
+
+
+def name_embedding_scales(spec: dict[str, Any], prefix: str) -> dict[str, Any]:
+    """Name only inspected test scales; production charts keep native scale identity."""
+    for axis in ("x", "y"):
+        channel = spec.get("encoding", {}).get(axis, {})
+        if channel.get("scale", {}).get("zoom") and channel.get("field", "").startswith(
+            "_coord_"
+        ):
+            channel["scale"]["name"] = (
+                f"{prefix}-{axis}-{channel['field'].rsplit('_', 1)[1]}"
+            )
+    for key in ("layer", "hconcat", "vconcat", "concat"):
+        for child in spec.get(key, []):
+            name_embedding_scales(child, prefix)
+    return spec
 
 
 def points(panel: dict[str, Any]) -> dict[str, Any]:

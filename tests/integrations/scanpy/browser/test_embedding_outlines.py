@@ -11,6 +11,7 @@ from anndata import AnnData
 from scipy.ndimage import maximum_filter, minimum_filter
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import name_embedding_scales
 from tests.integrations.scanpy.browser.test_umap import render
 
 
@@ -171,7 +172,7 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(
         height=300,
         show=False,
     )
-    bounds = render(page, chart)
+    bounds = render(page, name_embedding_scales(chart.to_dict(), "umap"))
     canvas = page.locator("canvas").bounding_box()
     domains = [
         page.evaluate(f"api.getScaleResolutionByName('umap-{axis}-{i}').getDomain()")

@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import name_embedding_scales
 from genome_spy._embed import bundled_module_url
 from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
 from tests.integrations.scanpy.helpers import points, units
@@ -243,7 +244,7 @@ def test_wheel_navigation_changes_coordinates_and_offline_html_needs_no_network(
             frameon=False,
             show=False,
         )
-    bounds = render(page, chart)
+    bounds = render(page, name_embedding_scales(chart.to_dict(), "umap"))
     canvas = page.locator("canvas").first.bounding_box()
     before = page.locator("canvas").first.screenshot()
     domains = page.evaluate(
@@ -446,7 +447,7 @@ def test_native_sized_panels_and_numeric_guide_fit_side_by_side(page, tmp_path):
         obs_id="cell_id",
         show=False,
     )
-    render(page, chart)
+    render(page, name_embedding_scales(chart.to_dict(), "umap"))
     panels = page.evaluate(
         "[0,1].map(i=>api.views.getLayoutBounds({scope:[],view:`panel-${i}`}))"
     )

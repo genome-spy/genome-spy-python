@@ -25,14 +25,12 @@ from genome_spy.integrations.scanpy._style import (
 
 def _coordinate(
     field: str,
-    dimension: int,
     values: np.ndarray,
     style: EmbeddingStyle,
     zoom: bool,
     *,
     horizontal: bool,
     label: str,
-    basis: str,
     show_ticks: bool,
 ) -> gs.X | gs.Y:
     """Return an x or y encoding from a panel's coordinates and style.
@@ -47,8 +45,6 @@ def _coordinate(
         nice=False,
         zoom=zoom,
     )
-    if zoom:
-        result = result.scale(name=f"{basis}-{'x' if horizontal else 'y'}-{dimension}")
     if not style.frameon:
         return result.axis(None)
     return result.axis(
@@ -161,24 +157,20 @@ def _panel(
         limits = np.vstack([limits, low - padding, high + padding])
     x = _coordinate(
         x_field,
-        panel.dimensions[0],
         limits[:, 0],
         style,
         zoom,
         horizontal=True,
         label=prepared.axis_labels[panel.dimensions[0]],
-        basis=prepared.basis,
         show_ticks=prepared.show_ticks,
     )
     y = _coordinate(
         y_field,
-        panel.dimensions[1],
         limits[:, 1],
         style,
         zoom,
         horizontal=False,
         label=prepared.axis_labels[panel.dimensions[1]],
-        basis=prepared.basis,
         show_ticks=prepared.show_ticks,
     )
     # Scanpy uses square points for size; GenomeSpy uses square pixels.

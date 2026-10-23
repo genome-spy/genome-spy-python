@@ -11,6 +11,7 @@ import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import name_embedding_scales
 from tests.integrations.scanpy.browser.test_umap import render, move_to
 from tests.integrations.scanpy.embedding_fixture import (
     embedding_cases,
@@ -133,7 +134,7 @@ def test_shared_hover_zoom_and_offline_delivery(page, tmp_path, basis, location)
     )
     spec = chart.to_dict()
     mark = points(spec)
-    bounds = render(page, chart)
+    bounds = render(page, name_embedding_scales(chart.to_dict(), basis))
     coords = a.obsm[f"X_{basis}"][4, :2]
     move_to(
         page,

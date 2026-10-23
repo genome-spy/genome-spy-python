@@ -1077,6 +1077,7 @@ after SciPy prepares compatible sparse storage; stored graphs remain unchanged.
 | color, colors | Default/group key uses existing group colors or shared Scanpy defaults; a CSS string or one CSS string per node is supported. Numeric observation keys show group means, skipping missing values. Gene keys show mean expression; a missing gene value makes that group's mean missing, as in Scanpy. Missing means omit the node's paint while retaining its label and edges. The legacy colors alias overrides color. Palettes are read without writing a color cache; a cached palette with the wrong length errors. Other categorical annotations, mixtures/pies, numeric lists and multiple color panels remain unsupported. |
 | degree_solid, degree_dashed | Use these strings as color keys. Compute weighted degrees from the displayed solid or dashed graph after thresholding, then normalize to 0–1. degree_dashed requires dashed_edges. Equal degrees have undefined normalization in Scanpy and raise a clear error. The existing graph helper preserves CSR/CSC edge order, including asymmetric weights. |
 | use_raw | Gene colors default to raw when present, otherwise X; False uses X. No layer or gene-symbol option is added. Reuse the grouped public getter and mean helpers; only the selected gene column is materialized. Resident dense/CSR/CSC and views follow the shared getter's limits. Ambiguous observation/gene names and CSS colors that also name annotations/genes reject. |
+| palette (native addition) | Group colors reuse the embedding palette resolver: an opaque CSS sequence or mapping, or a native scheme name. A supplied palette overrides saved colors without writing AnnData, and retains the full category domain when filtering components. Inactive for numeric/gene/degree colors. |
 | cmap, colorbar | Native continuous scheme, default viridis. colorbar=None automatically adds a guide for numeric observation and gene colors. Degree colors have no default guide. Explicit True or False both suppress the guide, matching Scanpy 1.11.5's behavior. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
 | labels, groups | One string label per node, defaulting to category names. The deprecated groups alias overrides labels with Scanpy's warning. |
 | single_component | True shows the largest thresholded solid component by node count; ties choose the first component in original group order. Keep original node IDs and coordinates. Filtering a disconnected graph requires dashed_edges=None. Inactive when plot=False. |
@@ -1112,7 +1113,7 @@ colors, point sizes and guides remain independent:
 
 ```python
 chart = gsc.pl.paga_compare(
-    pbmc, basis="umap", legend_fontweight="normal",
+    pbmc, basis="umap", palette="tableau10", legend_fontweight="normal",
     threshold=0.03, add_pos=False, zoom=True, show=False,
 )
 chart.display(inline=True, controls=False)
@@ -1124,6 +1125,26 @@ gene, omitted positions read `uns["paga"]["pos"]`; a missing cache errors instea
 of computing a layout. Explicit `pos` is retained. `add_pos=True` updates the
 position cache after successful parent construction, as in Scanpy; False keeps
 it unchanged. No embedding or PAGA analysis runs.
+
+For group colors, `palette` applies to both cells and graph nodes through the
+same category-palette resolver. CSS sequences and mappings match Scanpy; named
+schemes remain native GenomeSpy scales. Filtering the graph keeps the full palette
+domain, so a group keeps its color. The saved AnnData palette is unchanged.
+Standalone `paga` accepts the same native `palette` addition.
+
+Comparisons compose without assigning scale names:
+
+```python
+pairs = (chart & chart).resolve_scale(default="independent").resolve_legend(
+    default="independent"
+)
+```
+
+Each row shares navigation between its own two panels; the rows navigate
+independently. The shared embedding renderer lets native scale resolution manage
+identity, including embeddings, PCA, scatter and density charts. PAGA positions
+are inherited from the graph layer root; comparison changes that root encoding
+with ordinary native chart methods.
 
 When `basis=None`, selection prefers stored `X_draw_graph_fa`, `X_umap`, `X_tsne`,
 then `X_draw_graph_fr`. A missing embedding requires explicit preparation.
