@@ -351,20 +351,34 @@ not fresh-clone dependencies or release artifacts.
   and zoom growth exponent (0.3–1.6). Its initial defaults match the reference's
   `min(1.1 ** 2 * pow(zoomLevel(), 0.8), 36)` sizing: 1.1-pixel initial diameter,
   growing to six pixels. Removed the rejected shading/outline controls rather
-  than keeping unused alternatives. Semantic zoom is explicitly zero with no score channel
-  or point filtering. Native scale resolution shares wheel zoom and pan; the
+  than keeping unused alternatives. **Latest user request enables semantic zoom
+  in this 1.1M-cell preview**, above the agreed performance threshold. Native
+  `semanticScore` uses stable cell-ID hashes, independent of annotation or
+  expression; `semanticZoomFraction` targets about 100,000 overview points.
+  A native checkbox starts enabled and can restore full point drawing. All
+  1.1M source rows remain loaded; no dataflow filtering or analysis subsetting
+  occurs. Both views use the same scores and fraction; Core independently
+  estimates quantiles per mark, so overview counts are approximate and can differ.
+  Native scale resolution shares wheel zoom and pan; the
   reset button calls the public scale reset API. No custom rendering, selection
   engine, camera synchronization or serialized-spec mutation is involved.
   Coordinate limits reuse the integration's `coordinate_domain` helper.
   This is a native mark-style review, not a Scanpy preparation or performance
   benchmark; new library defaults are not adopted.
-  Headless checks verified **1,100,000 visible point instances per view** through
-  native SVG rasterization metadata and the native aggregate count. Native
+  Earlier full-drawing headless checks verified **1,100,000 visible point instances
+  per view** through native SVG rasterization metadata and the native aggregate count. Native
   slider changes altered candidate pixels while reference pixels stayed
   identical; wheel zoom, deep-zoom growth to a three-pixel radius and reset passed.
   The original opacity/shading/outline comparison and the revised flat-fill
   overview/size controls passed native headless checks. Browser errors
   were absent and requests stayed local. Ruff passed for both local scripts.
+  The latest `check_semantic.py` observed 98,710/89,034 overview instances,
+  1,100,000/1,100,000 with the checkbox off, and about 35% of local points after
+  a twofold x/y zoom, up from about 8–9% at overview. Deep zoom matched the
+  complete local set (2,604 symbols across both views). In-session toggle
+  restoration, the six-pixel point cap and zoom reset passed without browser
+  errors. This verifies native visibility behavior, not a frame-rate benchmark
+  or an automatic large-data integration default.
   Tableau10 repeats across 5,312 cluster IDs, so colors are not unique biological
   class labels; hover exposes exact cell and cluster IDs. Broad class/subclass
   colors, draw order and focused hover/labels remain candidates for later review.
