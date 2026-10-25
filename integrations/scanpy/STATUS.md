@@ -345,11 +345,13 @@ not fresh-clone dependencies or release artifacts.
   is served locally with its Parquet file; the original CSV is unchanged. The
   local `build_review.py` and `check_review.py` retain generation and verification.
   Both views share one native parent data source, cluster palette and x/y scales.
-  The left is a fixed flat reference at opacity 0.55; native parameter bindings
-  control the right view's opacity (0.1–1), shading (0–0.8), none/dark/white
-  inward outline and outline width (0.1–0.8 pixels). Both use native
-  `min(1.2 * pow(zoomLevel(), 0.8), 36)` sizing: about 1.1-pixel initial diameter,
-  growing to six pixels. Semantic zoom is explicitly zero with no score channel
+  **User decision: no outlines, no shading, and high opacity below one.** The
+  preview starts at 0.85 opacity in both views. The left is fixed; native bindings
+  control the right view's opacity (0.3–0.95), overview diameter (0.4–2 pixels)
+  and zoom growth exponent (0.3–1.6). Its initial defaults match the reference's
+  `min(1.1 ** 2 * pow(zoomLevel(), 0.8), 36)` sizing: 1.1-pixel initial diameter,
+  growing to six pixels. Removed the rejected shading/outline controls rather
+  than keeping unused alternatives. Semantic zoom is explicitly zero with no score channel
   or point filtering. Native scale resolution shares wheel zoom and pan; the
   reset button calls the public scale reset API. No custom rendering, selection
   engine, camera synchronization or serialized-spec mutation is involved.
@@ -358,13 +360,14 @@ not fresh-clone dependencies or release artifacts.
   benchmark; new library defaults are not adopted.
   Headless checks verified **1,100,000 visible point instances per view** through
   native SVG rasterization metadata and the native aggregate count. Native
-  slider/radio changes altered candidate pixels while reference pixels stayed
+  slider changes altered candidate pixels while reference pixels stayed
   identical; wheel zoom, deep-zoom growth to a three-pixel radius and reset passed.
-  Overview and five close-up treatments were visually inspected. Browser errors
+  The original opacity/shading/outline comparison and the revised flat-fill
+  overview/size controls passed native headless checks. Browser errors
   were absent and requests stayed local. Ruff passed for both local scripts.
   Tableau10 repeats across 5,312 cluster IDs, so colors are not unique biological
-  class labels; hover exposes exact cell and cluster IDs. Native SVG exports use
-  flat fills unless rasterizing shading; the live comparison uses WebGL shading.
+  class labels; hover exposes exact cell and cluster IDs. Broad class/subclass
+  colors, draw order and focused hover/labels remain candidates for later review.
 
 - **Revised appearance candidate:** 420 × 420 panels, no frame/axes, Tableau10
   categories, long cell-type labels in a single-column side legend and a
