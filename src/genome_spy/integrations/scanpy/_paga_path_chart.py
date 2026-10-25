@@ -51,7 +51,7 @@ def _path_track(
         )
         .transform_filter("isValid(datum._value)")
         .mark_rect(clip=True, tooltip={"handler": "default"} if hover else None)
-        .encode(x=gs.X("_start:Q").axis(None), x2="_end:Q", color=color.legend(None))
+        .encode(x=gs.X("_start:Q").axis(None), x2="_end:Q", color=color)
         .properties(height=height)
     )
     if hover:
@@ -142,27 +142,47 @@ def build_paga_path(
     center = with_values(tiles, "_value") if show_values else tiles
     center = center.properties(width=width, height=height, name="paga-path-values")
     group_values = np.asarray(categories)[data.groups]
-    group_color = gs.Color("_value:N").scale(
-        type="ordinal", domain=categories, range=list(palette)
+    group_color = (
+        gs.Color("_value:N")
+        .scale(type="ordinal", domain=categories, range=list(palette))
+        .legend(
+            gs.Legend(
+                title=data.group_key,
+                orient="bottom",
+                direction="horizontal",
+                symbolType="square",
+                values=list(dict.fromkeys(data.node_names)),
+            )
+        )
     )
     groups: gs.Chart | gs.LayerChart = _path_track(
         group_values, data.group_key, group_color, samples, height / genes, hover
     )
     if show_node_names:
         # The original group image keeps its own sample count after smoothing.
-        centers = (data.boundaries[:-1] + data.boundaries[1:]) / 2
-        positions = (centers + 0.5) * samples / len(data.groups) - 0.5
+        edges = data.boundaries * samples / len(data.groups) - 0.5
         labels = (
-            gs.Chart(pd.DataFrame({"_position": positions, "_label": data.node_names}))
+            gs.Chart(
+                pd.DataFrame(
+                    {"_start": edges[:-1], "_end": edges[1:], "_label": data.node_names}
+                )
+            )
             .mark_text(
                 font=FONT,
                 size=10 * PT,
                 baseline="middle",
                 align="center",
+                squeeze=False,
+                paddingX=4,
                 clip=True,
                 tooltip=None,
             )
-            .encode(x=gs.X("_position:Q").axis(None), y=gs.value(0.5), text="_label:N")
+            .encode(
+                x=gs.X("_start:Q").axis(None),
+                x2="_end:Q",
+                y=gs.value(0.5),
+                text="_label:N",
+            )
         )
         groups = gs.layer(groups, labels).properties(height=height / genes)
     tracks = [groups.properties(name="paga-path-groups")]
@@ -178,7 +198,15 @@ def build_paga_path(
             _path_track(
                 series,
                 name,
-                _path_color(series.to_numpy(), scheme, colorbar=False),
+                _path_color(series.to_numpy(), scheme, colorbar=False).legend(
+                    gs.Legend(
+                        title=name,
+                        orient="bottom",
+                        direction="horizontal",
+                        gradientLength=150,
+                        gradientThickness=15,
+                    )
+                ),
                 samples,
                 height / genes,
                 hover,
@@ -221,7 +249,7 @@ def build_paga_path(
             )
         )
         .resolve_scale(color="independent")
-        .resolve_legend(color="independent")
+        .resolve_legend(color="collected")
         .configure_view(stroke="transparent", strokeWidth=0)
     )
     if title is not None:

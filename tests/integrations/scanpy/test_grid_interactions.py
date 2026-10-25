@@ -220,7 +220,10 @@ def test_summary_tracks_share_positions_without_copying_measurements(family, swa
         [2] if family == "dotplot" else []
     )
     assert spec["scales"]["x" if swapped else "y"]["gapPositions"] == []
-    assert all(spec["scales"][axis]["gapWidth"] == 4 for axis in ("x", "y"))
+    assert all(
+        spec["scales"][axis]["gapWidth"] == (0 if family == "dotplot" else 4)
+        for axis in ("x", "y")
+    )
     assert set(spec["surround"]) == {"top", "bottom", "left", "right"}
     assert "padding" not in spec and spec["spacing"] == 0
     assert "params" not in spec

@@ -1179,6 +1179,7 @@ def dotplot(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     highlight: bool = False,
+    group_gap: float = 0,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1229,6 +1230,7 @@ def dotplot(
         hover: Show gene, group, displayed color value and expressing percentage.
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         highlight: Mark the row and column under the pointer with a native ruler.
+        group_gap: Space between marker blocks in pixels; 0 keeps slots contiguous.
         width: Native plot-area width in logical pixels, default 37 per column.
         height: Native plot-area height in logical pixels, default 35 per row.
         **kwds: Only scalar linewidth is supported; other scatter options error.
@@ -1291,6 +1293,7 @@ def dotplot(
         hover=hover,
         zoom=zoom,
         highlight=highlight,
+        group_gap=group_gap,
         width=width,
         height=height,
         cmap=cmap,
@@ -1494,7 +1497,7 @@ def heatmap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
-    group_gap: float = 4,
+    group_gap: float = 0,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1537,7 +1540,7 @@ def heatmap(
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
         group_gap: Space between cell groups and marker blocks in CSS pixels;
-            defaults to 4. Set to 0 for contiguous tiles.
+            defaults to 0. Set a positive width to separate groups.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
         **kwds: Native cmap scheme, scalar alpha and interpolation="nearest".
@@ -4116,7 +4119,7 @@ def rank_genes_groups_heatmap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
-    group_gap: float = 4,
+    group_gap: float = 0,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -4139,7 +4142,7 @@ def rank_genes_groups_heatmap(
         hover: Enable native cell tooltips.
         zoom: True navigates y only; "xy" navigates both axes.
         show_values: Show fitted plotted values when tiles have room.
-        group_gap: Space between groups in CSS pixels; 0 removes gaps, default 4.
+        group_gap: Space between groups in CSS pixels; 0 keeps tiles contiguous.
         width: Parent heatmap width in logical pixels.
         height: Parent heatmap height in logical pixels.
         **kwds: Existing heatmap options; dendrogram defaults True.

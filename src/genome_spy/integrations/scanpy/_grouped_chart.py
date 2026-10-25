@@ -135,18 +135,18 @@ def _brackets(
         size=1.5 * _PT,
         clip=True,
         tooltip=None,
-        xOffset=4 if swapped else 0,
-        x2Offset=4 if swapped else end_offset,
-        yOffset=0 if swapped else -4,
-        y2Offset=end_offset if swapped else -4,
+        xOffset=10 if swapped else 0,
+        x2Offset=10 if swapped else end_offset,
+        yOffset=0 if swapped else -10,
+        y2Offset=end_offset if swapped else -10,
     )
     caps = chart.mark_rule(
         color="black",
         size=1.5 * _PT,
         clip=True,
         tooltip=None,
-        x2Offset=4 if swapped else 0,
-        y2Offset=0 if swapped else -4,
+        x2Offset=10 if swapped else 0,
+        y2Offset=0 if swapped else -10,
     )
     if rotation is None:
         # Long labels need rotation to clear neighboring brackets.
@@ -162,8 +162,8 @@ def _brackets(
         align="left" if not swapped and rotation == 90 else "center",
         baseline="middle" if rotation else "bottom",
         # Offsets keep the label clear of the bracket after rotation.
-        xOffset=16 if swapped else 0,
-        yOffset=0 if swapped else -8,
+        xOffset=22 if swapped else 0,
+        yOffset=0 if swapped else -14,
         clip=True,
         tooltip=None,
     )
@@ -290,7 +290,7 @@ def summary_records(
 
 def bracket_space(groups: tuple[FeatureGroup, ...]) -> float:
     """Estimate space in pixels for marker-group labels so they clear the plot."""
-    return max((len(g.label) for g in groups), default=0) * _TICK * 0.65 + 12
+    return max((len(g.label) for g in groups), default=0) * _TICK * 0.65 + 18
 
 
 def feature_gaps(groups: tuple[FeatureGroup, ...], count: int) -> list[int]:

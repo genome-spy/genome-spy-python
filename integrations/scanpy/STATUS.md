@@ -177,10 +177,12 @@ Other embedding options retain M07.d/M14 owners; C11 still owns default
 categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
-Heatmap and dotplot default to four-pixel group gaps; heatmap's `group_gap` also
-accepts zero for contiguous tiles or a custom width. Matrixplot, generic matrix,
+Heatmap and dotplot now default to contiguous groups. `group_gap` defaults to 0
+and accepts a positive width for optional spacing. Matrixplot, generic matrix,
 correlation and clustermap tiles remain contiguous. All these grids now use
 native surround tracks; see the [numeric-layout completion](#m14b3-matrix-and-correlation-native-tracks).
+The [expression presentation review](#dotplot-and-shared-expression-presentation-review)
+records the updated defaults, shared bracket styling and native PAGA guides.
 All tree families now share [native orthogonal links](#shared-native-orthogonal-dendrograms),
 with complete SVG paths verified. C12's separately reproduced straight-link export
 bug remains upstream; the adapter no longer uses that shape for trees.
@@ -273,6 +275,43 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
 | M13 builders | In progress; DotPlot and MatrixPlot previews closed | Both share concrete group layout and their existing functional statistics/renderers, with upstream/native/workflow/resource checks. StackedViolin and remaining styles/constants stay open. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
+
+## Dotplot and shared expression presentation review
+
+Verified (2026-10-25) for the requested presentation corrections; publication
+styling approval remains open. Review found no significant reuse or YAGNI issue
+in dotplot: the two builders share concrete group state, data preparation and
+native layout. Short private-helper docstrings clarify that existing ownership.
+
+- The shared marker brackets are ten pixels tall in dotplot, matrixplot and
+  heatmap. These are gene-group brackets, separate from the computed dendrograms.
+- Dotplot/DotPlot now expose `group_gap=0`; heatmap and its ranked wrapper also
+  default to zero. Positive widths reuse native scale gaps. Basic notebook
+  examples leave numeric labels off; the MatrixPlot customization enables them
+  explicitly. Data, fractions, scaling order and cached analyses are unchanged.
+- Native PAGA links are muted gray, labels sit above nodes, and numeric guides
+  are fifteen pixels wide. Path group names use native ranged text with
+  `squeeze=False`, appearing when they fit the visible span. Native legends
+  identify groups and pseudotime without custom guides or browser callbacks.
+- Clustermap strips have no stroke or gap. Coalescing equal-color runs produced
+  a pixel-identical image, so that extra code was discarded. Dense category
+  transitions still blend at overview; zoom exposes individual rows.
+
+Verification: **2,143 Python checks pass**, with the existing C15/C16 upstream
+expected failures, including both clean canonical workflows. **184 relevant
+native browser cases pass across the final runs**, covering brackets, optional
+gaps, guides, label fitting under zoom, hover, composition and HTML delivery.
+The [presentation regressions](../../tests/integrations/scanpy/browser/test_expression_presentation.py)
+retain the new native observations. Ruff formatting/lint and mypy pass. The full
+repository suite, docs build and new resource benchmarks were not run; numerical
+preparation and data transport paths are unchanged.
+
+The ignored expression comparison PDF now has 39 visually checked pages with
+38 fresh chart pairs. A separate native dotplot candidate uses shorter guide
+titles and a centered guide stack; those defaults are not adopted. Existing
+local notebook navigation and execution outputs are preserved, while committed
+sources remain output-free. Clearance: retain; no milestone is closed by this
+review. Next: user review of dotplot guide layout and typography.
 
 ## UMAP publication review
 
@@ -543,6 +582,8 @@ apply to both cell groups and partitioned marker blocks. The existing
 [`index_scales`](../../src/genome_spy/integrations/scanpy/_grouped_chart.py)
 helper passes the width to native scale gaps, keeping category bands, labels,
 brackets and trees aligned without extra layers or data copies.
+This checkpoint's four-pixel default was superseded by the 2026-10-25
+presentation review: gaps are now opt-in, including in dotplots.
 
 Verification: **398 targeted Python checks**, **42 heatmap browser checks**, and
 the canonical expression workflow test pass, along with Ruff formatting/lint

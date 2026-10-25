@@ -230,7 +230,7 @@ def test_group_gap_changes_only_shared_scale_widths(adata, swapped, group_gap):
         "zoom": "xy",
     }
     expected = plot(adata, **options).to_dict()
-    assert all(expected["scales"][axis]["gapWidth"] == 4 for axis in ("x", "y"))
+    assert all(expected["scales"][axis]["gapWidth"] == 0 for axis in ("x", "y"))
     for axis in ("x", "y"):
         expected["scales"][axis]["gapWidth"] = group_gap
     assert plot(adata, group_gap=group_gap, **options).to_dict() == expected

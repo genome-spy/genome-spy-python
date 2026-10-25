@@ -187,7 +187,7 @@ def build_paga(
         rules = (
             gs.Chart(edges)
             .mark_rule(
-                color="grey" if is_dashed else "black",
+                color="grey" if is_dashed else "#999999",
                 opacity=0.5 if is_dashed else 1,
                 clip=True,
                 tooltip={"handler": "default"} if hover else None,
@@ -252,7 +252,7 @@ def build_paga(
             legend = gs.Legend(
                 title=None,
                 gradientLength=height,
-                gradientThickness=4,
+                gradientThickness=15,
                 gradientStrokeColor="black",
                 gradientStrokeWidth=0.8 * PT,
             )
@@ -300,7 +300,8 @@ def build_paga(
             fontWeight="bold" if fontweight == "bold" else "normal",
             size=fontsize * PT,
             align="center",
-            baseline="middle",
+            baseline="bottom",
+            yOffset=-8,
             clip=True,
             tooltip=None,
         )

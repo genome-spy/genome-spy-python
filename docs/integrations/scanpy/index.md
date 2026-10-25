@@ -633,13 +633,14 @@ ranking, palette write, or cached-result mutation occurs.
 | `width`, `height` | Plot-area logical pixels; defaults are 37 pixels per feature column and 35 per group row, exchanged with the axes. Labels and guides add space. |
 | `zoom`, `highlight` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Zoom/panning retain aligned labels and tree branches; highlighting uses a native crosshair ruler at the row and column centers under the pointer, including gaps between dots. Dot sizes and both guides keep their original mapping. Repeated labels retain separate integer slots. |
 | `hover` | Enabled by default. Tooltips show gene, group, displayed mean/color value and actual expressing-cell percentage, before dot-size clipping. Use `hover=False` to disable them. Scaled means and supplied color values are labeled explicitly. |
+| `group_gap` | Space between partitioned marker blocks in logical pixels, default 0. A positive width creates native gaps shared by dots, labels and brackets. Works with `DotPlot` and ranked dotplots too. |
 | `figsize` | Explicit native layout budget at 100 logical pixels/inch: subtract a fixed 150-pixel guide allowance from width; height sizes the plot area. Labels and renderer padding add space, so this does not fix the outer canvas dimensions. Conflicts with `width`/`height` error. |
 | `show`, `save`, `ax`, `return_fig` | Same native return/display/export boundary as UMAP. No Axes dictionaries or fake builders. |
 | `dendrogram`, `norm`, `vcenter`, other forwarded kwargs | Trees accept True or a stored key; see the tree contract below. Nondefault norm/vcenter and other kwargs error. Only scalar `linewidth` is accepted from scatter kwargs; the builder below supports separate style chains and supplied fractions. |
 
 Rows and columns use integer index-scale slots with padding that preserves the
-initial Scanpy spacing. Marker blocks that partition the genes have four-pixel
-gaps, fixed under zoom. Labels, brackets and trees use aligned `gs.surround`
+initial Scanpy spacing. Marker blocks are contiguous by default; `group_gap=4`
+adds fixed four-pixel gaps under zoom. Labels, brackets and trees use aligned `gs.surround`
 side tracks; native guides sit outside the whole chart. Repeated gene labels
 retain separate slots. Hover describes group/feature summaries; these dots do not identify individual cells.
 Brushes and individual-cell selection remain deferred.
@@ -789,6 +790,8 @@ Heatmap category bands and group gaps follow individual cells. Clustermap's
 two trees and annotation tracks follow the live row/column positions; automatic
 tick labels reveal more names as slots grow. Defaults remain
 `zoom=False`, `show_values=False` and `highlight=False`.
+Basic workflow examples leave numeric labels off. Group gaps are also opt-in:
+dotplot and heatmap use `group_gap=0` by default, while matrixplot stays contiguous.
 
 Category-strip tooltips use the native default handler and the same `hover` flag
 as tiles. They work with the bundled Core 1.2.0 runtime, including after zoom and
@@ -839,7 +842,7 @@ means or changes AnnData.
 | `dendrogram` | False, True or a stored-result key. Reuse Scanpy's stored result or the guarded public computation. Heatmap supports two-group trees. Interpolate stored branches to the centers of unequal cell-group spans; native link endpoints keep them connected across gaps. Group labels share those centers, correcting the old half-row offset. Matching marker blocks follow tree order too. |
 | `swap_axes`, `show_gene_labels`, `var_group_*` | Ordinary heatmaps use gene brackets above the matrix; swapped heatmaps use a colored gene-group strip on the right, as Scanpy does. Show gene labels by default for at most 50 slots. `var_group_rotation` affects ordinary brackets. |
 | `cmap`, `vmin`, `vmax`, `alpha`, `interpolation` | Native scheme (default viridis), numeric bounds, scalar opacity and nearest-neighbor tiles. Missing values keep their positions but are unpainted; all-missing colors error. Other interpolation, norm/vcenter, Matplotlib colormaps and unsupported imshow kwargs error by name. |
-| `group_gap` | Space between cell groups and partitioned marker blocks in CSS pixels, default 4. Set `group_gap=0` to remove the spaces, or choose another finite nonnegative width. The same option works in `rank_genes_groups_heatmap`. Native surround tracks share the tile scales, keeping bands, labels and trees aligned. Gap widths stay fixed under zoom and DPR changes. A single group has no internal gap; arbitrary or overlapping brackets do not create groups. |
+| `group_gap` | Space between cell groups and partitioned marker blocks in CSS pixels, default 0. Choose a positive width to separate groups. The same option works in `rank_genes_groups_heatmap`. Native surround tracks share the tile scales, keeping bands, labels and trees aligned. Gap widths stay fixed under zoom and DPR changes. A single group has no internal gap; arbitrary or overlapping brackets do not create groups. |
 | Category colors | Reuse saved AnnData colors or the shared Scanpy default palettes without writing them back. Numeric and multi-key strips use native category20, currently limited to 20 groups. |
 | `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
 | `zoom` | Defaults False. `True` enables y-only wheel zoom and drag panning; `"xy"` enables both index axes. Bands, gaps, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
@@ -1146,6 +1149,9 @@ layout even when positions are cached, as upstream. Pass
 `pos=pbmc.uns['paga']['pos']` to reuse coordinates. Missing results fail clearly.
 CSR/CSC graphs keep their stored edge order. LIL graphs use the same layout path
 after SciPy prepares compatible sparse storage; stored graphs remain unchanged.
+Solid links are muted gray so black labels remain readable. Labels sit eight
+pixels above their nodes. Numeric guides use the same 15-pixel width as matrix
+colorbars. Positions, connectivity weights and node sizes are unchanged.
 
 | Parameters | Current behavior |
 | --- | --- |
@@ -1277,6 +1283,10 @@ tracks use the smoothed values. All tracks share native sample coordinates and
 follow x navigation. `zoom=True` navigates y; `zoom="xy"` also navigates x.
 `show_values=True` reveals fitted tile values. Hover reports plotted values and
 group/annotation values. A smoothed window does not represent one cell ID.
+Group names use native ranged text at their normal font size. Names that do not
+fit the visible group span stay hidden until zoom provides enough room. Native
+legends identify the displayed groups and numeric annotation scale independently
+of the expression guide; no custom legend or browser callback is used.
 
 `return_data=True` returns `(chart, table)` with `show=False`, or the table after
 display. Columns contain the plotted keys, averaged numeric group codes, and
@@ -1402,6 +1412,8 @@ chart = gsc.pl.clustermap(
 ```
 
 Clustermap retains individual cells and clusters both rows and columns by default.
+Annotation strips retain every cell and have no outlines. Dense category changes
+can blend in the overview; zooming reveals the individual rows.
 It does not reuse the group-profile tree from dotplot/matrixplot: its distances
 describe the supplied cell/gene values. Scanpy delegates this plot to Seaborn;
 the adapter uses the same public SciPy calculations without constructing a figure.

@@ -124,6 +124,7 @@ def build_dotplot(
     show_size_legend: bool = True,
     show_colorbar: bool = True,
     legend_width: float = 150,
+    group_gap: float = 0,
 ) -> gs.TopLevelSpec:
     """Build a native dotplot from displayed colors, cell fractions and marker groups.
 
@@ -137,6 +138,7 @@ def build_dotplot(
     linewidth = number(
         0 if linewidth is None else linewidth, "linewidth", context="gsc.pl.dotplot"
     )
+    group_gap = number(group_gap, "group_gap", context="gsc.pl.dotplot")
     no_edge = edge_color is None or edge_color == "none"
     edge_color = (
         "black"
@@ -202,7 +204,11 @@ def build_dotplot(
     x, y = zoom_axes(x, y, enabled=zoom, name=None)
     gaps = feature_gaps(feature_groups, rows if swap_axes else columns)
     scales = index_scales(
-        x, y, xgaps=[] if swap_axes else gaps, ygaps=gaps if swap_axes else []
+        x,
+        y,
+        xgaps=[] if swap_axes else gaps,
+        ygaps=gaps if swap_axes else [],
+        gap_width=group_gap,
     )
     # The surround owns the scale definitions; marks retain fields and ticks.
     x, y = (

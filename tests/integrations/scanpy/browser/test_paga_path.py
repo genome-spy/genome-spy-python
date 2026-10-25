@@ -148,7 +148,9 @@ def test_registered_complete_heatmap_and_tracks(page, tmp_path, options):
     if options.get("show_node_names", True):
         assert {"beta", "alpha"} <= text
     gradients = [e for e in root.iter() if e.tag.endswith("linearGradient")]
-    assert bool(gradients) is options.get("show_colorbar", True)
+    assert len(gradients) == int(options.get("show_colorbar", True)) + int(
+        options.get("annotations") != ()
+    )
     page.screenshot(path=str(tmp_path / "complete.png"), full_page=True)
 
 

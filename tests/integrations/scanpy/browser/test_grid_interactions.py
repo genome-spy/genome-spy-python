@@ -566,7 +566,11 @@ def test_summary_feature_spacing_survives_navigation(page, family, swapped):
             width=450,
             height=300,
             show=False,
-            **({"highlight": True} if family == "dotplot" else {"show_values": True}),
+            **(
+                {"highlight": True, "group_gap": 4}
+                if family == "dotplot"
+                else {"show_values": True}
+            ),
         )
     bounds = render(page, chart, scale_prefix=family)
     axis = "y" if swapped else "x"

@@ -273,6 +273,7 @@ def test_complete_registered_heatmaps(page, tmp_path, reference_images, case):
             make_heatmap_adata(case),
             names,
             groupby,
+            group_gap=4,
             width=reference["plot_size"][0],
             height=reference["plot_size"][1],
             show=False,

@@ -164,6 +164,7 @@ class _GroupedPlot:
         return self
 
     def _displayed(self) -> tuple[pd.DataFrame, tuple[FeatureGroup, ...], list[int]]:
+        """Return means, marker spans and feature slots in the current display order."""
         from genome_spy.integrations.scanpy._dendrogram_data import reorder_grouped
 
         colors, groups = self._colors, self._feature_groups
@@ -175,6 +176,7 @@ class _GroupedPlot:
         return colors.loc[self._order], groups, slots
 
     def _totals(self) -> pd.DataFrame | None:
+        """Return ordered counts and colors when the totals track is active."""
         import pandas as pd
 
         if self._extra != "totals":
@@ -184,10 +186,12 @@ class _GroupedPlot:
         )
 
     def _check_show(self, show: bool | None) -> None:
+        """Reject invalid decoration visibility flags."""
         if show is not None and not isinstance(show, bool):
             raise TypeError(f"{self._context}: show flags must be boolean or None.")
 
     def _track_size(self, size: float | None) -> float:
+        """Convert a positive track size in inches to native pixels."""
         from genome_spy.integrations.scanpy._data import number
 
         value = number(size, "size/width", context=self._context)

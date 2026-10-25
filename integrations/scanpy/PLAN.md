@@ -1080,12 +1080,13 @@ native legends and layout spacing rather than compensating legend offsets or
 negative coordinates to reserve room for tracks. Preserve the documented
 `width`/`height` and `figsize` budget semantics during this change.
 
-Heatmap cell groups have real blank space between them by default. Use native index
-`gapPositions`, with a default `gapWidth` of 4 CSS pixels, which stays fixed
-under zoom and device-pixel-ratio changes. These gaps are a deliberate requested
-appearance change; values, ordering and scientific meaning stay unchanged.
-Expose keyword-only `group_gap=4` on heatmap and its ranked wrapper: zero removes
-the spacing, and finite nonnegative widths apply to both cell and marker groups.
+Group spacing is opt-in. Expose keyword-only `group_gap=0` on heatmap, dotplot and
+the DotPlot builder; ranked wrappers reuse their parent options. Positive widths
+use native index `gapPositions` and `gapWidth`, fixed under zoom and device-pixel
+ratio changes. Heatmap gaps separate cell and marker groups; dotplot gaps separate
+marker blocks. Matrixplot remains contiguous. Numeric tile labels also stay
+opt-in through `show_values=False`. Values, ordering and scientific meaning stay
+unchanged.
 Reuse the shared index-scale helper so every side track follows the same gaps;
 do not add a parallel layout configuration system.
 

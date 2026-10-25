@@ -92,21 +92,21 @@ def test_complete_grouped_labels_guides_and_brackets(
             if swapped:
                 padding = 0.5 if family == "dotplot" else 0
                 expected = bounds["y"] + index_position(
-                    slot, 3, padding, bounds["height"], [2]
+                    slot, 3, padding, bounds["height"]
                 )
                 assert label["y"] + label["height"] / 2 == pytest.approx(
                     expected, abs=2
                 )
                 assert label["x"] >= right + 6
-                px, py = round(right + 4), round(expected)
+                px, py = round(right + 10), round(expected)
             else:
                 padding = 0.3 if family == "dotplot" else 0
                 expected = bounds["x"] + index_position(
-                    slot, 3, padding, bounds["width"], [2]
+                    slot, 3, padding, bounds["width"]
                 )
                 assert label["x"] + label["width"] / 2 == pytest.approx(expected, abs=2)
                 assert label["y"] + label["height"] <= bounds["y"] - 6
-                px, py = round(expected), round(bounds["y"] - 4)
+                px, py = round(expected), round(bounds["y"] - 10)
             assert pixels[py - 1 : py + 2, px - 1 : px + 2].min() < 64
     page.screenshot(
         path=str(tmp_path / f"{family}-{swapped}-complete.png"), full_page=True
@@ -178,6 +178,7 @@ def test_pbmc_marker_brackets_paint_single_and_multiple_gene_spans(page):
         "bulk_labels",
         width=400,
         height=350,
+        group_gap=4,
         show=False,
     )
     bounds = render(page, chart)
@@ -188,7 +189,7 @@ def test_pbmc_marker_brackets_paint_single_and_multiple_gene_spans(page):
         px = round(
             bounds["x"] + (midpoint + 0.3) / 10.6 * (bounds["width"] - 24) + 4 * i
         )
-        py = round(bounds["y"] - 4)
+        py = round(bounds["y"] - 10)
         assert pixels[py - 1 : py + 2, px - 1 : px + 2].min() < 64, genes
         start += len(genes)
 
@@ -206,6 +207,7 @@ def test_registered_dotplot_positions_paints_and_footprints(
         names,
         "group",
         use_raw=False,
+        group_gap=4,
         show=False,
         width=reference["plot_size"][0],
         height=reference["plot_size"][1],

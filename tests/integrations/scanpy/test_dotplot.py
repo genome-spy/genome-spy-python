@@ -61,8 +61,30 @@ def test_signature_preserves_scanpy_defaults_and_native_boundary():
         "hover",
         "zoom",
         "highlight",
+        "group_gap",
     }
     assert native["hover"].default is True
+    assert native["group_gap"].default == 0
+
+
+@pytest.mark.parametrize("swapped", [False, True])
+@pytest.mark.parametrize("gap", [0, 2.5, 8])
+def test_group_gap_only_changes_native_slot_spacing(adata, swapped, gap):
+    options = {
+        "var_names": {"First": ["g1", "g2"], "Last": ["g3"]},
+        "swap_axes": swapped,
+    }
+    expected = chart(adata, **options).to_dict()
+    assert all(expected["scales"][axis]["gapWidth"] == 0 for axis in ("x", "y"))
+    for axis in ("x", "y"):
+        expected["scales"][axis]["gapWidth"] = gap
+    assert chart(adata, group_gap=gap, **options).to_dict() == expected
+
+
+@pytest.mark.parametrize("gap", [-1, float("nan"), float("inf"), True, "4", None])
+def test_group_gap_rejects_invalid_widths(adata, gap):
+    with pytest.raises(ValueError, match="group_gap"):
+        chart(adata, group_gap=gap)
 
 
 @pytest.mark.parametrize("case", dotplot_cases())

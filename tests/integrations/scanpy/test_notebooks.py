@@ -697,7 +697,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     ]
     spec = charts[1].to_dict()
     tiles = points(spec)
-    records = spec["datasets"][spec["spec"]["data"]["name"]]
+    records = spec["datasets"][tiles["data"]["name"]]
     assert tiles["mark"]["type"] == "rect"
     assert len(records) == 100
     assert tiles["encoding"]["color"]["scale"]["scheme"] == "blues"
@@ -726,7 +726,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         for name in namespace["pbmc"].obs_names
     )
     spec = charts[3].to_dict()
-    records = spec["datasets"][spec["spec"]["data"]["name"]]
+    records = spec["datasets"][points(spec)["data"]["name"]]
     np.testing.assert_array_equal(
         np.array([row["_value"] for row in records]).reshape(10, 10),
         namespace["pbmc"].uns["dendrogram_bulk_labels"]["correlation_matrix"],
@@ -742,8 +742,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     ):
         spec = chart.to_dict()
         grid = spec["spec"] if "surround" in spec else spec["layer"][0]
-        text = grid["layer"][1]["layer"][0]
-        assert text["mark"]["fitToBand"] is True
+        assert all(mark["mark"]["type"] != "text" for mark in leaf_marks(grid))
         assert all(
             (
                 spec["scales"][axis]
@@ -753,9 +752,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             is (axis == "y")
             for axis in ("x", "y")
         )
+    customized = namespace["matrix_builder_tree_chart"].to_dict()
+    assert any(mark["mark"].get("fitToBand") for mark in leaf_marks(customized))
     clustered = namespace["clustermap"].to_dict()
     tiles = points(clustered)
-    cells = clustered["datasets"][clustered["spec"]["data"]["name"]]
+    cells = clustered["datasets"][tiles["data"]["name"]]
     assert len(cells) == 700 * 10
     assert {row["_row"] for row in cells} == set(namespace["pbmc"].obs_names)
     assert {row["_column"] for row in cells} == set(namespace["marker_names"])

@@ -55,6 +55,7 @@ class DotPlot(_GroupedPlot):
         hover: Show gene, group, displayed value and expressing percentage.
         zoom: True enables y navigation; "xy" also enables x navigation.
         highlight: Mark the hovered row and column with a native ruler.
+        group_gap: Space between marker blocks in pixels; 0 keeps slots contiguous.
         width: Plot-area width in logical pixels.
         height: Plot-area height in logical pixels.
         **kwds: Only cmap and scalar linewidth are supported.
@@ -103,6 +104,7 @@ class DotPlot(_GroupedPlot):
         hover: bool = True,
         zoom: bool | Literal["xy"] = False,
         highlight: bool = False,
+        group_gap: float = 0,
         width: float | None = None,
         height: float | None = None,
         **kwds: Any,
@@ -178,6 +180,7 @@ class DotPlot(_GroupedPlot):
             "hover": hover,
             "zoom": zoom,
             "highlight": highlight,
+            "group_gap": group_gap,
             "width": width,
             "height": height,
             "cmap": kwds.get("cmap", "Reds"),
