@@ -278,12 +278,29 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 
 Started 2026-10-23 and revised 2026-10-25 for the package/documentation publication.
 The user requested **smaller points that grow on zoom, color depth and separable
-points at overview, and semantic zoom for large UMAPs**. The exact visual treatment
-and large-data policy remain under review; new appearance defaults are not adopted.
-The current local input is `tmp/scanpy-publication-review/umap-zoom-review.html`.
+points at overview**. Semantic zoom is **only a performance optimization above
+1,000,000 cells**, not a style choice; draw all points at or below that threshold.
+The user found the 700-/2,638-cell examples too sparse to judge styling. The exact
+visual treatment remains under review; new appearance defaults are not adopted.
+The earlier local input is `tmp/scanpy-publication-review/umap-zoom-review.html`.
 The earlier `umap-review.html` retains current/proposed plain views and linked
 selection. Generated HTML/specs, screenshots and SVGs are ignored local evidence,
 not fresh-clone dependencies or release artifacts.
+
+- **Next review dataset located:** the user identified the earlier lasso work.
+  The local chat **Explore lasso selector architecture**
+  (`01a12093-8e43-7100-9580-0831750ecdbd`) used
+  `/Users/okusupreme/genome-spy/private/lasso/allen-wmb.csv` and adjacent
+  `allen-wmb.json` provenance. This is a 1,100,000-cell ordered subset of Allen
+  Brain Cell Atlas WMB-10X release 20230830, with original published UMAP
+  coordinates, cell IDs and cluster aliases; it contains no expression matrix.
+  Local checks confirm 1,100,000 distinct IDs, finite x/y and 5,312 cluster aliases.
+  It is not a representative biological sample. The maintained downloader and
+  provenance description are in the lasso worktree's `tests/lasso/prepareData.py`
+  and `tests/lasso/README.md`. Use this real dense dataset instead of preparing
+  the proposed synthetic stand-in. These local paths are review inputs, not
+  dependencies of the package, tests or published documentation. Keep full-drawing
+  style comparisons separate from above-threshold performance qualification.
 
 - **Revised appearance candidate:** 420 × 420 panels, no frame/axes, Tableau10
   categories, long cell-type labels in a single-column side legend and a
@@ -296,14 +313,16 @@ not fresh-clone dependencies or release artifacts.
   and strokes remain export-consistent choices. Preserve explicit palettes and
   stored category colors when implementing defaults. Public plotting, encoding,
   mark and configuration APIs author these candidates without spec edits.
-- **Semantic zoom candidate:** the curated 2,638-cell PBMC dataset compares all
+- **Superseded semantic zoom demonstration:** the curated 2,638-cell PBMC dataset compares all
   points with native `semanticScore` and `semanticZoomFraction=0.25`. Review-only
   scores come from stable cell-ID hashes joined through native lookup; they
   do not rank expression or cell types. The same stored UMAP and cells remain
   in the chart. About 25% draw initially and more appear on zoom. This verifies
   the native mechanism, not performance on a large atlas or a final sampling
-  policy. Large-data thresholds, rare-population visibility, selection/count
-  semantics and a visible indication of partial drawing still need decisions.
+  policy. It is not a style candidate and does not satisfy the user's
+  above-1,000,000-cell performance requirement. That performance path, stable
+  visibility policy, selection/count semantics and indication of partial drawing
+  still need validation; do not enable thinning on these small examples.
 - **Interaction candidate:** hover available for reading; wheel zoom/pan and
   linked interval selection explicitly enabled for exploration. Decide tooltip
   content, navigation reset and notebook scrolling with the user. The current
@@ -333,7 +352,8 @@ not fresh-clone dependencies or release artifacts.
   legend overflowed. The existing C11 multi-column categorical-guide limitation
   remains open and must be accounted for in the publication scope.
 
-Next: settle the point treatment and large-data interaction policy, then apply
+Next: use the located Allen dataset for a dense full-drawing style comparison; validate the
+separate performance path above 1,000,000 cells before adopting semantic zoom. Apply
 accepted appearance/interaction changes with focused render checks and update
 the canonical notebook and user guide. Generalizing defaults to other embedding
 families requires inspecting those callers first.

@@ -1204,6 +1204,12 @@ theme framework, interaction framework or new renderer for this review. Shared
 defaults only propagate to other families after their effects are inspected.
 The current review queue and its decisions live only in STATUS.
 
+For UMAP, semantic zoom is a performance optimization only for datasets above
+1,000,000 cells, not an appearance treatment. Datasets at or below that threshold
+retain full point drawing. Review styling on sufficiently dense embeddings with
+semantic thinning disabled; keep point growth on coordinate zoom separate from
+semantic zoom. Validate the above-threshold performance path before adopting it.
+
 ### Documentation delivery
 
 M14.e designs the integrations landing page and one workflow page before choosing
