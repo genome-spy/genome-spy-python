@@ -369,7 +369,7 @@ not fresh-clone dependencies or release artifacts.
   preview starts at 0.85 opacity in both views. The left is fixed; native bindings
   control the right view's opacity (0.3–0.95), overview diameter (0.4–2 pixels)
   and zoom growth exponent (0.3–1.6), plus maximum diameter (3–12 pixels).
-  Its initial defaults match the reference's
+  The original defaults matched the reference's
   `min(1.1 ** 2 * pow(zoomLevel(), 0.8), 36)` sizing: 1.1-pixel initial diameter,
   growing to six pixels. Removed the rejected shading/outline controls rather
   than keeping unused alternatives. **Latest user request enables semantic zoom
@@ -425,6 +425,12 @@ not fresh-clone dependencies or release artifacts.
   were absent; Ruff passed for the generator and new check. Generated screenshots,
   metadata and scripts remain ignored review evidence. Draw order and focused
   labels remain candidates for later review; package defaults are unchanged.
+  **Accepted zoom growth (2026-10-25):** the user selected exponent **1.2**.
+  The candidate preview now starts at 1.2; the fixed comparison retains 0.8.
+  Other controls remain at opacity 0.85, overview diameter 1.1 pixels and maximum
+  diameter six pixels. The live user's selected 1.2 and camera view were retained.
+  This records the accepted style direction; public defaults await the completed
+  UMAP appearance and interaction review.
 
 - **Revised appearance candidate:** 420 × 420 panels, no frame/axes, Tableau10
   categories, long cell-type labels in a single-column side legend and a
