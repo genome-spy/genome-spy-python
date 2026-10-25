@@ -646,7 +646,11 @@ retain separate slots. Hover describes group/feature summaries; these dots do no
 Brushes and individual-cell selection remain deferred.
 
 Native labels use portable Lato Regular and native guides. Line breaks in guide
-titles become spaces; fractional percentage ticks retain native numeric precision
+titles become spaces. Dotplot defaults to the shorter titles `Cells expressing (%)`
+and `Mean expression`, with the right-side guides stacked and centered vertically.
+These presentation defaults differ from Scanpy; `size_title`, `colorbar_title`
+and `DotPlot.legend()` still accept custom titles. Fractional percentage ticks
+retain native numeric precision
 instead of Scanpy's integer label rounding. Guide sizing/padding and rotated text alignment
 differ from Matplotlib. Vega `reds` has different stops from Matplotlib `Reds`,
 including a darker low end; no Matplotlib colors are sampled or imported. Use

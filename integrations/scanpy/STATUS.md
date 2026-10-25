@@ -306,12 +306,32 @@ retain the new native observations. Ruff formatting/lint and mypy pass. The full
 repository suite, docs build and new resource benchmarks were not run; numerical
 preparation and data transport paths are unchanged.
 
-The ignored expression comparison PDF now has 39 visually checked pages with
-38 fresh chart pairs. A separate native dotplot candidate uses shorter guide
-titles and a centered guide stack; those defaults are not adopted. Existing
-local notebook navigation and execution outputs are preserved, while committed
-sources remain output-free. Clearance: retain; no milestone is closed by this
-review. Next: user review of dotplot guide layout and typography.
+The ignored expression comparison PDF at this checkpoint has 39 visually checked
+pages with 38 fresh chart pairs. Existing local notebook navigation and execution
+outputs are preserved, while committed sources remain output-free.
+
+Dotplot guide follow-up (2026-10-25): the user approved the candidate's shorter
+`Cells expressing (%)` and `Mean expression` titles and vertically centered
+right-side guides, with sixteen-pixel spacing. Functional calls, builder chains
+and ranked dotplots reuse the existing grouped layout helper and native legend
+configuration. Explicit titles, hidden guides and ranking-statistic titles remain
+authoritative; matrixplot guide defaults are unchanged. No extra marks, data
+extraction, callbacks or renderer patch were added.
+
+Verification: **207 targeted Python checks**, the clean canonical expression
+workflow and **57 relevant native browser cases** pass across the final runs.
+The browser cases observe centering in both orientations, complete labels,
+custom builder guides, composition, hover, navigation and registered dot
+footprints. Ruff formatting/lint and mypy pass. All **45 nonempty code cells**
+also completed in the restarted live Jupyter kernel without Python errors and
+were saved locally. The app browser encountered a shader-diagnostic error while
+displaying outputs and then disconnected; native Chromium rendering passes, but
+the refreshed in-app notebook display still needs a manual check. The existing
+PDF predates this guide-default change and was not regenerated. The full
+repository suite, docs build and new resource measurements were not repeated;
+summary preparation and transport are unchanged. Clearance: retain; no milestone
+is closed. Next: user review of the applied dotplot styling, then matrixplot
+styling under the publication-review contract.
 
 ## UMAP publication review
 

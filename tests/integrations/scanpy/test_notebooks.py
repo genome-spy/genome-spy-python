@@ -686,6 +686,19 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         assert len(chart_spec["datasets"][tree["data"]["name"]]) == 2 * (len(order) - 1)
     spec = charts[0].to_dict()
     dot = points(spec)
+    assert dot["encoding"]["size"]["legend"]["title"] == "Cells expressing (%)"
+    assert dot["encoding"]["color"]["legend"]["title"] == "Mean expression"
+    for name in ("dotplot", "ranked_dotplot", "statistic_dotplot"):
+        assert (
+            namespace[name].to_dict()["config"]["legend"]["layout"]["anchor"]
+            == "middle"
+        )
+    assert (
+        points(namespace["statistic_dotplot"].to_dict())["encoding"]["color"]["legend"][
+            "title"
+        ]
+        == "log fold change"
+    )
     assert len(spec["datasets"][dot["data"]["name"]]) == 100
     assert dot["encoding"]["color"]["scale"]["scheme"] == "reds"
     assert dot["encoding"]["x"]["type"] == dot["encoding"]["y"]["type"] == "index"

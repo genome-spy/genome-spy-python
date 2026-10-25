@@ -18,6 +18,47 @@ REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "dotplot.json").read_text())
 
 
+@pytest.mark.parametrize("swapped", [False, True])
+def test_native_dotplot_legend_stack_is_centered_beside_the_chart(page, adata, swapped):
+    chart = gsc.pl.dotplot(
+        adata,
+        {"First": ["g1", "g2"], "Last": ["g3"]},
+        "group",
+        use_raw=False,
+        swap_axes=swapped,
+        width=300,
+        height=350,
+        show=False,
+    )
+    render(page, chart)
+    geometry = page.evaluate(
+        """async () => {
+            const host = document.createElement('div');
+            host.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+            host.innerHTML = await (await api.imageExport.svg()).blob.text();
+            document.body.append(host);
+            await document.fonts.ready;
+            const chart = host.querySelector('svg').getBoundingClientRect();
+            const legend = host.querySelector('[data-name="legend_region_right"]');
+            const bounds = legend.getBoundingClientRect();
+            const result = {
+                top: bounds.top - chart.top,
+                bottom: chart.bottom - bounds.bottom,
+                left: bounds.left - chart.left,
+                right: chart.right - bounds.right,
+                titles: [...legend.querySelectorAll('[data-name="title"] text')]
+                    .map(e => e.textContent),
+            };
+            host.remove();
+            return result;
+        }"""
+    )
+    assert geometry["titles"] == ["Cells expressing (%)", "Mean expression"]
+    assert geometry["top"] > 0 and geometry["bottom"] > 0
+    assert geometry["left"] > 300 and geometry["right"] >= 0
+    assert geometry["top"] == pytest.approx(geometry["bottom"], abs=8)
+
+
 @pytest.mark.parametrize("swapped,rotation", [(False, None), (False, 0), (True, None)])
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 def test_complete_grouped_labels_guides_and_brackets(
@@ -48,7 +89,7 @@ def test_complete_grouped_labels_guides_and_brackets(
         "B",
         "A",
         "Mean expression",
-        *(["Fraction of cells"] if family == "dotplot" else []),
+        *(["Cells expressing (%)"] if family == "dotplot" else []),
     ]:
         assert label in svg
     labels = page.evaluate(
@@ -74,9 +115,14 @@ def test_complete_grouped_labels_guides_and_brackets(
     assert [label["text"] for label in labels].count("g2") == 2
     for text in ["first markers", "again"]:
         assert [label["text"] for label in labels].count(text) == 1
-    guides = [("Mean expression in group", "1.0")]
+    guides = [
+        (
+            "Mean expression" if family == "dotplot" else "Mean expression in group",
+            "1.0",
+        )
+    ]
     if family == "dotplot":
-        guides.append(("Fraction of cells in group (%)", "30"))
+        guides.append(("Cells expressing (%)", "30"))
     for title, tick in guides:
         heading = next(label for label in labels if label["text"] == title)
         entry = next(label for label in labels if label["text"] == tick)

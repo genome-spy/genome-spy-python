@@ -40,11 +40,12 @@ def table(result):
     return pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
 
 
-def test_signature_preserves_scanpy_defaults_and_native_boundary():
+def test_signature_preserves_statistical_defaults_and_native_title_defaults():
     reference = json.loads(
         Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
     )["entries"]["dotplot"]["parameters"]
     native = inspect.signature(gsc.pl.dotplot).parameters
+    titles = {"colorbar_title": "Mean expression", "size_title": "Cells expressing (%)"}
     for parameter in reference:
         name = parameter["name"]
         if name in {"ax", "return_fig"}:
@@ -54,7 +55,7 @@ def test_signature_preserves_scanpy_defaults_and_native_boundary():
         assert actual.kind.name == parameter["kind"]
         assert (
             None if actual.default is inspect.Parameter.empty else repr(actual.default)
-        ) == parameter["default"]
+        ) == (repr(titles[name]) if name in titles else parameter["default"])
     assert set(native) - {p["name"] for p in reference} == {
         "width",
         "height",

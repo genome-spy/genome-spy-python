@@ -278,6 +278,8 @@ Trees, builders and summary selections remain in their named later slices.
   `dot_min`/`dot_max`, inferred limits, size exponent and `smallest_dot`, including
   zero/all-equal fractions. Respect supplied `dot_color_df`/builder `dot_size_df`
   labels/order without silently recomputing or rescaling supplied values.
+  Reviewed native dotplot guides use `Cells expressing (%)` and `Mean expression`,
+  centered vertically on the right; explicit titles still override these defaults.
 - M02.d: freeze default, reordered, log, scaled, supplied-statistic and repeated-
   slot references; reproduce the core tutorial marker dotplot on PBMC.
   Keep dotplot, matrixplot and heatmap examples in the expression notebook,

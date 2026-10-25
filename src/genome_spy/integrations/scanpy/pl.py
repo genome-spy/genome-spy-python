@@ -1155,8 +1155,8 @@ def dotplot(
     mean_only_expressed: bool = False,
     standard_scale: Literal["var", "group"] | None = None,
     title: str | None = None,
-    colorbar_title: str | None = "Mean expression\nin group",
-    size_title: str | None = "Fraction of cells\nin group (%)",
+    colorbar_title: str | None = "Mean expression",
+    size_title: str | None = "Cells expressing (%)",
     figsize: tuple[float, float] | None = None,
     dendrogram: bool | str = False,
     gene_symbols: str | None = None,
@@ -1202,8 +1202,8 @@ def dotplot(
         mean_only_expressed: Average only expressed values, with empty means zero.
         standard_scale: Min–max scale means per variable or group.
         title: Plot title.
-        colorbar_title: Color guide title; None removes its title.
-        size_title: Percentage guide title; None removes its title.
+        colorbar_title: Color guide title, default "Mean expression"; None omits the title.
+        size_title: Percentage guide title, default "Cells expressing (%)"; None omits the title.
         figsize: Native layout budget in inches at 100 logical pixels/inch.
             Width includes a fixed 150-pixel guide allowance; height sizes the
             plot area. Labels and renderer padding add space. Cannot be combined

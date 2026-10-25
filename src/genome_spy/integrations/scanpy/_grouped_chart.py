@@ -384,6 +384,8 @@ def finish_grouped_chart(
     zoom: bool = False,
     tree_size: float = 80,
     group_track: gs.TopLevelSpec | None = None,
+    legend_anchor: Literal["end", "middle"] = "end",
+    legend_spacing: float = 25,
 ) -> gs.TopLevelSpec:
     """Combine summary marks, table labels and optional brackets/tree into a chart.
 
@@ -446,8 +448,8 @@ def finish_grouped_chart(
             titleFontSize=_TICK,
             titleFontWeight="normal",
             titleOrient="top",
-            layout={"anchor": "end", "direction": "vertical", "wrap": False},
-            spacing=25,
+            layout={"anchor": legend_anchor, "direction": "vertical", "wrap": False},
+            spacing=legend_spacing,
         )
     )
 

@@ -262,8 +262,8 @@ class DotPlot(_GroupedPlot):
         show: bool | None = True,
         show_size_legend: bool | None = True,
         show_colorbar: bool | None = True,
-        size_title: str | None = "Fraction of cells\nin group (%)",
-        colorbar_title: str | None = "Mean expression\nin group",
+        size_title: str | None = "Cells expressing (%)",
+        colorbar_title: str | None = "Mean expression",
         width: float | None = 1.5,
     ) -> Self:
         """Configure native size/color guides without changing either data scale.
@@ -272,8 +272,8 @@ class DotPlot(_GroupedPlot):
             show: False or None hides both guides.
             show_size_legend: Show the percentage guide when show is True.
             show_colorbar: Show the color guide when show is True.
-            size_title: Percentage guide title; None removes its title.
-            colorbar_title: Color guide title; None removes its title.
+            size_title: Percentage guide title, default "Cells expressing (%)"; None omits the title.
+            colorbar_title: Color guide title, default "Mean expression"; None omits the title.
             width: Native gradient width and figsize guide allowance in inches.
 
         Returns:

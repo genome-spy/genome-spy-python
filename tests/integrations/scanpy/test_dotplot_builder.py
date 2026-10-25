@@ -271,6 +271,25 @@ def test_legend_visibility_titles_and_native_width(adata):
     assert point["encoding"]["size"]["legend"]["title"] == "Cells"
 
 
+def test_default_legends_match_the_function_before_and_after_a_chain(adata):
+    expected = gsc.pl.dotplot(adata, ["g1", "g2"], "group", show=False).to_dict()
+    plot = gsc.pl.DotPlot(adata, ["g1", "g2"], "group")
+    assert plot.to_chart().to_dict() == expected
+    assert plot.legend().to_chart().to_dict() == expected
+    point = points(expected)
+    assert point["encoding"]["size"]["legend"]["title"] == "Cells expressing (%)"
+    assert point["encoding"]["color"]["legend"]["title"] == "Mean expression"
+    legend = expected["config"]["legend"]
+    assert legend["layout"] == {
+        "anchor": "middle",
+        "direction": "vertical",
+        "wrap": False,
+    }
+    assert legend["spacing"] == 16
+    assert legend["labelFont"] == legend["titleFont"] == "Lato"
+    assert legend["labelFontSize"] == legend["titleFontSize"]
+
+
 def test_show_uses_one_native_display_and_does_not_follow_autosave(adata, monkeypatch):
     monkeypatch.setattr(sc.settings, "_autosave", True)
     shown = []
