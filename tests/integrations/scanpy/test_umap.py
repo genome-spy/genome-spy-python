@@ -432,6 +432,32 @@ def test_native_dimensions_override_panel_areas_without_changing_data_or_setting
     assert before == (list(mpl.rcParams["figure.figsize"]), mpl.rcParams["figure.dpi"])
 
 
+@pytest.mark.parametrize("color", ["cell_type", "score", ["cell_type", "score"]])
+@pytest.mark.parametrize("fontsize", [8, 20])
+@pytest.mark.parametrize("linked", [False, True])
+def test_legend_typography_survives_single_panel_composition(
+    adata, color, fontsize, linked
+):
+    options = (
+        {"selection": gs.selection_interval("cells", encodings=["x", "y"])}
+        if linked
+        else {}
+    )
+    spec = gsc.pl.umap(
+        adata, color=color, legend_fontsize=fontsize, show=False, **options
+    ).to_dict()
+    panels = units(spec["vconcat"][0] if linked else spec)
+    for panel in panels:
+        categorical = points(panel)["encoding"]["color"]["type"] == "nominal"
+        legend = panel["config"]["legend"]
+        assert legend["labelFontSize"] == pytest.approx(
+            (fontsize if categorical else 10) * 100 / 72
+        )
+        assert legend["rowPadding"] == pytest.approx(0.5 * fontsize * 100 / 72)
+        assert legend["labelOffset"] == pytest.approx(0.8 * fontsize * 100 / 72)
+        assert legend["layout"] == {"anchor": "middle", "wrap": False}
+
+
 def test_relative_panel_gaps_use_native_dimensions(adata):
     chart = gsc.pl.umap(
         adata,

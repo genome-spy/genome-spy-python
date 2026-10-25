@@ -7,6 +7,7 @@ from typing import Literal
 import numpy as np
 
 import genome_spy as gs
+from genome_spy.schema.core import LegendConfig
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import coordinate_domain
 from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
@@ -93,6 +94,19 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
     if style.colorbar_loc is None:
         return None
     return gs.Legend(title=None, gradientOpacity=style.alpha)
+
+
+def _legend_typography(panel: Panel, style: EmbeddingStyle) -> LegendConfig:
+    """Return shared guide text settings, retaining separate colorbar tick sizing."""
+    return LegendConfig(
+        labelFont=style.font,
+        labelFontSize=style.legend_fontsize
+        if panel.categorical
+        else style.tick_fontsize,
+        rowPadding=style.legend_labelspacing * style.legend_fontsize,
+        labelOffset=style.legend_handletextpad * style.legend_fontsize,
+        layout={"anchor": "middle", "wrap": False},
+    )
 
 
 def _color(panel: Panel, index: int, style: EmbeddingStyle) -> gs.Color:
@@ -361,15 +375,7 @@ def _panel(
     return result.configure_view(
         stroke=style.frame_color if style.frameon else "transparent",
         strokeWidth=style.frame_width if style.frameon else 0,
-    ).configure_legend(
-        labelFont=style.font,
-        labelFontSize=style.legend_fontsize
-        if panel.categorical
-        else style.tick_fontsize,
-        rowPadding=style.legend_labelspacing * style.legend_fontsize,
-        labelOffset=style.legend_handletextpad * style.legend_fontsize,
-        layout={"anchor": "middle", "wrap": False},
-    )
+    ).configure_legend(_legend_typography(panel, style))
 
 
 def _compose(
@@ -464,9 +470,16 @@ def build_embedding(
         chart = with_brush_count(chart, prepared, style, selection)
     horizontal = style.colorbar_loc in ("top", "bottom")
     gradient_length = style.width if horizontal else style.height
+    # A single panel is also the root, so retain its text settings when configuring it.
+    legend = (
+        _legend_typography(prepared.panels[0], style)
+        if len(charts) == 1
+        else LegendConfig()
+    )
     # Keep presentation defaults overridable through native chart configuration.
     return chart._configure_nested(
         "legend",
+        legend,
         orient=style.colorbar_loc or "right",
         direction="horizontal" if horizontal else "vertical",
         symbolSize=style.legend_symbol_size * POINTS_TO_PIXELS**2,
