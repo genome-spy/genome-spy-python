@@ -58,6 +58,37 @@ def validate_brush(prepared: PreparedEmbedding) -> None:
         )
 
 
+def brush_count(
+    selection: gs.Parameter,
+    fields: tuple[str, str],
+    *,
+    name: str,
+    width: float,
+) -> gs.Chart:
+    """Return a native count row inheriting its cell data from the composition.
+
+    Read the brush bounds without changing the point marks.
+    """
+    x, y = fields
+    parameter = selection.name
+    # Match the shader's lower-inclusive, upper-exclusive point membership.
+    predicate = (
+        f"{parameter}.intervals.x && {parameter}.intervals.y && "
+        f"{parameter}.intervals.x[0] <= datum.{x} && datum.{x} < {parameter}.intervals.x[1] && "
+        f"{parameter}.intervals.y[0] <= datum.{y} && datum.{y} < {parameter}.intervals.y[1]"
+    )
+    return (
+        gs.Chart()
+        .transform_collect()
+        .transform_formula(expr=f"({predicate}) ? 1 : 0", as_="selected")
+        .transform_aggregate(fields=["selected"], ops=["sum"], as_=["count"])
+        .transform_formula(expr="datum.count + ' cells selected'", as_="label")
+        .mark_text(align="left", baseline="middle", size=12, tooltip=None)
+        .encode(x=gs.value(0), y=gs.value(0.5), text="label:N")
+        .properties(name=name, width=width, height=24)
+    )
+
+
 def with_brush_count(
     chart: gs.TopLevelSpec,
     prepared: PreparedEmbedding,
@@ -68,23 +99,10 @@ def with_brush_count(
 
     Count prepared cells in the browser using the same bounds as point highlighting.
     """
-    x, y = [f"_coord_{d}" for d in prepared.panels[0].dimensions]
+    x, y = (f"_coord_{d}" for d in prepared.panels[0].dimensions)
     name = selection.name
-    # Match the shader's lower-inclusive, upper-exclusive point membership.
-    predicate = (
-        f"{name}.intervals.x && {name}.intervals.y && "
-        f"{name}.intervals.x[0] <= datum.{x} && datum.{x} < {name}.intervals.x[1] && "
-        f"{name}.intervals.y[0] <= datum.{y} && datum.{y} < {name}.intervals.y[1]"
-    )
-    count = (
-        gs.Chart()
-        .transform_collect()
-        .transform_formula(expr=f"({predicate}) ? 1 : 0", as_="selected")
-        .transform_aggregate(fields=["selected"], ops=["sum"], as_=["count"])
-        .transform_formula(expr="datum.count + ' cells selected'", as_="label")
-        .mark_text(align="left", baseline="middle", size=12, tooltip=None)
-        .encode(x=gs.value(0), y=gs.value(0.5), text="label:N")
-        .properties(name=f"{prepared.basis}-count-{name}", width=style.width, height=24)
+    count = brush_count(
+        selection, (x, y), name=f"{prepared.basis}-count-{name}", width=style.width
     )
     return (
         gs.vconcat(chart, count, spacing=8)

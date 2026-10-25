@@ -246,13 +246,14 @@ evidence. Its order is basic plotting, linked selection, then customization.
 Acceptance: preserve supplied coordinates and independent per-panel color scales.
 With zoom enabled, Shift-drag brushing, clearing, coincident cells and half-open
 membership agree in the chart and Python. No local Core patch or notebook connection task.
-The accepted publication interaction direction is a default native interval brush
-that stores rectangle bounds without automatic per-cell highlighting, fading or
-live counts. Membership and Python retrieval must be explicit actions. The dense
-review uses that native brush; adoption in the public integration and canonical
-workflow remains a follow-up. If membership is requested, use all loaded cells
-inside the bounds regardless of semantic visibility. Review tooltip content and
-navigation gestures; keep reset zoom separate from clearing.
+The publication interaction direction is a default native interval brush without
+per-cell point highlighting or fading. A user-requested live count is under review
+as a separate native text/dataflow branch driven by the brush parameter; the count
+still checks membership, while point rendering stays independent of selection.
+Count all loaded cells inside the bounds regardless of semantic visibility.
+Python subset retrieval remains explicit. Review count latency, tooltip content
+and navigation before public/canonical-workflow adoption; keep reset zoom separate
+from clearing.
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 

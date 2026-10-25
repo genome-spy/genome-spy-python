@@ -515,7 +515,8 @@ not fresh-clone dependencies or release artifacts.
   source-wide mypy pass. Full resource qualification, the full repository suite
   and docs build were not run. User review of tooltip content, selection contrast
   and gestures remains open; no new public interaction defaults are adopted.
-- **Default-brush decision (2026-10-25):** the user found selection of tens of
+- **Default-brush decision (2026-10-25; count revised below):** the user found
+  selection of tens of
   thousands of cells buggy and rejected effects requiring per-cell membership
   checks. The dense review now declares only native `selection_interval` on the
   first panel. Removed conditional point opacity, membership transforms and the
@@ -536,6 +537,27 @@ not fresh-clone dependencies or release artifacts.
   membership/highlight tests are historical evidence of the rejected candidate.
   No production Python changed in this update; the full suite and docs build
   were not repeated. Next: user review of the plain brush and native hover.
+- **Live count-only trial (2026-10-25):** the user requested text that updates
+  while dragging, driven by a GenomeSpy parameter. The preview keeps the native
+  brush and constant point appearance, with a separate native formula/aggregate/
+  text branch reading `cells.intervals`. An exact count still evaluates cell
+  membership; this is confined to that branch, not the point encodings. There
+  are no brush event listeners or custom rendering callbacks. A small internal
+  `brush_count` extraction supplies the existing count row to both
+  `with_brush_count` and the dense preview; `brush_owner` retains native ownership.
+  This avoids rebuilding prepared embedding metadata or duplicating the count
+  predicate. Public plotting behavior and tooltip defaults remain unchanged.
+  **Verification:** local `check_live_count.py` observed **40,967 then 232,114**
+  cells before mouse release, matching independent full-table membership at both
+  positions. Point raster bytes stayed identical, semantic zoom on/off gave the
+  same count, and clearing returned zero without browser errors. A fresh-clone
+  native regression verifies mid-drag counts of 2 then 4, including coincident
+  cells, unchanged point geometry/opacity and clearing through the shared helper
+  with a native URL source. All **92 focused UMAP/selection Python cases** and
+  **three native brush cases** pass, including widget delivery/offline HTML.
+  Ruff formatting/lint and source-wide mypy pass. The full suite, docs build and
+  hardware count-latency measurements were not repeated; responsiveness and final
+  public/canonical-workflow adoption remain under user review.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
@@ -559,9 +581,9 @@ not fresh-clone dependencies or release artifacts.
   legend overflowed. The existing C11 multi-column categorical-guide limitation
   remains open and must be accounted for in the publication scope.
 
-Next: gather feedback on the default native brain brush and hover; qualify native
-interaction performance above 1,000,000 cells. Adopt the accepted rectangle-only
-direction in the public integration and canonical notebook as part of the review. Apply
+Next: gather feedback on the default native brain brush with count-only text;
+qualify native interaction/count latency above 1,000,000 cells before final public
+integration and canonical-notebook adoption. Apply
 accepted appearance/interaction changes with focused render checks and update
 the canonical notebook and user guide. Generalizing defaults to other embedding
 families requires inspecting those callers first.

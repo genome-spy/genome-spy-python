@@ -3,6 +3,9 @@
 import asyncio
 import base64
 from io import BytesIO
+import json
+from urllib.parse import quote
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import pandas as pd
@@ -11,6 +14,10 @@ import pytest
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from genome_spy._embed import bundled_module_url
+from genome_spy.integrations.scanpy._embedding_interactions import (
+    brush_count,
+    brush_owner,
+)
 from tests.browser.test_embed_api import module_url
 from tests.integrations.scanpy.helpers import points, units
 
@@ -18,6 +25,81 @@ ad = pytest.importorskip("anndata")
 pytest.importorskip("scanpy")
 playwright = pytest.importorskip("playwright.async_api")
 Image = pytest.importorskip("PIL.Image")
+
+
+def test_native_count_updates_during_drag_without_changing_points(page):
+    from tests.integrations.scanpy.browser.test_umap import render
+
+    brush = gs.selection_interval("cells", encodings=["x", "y"])
+    points = (
+        gs.Chart()
+        .mark_point(filled=True, fillOpacity=0.85, strokeWidth=0)
+        .encode(
+            x=gs.X("x:Q").scale(domain=[0, 4], nice=False, zoom=True),
+            y=gs.Y("y:Q").scale(domain=[0, 4], nice=False, zoom=True),
+            size=gs.value(49),
+        )
+        .properties(width=240, height=240)
+        .configure_view(strokeWidth=0)
+    )
+    data = [{"x": x, "y": y} for x, y in [(1, 1), (1, 1), (2, 2), (3, 1)]]
+    chart = (
+        gs.vconcat(
+            brush_owner(points, brush, "plain"),
+            brush_count(brush, ("x", "y"), name="count", width=240),
+        )
+        .resolve_scale(x="independent", y="independent")
+        .properties(
+            data=gs.Data(
+                url="data:application/json," + quote(json.dumps(data)),
+                format=gs.DataFormat(type="json"),
+            )
+        )
+        .add_params(
+            gs.param(
+                "cells", value={"type": "interval", "intervals": {"x": None, "y": None}}
+            )
+        )
+    )
+    bounds = render(page, chart)
+    canvas = page.locator("canvas").first.bounding_box()
+
+    def position(x, y):
+        return (
+            canvas["x"] + bounds["x"] + bounds["width"] * x / 4,
+            canvas["y"] + bounds["y"] + bounds["height"] * (1 - y / 4),
+        )
+
+    def observe(expected):
+        svg = page.evaluate("async()=>(await api.imageExport.svg()).blob.text()")
+        root = ET.fromstring(svg)
+        texts = [e.text for e in root.iter() if e.tag.endswith("text")]
+        assert f"{expected} cells selected" in texts, texts
+
+        def point_states(element, opacity=1):
+            opacity = float(element.get("fill-opacity", opacity))
+            if element.tag.endswith("circle"):
+                yield element.attrib, opacity
+            for child in element:
+                yield from point_states(child, opacity)
+
+        circles = list(point_states(root))
+        assert len(circles) == 4
+        assert {opacity for _, opacity in circles} == {0.85}
+        return circles
+
+    original = observe(0)
+    page.keyboard.down("Shift")
+    page.mouse.move(*position(0.5, 0.5))
+    page.mouse.down()
+    page.mouse.move(*position(1.5, 1.5), steps=3)
+    assert observe(2) == original
+    page.mouse.move(*position(3.5, 2.5), steps=3)
+    assert observe(4) == original
+    page.mouse.up()
+    page.keyboard.up("Shift")
+    page.mouse.dblclick(*position(3.8, 3.8))
+    assert observe(0) == original
 
 
 @pytest.mark.parametrize("zoom", [False, True])
