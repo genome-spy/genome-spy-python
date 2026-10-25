@@ -341,6 +341,31 @@ not fresh-clone dependencies or release artifacts.
   dependencies of the package, tests or published documentation. Keep full-drawing
   style comparisons separate from above-threshold performance qualification.
 
+- **Dense brain comparison ready:** `tmp/scanpy-publication-review/brain/index.html`
+  is served locally with its Parquet file; the original CSV is unchanged. The
+  local `build_review.py` and `check_review.py` retain generation and verification.
+  Both views share one native parent data source, cluster palette and x/y scales.
+  The left is a fixed flat reference at opacity 0.55; native parameter bindings
+  control the right view's opacity (0.1–1), shading (0–0.8), none/dark/white
+  inward outline and outline width (0.1–0.8 pixels). Both use native
+  `min(1.2 * pow(zoomLevel(), 0.8), 36)` sizing: about 1.1-pixel initial diameter,
+  growing to six pixels. Semantic zoom is explicitly zero with no score channel
+  or point filtering. Native scale resolution shares wheel zoom and pan; the
+  reset button calls the public scale reset API. No custom rendering, selection
+  engine, camera synchronization or serialized-spec mutation is involved.
+  Coordinate limits reuse the integration's `coordinate_domain` helper.
+  This is a native mark-style review, not a Scanpy preparation or performance
+  benchmark; new library defaults are not adopted.
+  Headless checks verified **1,100,000 visible point instances per view** through
+  native SVG rasterization metadata and the native aggregate count. Native
+  slider/radio changes altered candidate pixels while reference pixels stayed
+  identical; wheel zoom, deep-zoom growth to a three-pixel radius and reset passed.
+  Overview and five close-up treatments were visually inspected. Browser errors
+  were absent and requests stayed local. Ruff passed for both local scripts.
+  Tableau10 repeats across 5,312 cluster IDs, so colors are not unique biological
+  class labels; hover exposes exact cell and cluster IDs. Native SVG exports use
+  flat fills unless rasterizing shading; the live comparison uses WebGL shading.
+
 - **Revised appearance candidate:** 420 × 420 panels, no frame/axes, Tableau10
   categories, long cell-type labels in a single-column side legend and a
   horizontal Viridis guide for CD79A expression. Native size is
@@ -391,7 +416,7 @@ not fresh-clone dependencies or release artifacts.
   legend overflowed. The existing C11 multi-column categorical-guide limitation
   remains open and must be accounted for in the publication scope.
 
-Next: use the located Allen dataset for a dense full-drawing style comparison; validate the
+Next: gather feedback on the dense full-drawing brain comparison; validate the
 separate performance path above 1,000,000 cells before adopting semantic zoom. Apply
 accepted appearance/interaction changes with focused render checks and update
 the canonical notebook and user guide. Generalizing defaults to other embedding
