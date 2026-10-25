@@ -45,10 +45,12 @@ they are explicit renderer-specific exceptions, not native plots to implement.
 this core roadmap. Changes in the upstream public surface require a new inventory
 and a version review rather than silently changing the denominator.
 
-For supported cases, preserve names, argument names/kinds/defaults, aliases,
-ordering, statistical meaning, and supplied results. Add keyword-only GenomeSpy
-controls. Track meaningful unsupported parameters until implemented or explicitly
-resolved as a renderer boundary. Signature presence alone is not support.
+For supported cases, preserve names, argument names/kinds, aliases, ordering,
+statistical meaning, supplied results and data-selection/statistical defaults.
+Native presentation and interaction defaults may deliberately differ after
+plot-by-plot review; document and test each accepted difference. Add keyword-only
+GenomeSpy controls. Track meaningful unsupported parameters until implemented or
+explicitly resolved as a renderer boundary. Signature presence alone is not support.
 Scanpy 1.11.5 is the only accepted version today; broaden the optional dependency
 range only after the version checks in M14 pass. Keep base and namespace imports
 free of the scientific stack.
@@ -78,9 +80,11 @@ free of the scientific stack.
 - No ignored kwargs: supported aliases/conflicts have tests; unsupported values
   name the function, option, and usable alternative or missing capability.
 
-Initial appearance stays faithful to the data, order, marks, and guides.
-Interactivity is opt-in and follows plain-chart review. Current native defaults
-use 300 by 300 logical pixels per UMAP panel and 100/72 pixels per point.
+Appearance stays faithful to data, order and visual encodings; Scanpy's default
+styling is a comparison reference, not the design target. Review visual defaults
+and interaction behavior together before changing them. Existing interaction
+defaults remain until that review selects useful, predictable behavior. Current
+native defaults use 300 by 300 logical pixels per UMAP panel and 100/72 pixels per point.
 Typography and native continuous palette interpolation are documented differences,
 not reasons to skip complete-chart validation.
 
@@ -1168,6 +1172,40 @@ Each increment requires:
 
 ## Documentation and release
 
+### Publication review of the implemented scope
+
+The target is a Python package and documentation publication during **26 October–
+1 November 2026**. Review the implemented subset before adding new plot families;
+spatial, violin/stacked violin and tracks remain deferred. This publication does
+not require full Scanpy plotting compatibility and must state its supported scope.
+The long-term inventory and capability backlog remain in this plan and STATUS.
+
+Review plots one at a time with the user, starting with UMAP. Each review covers:
+
+1. **Appearance:** real-data initial view, typography, hierarchy, color meaning,
+   point/tile sizing, spacing, axes, labels and guides; inspect long labels,
+   missing values and categorical/continuous examples. Show current output and
+   a concrete native proposal before adopting new defaults.
+2. **Interaction:** define the useful task for hover, zoom/pan, selection and
+   linked views; choose defaults, activation, feedback, clearing/reset, tooltip
+   content and notebook scrolling behavior. Check notebook and standalone HTML
+   delivery, and distinguish browser-only actions from live Python retrieval.
+3. **Code:** correctness, shared-helper reuse, self-containment, readability and
+   YAGNI; use public GenomeSpy capabilities and retain computation/renderer
+   boundaries. Fix shared causes once without bundling unrelated refactors.
+4. **Decision and verification:** record accepted design, unresolved blockers,
+   focused semantic/render/interaction checks, documentation/notebook changes
+   and residual limits in STATUS. Intentional visual differences update visual
+   expectations; they do not weaken data/identity/statistical assertions.
+
+Keep implementation and visual decisions in small reviewable slices. Reuse
+existing charts, references, native APIs and comparison artifacts; do not add a
+theme framework, interaction framework or new renderer for this review. Shared
+defaults only propagate to other families after their effects are inspected.
+The current review queue and its decisions live only in STATUS.
+
+### Documentation delivery
+
 M14.e designs the integrations landing page and one workflow page before choosing
 and implementing notebook rendering. Keep the general visualization skill and
 focused agent guides general; Scanpy policy/tutorials belong in this integration.
@@ -1198,9 +1236,10 @@ as families arrive. Keep upstream analysis steps explicit; replace the supported
 plotting calls. The tracked pinned signature inventory and installed 1.11.5 source
 remain authoritative where the moving stable tutorials differ.
 
-Release acceptance: one rendered real tutorial page and working notebook download,
-observed native interactions, offline delivery, reproducible artifacts and reviewed
-provenance; full core API and parameter/method coverage evidence; tested resource
+Release acceptance for the implemented-scope publication: one rendered real tutorial
+page and working notebook download, observed native interactions, offline delivery,
+reproducible artifacts and reviewed provenance; an accurate full-core inventory
+and supported parameter/method coverage evidence; tested resource
 limits and version range. Update STATUS with the release and residual scope before
 clearing any completed working plans. Another library starts with its own small
 contract, inventory and workflow, reusing this layout without assuming Scanpy's

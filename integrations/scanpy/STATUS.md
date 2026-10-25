@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-23. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-25. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -100,6 +100,27 @@ code cells and forty-five expression/ranked/QC/profile/simulation/DPT/PAGA/build
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
+
+**Priority: publish the implemented integration as a Python package with
+documentation during 26 October–1 November 2026.** New plot families, including
+spatial, are deferred. Review plots with the user one at a time; preserve data
+semantics while improving native style and deliberately choosing interactions.
+Scanpy's appearance is a reference, not a required visual target. Publication
+scope is the documented implemented subset, not full Scanpy compatibility.
+
+**UMAP review — in progress.** Current and proposed categorical/continuous views
+are ready for the user's design feedback; see the [review record](#umap-publication-review).
+This chat owns embedding work and this ledger. The other chat owns DotPlot-first
+review and grouped/clustermap/PAGA presentation fixes, following its completed
+expression-comparison PDF. Coordinate shared plan and notebook edits before each
+implementation slice. Remaining plot reviews are unstarted.
+
+For each plot, record appearance and interaction decisions, code findings,
+release blockers, verification and remaining limits. Resolve misleading initial
+views, broken useful interactions and unclear scope before publication; keep
+optional features and new families in the existing backlog. The
+[publication review contract](PLAN.md#publication-review-of-the-implemented-scope)
+defines the review and package/documentation gates.
 
 **The M13.a DotPlot and M13.b MatrixPlot builder previews are closed** within
 their documented scope. Both reuse family summaries/renderers and share group
@@ -252,6 +273,70 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
 | M13 builders | In progress; DotPlot and MatrixPlot previews closed | Both share concrete group layout and their existing functional statistics/renderers, with upstream/native/workflow/resource checks. StackedViolin and remaining styles/constants stay open. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
+
+## UMAP publication review
+
+Started 2026-10-23 and revised 2026-10-25 for the package/documentation publication.
+The user requested **smaller points that grow on zoom, color depth and separable
+points at overview, and semantic zoom for large UMAPs**. The exact visual treatment
+and large-data policy remain under review; new appearance defaults are not adopted.
+The current local input is `tmp/scanpy-publication-review/umap-zoom-review.html`.
+The earlier `umap-review.html` retains current/proposed plain views and linked
+selection. Generated HTML/specs, screenshots and SVGs are ignored local evidence,
+not fresh-clone dependencies or release artifacts.
+
+- **Revised appearance candidate:** 420 × 420 panels, no frame/axes, Tableau10
+  categories, long cell-type labels in a single-column side legend and a
+  horizontal Viridis guide for CD79A expression. Native size is
+  `min(3 * pow(zoomLevel(), 0.7), 36)`: about 1.7-pixel initial diameter,
+  increasing to a six-pixel cap. Compare flat fills, `fillGradientStrength=0.35`
+  and a thin inward dark stroke at fill opacity 0.9 on the same 700 packaged
+  PBMC cells. White strokes looked too faint at overview and were replaced in
+  the candidate. Native SVG export currently ignores fill shading; flat fills
+  and strokes remain export-consistent choices. Preserve explicit palettes and
+  stored category colors when implementing defaults. Public plotting, encoding,
+  mark and configuration APIs author these candidates without spec edits.
+- **Semantic zoom candidate:** the curated 2,638-cell PBMC dataset compares all
+  points with native `semanticScore` and `semanticZoomFraction=0.25`. Review-only
+  scores come from stable cell-ID hashes joined through native lookup; they
+  do not rank expression or cell types. The same stored UMAP and cells remain
+  in the chart. About 25% draw initially and more appear on zoom. This verifies
+  the native mechanism, not performance on a large atlas or a final sampling
+  policy. Large-data thresholds, rare-population visibility, selection/count
+  semantics and a visible indication of partial drawing still need decisions.
+- **Interaction candidate:** hover available for reading; wheel zoom/pan and
+  linked interval selection explicitly enabled for exploration. Decide tooltip
+  content, navigation reset and notebook scrolling with the user. The current
+  tooltip repeats ID/label for this dataset and includes UMAP coordinates; their
+  usefulness remains a design question. Standalone selection highlights linked
+  panels and counts cells; Python subset retrieval still requires a live kernel.
+- **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
+  now retains single-panel typography when applying final native guide settings.
+  One small helper supplies the existing font/spacing configuration at both
+  composition stages. Previously `legend_fontsize=8` and `20` both rendered
+  10-pixel labels; native SVG now reports 11.1 and 27.8 pixels, preserving the
+  existing points-to-pixels conversion. Colorbar tick sizing remains separate.
+  [Regression coverage](../../tests/integrations/scanpy/test_umap.py) exercises
+  both sizes, categorical/continuous and mixed panels, with/without selection.
+  No new theme abstraction, renderer or Core configuration behavior was added.
+  All **369 focused UMAP/embedding/colorbar/scatter/PCA-overview/density/PAGA-compare
+  Python cases**, targeted Ruff checks and source-wide mypy passed. Native SVG
+  checks confirmed the two requested sizes in rendered output.
+- **Review verification:** all six revised views rendered offline with no browser
+  errors. Exported point radii increased from 0.9 to 1.1 pixels after a twofold
+  coordinate zoom, within SVG rounding. The semantic view initially drew 660 of
+  2,638 cells and converged to the full view in the zoomed region; a one-cell
+  boundary difference reflects independent animated zoom endpoints.
+  Native linked brushing produced a nonempty selection/count and double-click
+  cleared both intervals in the earlier selection candidate. Proposals were visually checked;
+  long cell-type labels use the side legend because a compact two-column bottom
+  legend overflowed. The existing C11 multi-column categorical-guide limitation
+  remains open and must be accounted for in the publication scope.
+
+Next: settle the point treatment and large-data interaction policy, then apply
+accepted appearance/interaction changes with focused render checks and update
+the canonical notebook and user guide. Generalizing defaults to other embedding
+families requires inspecting those callers first.
 
 ## M05.e shared grid interactions
 
