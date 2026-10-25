@@ -348,7 +348,8 @@ not fresh-clone dependencies or release artifacts.
   **User decision: no outlines, no shading, and high opacity below one.** The
   preview starts at 0.85 opacity in both views. The left is fixed; native bindings
   control the right view's opacity (0.3–0.95), overview diameter (0.4–2 pixels)
-  and zoom growth exponent (0.3–1.6). Its initial defaults match the reference's
+  and zoom growth exponent (0.3–1.6), plus maximum diameter (3–12 pixels).
+  Its initial defaults match the reference's
   `min(1.1 ** 2 * pow(zoomLevel(), 0.8), 36)` sizing: 1.1-pixel initial diameter,
   growing to six pixels. Removed the rejected shading/outline controls rather
   than keeping unused alternatives. **Latest user request enables semantic zoom
@@ -379,6 +380,16 @@ not fresh-clone dependencies or release artifacts.
   restoration, the six-pixel point cap and zoom reset passed without browser
   errors. This verifies native visibility behavior, not a frame-rate benchmark
   or an automatic large-data integration default.
+  The user observed no size change above growth 0.8 at deep zoom: native SVG
+  measurements confirmed the existing six-pixel cap had already been reached.
+  The preview now labels this control `Growth rate on zoom` and exposes
+  `Maximum dot size (pixels)`, defaulting to six while the reference stays fixed.
+  Local `check_sizing.py` verified candidate diameters of 4.2 pixels at growth
+  0.5 and six at 0.8/1.1/1.6 at the same deep zoom. The native maximum-size
+  slider produced three- and twelve-pixel diameters while the reference remained
+  six; browser errors were absent. Growth has no effect at overview or after
+  reaching the cap. This clarifies the review controls without changing package
+  defaults.
   Tableau10 repeats across 5,312 cluster IDs, so colors are not unique biological
   class labels; hover exposes exact cell and cluster IDs. Broad class/subclass
   colors, draw order and focused hover/labels remain candidates for later review.
