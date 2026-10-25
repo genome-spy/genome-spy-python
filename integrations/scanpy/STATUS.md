@@ -333,6 +333,33 @@ summary preparation and transport are unchanged. Clearance: retain; no milestone
 is closed. Next: user review of the applied dotplot styling, then matrixplot
 styling under the publication-review contract.
 
+## Common matrix value labels
+
+Implemented and verified (2026-10-25): every current matrix/heatmap entry point
+accepts keyword-only `show_values`. The missing correlation-matrix option now
+uses the existing shared fitted-text renderer, including native text fitting,
+palette contrast, two-decimal labels and hover access. Its Scanpy flag
+`show_correlation_numbers=False` remains available; `show_values=None` follows
+that flag, and `show_values=False` with the old flag True raises a clear error.
+Both names produce the same native chart. Default labels remain off, and
+correlation navigation remains fixed. No new renderer, source copy or callback
+was introduced.
+
+Verification: **122 targeted Python checks**, the clean canonical expression
+workflow and **nine correlation browser cases** pass across the final runs.
+The common signature check covers thirteen function/builder entry points;
+native cases check both names, small-cell hiding, complete labels, unchanged
+correlation colors, hover through text and standalone HTML. Ruff formatting/lint
+and mypy pass. The full repository suite, docs build and resource benchmarks
+were not rerun; data preparation is unchanged and the value renderer reuses the
+already measured shared grid path. The expression notebook explains the common
+option. All forty-five nonempty code cells completed after restarting the live
+expression kernel, and the user's `show_values=True` correlation cell was rerun
+and visually verified in the in-app notebook. Existing local annotation and
+navigation choices are preserved; committed notebook sources remain output-free.
+Clearance: retain. This closes the common-option inconsistency; broader
+publication styling and the existing compatibility backlog remain open.
+
 ## UMAP publication review
 
 Started 2026-10-23 and revised 2026-10-25 for the package/documentation publication.

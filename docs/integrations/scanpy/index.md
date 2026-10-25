@@ -783,8 +783,18 @@ heatmap = gsc.pl.heatmap(pbmc, markers, "bulk_labels", zoom=True, show_values=Tr
 matrixplot = gsc.pl.matrixplot(pbmc, markers, "bulk_labels", zoom=True, show_values=True, show=False)
 matrix = gsc.pl.matrix(values, zoom=True, show_values=True, show=False)
 clustermap = gsc.pl.clustermap(cells, zoom=True, show_values=True, show=False)
+correlations = gsc.pl.correlation_matrix(pbmc, "bulk_labels", show_values=True, show=False)
 dotplot = gsc.pl.dotplot(pbmc, markers, "bulk_labels", zoom=True, highlight=True, show=False)
 ```
+
+Every matrix/heatmap entry point accepts `show_values`, including ranked,
+time-series, simulation, DPT and PAGA heatmaps. For functions with line or point
+output too, this option requires heatmap mode. Values are off by default.
+Correlation matrices retain Scanpy's `show_correlation_numbers` name as an alias:
+`show_values=None` follows that flag, which defaults to False. Combining
+`show_values=False` with `show_correlation_numbers=True` raises a clear error.
+Correlation matrices currently keep fixed axes; the other grids' navigation
+options are unchanged.
 
 Use the mouse wheel inside the plot to zoom y and drag to pan y with
 `zoom=True`; x stays fixed. Set `zoom="xy"` to enable zooming and panning both
@@ -1534,7 +1544,7 @@ dots = gsc.pl.dotplot(pbmc, marker_genes, "bulk_labels", dendrogram=True, show=F
 tiles = gsc.pl.matrixplot(pbmc, marker_genes, "bulk_labels", dendrogram=True, show=False)
 tree = gsc.pl.dendrogram(pbmc, "bulk_labels", orientation="left", show=False)
 correlations = gsc.pl.correlation_matrix(
-    pbmc, "bulk_labels", show_correlation_numbers=True, show=False,
+    pbmc, "bulk_labels", show_values=True, show=False,
 )
 ```
 
@@ -1570,7 +1580,7 @@ does not infer staleness from expression values.
 | Grouped `dendrogram` | False retains the original plot; True uses `uns["dendrogram_<groupby>"]`, and a string selects another key. Missing results delegate to Scanpy. Tree order overrides explicit `categories_order`, as in Scanpy. Dotplot/matrixplot warn and omit attachments with at most two groups; heatmap supports two-group attachments. |
 | Category and feature order | Carry the same leaf permutation through means, fractions, supplied tables and labels. When marker-block labels match the group categories, reorder their feature slots and brackets too; otherwise retain marker order. Multiple categorical string keys use Scanpy's lexically ordered joined tree groups. |
 | Standalone `dendrogram` | All four orientations and `remove_labels`, including a two-group tree. At least two observed categories are required. Unused categories, ambiguous joined/string labels, and undefined constant/missing profiles error explicitly. Native width/height default to 300 × 300 logical pixels. |
-| `correlation_matrix` | Cached or locally computed group correlations. None/True draws a left tree and orders both axes by leaves; a string selects the cache. False keeps current category order without drawing a tree. Optional two-decimal numbers and default summary hover are native marks. Native side tracks hold vertical column labels, right row labels and the optional left tree; the colorbar stays beneath the matrix. |
+| `correlation_matrix` | Cached or locally computed group correlations. None/True draws a left tree and orders both axes by leaves; a string selects the cache. False keeps current category order without drawing a tree. `show_values=True` enables shared fitted two-decimal labels; `show_correlation_numbers=True` remains supported. Default summary hover uses the same records. Native side tracks hold vertical column labels, right row labels and the optional left tree; the colorbar stays beneath the matrix. |
 | Correlation colors/style | Default native redblue with reversed scheme extent gives blue negatives and red positives; the guide increases from -1 to 1. Native cmap names, scalar edgecolors and linewidth are supported kwargs. Other kwargs, norm/vcenter and Matplotlib colormaps error. Native interpolation differs from Scanpy's default bwr. |
 | Correlation size/delivery | Default tile area is 60 pixels per group in each direction; width/height override it. Figsize uses a 100-pixels/inch budget, subtracting 180 pixels for a tree and 20 for the guide. Labels and padding add space. Existing show/save/native-return rules apply; ax is omitted. |
 

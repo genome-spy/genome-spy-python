@@ -9,6 +9,7 @@ from genome_spy.schema.core import SchemeParams
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._grid_interactions import with_values
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
     POINTS_TO_PIXELS as _PT,
@@ -148,22 +149,14 @@ def build_correlation_matrix(
             _slot_labels(names, y, horizontal=False, opposite=True, font_size=10 * _PT)
         ],
     }
-    layers = [tiles]
-    if numbers:
-        layers.append(
-            gs.Chart(table)
-            .mark_text(font=_FONT, size=10 * _PT, color="black", tooltip=None)
-            .encode(x=x, y=y, text=gs.Text("_correlation:Q", format=".2f"))
-        )
+    center = with_values(tiles, "_correlation") if numbers else gs.layer(tiles)
     if dendrogram:
         sides["left"] = [
             tree_track(tree, list(range(n)), horizontal=False, size=180, reverse=True)
         ]
     return (
         gs.surround(
-            gs.layer(*layers).properties(
-                width=width, height=height, name="correlation-cells"
-            ),
+            center.properties(width=width, height=height, name="correlation-cells"),
             surround=gs.SurroundSides(**sides),
             spacing=0,
         )

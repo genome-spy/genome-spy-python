@@ -350,6 +350,13 @@ def test_new_signatures_preserve_defaults_and_optional_imports(family):
         ("correlation_matrix", {"vcenter": 0}, NotImplementedError),
         ("correlation_matrix", {"shading": "auto"}, TypeError),
         ("correlation_matrix", {"hover": "yes"}, TypeError),
+        ("correlation_matrix", {"show_values": "yes"}, TypeError),
+        ("correlation_matrix", {"show_values": 1}, TypeError),
+        (
+            "correlation_matrix",
+            {"show_values": False, "show_correlation_numbers": True},
+            ValueError,
+        ),
         ("correlation_matrix", {"dendrogram": 1}, TypeError),
     ],
 )
@@ -372,7 +379,39 @@ def test_correlation_numbers_and_native_defaults():
     assert color["domain"] == [-1, 1]
     assert color["scheme"] == {"name": "redblue", "extent": [1, 0]}
     assert not color.get("reverse", False)
-    assert spec["spec"]["layer"][1]["mark"]["type"] == "text"
+    text = spec["spec"]["layer"][1]["layer"][0]
+    assert text["mark"]["type"] == "text"
+    assert text["mark"]["fitToBand"] is True
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_correlation_value_flags_share_the_same_rendering_and_records(enabled):
+    a = make_tree_adata()
+    cache(a)
+    common = gsc.pl.correlation_matrix(
+        a, "group", show_values=enabled, show=False
+    ).to_dict()
+    legacy = gsc.pl.correlation_matrix(
+        a, "group", show_correlation_numbers=enabled, show=False
+    ).to_dict()
+    assert common == legacy
+    both = gsc.pl.correlation_matrix(
+        a, "group", show_values=enabled, show_correlation_numbers=enabled, show=False
+    ).to_dict()
+    assert both == common
+    if enabled:
+        grid = common["spec"]
+        tiles, text_group = grid["layer"]
+        text = text_group["layer"][0]
+        assert "data" not in tiles and "data" not in text
+        assert len(common["datasets"][grid["data"]["name"]]) == 16
+        assert text["encoding"]["text"]["field"] == "_correlation"
+        assert text["mark"]["fitToBand"] is True
+        assert text["mark"]["tooltip"] is None
+        assert tiles["encoding"]["x"] == text["encoding"]["x"]
+        assert tiles["encoding"]["y"] == text["encoding"]["y"]
+    else:
+        assert len(common["spec"]["layer"]) == 1
 
 
 @pytest.mark.parametrize("dendrogram", [False, True])
@@ -401,7 +440,7 @@ def test_correlation_tracks_keep_cached_order_and_numeric_records(
         stored["categories_ordered"] if dendrogram else list(a.obs.group.cat.categories)
     )
     order = [list(a.obs.group.cat.categories).index(label) for label in labels]
-    records = spec["datasets"][spec["spec"]["layer"][0]["data"]["name"]]
+    records = spec["datasets"][spec["spec"]["data"]["name"]]
     assert len(records) == len(labels) ** 2
     assert [row["_column"] for row in records[: len(labels)]] == labels
     np.testing.assert_allclose(

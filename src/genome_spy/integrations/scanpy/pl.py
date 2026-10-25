@@ -3314,6 +3314,7 @@ def correlation_matrix(
     vcenter: float | None = None,
     norm: Any = None,
     hover: bool = True,
+    show_values: bool | None = None,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -3329,7 +3330,7 @@ def correlation_matrix(
     Args:
         adata: AnnData with categorical groups and an existing representation.
         groupby: Categorical observation key.
-        show_correlation_numbers: Label each tile with two decimal places.
+        show_correlation_numbers: Scanpy name for fitted two-decimal tile labels.
         dendrogram: None/True attaches a left tree and orders both axes by leaves.
             A string selects its cache key. False retains category order without
             drawing the tree; correlations still use the tree computation.
@@ -3343,6 +3344,8 @@ def correlation_matrix(
         vcenter: Reserved; nondefault values error.
         norm: Reserved; Matplotlib normalization objects error.
         hover: Show the row group, column group and exact correlation.
+        show_values: Common matrix option for fitted tile labels. None follows
+            show_correlation_numbers; False conflicts with that flag set True.
         width: Tile plot-area width, default 60 logical pixels per group.
         height: Tile plot-area height, default 60 logical pixels per group.
         **kwds: Native cmap, scalar edgecolors and linewidth. Default colors
@@ -3360,7 +3363,7 @@ def correlation_matrix(
 
     Example:
         >>> chart = gsc.pl.correlation_matrix(
-        ...     pbmc, "bulk_labels", show_correlation_numbers=True, show=False
+        ...     pbmc, "bulk_labels", show_values=True, show=False
         ... )
         >>> chart.display(inline=True)
     """
@@ -3381,6 +3384,15 @@ def correlation_matrix(
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
+    # Retain Scanpy's flag while allowing the same option as other matrices.
+    if show_values is None:
+        show_values = show_correlation_numbers
+    elif not isinstance(show_values, bool):
+        raise TypeError(f"{context}: show_values must be boolean or None.")
+    elif show_correlation_numbers and not show_values:
+        raise ValueError(
+            f"{context}: show_values=False conflicts with show_correlation_numbers=True."
+        )
     if dendrogram is not None and (
         not isinstance(dendrogram, (bool, str)) or dendrogram == ""
     ):
@@ -3400,7 +3412,7 @@ def correlation_matrix(
     chart = build_correlation_matrix(
         tree,
         dendrogram=dendrogram is not False,
-        numbers=show_correlation_numbers,
+        numbers=show_values,
         cmap=kwds.get("cmap"),
         edgecolors=kwds.get("edgecolors"),
         linewidth=kwds.get("linewidth", 0.01),

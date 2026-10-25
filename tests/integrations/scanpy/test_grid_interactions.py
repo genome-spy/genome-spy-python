@@ -12,6 +12,30 @@ from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
 from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
 
 
+@pytest.mark.parametrize(
+    "family",
+    [
+        "matrix",
+        "matrixplot",
+        "MatrixPlot",
+        "heatmap",
+        "clustermap",
+        "correlation_matrix",
+        "rank_genes_groups_matrixplot",
+        "rank_genes_groups_heatmap",
+        "timeseries_as_heatmap",
+        "sim",
+        "dpt_timeseries",
+        "paga_adjacency",
+        "paga_path",
+    ],
+)
+def test_every_matrix_family_exposes_keyword_only_value_labels(family):
+    parameter = inspect.signature(getattr(gsc.pl, family)).parameters["show_values"]
+    assert parameter.kind is inspect.Parameter.KEYWORD_ONLY
+    assert parameter.default is (None if family == "correlation_matrix" else False)
+
+
 def grid_chart(family, **options):
     """Build a small grid with real fixture values and optional interactions."""
     if family == "matrix":

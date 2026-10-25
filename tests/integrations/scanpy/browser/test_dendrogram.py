@@ -12,7 +12,10 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 import genome_spy as gs
 from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import position
+from tests.integrations.scanpy.browser.test_grid_interactions import (
+    position,
+    value_texts,
+)
 from tests.integrations.scanpy.helpers import (
     leaf_marks,
     tree_paths,
@@ -265,9 +268,17 @@ def test_tree_alignment_survives_resizing_and_wheel(page, family, swapped, size)
     np.testing.assert_allclose(sorted(leaves[:, axis]), targets, atol=0.5)
 
 
-def test_correlation_hover_palette_direction_and_offline_output(page, tmp_path):
+@pytest.mark.parametrize("show_values", [False, True])
+def test_correlation_hover_palette_direction_and_offline_output(
+    page, tmp_path, show_values
+):
     chart = gsc.pl.correlation_matrix(
-        make_tree_adata(), "group", width=240, height=240, show=False
+        make_tree_adata(),
+        "group",
+        show_values=show_values,
+        width=240,
+        height=240,
+        show=False,
     )
     bounds = render(page, chart)
     canvas = page.locator("canvas").first.bounding_box()
@@ -286,7 +297,7 @@ def test_correlation_hover_palette_direction_and_offline_output(page, tmp_path):
         == "1.000"
     )
     pixel = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))[
-        round(py), round(px)
+        round(py - bounds["height"] / 16), round(px - bounds["width"] / 16)
     ]
     assert int(pixel[0]) > int(pixel[2]) + 80
     output = tmp_path / "correlation.html"
@@ -302,6 +313,28 @@ def test_correlation_hover_palette_direction_and_offline_output(page, tmp_path):
     page.goto(output.as_uri())
     page.locator("canvas").first.wait_for(state="visible")
     assert not requests and not page.locator(".message-box").count()
+
+
+@pytest.mark.parametrize("flag", ["show_values", "show_correlation_numbers"])
+def test_correlation_values_fit_cells_using_either_public_name(page, flag):
+    data = make_tree_adata()
+    for size in (24, 240):
+        chart = gsc.pl.correlation_matrix(
+            data, "group", **{flag: True}, width=size, height=size, show=False
+        )
+        spec = chart.to_dict()
+        rows = spec["datasets"][spec["spec"]["data"]["name"]]
+        bounds = render(page, chart)
+        assert bounds["width"] == pytest.approx(size, abs=1)
+        assert bounds["height"] == pytest.approx(size, abs=1)
+        root = ET.fromstring(
+            page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+        )
+        actual = sorted(text.text.replace("−", "-") for text in value_texts(root))
+        expected = (
+            sorted(f"{row['_correlation']:.2f}" for row in rows) if size == 240 else []
+        )
+        assert actual == expected
 
 
 @pytest.mark.parametrize("page", [1, 2], indirect=True)

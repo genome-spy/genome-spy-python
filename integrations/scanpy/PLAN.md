@@ -1092,7 +1092,10 @@ the DotPlot builder; ranked wrappers reuse their parent options. Positive widths
 use native index `gapPositions` and `gapWidth`, fixed under zoom and device-pixel
 ratio changes. Heatmap gaps separate cell and marker groups; dotplot gaps separate
 marker blocks. Matrixplot remains contiguous. Numeric tile labels also stay
-opt-in through `show_values=False`. Values, ordering and scientific meaning stay
+opt-in through `show_values` on every matrix/heatmap entry point. Correlation
+matrices retain `show_correlation_numbers=False`; `show_values=None` follows that
+flag, and contradictory explicit settings error. Both names reuse the same fitted
+value renderer. Values, ordering and scientific meaning stay
 unchanged.
 Reuse the shared index-scale helper so every side track follows the same gaps;
 do not add a parallel layout configuration system.
