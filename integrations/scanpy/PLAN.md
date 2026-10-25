@@ -246,11 +246,13 @@ evidence. Its order is basic plotting, linked selection, then customization.
 Acceptance: preserve supplied coordinates and independent per-panel color scales.
 With zoom enabled, Shift-drag brushing, clearing, coincident cells and half-open
 membership agree in the chart and Python. No local Core patch or notebook connection task.
-The publication interaction review reuses the hover, brush-owner, highlighting
-and count helpers. For a dataset above one million cells, verify that the count
-uses every loaded cell inside the rectangle regardless of semantic visibility.
-Review tooltip content, replacement/clearing, linked feedback and navigation
-gestures before adopting new defaults; keep reset zoom separate from clearing.
+The accepted publication interaction direction is a default native interval brush
+that stores rectangle bounds without automatic per-cell highlighting, fading or
+live counts. Membership and Python retrieval must be explicit actions. The dense
+review uses that native brush; adoption in the public integration and canonical
+workflow remains a follow-up. If membership is requested, use all loaded cells
+inside the bounds regardless of semantic visibility. Review tooltip content and
+navigation gestures; keep reset zoom separate from clearing.
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 
@@ -827,6 +829,9 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   no chart. Missing results require explicit sc.tl.paga. Reuse shared numeric,
   CSS/palette, coordinate-domain, point-unit, navigation and delivery helpers;
   graph nodes represent groups, so no observation brush is added.
+  White edge borders await native rule/link outline support (C17). Do not emulate
+  them with extra layers or custom geometry; recheck crossings after a Core release
+  adds this capability.
   Acceptance: public Scanpy references for thresholds, layout seeds/initialization,
   positions, sizes, colors, aliases, labels, edge order/widths and bounds; sparse
   formats/invalid-result and mutation guards; registered DPI-aware complete-chart

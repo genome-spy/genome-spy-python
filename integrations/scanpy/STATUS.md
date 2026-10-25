@@ -486,7 +486,7 @@ not fresh-clone dependencies or release artifacts.
   tooltip repeats ID/label for this dataset and includes UMAP coordinates; their
   usefulness remains a design question. Standalone selection highlights linked
   panels and counts cells; Python subset retrieval still requires a live kernel.
-- **Dense hover/brush review (2026-10-25):** the local
+- **Initial dense hover/brush review (2026-10-25; superseded below):** the local
   `tmp/scanpy-publication-review/brain/interactions.html` retains the 34 Allen
   classes, flat 0.85-opacity fills, 1.1-pixel initial diameter, accepted growth
   1.2 and six-pixel cap in both panels. Hover uses native tooltip encodings for
@@ -515,6 +515,27 @@ not fresh-clone dependencies or release artifacts.
   source-wide mypy pass. Full resource qualification, the full repository suite
   and docs build were not run. User review of tooltip content, selection contrast
   and gestures remains open; no new public interaction defaults are adopted.
+- **Default-brush decision (2026-10-25):** the user found selection of tens of
+  thousands of cells buggy and rejected effects requiring per-cell membership
+  checks. The dense review now declares only native `selection_interval` on the
+  first panel. Removed conditional point opacity, membership transforms and the
+  live count, plus the preview's unused prepared metadata and count-specific
+  Parquet file generation. Both panels use the existing style source directly;
+  hover, shared navigation and above-threshold semantic zoom remain. Only the
+  native rectangle and its bounds change while brushing. Default brush styling
+  and gestures are retained; clear uses the native parameter API. No new renderer
+  or callback machinery was added. Public integration helpers and the canonical
+  linked-selection notebook still describe the earlier explicit selection API;
+  adopting rectangle-only behavior there is a named publication follow-up.
+  Local `check_default_brush.py` verifies absence of point predicates and
+  membership/count transforms, bounds-only snapshots, button/double-click
+  clearing and identical raster bytes for both point views before/after brushing.
+  Browser errors were absent; local Ruff passed. The automated six-step gesture
+  took 4.30 seconds in headless Chromium, not a hardware interaction benchmark;
+  no speedup or resolution of the user's reported bug is claimed. The previous
+  membership/highlight tests are historical evidence of the rejected candidate.
+  No production Python changed in this update; the full suite and docs build
+  were not repeated. Next: user review of the plain brush and native hover.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
@@ -538,8 +559,9 @@ not fresh-clone dependencies or release artifacts.
   legend overflowed. The existing C11 multi-column categorical-guide limitation
   remains open and must be accounted for in the publication scope.
 
-Next: gather feedback on the dense brain hover/brush review; qualify rendering and
-count-update performance above 1,000,000 cells before adopting semantic zoom. Apply
+Next: gather feedback on the default native brain brush and hover; qualify native
+interaction performance above 1,000,000 cells. Adopt the accepted rectangle-only
+direction in the public integration and canonical notebook as part of the review. Apply
 accepted appearance/interaction changes with focused render checks and update
 the canonical notebook and user guide. Generalizing defaults to other embedding
 families requires inspecting those callers first.
@@ -4172,6 +4194,7 @@ affected slice.
 | C14 | Native equilateral triangles differ from Scanpy's equal-width/height triangles; uniform sizing cannot match both dimensions. | Triangular markers in M07.d | [Native SVG/WebGL comparison](../../tests/integrations/scanpy/browser/test_native_triangles.py) strictly xfails for four orientations, with/without strokes. Recheck a released matching shape or native aspect control, including guides and outlines, before enabling support; no custom geometry. |
 | C15 | Scanpy 1.11.5's disconnected single_component=True call subsets colors but retains full coordinates and raises a shape error. | M11.c direct parent-reference gate | [Strict expected-failure check](../../tests/integrations/scanpy/test_paga.py) detects a fixed upstream entry. Intended native filtering is independently checked against explicitly subsetted public Scanpy inputs; recheck a compatible release before closing this gate. |
 | C16 | Scanpy 1.11.5 paga_path return_data calls .T on an unsmoothed annotation list | Default return_data parent-reference gate; heatmap/other return_data cases verified independently | Strict expected-failure check verifies the exact exception and asserts returned values if fixed; native chart/table return contract is explicit. |
+| C17 | Core 1.2 rule/link marks have one paint and no independent edge border. Audited 2026-10-25 against the installed schema/API and official [rule](https://genomespy.app/docs/grammar/mark/rule/) and [link](https://genomespy.app/docs/grammar/mark/link/) channels. Both Python mark methods reject stroke/strokeWidth. | White borders separating overlapping PAGA edges, M11.c/M14 styling | Recheck a released native outline capability with crossing, width, zoom, hover and export cases. No extra edge layers or custom geometry. PAGA charts and the expression notebook remain unchanged; notebook rerun was conditional on native support. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental
