@@ -580,6 +580,34 @@ not fresh-clone dependencies or release artifacts.
   every movement need a more efficient native counting path. No debounce,
   approximation, custom counter or renderer workaround was silently adopted.
   The live-count preview remains available; the lag is diagnosed, not fixed.
+- **Faster native count candidate (2026-10-25):** the separate ignored
+  `tmp/scanpy-publication-review/brain/fast-count.html` uses native x/y projection,
+  collection, selection-parameter filtering, aggregate count and text. It reuses
+  the existing brush owner and style composition; no point conditions, debounce,
+  custom counter or renderer patches are involved. Removing the per-row selected
+  formula avoids that branch's cloning cost. A clean tracked Core snapshot at
+  `84a3f6b55a88c1145eececb913f898cb0f20d0bd` supplies the already-upstream
+  empty-global-aggregate fix `7e219a03442916d9c5042dd760a28f307d137ab7`.
+  The published/pinned Core 1.2.0 lacks that fix and drops the count row when no
+  cells match. This candidate therefore remains release gated; the package
+  bundle and shared Python count helper are unchanged.
+  Local `check_fast_count.py` verifies **40,967 then 232,114** cells during a held
+  drag against independent full-table membership, initial/cleared/empty/zero-width
+  zero counts, semantic-visibility independence and unchanged point raster bytes.
+  Browser errors were absent. `profile_fast_count.py` measures synchronous native
+  parameter updates at **14.4–21.6 ms**, median **17.2 ms**, across twelve updates.
+  This is substantially cheaper than the formula/sum path, but still consumes
+  roughly a 60 Hz frame before rendering and does not establish smooth brushing.
+  The same SwiftShader limitation applies to headless frame measurements.
+  All **10 upstream aggregate tests** and local-script Ruff formatting/lint pass;
+  public Python did not change, so the Python suite, mypy and docs build were not
+  repeated. Generated builds, scripts and evidence remain ignored local artifacts.
+  For consistently low-latency continuous exact counting, the proposed Core
+  follow-up is a cached x/y spatial range index: add stored counts for fully
+  enclosed nodes, test boundary leaves with the existing half-open semantics,
+  and emit one summary row on brush changes. Rebuild on source/coordinate changes
+  and count all loaded cells independently of semantic visibility. This is a
+  design direction, not an implemented or performance-qualified native API.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
@@ -604,7 +632,8 @@ not fresh-clone dependencies or release artifacts.
   remains open and must be accounted for in the publication scope.
 
 Next: gather feedback on the default native brain brush with count-only text;
-resolve the measured synchronous count stalls and qualify native interaction/count
+review the faster native candidate, obtain a released empty-aggregate fix and
+resolve the remaining full-scan cost in Core. Qualify native interaction/count
 latency above 1,000,000 cells before final public
 integration and canonical-notebook adoption. Apply
 accepted appearance/interaction changes with focused render checks and update

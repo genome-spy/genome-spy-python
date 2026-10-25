@@ -254,6 +254,10 @@ Count all loaded cells inside the bounds regardless of semantic visibility.
 Python subset retrieval remains explicit. Review count latency, tooltip content
 and navigation before public/canonical-workflow adoption; keep reset zoom separate
 from clearing.
+The native selection-filter/count candidate needs a released Core with the
+upstream empty-global-aggregate fix before package adoption. Its full-table scan
+still consumes approximately one frame at 1.1M cells; a proposed native cached
+spatial range count remains Core work, not an implemented integration capability.
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 
