@@ -558,6 +558,28 @@ not fresh-clone dependencies or release artifacts.
   Ruff formatting/lint and source-wide mypy pass. The full suite, docs build and
   hardware count-latency measurements were not repeated; responsiveness and final
   public/canonical-workflow adoption remain under user review.
+- **Brush-lag diagnosis (2026-10-25):** the user reports repeated small jumps
+  while dragging, unlike a smooth brush/expression workflow in another app.
+  Controlled local profiling of the same bundled Core and 1.1M cells isolated
+  synchronous parameter-update work: plain brush **0–0.4 ms** (median 0.1),
+  one-row parameter-driven bounds text **0–0.4 ms** (median 0.2), and the live
+  count **46.2–218.1 ms** (median 68.6). Each count update replays the full cell
+  table through formula evaluation, row cloning and aggregation; CPU samples
+  also show garbage collection. Native text/parameter use does not make this
+  full-table reduction cheap. These event-time stalls are sufficient to explain
+  drag hitches; the previous correctness checks did not establish responsiveness.
+  Caching only x/y before counting still took **36.9–70.6 ms** (median 56.4);
+  that insufficient trial was discarded, with production source restored.
+  Local `profile_brush.py`, `brush-profile-before.json`,
+  `brush-profile-results.json` and CPU profiles retain ignored diagnostic evidence.
+  Headless Chromium used SwiftShader: its frame times are not evidence of the
+  user's hardware-rendering performance. The isolated synchronous CPU timings
+  distinguish counting from parameter/text updates under the same test conditions.
+  The native parameter/transform debounce is an available delayed-count option;
+  it changes the requested continuous-update behavior. Smooth exact counts on
+  every movement need a more efficient native counting path. No debounce,
+  approximation, custom counter or renderer workaround was silently adopted.
+  The live-count preview remains available; the lag is diagnosed, not fixed.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
@@ -582,7 +604,8 @@ not fresh-clone dependencies or release artifacts.
   remains open and must be accounted for in the publication scope.
 
 Next: gather feedback on the default native brain brush with count-only text;
-qualify native interaction/count latency above 1,000,000 cells before final public
+resolve the measured synchronous count stalls and qualify native interaction/count
+latency above 1,000,000 cells before final public
 integration and canonical-notebook adoption. Apply
 accepted appearance/interaction changes with focused render checks and update
 the canonical notebook and user guide. Generalizing defaults to other embedding
