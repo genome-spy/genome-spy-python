@@ -364,7 +364,7 @@ not fresh-clone dependencies or release artifacts.
 - **Dense brain comparison ready:** `tmp/scanpy-publication-review/brain/index.html`
   is served locally with its Parquet file; the original CSV is unchanged. The
   local `build_review.py` and `check_review.py` retain generation and verification.
-  Both views share one native parent data source, cluster palette and x/y scales.
+  Both views share one native parent data source, class palette and x/y scales.
   **User decision: no outlines, no shading, and high opacity below one.** The
   preview starts at 0.85 opacity in both views. The left is fixed; native bindings
   control the right view's opacity (0.3–0.95), overview diameter (0.4–2 pixels)
@@ -410,9 +410,21 @@ not fresh-clone dependencies or release artifacts.
   six; browser errors were absent. Growth has no effect at overview or after
   reaching the cap. This clarifies the review controls without changing package
   defaults.
-  Tableau10 repeats across 5,312 cluster IDs, so colors are not unique biological
-  class labels; hover exposes exact cell and cluster IDs. Broad class/subclass
-  colors, draw order and focused hover/labels remain candidates for later review.
+  **Broad-class coloring (2026-10-25):** the user requested biologically broader
+  labels instead of recycling Tableau10 across 5,312 cluster IDs. Both panels
+  now encode Allen's 34 cell classes with 34 unique published class colors and
+  one collected native legend. Class and subclass labels join by cluster alias
+  from the matching `WMB-taxonomy/20230830` membership and color views, located
+  through Allen's release manifest; downloaded files match its MD5 hashes.
+  All 1,100,000 cells match, with original row order, coordinates and cluster
+  aliases preserved. Native hover exposes class, subclass, cluster ID and cell
+  ID. `source.json` records metadata URLs, hashes and class counts; the original
+  input CSV is unchanged. Local `check_classes.py` verified complete matching,
+  identical panel color mappings, every legend label exactly once, native hover,
+  and 99,837/99,888 overview instances with semantic zoom enabled. Browser errors
+  were absent; Ruff passed for the generator and new check. Generated screenshots,
+  metadata and scripts remain ignored review evidence. Draw order and focused
+  labels remain candidates for later review; package defaults are unchanged.
 
 - **Revised appearance candidate:** 420 × 420 panels, no frame/axes, Tableau10
   categories, long cell-type labels in a single-column side legend and a
