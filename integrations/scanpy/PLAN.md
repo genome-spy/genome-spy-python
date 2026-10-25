@@ -246,6 +246,11 @@ evidence. Its order is basic plotting, linked selection, then customization.
 Acceptance: preserve supplied coordinates and independent per-panel color scales.
 With zoom enabled, Shift-drag brushing, clearing, coincident cells and half-open
 membership agree in the chart and Python. No local Core patch or notebook connection task.
+The publication interaction review reuses the hover, brush-owner, highlighting
+and count helpers. For a dataset above one million cells, verify that the count
+uses every loaded cell inside the rectangle regardless of semantic visibility.
+Review tooltip content, replacement/clearing, linked feedback and navigation
+gestures before adopting new defaults; keep reset zoom separate from clearing.
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 

@@ -459,6 +459,35 @@ not fresh-clone dependencies or release artifacts.
   tooltip repeats ID/label for this dataset and includes UMAP coordinates; their
   usefulness remains a design question. Standalone selection highlights linked
   panels and counts cells; Python subset retrieval still requires a live kernel.
+- **Dense hover/brush review (2026-10-25):** the local
+  `tmp/scanpy-publication-review/brain/interactions.html` retains the 34 Allen
+  classes, flat 0.85-opacity fills, 1.1-pixel initial diameter, accepted growth
+  1.2 and six-pixel cap in both panels. Hover uses native tooltip encodings for
+  class, subclass, cluster ID and cell ID. It omits duplicate IDs and coordinates
+  in this review; the public tooltip defaults remain unchanged. Existing
+  `point_interactions`, `brush_owner`, `validate_brush` and `with_brush_count`
+  supply selection highlighting, first-panel ownership, validation and the count.
+  Shift-drag in the left panel replaces the brush; the right panel observes it.
+  Double-click and a native parameter clear button restore an empty selection.
+  Reset zoom uses the public scale API separately. Ordinary pan stays within
+  the original domain limits, so movement is available after zooming in.
+  The count helper now inherits its data from the returned parent composition,
+  retaining the prepared table by default. This allows the local review to use
+  one native Parquet URL for points and count through ordinary `.properties()`;
+  no serialized-spec edits, new option, selection engine or callback layer was
+  introduced. The canonical notebook clarifies replacement, clearing and region
+  membership; existing local execution outputs and navigation are preserved.
+  **Verification:** 92 focused UMAP/selection Python cases, both existing native
+  brush/widget/offline-HTML cases and the canonical UMAP workflow pass. The local
+  `check_interactions.py` observed **232,114 selected cells**, matching independent
+  full-table membership with semantic zoom on and off. Native hover, left-only
+  ownership, wheel zoom, pan/reset, double-click/button clearing and linked
+  0.85/0.17 point opacity passed without browser errors. The six-step overview
+  gesture plus SVG export took 5.54 seconds in this run; this includes export and
+  does not establish interactive frame rate or count-update latency. Ruff and
+  source-wide mypy pass. Full resource qualification, the full repository suite
+  and docs build were not run. User review of tooltip content, selection contrast
+  and gestures remains open; no new public interaction defaults are adopted.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
@@ -482,8 +511,8 @@ not fresh-clone dependencies or release artifacts.
   legend overflowed. The existing C11 multi-column categorical-guide limitation
   remains open and must be accounted for in the publication scope.
 
-Next: gather feedback on the dense full-drawing brain comparison; validate the
-separate performance path above 1,000,000 cells before adopting semantic zoom. Apply
+Next: gather feedback on the dense brain hover/brush review; qualify rendering and
+count-update performance above 1,000,000 cells before adopting semantic zoom. Apply
 accepted appearance/interaction changes with focused render checks and update
 the canonical notebook and user guide. Generalizing defaults to other embedding
 families requires inspecting those callers first.

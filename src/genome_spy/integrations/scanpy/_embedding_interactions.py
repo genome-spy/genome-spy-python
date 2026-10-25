@@ -77,7 +77,7 @@ def with_brush_count(
         f"{name}.intervals.y[0] <= datum.{y} && datum.{y} < {name}.intervals.y[1]"
     )
     count = (
-        gs.Chart(prepared.table)
+        gs.Chart()
         .transform_collect()
         .transform_formula(expr=f"({predicate}) ? 1 : 0", as_="selected")
         .transform_aggregate(fields=["selected"], ops=["sum"], as_=["count"])
@@ -88,6 +88,7 @@ def with_brush_count(
     )
     return (
         gs.vconcat(chart, count, spacing=8)
+        .properties(data=prepared.table)
         .resolve_scale(x="independent", y="independent")
         .add_params(
             gs.param(

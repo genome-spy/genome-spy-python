@@ -490,6 +490,8 @@ def test_brushing_has_one_owner_without_changing_prepared_data_or_guides(adata):
     ]
     panels = units(spec["vconcat"][0])
     counter = spec["vconcat"][1]
+    assert "data" not in counter
+    assert spec["data"] == panels[0]["data"]
     assert counter["name"] == f"umap-count-{brush.name}"
     assert counter["transform"][-2] == {
         "type": "aggregate",
