@@ -763,6 +763,16 @@ not fresh-clone dependencies or release artifacts.
   bundles remain ignored. Python API/schema, canonical notebook and bundled
   runtime adoption still wait for a published Core release, as requested.
   Clearance: retain pending upstream review, release and package adoption.
+  Five Sol reviews subsequently completed; fixes share native point events,
+  preserve legend opacity, retain independent guides, validate projected field
+  mappings and keep category focus independent of semantic sampling. The branch
+  includes the latest upstream hover fixes and refreshed native agent schemas.
+  [CI on `ce2e2282`](https://github.com/genome-spy/genome-spy/actions/runs/40310111613)
+  passes all three checks, including **5,291 tests**, one skipped and two TODO.
+  The [recording comment](https://github.com/genome-spy/genome-spy/pull/605#issuecomment-6413558444)
+  demonstrates the reviewed native behavior. A maintainer's request to split the
+  selection foundation and legend UI into stacked PRs remains open. Python
+  runtime/notebook adoption still waits for a published Core release.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
