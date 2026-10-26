@@ -1989,7 +1989,8 @@ def paga_compare(
         height: Per-panel plot height in pixels, default 300.
         **paga_graph_params: Supported paga options, including threshold and add_pos.
             The graph shows labels on hover unless show_node_labels=True or custom labels
-            are supplied. edge_slider=True adds a stored-edge display filter.
+            are supplied. Labels make room for each other and the nodes while zooming.
+            edge_slider=True adds a stored-edge display filter.
             Parent rendering restrictions apply; plot=False is unsupported here.
 
     Returns:
@@ -2560,7 +2561,8 @@ def paga(
             for group colors. None reuses saved colors; inactive for other colors.
         edge_slider: Add a slider that hides displayed edges below a weight cutoff.
             It does not recover edges excluded by threshold or recompute node statistics.
-        show_node_labels: Show permanent node text; hover retains group names when False.
+        show_node_labels: Show native labels that make room for nodes and each other.
+            False keeps group names on hover.
         **kwargs: Unsupported keywords fail clearly, including ax/cax.
 
     Returns:

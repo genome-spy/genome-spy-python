@@ -299,3 +299,45 @@ def test_native_node_guide_names_and_colors_are_visible_without_node_labels(
         assert sum(len(g) for g in guide_points) == 4
     else:
         assert color in texts and len(gradients) == 1
+
+
+def test_displaced_label_avoids_its_actual_node_size_and_works_offline(page, tmp_path):
+    from tests.integrations.scanpy.browser.test_grid_interactions import position
+
+    chart = gsc.pl.paga(
+        make_paga("component_empty"),
+        pos=POSITIONS,
+        single_component=True,
+        node_size_scale=100,
+        labels=["I"] * 4,
+        fontsize=3,
+        width=400,
+        height=400,
+        show=False,
+    )
+    render(page, chart)
+    page.wait_for_timeout(1200)
+    root = svg_root(page)
+    circle = next(
+        e
+        for g in root.iter()
+        if g.get("data-mark-type") == "point" and g.get("clip-path")
+        for e in g
+    )
+    label = next(
+        e
+        for g in root.iter()
+        if g.get("data-mark-type") == "text" and g.get("clip-path")
+        for e in g
+    )
+    offset = np.array(position(label)) - [
+        float(circle.get("cx")),
+        float(circle.get("cy")),
+    ]
+    assert max(abs(offset)) > float(circle.get("r"))
+    output = tmp_path / "paga-labels.html"
+    chart.save(output, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(output.as_uri())
+    page.locator("canvas").first.wait_for(state="visible")
+    assert not page.locator(".message-box").count()

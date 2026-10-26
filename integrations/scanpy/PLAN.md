@@ -841,7 +841,12 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   layout. Cache positions only after success when add_pos=True; plot=False creates
   no chart. Missing results require explicit sc.tl.paga. Reuse shared numeric,
   CSS/palette, coordinate-domain, point-unit, navigation and delivery helpers;
-  graph nodes represent groups, so no observation brush is added.
+  graph nodes represent groups, so no observation brush is added. When labels
+  are shown, reuse the embedding label renderer: native text measurement and
+  displace2d use stable node IDs and pixel-sized anchor obstacles. Hide labels
+  whose anchors leave the viewport; preserve supplied positions and group IDs.
+  Test duplicate display labels, normal/bold measurement, zero-size nodes,
+  obstacle size, live reflow and offline delivery.
   White edge borders await native rule/link outline support (C17). Do not emulate
   them with extra layers or custom geometry; recheck crossings after a Core release
   adds this capability.

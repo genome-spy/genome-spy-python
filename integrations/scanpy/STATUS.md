@@ -218,6 +218,20 @@ now measures 630 pixels within the 786-pixel output, with the complete native
 key visible. Six further guide/navigation browser checks passed. Local edits
 and execution outputs remain separate from the output-free committed source.
 
+**PAGA node annotations — verified.** Graph nodes now reuse the
+[shared native label renderer](../../src/genome_spy/integrations/scanpy/_labels.py)
+with embeddings. Native text measurement and `displace2d` use stable node IDs,
+including repeated display labels. Anchor obstacles include each painted node's
+pixel diameter and outline; hidden/zero-size nodes add no obstacle. Source node
+positions, sizes and caches stay unchanged. `show_node_labels=False` still hides
+text, while the expression comparison now demonstrates True.
+The 230-check UMAP/PAGA semantic run passed with one retained upstream expected
+failure. Browser checks observed reflow for both label consumers, default bold
+text, zero-size nodes, a large-node obstacle and offline HTML. The canonical
+expression workflow passed and the visible Jupyter notebook was rerun. Ruff and
+mypy passed. These are native labels, not custom layout or event handling;
+publication review and remaining PAGA parameter coverage stay open.
+
 This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.

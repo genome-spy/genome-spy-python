@@ -17,6 +17,7 @@ from genome_spy.integrations.scanpy._embedding_interactions import (
     validate_brush,
     with_brush_count,
 )
+from genome_spy.integrations.scanpy._labels import displaced_labels
 from genome_spy.integrations.scanpy._style import (
     EMBEDDING_MARKERS,
     POINTS_TO_PIXELS,
@@ -345,44 +346,15 @@ def _panel(
             if (table[f"_color_{index}"] == label).any()
         ]
         layers.append(
-            gs.Chart(labels)
-            .transform_measure_text(
-                field="label",
-                fontSize=style.legend_fontsize,
-                font=style.font,
-                as_="_label_width",
-            )
-            .transform_collect()
-            .transform_filter(
-                gs.expr.inrange(gs.datum.x, gs.expr.domain("x"))
-                & gs.expr.inrange(gs.datum.y, gs.expr.domain("y"))
-            )
-            .transform_displace2d(
+            displaced_labels(
+                gs.Chart(labels),
                 key="label",
+                text="label",
                 x="x",
                 y="y",
-                width="_label_width",
-                height=style.legend_fontsize * 1.2,
-                anchorWidth=6,
-                anchorHeight=6,
-                as_=["_label_dx", "_label_dy"],
-            )
-            .mark_text(
                 size=style.legend_fontsize,
                 font=style.font,
-                fontWeight="normal",
-                align="center",
-                baseline="middle",
-                clip=True,
-                tooltip=None,
-            )
-            .encode(
-                x=x.field("x"),
-                y=y.field("y"),
-                text="label:N",
-                xOffset=gs.XOffset("_label_dx:Q").scale(None),
-                yOffset=gs.YOffset("_label_dy:Q").scale(None),
-            )
+            ).encode(x=x.field("x"), y=y.field("y"))
         )
     result = (gs.layer(*layers) if len(layers) > 1 else layers[0]).properties(
         width=style.width, height=style.height

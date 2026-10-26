@@ -558,3 +558,35 @@ def test_node_legend_rejects_colliding_group_names_before_cache_write():
     with pytest.raises(ValueError, match="labels collide when serialized"):
         gsc.pl.paga(a, pos=POSITIONS, show=False)
     np.testing.assert_array_equal(a.uns["paga"]["pos"], original)
+
+
+@pytest.mark.parametrize("fontweight", ["normal", "bold"])
+def test_node_labels_use_native_measurement_and_stable_ids_without_changing_nodes(
+    fontweight,
+):
+    a = make_paga()
+    options = dict(
+        pos=POSITIONS,
+        labels=["Same label"] * 4,
+        fontsize=12,
+        fontweight=fontweight,
+        add_pos=False,
+        show=False,
+    )
+    spec = gsc.pl.paga(a, **options).to_dict()
+    hidden = gsc.pl.paga(a, show_node_labels=False, **options).to_dict()
+    assert spec["datasets"] == hidden["datasets"]
+    labels = next(m for m in leaf_marks(spec) if m["mark"]["type"] == "text")
+    measure = next(t for t in labels["transform"] if t["type"] == "measureText")
+    displacement = next(t for t in labels["transform"] if t["type"] == "displace2d")
+    assert displacement["key"] == "_id"
+    assert displacement["x"] == "_x" and displacement["y"] == "_y"
+    assert displacement["anchorWidth"] == displacement["anchorHeight"] == "_node_extent"
+    assert measure["fontSize"] == labels["mark"]["size"] == pytest.approx(12 * 100 / 72)
+    assert measure["fontWeight"] == labels["mark"]["fontWeight"] == fontweight
+    assert labels["mark"]["baseline"] == "middle"
+    assert "yOffset" not in labels["mark"]
+    assert labels["encoding"]["xOffset"]["scale"] is None
+    assert labels["encoding"]["yOffset"]["scale"] is None
+    assert not any(m["mark"]["type"] == "text" for m in leaf_marks(hidden))
+    np.testing.assert_array_equal(a.uns["paga"]["pos"], make_paga().uns["paga"]["pos"])

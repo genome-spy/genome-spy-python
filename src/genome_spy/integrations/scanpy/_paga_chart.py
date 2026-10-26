@@ -7,6 +7,7 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.schemapi import Undefined
 
+from genome_spy.integrations.scanpy._labels import displaced_labels
 from genome_spy.integrations.scanpy._data import coordinate_domain, number
 from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
 from genome_spy.integrations.scanpy._style import (
@@ -371,23 +372,28 @@ def build_paga(
         if numeric:
             tooltips.append(gs.Tooltip("_color:Q", title="Color value", format=".4g"))
         points = points.encode(tooltip=tooltips)
-    labels = (
-        gs.Chart(nodes)
-        .mark_text(
-            font=FONT,
-            fontWeight="bold" if fontweight == "bold" else "normal",
-            size=fontsize * PT,
-            align="center",
-            baseline="bottom",
-            yOffset=-8,
-            clip=True,
-            tooltip=None,
-        )
-        .encode(text="_label:N")
-    )
     layers = [*charts, points]
     if show_node_labels:
-        layers.append(labels)
+        # Make room for painted nodes and their outlines; hidden nodes need no obstacle.
+        source = gs.Chart(nodes).transform_calculate(
+            _node_extent=gs.expr.if_(
+                (gs.datum._area > 0) & gs.expr.isValid(gs.datum._color),
+                (gs.expr.sqrt(gs.datum._area) + 2) * PT,
+                0,
+            )
+        )
+        layers.append(
+            displaced_labels(
+                source,
+                key="_id",
+                text="_label",
+                x="_x",
+                y="_y",
+                size=fontsize * PT,
+                fontweight="bold" if fontweight == "bold" else "normal",
+                anchor_size="_node_extent",
+            )
+        )
     result = (
         gs.layer(*layers)
         .encode(x=x, y=y)

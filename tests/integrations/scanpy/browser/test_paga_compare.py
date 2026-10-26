@@ -272,7 +272,8 @@ def test_composed_comparisons_keep_navigation_inside_their_own_pair(page, tmp_pa
     assert not page.locator(".message-box").count()
 
 
-def test_on_data_labels_displace_and_reflow_on_zoom(page):
+@pytest.mark.parametrize("node_labels", [False, True])
+def test_on_data_labels_displace_and_reflow_on_zoom(page, node_labels):
     from tests.integrations.scanpy.browser.test_grid_interactions import (
         pointer,
         position,
@@ -291,6 +292,8 @@ def test_on_data_labels_displace_and_reflow_on_zoom(page):
         a,
         legend_fontweight="normal",
         legend_fontsize=12,
+        legend_loc="none" if node_labels else "on data",
+        show_node_labels=node_labels,
         width=400,
         height=300,
         zoom=True,

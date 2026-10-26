@@ -1296,10 +1296,12 @@ renderer boundary; this is not full `paga_compare` parameter compatibility.
 PAGA comparisons use compact embedding points when `size` is omitted. Supply
 `size` to choose another starting area. Points grow on zoom; graph node sizes
 continue to represent their stored group sizes. Group names appear on hover.
-Use `show_node_labels=True` for permanent graph labels. Native legends identify
-the node colors in every graph, including comparisons. On-data embedding labels
-keep their group-median anchors and use native `displace2d` to avoid overlap as
-you zoom. Labels whose anchors leave the viewport are hidden.
+Use `show_node_labels=True` for permanent graph labels. They move apart as you
+zoom and make room for the node circles. Hiding labels keeps names on hover.
+Graph labels and on-data embedding labels share native `displace2d` placement.
+Graph anchors stay at the supplied node positions; embedding anchors stay at
+group medians. Labels whose anchors leave the viewport are hidden. Native
+legends identify node colors in every graph, including comparisons.
 
 Set `edge_slider=True` on `paga` or `paga_compare` to hide weaker displayed edges.
 The slider filters the graph already selected by `threshold`; it does not restore
