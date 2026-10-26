@@ -12,12 +12,23 @@ Copyright (c) 2015-2025, Vega-Altair Developers. BSD-3-Clause license; see
 
 from __future__ import annotations
 
-from copy import deepcopy
 import json
+from copy import deepcopy
+from functools import lru_cache
 from typing import Any, ClassVar, Self
 
 from jsonschema import ValidationError
+from jsonschema.protocols import Validator
 from jsonschema.validators import validator_for
+
+
+@lru_cache(maxsize=8)
+def _root_validator(schema_json: str) -> Validator:
+    """Reuse a checked schema; changed schema contents get their own validation."""
+    schema = json.loads(schema_json)
+    validator_class = validator_for(schema)
+    validator_class.check_schema(schema)
+    return validator_class(schema)
 
 
 class SchemaValidationError(ValueError):
@@ -128,9 +139,9 @@ class SchemaBase:
     def validate(cls, instance: dict[str, Any]) -> None:
         """Validate an instance against this wrapper's schema."""
         rootschema = cls._rootschema or cls._schema
-        validator_class = validator_for(rootschema)
-        validator_class.check_schema(rootschema)
-        validator = validator_class(rootschema).evolve(schema=cls._schema)
+        # Cache by content so custom schemas can still be changed or replaced safely.
+        schema_json = json.dumps(rootschema, sort_keys=True, separators=(",", ":"))
+        validator = _root_validator(schema_json).evolve(schema=cls._schema)
         validator.validate(instance)
 
     @classmethod
@@ -254,11 +265,11 @@ def _resolve_schema_references(
 
 
 __all__ = [
-    "merge_mapping_value",
-    "normalize_mapping_value",
-    "normalize_schema_value",
     "SchemaBase",
     "SchemaValidationError",
     "Undefined",
     "UndefinedType",
+    "merge_mapping_value",
+    "normalize_mapping_value",
+    "normalize_schema_value",
 ]
