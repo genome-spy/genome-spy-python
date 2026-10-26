@@ -657,6 +657,29 @@ not fresh-clone dependencies or release artifacts.
   The preview is reloaded and ready; scripts pass Ruff. No public Python changed,
   so package tests, mypy and the docs build were not repeated. Screenshots and
   generated previews remain ignored local evidence. Clearance: retain.
+- **Native interactive legend review (2026-10-26):** implemented in upstream
+  [draft Core PR #605](https://github.com/genome-spy/genome-spy/pull/605), commit
+  `6263d500`. A single-field point selection bound to a categorical color legend
+  supports click to focus, Shift-click to toggle and double-click to clear.
+  Native conditional opacity links both brain panels while retaining all 34
+  category entries and their colors. Highlighting retains the data; an explicit
+  color domain is required when using the selection in a filter to avoid
+  disappearing entries. The rectangular brush and all-cell count are independent.
+  The native implementation reuses scoped params, legend views, predicates,
+  geometry builders and GPU selection textures; App bookmarks store categories
+  directly without row keys. The unpublished WebGPU adapter rejects projected
+  predicates explicitly; Canvas, WebGL and SVG are covered.
+  The ignored `brain/legend-review.html` preview under the publication review
+  uses a clean production build of that Core commit. On 1.1M cells, 24 category
+  changes retained the 181,896-cell brush count and bounds with no point-buffer
+  uploads or new texture allocations; median synchronous parameter work was
+  about 0.1 ms, not an end-to-end frame-time benchmark. Full Core/App tests:
+  **5,270 passed**, one skipped and two TODO; subsequent focused checks:
+  **286 passed**. Four native Canvas/WebGL cases at DPR 1/2, type checks, lint,
+  production/docs builds and release-policy checks pass. Generated media and
+  bundles remain ignored. Python API/schema, canonical notebook and bundled
+  runtime adoption still wait for a published Core release, as requested.
+  Clearance: retain pending upstream review, release and package adoption.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
