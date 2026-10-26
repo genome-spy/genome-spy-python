@@ -816,6 +816,7 @@ def highly_variable_genes(
     highly_variable_genes: bool = True,
     hover: bool = True,
     zoom: bool = False,
+    threshold_slider: bool = False,
     width: float | None = None,
     height: float | None = None,
 ) -> TopLevelSpec | None:
@@ -832,6 +833,7 @@ def highly_variable_genes(
         highly_variable_genes: Use highly_variable; False reads legacy gene_subset.
         hover: Show gene identity and the stored plotted statistics.
         zoom: Enable native x/y zoom independently in each panel.
+        threshold_slider: Add a normalized-score cutoff preview; leaves saved selection unchanged.
         width: Plot width per panel, default 300 logical pixels.
         height: Plot height per panel, default 300 logical pixels.
 
@@ -857,14 +859,26 @@ def highly_variable_genes(
         highly_variable_genes=highly_variable_genes,
         hover=hover,
         zoom=zoom,
+        threshold_slider=threshold_slider,
     )
+    if threshold_slider and log:
+        raise NotImplementedError(
+            f"{context}: threshold_slider requires linear axes (log=False)."
+        )
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._scatter_data import prepare_variable_genes
     from genome_spy.integrations.scanpy._hvg_chart import build_variable_genes
 
     table, statistic = prepare_variable_genes(adata_or_result, highly_variable_genes)
     chart = build_variable_genes(
-        table, statistic, log=log, hover=hover, zoom=zoom, width=width, height=height
+        table,
+        statistic,
+        log=log,
+        hover=hover,
+        zoom=zoom,
+        threshold_slider=threshold_slider,
+        width=width,
+        height=height,
     )
     return _finish_plot(chart, show, sc)
 
@@ -877,6 +891,7 @@ def filter_genes_dispersion(
     save: bool | str | None = None,
     hover: bool = True,
     zoom: bool = False,
+    threshold_slider: bool = False,
     width: float | None = None,
     height: float | None = None,
 ) -> TopLevelSpec | None:
@@ -892,6 +907,7 @@ def filter_genes_dispersion(
         save: None or False; use native chart.save for HTML/JSON.
         hover: Show gene identity and stored statistics.
         zoom: Enable native x/y zoom independently in each panel.
+        threshold_slider: Preview a normalized-score cutoff without changing gene_subset.
         width: Plot width per panel, default 300 logical pixels.
         height: Plot height per panel, default 300 logical pixels.
 
@@ -918,6 +934,7 @@ def filter_genes_dispersion(
         show=show,
         save=save,
         highly_variable_genes=False,
+        threshold_slider=threshold_slider,
         hover=hover,
         zoom=zoom,
         width=width,
@@ -1951,7 +1968,8 @@ def paga_compare(
         palette: CSS category colors/mapping or native scheme, shared by embedding
             and graph when color is the stored PAGA grouping.
         frameon: Draw the native panel frames.
-        size: Embedding point areas in square points.
+        size: Embedding point areas in square points; None uses a compact area of 9.
+            Points grow gently on zoom, up to twice their initial diameter.
         title: Common title when title_graph is None; otherwise embedding title.
         right_margin: Only None; native composition places the guides.
         left_margin: Only the pinned default; native composition sets spacing.
@@ -1965,6 +1983,8 @@ def paga_compare(
         width: Per-panel plot width in pixels, default 300.
         height: Per-panel plot height in pixels, default 300.
         **paga_graph_params: Supported paga options, including threshold and add_pos.
+            The graph shows labels on hover unless show_node_labels=True or custom labels
+            are supplied. edge_slider=True adds a stored-edge display filter.
             Parent rendering restrictions apply; plot=False is unsupported here.
 
     Returns:
@@ -2055,7 +2075,7 @@ def paga_compare(
         color_map=color_map,
         palette=palette,
         frameon=frameon,
-        size=size,
+        size=9 if size is None else size,
         title="" if title_graph is None else title,
         hover=hover,
         zoom=zoom,
@@ -2092,6 +2112,7 @@ def paga_compare(
             700: "bold",
             "regular": "normal",
         }.get(legend_fontweight, legend_fontweight)
+    paga_graph_params.setdefault("show_node_labels", labels is not None)
     graph = paga(
         adata,
         colors=color,
@@ -2160,6 +2181,8 @@ def paga_path(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    series_select: bool = False,
+    ruler: bool = False,
     width: float | None = None,
     height: float | None = None,
 ) -> TopLevelSpec | tuple[TopLevelSpec, pd.DataFrame] | pd.DataFrame | None:
@@ -2202,6 +2225,8 @@ def paga_path(
         save: Only None/False; use native HTML/JSON export.
         hover: Include value and annotation tooltips.
         zoom: True navigates y; "xy" navigates both axes and aligned tracks.
+        series_select: Add a dropdown to emphasize one plotted key.
+        ruler: Show a native cursor along the path.
         show_values: Show fitted tile values; requires as_heatmap=True.
         width: Native plot area width in pixels.
         height: Native plot area height in pixels.
@@ -2231,6 +2256,8 @@ def paga_path(
         "return_data": return_data,
         "hover": hover,
         "show_values": show_values,
+        "series_select": series_select,
+        "ruler": ruler,
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
@@ -2267,17 +2294,17 @@ def paga_path(
         normalize_to_zero_one=normalize_to_zero_one,
         as_heatmap=as_heatmap,
     )
-    if as_heatmap:
-        categories = adata.obs[prepared.group_key].cat.categories
-        if palette_groups is not None and (
-            isinstance(palette_groups, str) or len(palette_groups) < len(categories)
-        ):
-            raise ValueError(
-                f"{context}: palette_groups needs CSS colors for all categories."
-            )
-        palette, _ = _palette(
-            adata, prepared.group_key, categories, palette_groups, context=context
+    categories = adata.obs[prepared.group_key].cat.categories
+    if palette_groups is not None and (
+        isinstance(palette_groups, str) or len(palette_groups) < len(categories)
+    ):
+        raise ValueError(
+            f"{context}: palette_groups needs CSS colors for all categories."
         )
+    palette, _ = _palette(
+        adata, prepared.group_key, categories, palette_groups, context=context
+    )
+    if as_heatmap:
         chart = build_paga_path(
             prepared,
             categories=list(map(str, categories)),
@@ -2295,11 +2322,17 @@ def paga_path(
             show_values=show_values,
             width=width,
             height=height,
+            series_select=series_select,
+            ruler=ruler,
         )
     else:
         chart = build_paga_path_lines(
             prepared,
             xlim=xlim,
+            categories=list(map(str, categories)),
+            palette=palette,
+            show_node_names=show_node_names,
+            normalized=normalize_to_zero_one,
             title=title,
             title_fontsize=title_fontsize,
             legend_fontsize=legend_fontsize,
@@ -2307,6 +2340,8 @@ def paga_path(
             zoom=zoom,
             width=width,
             height=height,
+            series_select=series_select,
+            ruler=ruler,
         )
     shown = _finish_plot(chart, show, sc)
     if not return_data:
@@ -2330,6 +2365,7 @@ def paga_adjacency(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    labels: Collection[str] | None = None,
     width: float | None = None,
     height: float | None = None,
 ) -> TopLevelSpec | None:
@@ -2338,9 +2374,10 @@ def paga_adjacency(
     Description:
         Read top-level uns matrices, as Scanpy's legacy entry does. Reuse native
         matrix tiles, color guides and navigation without reading expression,
-        computing PAGA or changing AnnData. Black dots mark tree nonzero entries
+        computing PAGA or changing AnnData. Dots mark tree nonzero entries
         at x=row, y=column, preserving Scanpy's orientation. Stripplot mode shows
-        off-diagonal connectivity in gray and tree-selected values in black.
+        off-diagonal connectivity in light gray and tree-selected values in blue.
+        Points grow gently on zoom; heatmap dots stay inside their cells.
 
     Args:
         adata: AnnData containing the explicitly stored adjacency matrices.
@@ -2353,6 +2390,7 @@ def paga_adjacency(
         hover: Include matrix-value, tree-edge or stripplot connectivity tooltips.
         zoom: True enables y navigation; "xy" enables both axes.
         show_values: Show fitted heatmap values; requires as_heatmap=True.
+        labels: Explicit group labels in adjacency row/column order; None keeps indices.
         width: Native plot width in pixels.
         height: Native plot height in pixels.
 
@@ -2387,10 +2425,15 @@ def paga_adjacency(
     from genome_spy.integrations.scanpy._paga_chart import build_paga_adjacency
 
     values, points = adjacency_values(adata, adjacency, adjacency_tree)
+    if labels is not None:
+        from genome_spy.integrations.scanpy._matrix_chart import _labels
+
+        labels = _labels(labels, len(values), "labels", context=context)
     chart = build_paga_adjacency(
         values,
         points,
         as_heatmap=as_heatmap,
+        labels=labels,
         color_map=color_map,
         hover=hover,
         zoom=zoom,
@@ -2447,6 +2490,8 @@ def paga(
     width: float | None = None,
     height: float | None = None,
     palette: Any = None,
+    edge_slider: bool = False,
+    show_node_labels: bool = True,
     **kwargs: Any,
 ) -> TopLevelSpec | None:
     """Draw stored undirected PAGA connectivity graphs with native nodes and edges.
@@ -2508,6 +2553,9 @@ def paga(
         height: Native plot height in pixels, default 384.
         palette: Native addition: CSS category colors/mapping or native scheme
             for group colors. None reuses saved colors; inactive for other colors.
+        edge_slider: Add a slider that hides displayed edges below a weight cutoff.
+            It does not recover edges excluded by threshold or recompute node statistics.
+        show_node_labels: Show permanent node text; hover retains group names when False.
         **kwargs: Unsupported keywords fail clearly, including ax/cax.
 
     Returns:
@@ -2525,6 +2573,21 @@ def paga(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.paga"
+    for name, flag in {
+        "edge_slider": edge_slider,
+        "show_node_labels": show_node_labels,
+    }.items():
+        if not isinstance(flag, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    node_color = colors if colors is not None else color
+    if (
+        edge_slider
+        and isinstance(node_color, str)
+        and node_color in {"degree_solid", "degree_dashed"}
+    ):
+        raise NotImplementedError(
+            f"{context}: edge_slider cannot update graph-degree node colors; use a fixed threshold."
+        )
     _check_kwargs(kwargs, set(), context=context)
     _check_point_options(
         context=context,
@@ -2650,6 +2713,8 @@ def paga(
             cmap=cmap,
             colorbar=colorbar is None and automatic_colorbar,
             color_data=color_data,
+            edge_slider=edge_slider,
+            show_node_labels=show_node_labels,
         )
     if add_pos:
         adata.uns["paga"]["pos"] = positions.copy()
@@ -2865,6 +2930,10 @@ def sim(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    series_select: bool = False,
+    ruler: bool = False,
+    run_select: bool = False,
+    connect: bool = False,
     width: float | None = None,
     height: float | None = None,
 ) -> TopLevelSpec | None:
@@ -2888,6 +2957,11 @@ def sim(
         hover: Show the existing time-series value tooltips.
         zoom: True navigates both point axes or heatmap y; 'xy' navigates both.
         show_values: Fit numeric labels inside heatmap cells; points reject True.
+        series_select: Add a dropdown to emphasize one gene in points or heatmap.
+        ruler: Show a native cursor for reading sample positions.
+        run_select: Add a run dropdown; unavailable for shuffled samples.
+        connect: Join adjacent simulation samples within each run; point output only.
+            Missing values leave gaps. Never connects different runs.
         width: Native plot-area width; defaults to the selected time-series chart.
         height: Native plot-area height; defaults to the selected time-series chart.
 
@@ -2911,6 +2985,10 @@ def sim(
         "shuffle": shuffle,
         "hover": hover,
         "show_values": show_values,
+        "series_select": series_select,
+        "ruler": ruler,
+        "run_select": run_select,
+        "connect": connect,
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
@@ -2919,10 +2997,19 @@ def sim(
         raise NotImplementedError(
             f"{context}: show_values requires unshuffled heatmap output."
         )
+    if shuffle and (run_select or connect):
+        raise NotImplementedError(
+            f"{context}: run_select and connect require unshuffled samples."
+        )
+    if connect and as_heatmap:
+        raise NotImplementedError(
+            f"{context}: connect requires point output (as_heatmap=False)."
+        )
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._timeseries_data import prepare_sim
 
     values, highlights, ticks = prepare_sim(adata, tmax_realization, shuffle)
+    realization_length = highlights[0] if highlights else adata.n_obs
     if as_heatmap and not shuffle:
         from genome_spy.integrations.scanpy._matrix_chart import (
             build_timeseries_heatmap,
@@ -2940,6 +3027,10 @@ def sim(
             height=height,
             context=context,
             xtick_labels=ticks,
+            series_select=series_select,
+            ruler=ruler,
+            run_select=run_select,
+            realization_length=realization_length,
         )
     else:
         from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
@@ -2953,10 +3044,15 @@ def sim(
             marker=marker,
             hover=hover,
             zoom=bool(zoom),
+            connect=connect,
             width=width,
             height=height,
             context=context,
             xtick_labels=None if shuffle else ticks,
+            series_select=series_select,
+            ruler=ruler,
+            run_select=run_select,
+            realization_length=realization_length,
         )
     return _finish_plot(chart, show, sc)
 
@@ -2968,6 +3064,8 @@ def timeseries(
     save: bool | str | None = None,
     hover: bool = True,
     zoom: bool = False,
+    series_select: bool = False,
+    ruler: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwargs: Any,
@@ -2986,6 +3084,8 @@ def timeseries(
         save: Only None/False; use the native chart's HTML/JSON export.
         hover: Show series, source sample position, time, value and numeric color.
         zoom: Enable native wheel zoom and drag panning on both axes.
+        series_select: Add a dropdown to emphasize one series without filtering samples.
+        ruler: Show a native cursor for reading time positions.
         width: Native plot-area width in pixels, default 992.
         height: Native plot-area height in pixels, default 739.2.
         **kwargs: Scanpy's time=None, color=None, var_names=(), highlights_x=(),
@@ -3018,6 +3118,8 @@ def timeseries(
         save=save,
         hover=hover,
         zoom=zoom,
+        series_select=series_select,
+        ruler=ruler,
         width=width,
         height=height,
     )
@@ -3042,6 +3144,8 @@ def timeseries_subplot(
     save: bool | str | None = None,
     hover: bool = True,
     zoom: bool = False,
+    series_select: bool = False,
+    ruler: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwargs: Any,
@@ -3071,6 +3175,8 @@ def timeseries_subplot(
         save: Only None/False; use the native chart's HTML/JSON export.
         hover: Show series, source position, time, value and numeric color.
         zoom: Enable native wheel zoom and panning on both axes.
+        series_select: Add a dropdown to emphasize one series without filtering samples.
+        ruler: Show a native cursor for reading time positions.
         width: Native plot-area width in pixels, default 496.
         height: Native plot-area height in pixels, default 369.6.
         **kwargs: Unsupported keywords fail clearly; ax and return_fig are omitted.
@@ -3111,6 +3217,8 @@ def timeseries_subplot(
         save=save,
         hover=hover,
         zoom=zoom,
+        series_select=series_select,
+        ruler=ruler,
         width=496 if width is None else width,
         height=369.6 if height is None else height,
     )
@@ -3125,11 +3233,18 @@ def _timeseries_plot(
     save: bool | str | None,
     hover: bool,
     zoom: bool,
+    series_select: bool,
+    ruler: bool,
     width: float | None,
     height: float | None,
 ) -> TopLevelSpec | None:
     """Validate either time-series entry and deliver its shared native point chart."""
-    for name, value in {"hover": hover, "zoom": zoom}.items():
+    for name, value in {
+        "hover": hover,
+        "zoom": zoom,
+        "series_select": series_select,
+        "ruler": ruler,
+    }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     _check_kwargs(
@@ -3157,6 +3272,8 @@ def _timeseries_plot(
         X,
         hover=hover,
         zoom=zoom,
+        series_select=series_select,
+        ruler=ruler,
         width=width,
         height=height,
         context=context,

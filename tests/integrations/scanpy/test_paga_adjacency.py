@@ -24,6 +24,7 @@ def test_signature_preserves_upstream_parameters_and_defaults():
         "hover",
         "zoom",
         "show_values",
+        "labels",
         "width",
         "height",
     }
@@ -63,9 +64,8 @@ def test_values_and_tree_orientation_match_direct_public_scanpy(storage, case):
         assert native_points == points.to_dict("records")
     assert spec["scales"]["y"]["reverse"] is True
     assert spec["scales"]["x"]["domain"] == [0, values.shape[1] - 1]
-    assert marks[1]["mark"]["size"] == pytest.approx((100 / 72) ** 2)
-    assert marks[1]["mark"]["strokeWidth"] == pytest.approx(100 / 72)
-    assert marks[1]["mark"]["inwardStroke"] is False
+    assert "bandstep" in marks[1]["mark"]["size"]["expr"]
+    assert marks[1]["mark"]["strokeWidth"] == 0
     plt.close("all")
 
 
@@ -226,7 +226,8 @@ def test_stripplot_order_colors_and_limits_match_public_scanpy(storage, case):
         np.testing.assert_allclose(spec["encoding"][axis]["scale"]["domain"], expected)
         assert "name" not in spec["encoding"][axis]["scale"]
     assert spec["width"] == 496 and spec["height"] == 369.6
-    assert spec["encoding"]["fill"]["legend"] is None
+    assert spec["encoding"]["fill"]["legend"]["orient"] == "bottom"
+    assert spec["encoding"]["fill"]["scale"]["range"] == ["#cbd5e1", "#2563a6"]
     plt.close("all")
 
 

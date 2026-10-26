@@ -104,7 +104,7 @@ def test_registered_lines_preserve_values_gaps_colors_and_native_legend(
     texts = {e.text for e in root.iter() if e.tag.endswith("text")}
     assert {"g1", "g2", "cluster"} <= texts
     legend = next(
-        e for e in root.iter() if e.get("data-view-path", "").endswith("/legend_left")
+        e for e in root.iter() if e.get("data-view-path", "").endswith("/legend_bottom")
     )
     assert any(e.get("data-mark-type") == "point" for e in legend.iter())
     canvas = page.locator("canvas").first.bounding_box()
@@ -156,11 +156,12 @@ def test_line_hover_navigation_independent_composition_and_offline_html(
         show=False,
     )
     spec = chart.to_dict()
+    panel = spec["spec"]
     for axis in ("x", "y"):
-        spec["encoding"][axis]["scale"]["name"] = f"line-{axis}"
+        panel["encoding"][axis]["scale"]["name"] = f"line-{axis}"
     bounds = render(page, spec)
-    xdomain = spec["encoding"]["x"]["scale"]["domain"]
-    ydomain = spec["encoding"]["y"]["scale"]["domain"]
+    xdomain = panel["encoding"]["x"]["scale"]["domain"]
+    ydomain = panel["encoding"]["y"]["scale"]["domain"]
     x = bounds["x"] + bounds["width"] * (0.5 - xdomain[0]) / np.ptp(xdomain)
     y = bounds["y"] + bounds["height"] * (1 - (5 - ydomain[0]) / np.ptp(ydomain))
     hover_at(page, x, y)
@@ -230,6 +231,6 @@ def test_single_key_single_sample_and_empty_crop_render_natively(page, options):
     root = svg_root(page)
     texts = {e.text for e in root.iter() if e.tag.endswith("text")}
     if len(keys) == 1:
-        assert "g1 (a.u.)" in texts
+        assert "g1" in texts
     else:
         assert {"g1", "g2"} <= texts

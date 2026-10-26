@@ -46,7 +46,7 @@ def test_line_values_domains_labels_and_order_match_public_scanpy(storage, case)
         sc.pl.paga_path(a, nodes, keys, as_heatmap=False, show=False, ax=ax, **options)
         expected = [line.get_xydata().copy() for line in ax.lines]
         domains = [ax.get_xlim(), ax.get_ylim()]
-        xlabel, ylabel = ax.get_xlabel(), ax.get_ylabel()
+        xlabel = ax.get_xlabel()
         legend = (
             None
             if ax.get_legend() is None
@@ -57,8 +57,10 @@ def test_line_values_domains_labels_and_order_match_public_scanpy(storage, case)
     spec = gsc.pl.paga_path(
         a, nodes, keys, as_heatmap=False, show=False, **options
     ).to_dict()
+    root = spec
+    spec = root["spec"]
     frame = pd.DataFrame(
-        next(iter(spec["datasets"].values())), columns=["_sample", "_value", "_key"]
+        root["datasets"][spec["data"]["name"]], columns=["_sample", "_value", "_key"]
     )
     for key, curve in zip(keys, expected, strict=True):
         actual = frame.loc[frame["_key"] == key]
@@ -69,7 +71,10 @@ def test_line_values_domains_labels_and_order_match_public_scanpy(storage, case)
     for axis, domain in zip(("x", "y"), domains, strict=True):
         np.testing.assert_allclose(spec["encoding"][axis]["scale"]["domain"], domain)
     assert spec["encoding"]["x"]["axis"]["title"] == xlabel
-    assert spec["encoding"]["y"]["axis"]["title"] == (ylabel or None)
+    assert spec["encoding"]["y"]["axis"]["title"] == (
+        (keys[0] if len(keys) == 1 else "Value")
+        + (" (0–1)" if options.get("normalize_to_zero_one") else "")
+    )
     assert spec["encoding"]["color"]["scale"]["domain"] == keys
     assert (spec["encoding"]["color"]["legend"] is None) is (legend is None)
     if legend is not None:
@@ -78,7 +83,7 @@ def test_line_values_domains_labels_and_order_match_public_scanpy(storage, case)
     assert spec["transform"][0]["ops"] == ["lead", "lead"]
     assert spec["transform"][0]["groupby"] == ["_key"]
     assert spec["transform"][1]["type"] == "filter"
-    assert "surround" not in spec
+    assert "bottom" in root["surround"]
 
 
 def test_line_return_data_is_uncropped_and_matches_working_public_case(monkeypatch):
@@ -101,7 +106,8 @@ def test_line_return_data_is_uncropped_and_matches_working_public_case(monkeypat
     chart, frame = gsc.pl.paga_path(a, ["beta", "alpha"], ["g1", "g2"], **options)
     pd.testing.assert_frame_equal(frame, expected)
     assert len(frame) == 3
-    assert len(next(iter(chart.to_dict()["datasets"].values()))) == 4
+    spec = chart.to_dict()
+    assert len(spec["datasets"][spec["spec"]["data"]["name"]]) == 4
     pd.testing.assert_frame_equal(a.obs, before[0])
     assert repr(a.uns) == before[1]
     np.testing.assert_array_equal(a.X, before[2])
@@ -135,7 +141,7 @@ def test_line_options_use_native_guides_and_ignore_inactive_heatmap_options():
         as_heatmap=False,
         color_map=object(),
         color_maps_annotations=object(),
-        palette_groups=[],
+        palette_groups=["red", "gray", "blue", "green"],
         show_node_names=False,
         show_yticks=False,
         show_colorbar=False,
@@ -146,8 +152,10 @@ def test_line_options_use_native_guides_and_ignore_inactive_heatmap_options():
         zoom="xy",
         show=False,
     ).to_dict()
-    assert spec["encoding"]["color"]["legend"]["orient"] == "left"
-    assert spec["title"]["text"] == "Profiles"
+    root = spec
+    spec = root["spec"]
+    assert spec["encoding"]["color"]["legend"]["orient"] == "bottom"
+    assert root["title"]["text"] == "Profiles"
     assert spec["mark"]["tooltip"] is None
     assert "tooltip" not in spec["encoding"]
     assert all(spec["encoding"][axis]["scale"]["zoom"] is True for axis in ("x", "y"))

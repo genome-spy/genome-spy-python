@@ -10,7 +10,10 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_heatmap import render, hover_at
 from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
-from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
+from tests.integrations.scanpy.browser.test_timeseries import (
+    point_coordinates,
+    style_profile_reference,
+)
 from tests.integrations.scanpy.dpt_fixture import make_dpt, dpt_cases, dpt_reference
 
 
@@ -27,6 +30,8 @@ def test_complete_dpt_panels_match_scanpy_points_and_guides(page, tmp_path, case
     ):
         warnings.simplefilter("ignore")
         fig = dpt_reference(adata, **options)
+        for ax in fig.axes:
+            style_profile_reference(ax)
         fig.canvas.draw()
         reference = tmp_path / "reference.png"
         fig.savefig(reference, dpi=150)

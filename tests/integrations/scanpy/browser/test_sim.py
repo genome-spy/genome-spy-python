@@ -14,7 +14,10 @@ from tests.integrations.scanpy.browser.test_grid_interactions import (
     position,
     value_texts,
 )
-from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
+from tests.integrations.scanpy.browser.test_timeseries import (
+    point_coordinates,
+    style_profile_reference,
+)
 from tests.integrations.scanpy.sim_fixture import make_sim, sim_cases
 from tests.integrations.scanpy.helpers import leaf_marks
 
@@ -42,6 +45,7 @@ def test_complete_simulation_matches_scanpy_ticks_boundaries_and_paint(
             warnings.simplefilter("ignore")
             sc.pl.sim(adata, show=False, **options)
             fig, ax = plt.gcf(), plt.gcf().axes[0]
+            style_profile_reference(ax)
             fig.canvas.draw()
             bbox = ax.get_window_extent()
             limits = [ax.get_xlim(), ax.get_ylim()]

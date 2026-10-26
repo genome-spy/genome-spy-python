@@ -2,6 +2,7 @@
 
 from collections.abc import Collection, Mapping
 from typing import Any, Literal
+from math import ceil
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,8 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     with_values,
     vertical_highlights,
     horizontal_tick_labels,
+    profile_ruler,
+    series_focus,
 )
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import (
@@ -55,6 +58,10 @@ def build_matrix(
     context: str = "gsc.pl.matrix",
     xtick_labels: Mapping[float, str] | None = None,
     overlay: gs.Chart | None = None,
+    row_select: bool = False,
+    ruler: bool = False,
+    run_select: bool = False,
+    realization_length: float | None = None,
 ) -> gs.TopLevelSpec:
     """Return native tiles, labels and a color guide from a resident numeric matrix.
 
@@ -206,11 +213,33 @@ def build_matrix(
             y=axes[1].field("_y0"),
             y2=gs.Y2("_y1:Q"),
         )
+    focus = None
+    opacity = gs.Expression("1")
+    if row_select:
+        focus, opacity = series_focus(list(dict.fromkeys(ylabels)), "_row")
+    run = None
+    if run_select and realization_length is not None:
+        tiles = tiles.transform_calculate(
+            _run=gs.expr.format(
+                gs.expr.floor(gs.datum._x / realization_length) + 1, "d"
+            )
+        )
+        choices = [str(i + 1) for i in range(ceil(columns / realization_length))]
+        run, run_opacity = series_focus(
+            choices, "_run", name="simulation_run", title="Run: "
+        )
+        opacity = gs.expr.min(opacity, run_opacity)
+    if focus is not None or run is not None:
+        tiles = tiles.transform_calculate(_focus_opacity=opacity).encode(
+            opacity=gs.Opacity("_focus_opacity:Q").scale(None).legend(None)
+        )
     center = with_values(tiles, "_value") if show_values else tiles
     if overlay is not None:
         center = gs.layer(center, overlay)
     if len(highlights_x):
         center = gs.layer(center, vertical_highlights(highlights_x, 0, rows))
+    if ruler:
+        center = center.add_params(profile_ruler())
     center = center.properties(width=width, height=height, name=f"{name}-cells")
     chart = gs.surround(
         center, surround=gs.SurroundSides(**sides), spacing=0
@@ -219,6 +248,10 @@ def build_matrix(
         chart = chart.properties(padding={"top": TICK / 2, "bottom": TICK / 2})
     if title is not None:
         chart = chart.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))
+    if focus is not None:
+        chart = chart.add_params(focus)
+    if run is not None:
+        chart = chart.add_params(run)
     return chart.configure_view(stroke="transparent", strokeWidth=0).configure_legend(
         labelFont=FONT,
         labelFontSize=TICK,
@@ -240,6 +273,10 @@ def build_timeseries_heatmap(
     context: str = "gsc.pl.timeseries_as_heatmap",
     xtick_labels: Mapping[float, str] | None = None,
     xlabel: str | None = None,
+    series_select: bool = False,
+    ruler: bool = False,
+    run_select: bool = False,
+    realization_length: float | None = None,
 ) -> gs.TopLevelSpec:
     """Transpose supplied samples into variable rows, then reuse native matrix rendering."""
     array = matrix_array(X, context=context)
@@ -292,6 +329,10 @@ def build_timeseries_heatmap(
         highlights_x=positions,
         context=context,
         xtick_labels=xtick_labels,
+        row_select=series_select,
+        ruler=ruler,
+        run_select=run_select,
+        realization_length=realization_length,
     )
 
 

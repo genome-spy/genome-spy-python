@@ -13,7 +13,10 @@ from tests.integrations.scanpy.browser.test_grid_interactions import (
     svg_root,
     value_texts,
 )
-from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
+from tests.integrations.scanpy.browser.test_timeseries import (
+    point_coordinates,
+    style_profile_reference,
+)
 from tests.integrations.scanpy.browser.test_sim import point_spacing
 from tests.integrations.scanpy.dpt_fixture import make_dpt_profiles, dpt_profile_cases
 
@@ -32,6 +35,7 @@ def test_complete_dpt_expression_matches_scanpy_paint_labels_and_boundaries(
         warnings.simplefilter("ignore")
         sc.pl.dpt_timeseries(adata, show=False, **options)
         fig, ax = plt.gcf(), plt.gcf().axes[0]
+        style_profile_reference(ax)
         fig.canvas.draw()
         bbox = ax.get_window_extent()
         limits = [ax.get_xlim(), ax.get_ylim()]

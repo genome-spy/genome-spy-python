@@ -24,6 +24,10 @@ def test_signature_preserves_scanpy_and_adds_native_options():
         "hover",
         "zoom",
         "show_values",
+        "series_select",
+        "ruler",
+        "run_select",
+        "connect",
         "width",
         "height",
     }

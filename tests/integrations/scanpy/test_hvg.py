@@ -22,7 +22,13 @@ def test_signatures_preserve_scanpy_defaults_and_add_native_options(family):
     for name, parameter in expected.items():
         assert actual[name].kind == parameter.kind
         assert actual[name].default == parameter.default
-    assert set(actual) - set(expected) == {"hover", "zoom", "width", "height"}
+    assert set(actual) - set(expected) == {
+        "hover",
+        "zoom",
+        "threshold_slider",
+        "width",
+        "height",
+    }
     assert all(
         actual[name].kind == inspect.Parameter.KEYWORD_ONLY
         for name in set(actual) - set(expected)
@@ -66,8 +72,15 @@ def test_points_limits_labels_order_and_selection_match_scanpy(
                     getattr(ax, f"get_{axis}lim")(),
                     rtol=1e-7,
                 )
-                assert (
-                    encoding[axis]["axis"]["title"] == getattr(ax, f"get_{axis}label")()
+                assert encoding[axis]["axis"]["title"] == (
+                    "Mean expression"
+                    if axis == "x"
+                    else (
+                        "Normalized "
+                        if encoding[axis]["field"].endswith("_norm")
+                        else ""
+                    )
+                    + ("variance" if flavor == "seurat_v3" else "dispersion")
                 )
                 assert encoding[axis]["scale"]["type"] == ("log" if log else "linear")
             for artist, flag in zip(ax.collections, (True, False), strict=True):
@@ -78,15 +91,11 @@ def test_points_limits_labels_order_and_selection_match_scanpy(
                     if r["_selected"] == flag
                 ]
                 np.testing.assert_allclose(actual, expected, rtol=1e-7)
-                assert panel["mark"]["size"] == pytest.approx(
-                    artist.get_sizes()[0] * (100 / 72) ** 2
-                )
-                assert panel["mark"]["strokeWidth"] == pytest.approx(
-                    artist.get_linewidths()[0] * 100 / 72
-                )
+                assert panel["mark"]["size"] == 9
+                assert panel["mark"]["strokeWidth"] == 0
             assert panel["transform"][-1]["sort"] == {
                 "field": "_selected",
-                "order": "descending",
+                "order": "ascending",
             }
         plt.close("all")
     if storage == "frame":

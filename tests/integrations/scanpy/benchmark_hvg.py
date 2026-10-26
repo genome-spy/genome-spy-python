@@ -15,6 +15,7 @@ import tracemalloc
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--threshold-slider", action="store_true")
     args = parser.parse_args()
     import anndata as ad
     import numpy as np
@@ -42,7 +43,9 @@ def main() -> None:
     tracemalloc.start()
     start = perf_counter()
     try:
-        chart = gsc.pl.highly_variable_genes(a, zoom=True, show=False)
+        chart = gsc.pl.highly_variable_genes(
+            a, zoom=True, threshold_slider=args.threshold_slider, show=False
+        )
         prepared = perf_counter()
         spec = chart.to_dict()
         payload = json.dumps(spec, separators=(",", ":")).encode()
@@ -51,13 +54,20 @@ def main() -> None:
         ad.AnnData.X = original
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    assert len(spec["datasets"]) == 1
-    assert len(next(iter(spec["datasets"].values()))) == genes
+    assert len(spec["datasets"]) == (2 if args.threshold_slider else 1)
+    records = next(rows for rows in spec["datasets"].values() if "_selected" in rows[0])
+    assert len(records) == genes
     report = {
         "system": platform.platform(),
         "python": platform.python_version(),
         "core": SCHEMA_VERSION,
-        "fixture": {"seed": 17, "cells": cells, "genes": genes, "panels": 2},
+        "fixture": {
+            "seed": 17,
+            "cells": cells,
+            "genes": genes,
+            "panels": 2,
+            "threshold_slider": args.threshold_slider,
+        },
         "scope": "Imports/fixture excluded; validated JSON includes allocation tracing. Expression access raises. Browser timing excludes JSON validation.",
         "seconds": {
             "prepare": prepared - start,
@@ -73,6 +83,19 @@ def main() -> None:
         start = perf_counter()
         render(page, spec)
         report["seconds"]["browser_first_paint"] = perf_counter() - start
+        if args.threshold_slider:
+            slider = page.locator('input[type="range"]')
+            start = perf_counter()
+            slider.evaluate(
+                "el => {el.value=1; el.dispatchEvent(new Event('input', {bubbles:true}));}"
+            )
+            cutoff = float(slider.input_value())
+            count = int((a.var["dispersions_norm"] >= cutoff).sum())
+            page.wait_for_function(
+                "async n => (await (await api.imageExport.svg()).blob.text()).includes(n + ' genes above cutoff (preview)')",
+                arg=count,
+            )
+            report["seconds"]["slider_and_svg_verification"] = perf_counter() - start
         report["bytes"]["reported_js_heap"] = page.evaluate(
             "performance.memory.usedJSHeapSize"
         )

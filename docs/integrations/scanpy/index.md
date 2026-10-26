@@ -353,9 +353,16 @@ chart = gsc.pl.highly_variable_genes(
 ```
 
 This plots the stored normalized and raw dispersion against mean expression.
-Black points are selected genes; gray points are other genes. Native tooltips
-show gene identity and original values, and `zoom=True` enables independent x/y
-navigation in each panel. One native legend is collected below the pair.
+Blue points are selected genes; light gray points are other genes. Selected genes
+draw last. Hover shows gene identity and stored values. With `zoom=True`, points
+grow gently as you zoom, up to twice their starting diameter. Each panel has its
+own navigation, with one legend below the pair.
+
+Add `threshold_slider=True` to preview a cutoff on the stored normalized score.
+The slider updates both panels and a gene count. Hover distinguishes the preview
+from the saved selection. This leaves your data unchanged. It does not reproduce
+Scanpy's top-N or batch-aware gene selection. Use Scanpy to change the analysis.
+The slider requires linear axes and a varying, nonmissing normalized score.
 
 Pass AnnData after explicitly running `sc.pp.highly_variable_genes` in your
 analysis workflow, or supply its result DataFrame/record array. The packaged PBMC
@@ -368,11 +375,11 @@ expression. Repeated gene labels retain separate point identities.
 | AnnData | Read `var` and stored `uns["hvg"]["flavor"]`; views and backed metadata are supported without reading X/raw/layers. Missing analysis errors clearly. |
 | DataFrame | Read supplied columns; `variances_norm` selects variance fields, otherwise dispersion fields, as in Scanpy. |
 | Record array | Use supplied dispersion fields and positional gene identities, preserving the pinned legacy behavior. |
-| `highly_variable_genes` | True reads the boolean `highly_variable` column; False reads `gene_subset`. Selected genes draw first, then other genes. |
+| `highly_variable_genes` | True reads the boolean `highly_variable` column; False reads `gene_subset`. Selected genes draw after other genes. |
 | `log` | Use log axes without transforming stored values. As in 1.11.5, both panels use raw-statistic y limits. Means must be finite and positive; raw statistics must be finite with positive increasing limits. Other forms fail explicitly. |
 | Missing values | Omit missing coordinate pairs independently per panel; retain their stored values. Infinity, ambiguous columns and missing/nonboolean selection flags error. |
 | `show`, `save` | Common native display behavior; save only None/False, with HTML/JSON available through the chart. |
-| Native additions | Keyword-only `hover=True`, `zoom=False`, `width=None`, `height=None`; default plot areas are 300 × 300 logical pixels. |
+| Native additions | Keyword-only `hover=True`, `zoom=False`, `threshold_slider=False`, `width=None`, `height=None`; default plot areas are 300 × 300 logical pixels. |
 
 `filter_genes_dispersion(result, ...)` delegates to the same implementation with
 `highly_variable_genes=False` and preserves the upstream deprecation warning.
@@ -382,8 +389,8 @@ variance columns; a supplied DataFrame selects them by the column's presence.
 No cached statistics or caller data are changed.
 
 Native fonts, ticks and the collected bottom guide use GenomeSpy layout. The
-plotting data, draw order, point units and axis limits are checked independently
-against Scanpy; this does not claim identical Matplotlib guide placement.
+stored values and axis limits are checked independently against Scanpy. Colors,
+point appearance, draw order and guide placement use the reviewed native style.
 
 ## Installation and version contract
 
@@ -991,7 +998,7 @@ are supported. DataFrame labels are used only when supplied as `var_names`.
 | Labels/legend | `var_names` labels the variables or single-variable subsets. Nonempty names must cover all subsets and be distinct strings; extra names are unused. `legend=True` shows a native bottom series legend when names exist. Continuous coloring has a series key, without a gradient colorbar, as upstream. |
 | Limits/highlights | Default time is the sample position. Automatic limits use a 5% margin; highlights expand the x range. Dashed rules retain the original y endpoints even when explicit `yticks` expand the y view. `xlim` overrides x limits and may reverse the axis. |
 | Missing values | Jointly missing/masked time, value or continuous color hides the point and excludes it from automatic limits. Categorical colors cannot be missing; at least one visible point is required. |
-| Markers | Shared native `.`, `o`, `s` and `D` shapes, also as a singleton or identical per-subset list. The frozen default area is 6 points², with Scanpy's dot-path width and a one-point face-colored edge. |
+| Markers | Shared native `.`, `o`, `s` and `D` shapes, also as a singleton or identical per-subset list. The starting area is 6 points² with Scanpy's dot-path width, no heavy outline and partial opacity. Points grow gently when zoom is enabled. |
 | Interaction/delivery | Hover reports series, original sample position, time, value and numeric color. `zoom=True` enables both axes, drag panning and native reset; both options use existing helpers. Native show/save and HTML/JSON delivery rules apply. |
 
 The default native plot area is 992 × 739.2 logical pixels. Fonts, numeric tick
@@ -999,6 +1006,11 @@ density, bottom legend layout, palette sampling and browser rasterization follow
 GenomeSpy rather than Matplotlib's figure system. Global Matplotlib settings,
 axes/cycler/colormap objects, sparse/lazy sources, complex/infinite values,
 repeated series labels and differing per-subset marker shapes fail clearly.
+
+Set `series_select=True` to add a dropdown. Choose a gene or series to emphasize
+it while keeping the other points visible. Set `ruler=True` to follow the cursor
+with a vertical guide. Both options are off by default and leave sample values,
+order and identities unchanged.
 
 ### Compose time-series subplots
 
@@ -1057,6 +1069,14 @@ NumPy random state. As upstream, this always draws points even with
 `as_heatmap=True`, with an ordinary numeric index axis. `marker` is unused for
 unshuffled heatmaps. `zoom=True` enables both point axes or heatmap y;
 `zoom="xy"` enables both axes. `show_values=True` requires heatmap output.
+Use `series_select=True` to focus on a gene in either view. Add `ruler=True` for
+a sample-position guide. These controls reuse the profile and matrix renderers.
+
+For ordered simulations, set `connect=True` to join neighboring samples within
+each run. Missing values leave gaps. This is available for point output only.
+Set `run_select=True` to add a run dropdown in either view. Combine it with
+`series_select=True` to emphasize one gene in one run. Neither dropdown removes
+data. Shuffled output rejects both `connect` and `run_select`.
 
 The preview supports resident dense AnnData and read-only views; it rejects
 backed, lazy and sparse X before loading or densifying. Point output retains the
@@ -1260,6 +1280,17 @@ margins, `plot=False`, outlines, directed graphs and the other parent rendering
 restrictions remain unsupported. Native layout and fonts retain the existing
 renderer boundary; this is not full `paga_compare` parameter compatibility.
 
+PAGA comparisons use compact embedding points when `size` is omitted. Supply
+`size` to choose another starting area. Points grow on zoom; graph node sizes
+continue to represent their stored group sizes. Group names appear on hover.
+Use `show_node_labels=True` for permanent graph labels.
+
+Set `edge_slider=True` on `paga` or `paga_compare` to hide weaker displayed edges.
+The slider filters the graph already selected by `threshold`; it does not restore
+excluded edges. Degree-colored graphs reject the slider, so the colors cannot
+become stale as edges disappear. Both controls use native marks and
+parameters. Legend clicks do not select groups in this release.
+
 ### PAGA path heatmaps and lines
 
 Use a supplied sequence of groups and explicitly computed pseudotime:
@@ -1343,12 +1374,16 @@ Scanpy; see the [native comparison](../../../integrations/scanpy/STATUS.md#m11d-
 `xlim=(start, stop)` slices the smoothed, normalized samples by position, including
 negative Python slice bounds. Displayed x coordinates restart at zero; returned
 data stays uncropped. Native category10 colors follow key order and cycle after
-ten keys. The built-in legend uses standard category symbols on the left;
-`legend_fontsize` sets its size. A single key instead has a ylabel and no legend.
+ten keys. The built-in legend sits below the plot; `legend_fontsize` sets its
+size. A single key has no series legend. The value axis remains visible, with
+“Value (0–1)” when normalization is enabled. A group strip follows the same path
+and stays aligned after cropping. Set `series_select=True` to emphasize one key
+or `ruler=True` to read positions along the path. Both work in heatmap mode too.
 One-sample and empty crops are valid. Repeated line keys and `show_values=True`
 fail clearly.
 
-Annotation bands and heatmap color/guide options do not style lines. Numeric or
+Numeric annotation bands and heatmap color/guide options do not style lines.
+Group colors and `show_node_names` apply to both views. Numeric or
 categorical annotations can still be prepared, preserving the same returned
 pseudotime and group columns. The existing resident-data/value limit and explicit
 analysis contract apply to both modes.
@@ -1377,11 +1412,13 @@ entries blank. The native matrix color guide defaults to viridis; `color_map`
 accepts native schemes. Black native points mark nonzero tree entries, including
 diagonal or negative entries. As in Scanpy, a tree entry `(row, column)` appears
 at **x=row, y=column**, even for asymmetric input. No thresholding, clustering or
-category reordering occurs. The axes retain numeric group indices.
+category reordering occurs. The axes retain numeric group indices unless you
+supply `labels=[...]` in matrix row/column order. The plot does not guess labels
+from unrelated observation categories.
 
 `hover=True` shows cell values and source/target indices for tree points.
-`zoom=True` navigates y; `zoom="xy"` navigates both axes. Points keep their pixel
-sizes and remain aligned with the tiles. `show_values=True` uses the shared fitted
+`zoom=True` navigates y; `zoom="xy"` navigates both axes. Larger tree points grow
+gently on zoom and stay inside their cells. `show_values=True` uses the shared fitted
 cell labels. `width` and `height` set the matrix area; defaults fit square cells
 within 400 pixels. Standard native display and HTML/JSON delivery apply. Fonts,
 automatic tick density and outer spacing retain the shared matrix preview's limits.
@@ -1394,15 +1431,16 @@ strips.display(inline=True, controls=False)
 ```
 
 X is the source group index; y is its stored adjacency value to a target group.
-Gray points exclude the diagonal. Black points select nonzero tree entries,
+Light gray points exclude the diagonal. Blue points select nonzero tree entries,
 including selected diagonals; their y values come from adjacency, not tree weights.
-Draw order follows Scanpy: gray points, then black points for each source row.
+Draw order follows Scanpy: background points, then tree points for each source row.
 Missing values stay undrawn and do not affect automatic limits. Constant or empty
 plots retain Scanpy's expanded limits. Hover reports source/target indices,
 connectivity and edge type. Both zoom modes and independent composition work for
 strips too. `color_map` is inactive, and `show_values=True` requires heatmap mode.
-The stripplot area defaults to 496 by 369.6 pixels, with fixed-size native points
-and no color guide.
+The stripplot area defaults to 496 by 369.6 pixels. Points grow on zoom. A native
+legend explains the two edge types, and the vertical axis shows connectivity.
+The optional `labels` also appear in tree-edge tooltips.
 
 Zoomable matrix charts can use independent native panels and guides:
 

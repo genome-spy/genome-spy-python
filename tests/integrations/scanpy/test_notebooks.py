@@ -375,10 +375,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     ]
     assert len(path_values) == 358
     line_spec = namespace["paga_path_lines"].to_dict()
-    assert line_spec["mark"]["type"] == "rule"
-    assert line_spec["mark"]["strokeCap"] == "round"
-    assert line_spec["encoding"]["color"]["scale"]["domain"] == namespace["path_genes"]
-    line_rows = next(iter(line_spec["datasets"].values()))
+    line_panel = line_spec["spec"]
+    assert line_panel["mark"]["type"] == "rule"
+    assert line_panel["mark"]["strokeCap"] == "round"
+    assert line_panel["encoding"]["color"]["scale"]["domain"] == namespace["path_genes"]
+    line_rows = line_spec["datasets"][line_panel["data"]["name"]]
     np.testing.assert_allclose(
         np.array([r["_value"] for r in line_rows]).reshape(6, 358).T,
         path_values[namespace["path_genes"]],
@@ -481,15 +482,21 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         np.array([r["_value"] for r in cells]).reshape(10, 10),
         pbmc.uns["paga"]["connectivities"].toarray(),
     )
-    tree_points = adjacency_spec["datasets"][marks[-1]["data"]["name"]]
+    tree_mark = next(m for m in marks if m["mark"]["type"] == "point")
+    tree_points = adjacency_spec["datasets"][tree_mark["data"]["name"]]
     rows, columns = pbmc.uns["paga"]["connectivities_tree"].nonzero()
-    assert tree_points == [
-        {"_x": int(x), "_y": int(y)} for x, y in zip(rows, columns, strict=True)
-    ]
+    assert [(p["_x"], p["_y"]) for p in tree_points] == list(
+        zip(rows, columns, strict=True)
+    )
+    labels = pbmc.obs["bulk_labels"].cat.categories
+    assert all(
+        p["_source_label"] == labels[p["_x"]] and p["_target_label"] == labels[p["_y"]]
+        for p in tree_points
+    )
     assert pbmc.uns["connectivities"] is pbmc.uns["paga"]["connectivities"]
     assert pbmc.uns["connectivities_tree"] is pbmc.uns["paga"]["connectivities_tree"]
     strips = namespace["paga_stripplot"].to_dict()
-    rows = strips["datasets"][strips["data"]["name"]]
+    rows = strips["datasets"][strips["spec"]["data"]["name"]]
     background = [r for r in rows if r["_kind"] == "Adjacency"]
     assert len(background) == 10 * 9
     assert all(r["_x"] != r["_target"] for r in background)
@@ -565,7 +572,9 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             np.array([r["_value"] for r in rows]).reshape(5, 640), sim_profiles.X.T
         )
         rule = next(
-            m for m in leaf_marks(spec) if m.get("mark", {}).get("type") == "rule"
+            m
+            for m in leaf_marks(spec)
+            if m.get("mark", {}).get("type") == "rule" and m["mark"].get("strokeDash")
         )
         assert [r["position"] for r in spec["datasets"][rule["data"]["name"]]] == [
             160,
@@ -661,12 +670,17 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(boxes) == 20 and boxes[0]["gene"] == "MALAT1"
     assert highest["layer"][0]["encoding"]["x"]["scale"]["zoom"] is True
     qc = namespace["variable_genes"].to_dict()
-    genes = next(iter(qc["datasets"].values()))
+    genes = next(rows for rows in qc["datasets"].values() if "_selected" in rows[0])
     assert len(genes) == 765 and sum(g["_selected"] for g in genes) == 309
     assert [g["_obs_label"] for g in genes] == list(namespace["pbmc"].var_names)
     assert all(
-        p["encoding"][axis]["scale"]["zoom"] for p in units(qc) for axis in ("x", "y")
+        mark["encoding"][axis]["scale"]["zoom"]
+        for panel in units(qc)
+        for mark in leaf_marks(panel)
+        if mark["mark"]["type"] == "point"
+        for axis in ("x", "y")
     )
+    assert len([p for p in qc["params"] if "bind" in p]) == 1
     assert len(calls) == 1 and calls[0]["n_genes"] == 765
     assert namespace["pbmc"].shape == (700, 765)
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
@@ -738,8 +752,14 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         sum(row["_obs_id"] == name for row in cells) == 10
         for name in namespace["pbmc"].obs_names
     )
-    spec = charts[3].to_dict()
-    records = spec["datasets"][points(spec)["data"]["name"]]
+    spec = namespace["matrix"].to_dict()
+    tables = [
+        rows
+        for rows in spec["datasets"].values()
+        if rows and "_column" in rows[0] and "_value" in rows[0]
+    ]
+    assert len(tables) == 1
+    records = tables[0]
     np.testing.assert_array_equal(
         np.array([row["_value"] for row in records]).reshape(10, 10),
         namespace["pbmc"].uns["dendrogram_bulk_labels"]["correlation_matrix"],

@@ -5,7 +5,11 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._data import coordinate_domain
-from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS
+from genome_spy.integrations.scanpy._style import (
+    FONT,
+    POINTS_TO_PIXELS,
+    zoom_point_size,
+)
 
 
 def build_variable_genes(
@@ -15,6 +19,7 @@ def build_variable_genes(
     log: bool,
     hover: bool,
     zoom: bool,
+    threshold_slider: bool,
     width: float | None,
     height: float | None,
 ) -> gs.TopLevelSpec:
@@ -40,10 +45,34 @@ def build_variable_genes(
             )
         # Scanpy uses the raw statistic's limits on both logarithmic panels.
         log_domains = [[0.95 * means.min(), 1.05 * means.max()], [low, high]]
+    cutoff = None
+    normalized = f"{statistic}_norm"
+    if threshold_slider:
+        scores = table[normalized].dropna().to_numpy()
+        if len(scores) < 2 or scores.min() == scores.max():
+            raise ValueError(
+                "gsc.pl.highly_variable_genes: threshold_slider needs a varying normalized score."
+            )
+        initial = float(f"{np.median(scores):.3g}")
+        initial = float(np.clip(initial, scores.min(), scores.max()))
+        cutoff = gs.param(
+            "hvg_cutoff",
+            value=initial,
+            bind=gs.binding_range(
+                min=float(scores.min()),
+                max=float(scores.max()),
+                name="Preview score cutoff: ",
+            ),
+        )
+    statuses = (
+        ["Above cutoff", "Below cutoff"]
+        if threshold_slider
+        else ["highly variable genes", "other genes"]
+    )
     colors = gs.Scale(
         type="ordinal",
-        domain=["highly variable genes", "other genes"],
-        range=["black", "grey"],
+        domain=statuses,
+        range=["#2563a6", "#cbd5e1"],
     )
     panels = []
     for index, field in enumerate((f"{statistic}_norm", statistic)):
@@ -58,9 +87,9 @@ def build_variable_genes(
                 )
             )
             label = (
-                "mean expressions of genes"
+                "Mean expression"
                 if axis == "x"
-                else f"{statistic} of genes ({'' if index == 0 else 'not '}normalized)"
+                else f"{'Normalized ' if index == 0 else ''}{statistic.removesuffix('s')}"
             )
             channel = gs.X if axis == "x" else gs.Y
             axes[axis] = (
@@ -71,30 +100,43 @@ def build_variable_genes(
                     nice=False,
                     zero=False,
                     zoom=zoom,
-                    name=f"hvg-{axis}-{index}",
                 )
                 .axis(title=label, domain=False)
             )
-        panel = (
-            gs.Chart(table)
-            .transform_filter(
+        source = gs.Chart(table)
+        if cutoff is not None:
+            source = source.transform_calculate(
+                _above=gs.expr.isValid(gs.datum[normalized])
+                & (gs.datum[normalized] >= cutoff),
+            ).transform_calculate(
+                _preview_status=gs.expr.if_(gs.datum._above, *statuses)
+            )
+        panel: gs.Chart | gs.LayerChart = (
+            source.transform_filter(
                 f"isValid(datum.means) && isValid(datum.{field})"
                 + (f" && datum.means > 0 && datum.{field} > 0" if log else "")
             )
-            .transform_collect(sort={"field": "_selected", "order": "descending"})
+            .transform_collect(
+                sort={
+                    "field": "_above" if cutoff is not None else "_selected",
+                    "order": "ascending",
+                }
+            )
             .mark_point(
                 filled=True,
-                size=POINTS_TO_PIXELS**2,
-                strokeWidth=POINTS_TO_PIXELS,
-                inwardStroke=False,
+                size=zoom_point_size(9, zoom),
+                strokeWidth=0,
+                minPickingSize=5,
                 clip=True,
                 tooltip={"handler": "default"} if hover else None,
             )
             .encode(
                 **axes,
                 key=gs.Key("_obs_id"),
-                fill=gs.Fill("_status:N", scale=colors).legend(gs.Legend(title=None)),
-                stroke=gs.Stroke("_status:N", scale=colors).legend(None),
+                fill=gs.Fill(
+                    "_preview_status:N" if cutoff is not None else "_status:N",
+                    scale=colors,
+                ).legend(gs.Legend(title=None)),
             )
             .properties(width=width, height=height)
         )
@@ -111,11 +153,52 @@ def build_variable_genes(
                         format=".4g",
                     ),
                 ]
+                + (
+                    [gs.Tooltip("_preview_status:N", title="Preview")]
+                    if cutoff is not None
+                    else []
+                )
             )
+        if cutoff is not None and index == 0:
+            rule = (
+                gs.Chart([{}])
+                .transform_calculate(_cutoff=cutoff)
+                .mark_rule(
+                    color="#64748b", size=1, strokeDash=[4, 4], clip=True, tooltip=None
+                )
+                .encode(y=axes["y"].field("_cutoff"))
+            )
+            panel = gs.layer(rule, panel).properties(width=width, height=height)
         panels.append(panel)
+    result: gs.HConcatChart | gs.VConcatChart = gs.hconcat(
+        *panels, spacing=0.3 * width
+    ).resolve_scale(x="independent", y="independent", fill="shared")
+    if cutoff is not None:
+        count = (
+            gs.Chart(table)
+            .transform_calculate(
+                _above=gs.expr.if_(
+                    gs.expr.isValid(gs.datum[normalized])
+                    & (gs.datum[normalized] >= cutoff),
+                    1,
+                    0,
+                )
+            )
+            .transform_aggregate(fields=["_above"], ops=["sum"], as_=["_count"])
+            .transform_calculate(
+                _label="datum._count + ' genes above cutoff (preview)'"
+            )
+            .mark_text(
+                align="left", baseline="middle", size=12, font=FONT, tooltip=None
+            )
+            .encode(x=gs.value(0), y=gs.value(0.5), text="_label:N")
+            .properties(width=2.3 * width, height=24)
+        )
+        result = gs.vconcat(result, count, spacing=8).add_params(cutoff)
     return (
-        gs.hconcat(*panels, spacing=0.3 * width)
-        .resolve_scale(x="independent", y="independent", fill="shared", stroke="shared")
+        result.resolve_scale(
+            x="independent", y="independent", fill="shared", stroke="shared"
+        )
         .resolve_legend(default="collected")
         .configure_axis(
             labelFont=FONT,
@@ -123,7 +206,7 @@ def build_variable_genes(
             labelFontSize=10 * POINTS_TO_PIXELS,
             titleFontSize=10 * POINTS_TO_PIXELS,
         )
-        .configure_view(stroke="black", strokeWidth=0.8 * POINTS_TO_PIXELS)
+        .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(
             orient="bottom",
             direction="horizontal",

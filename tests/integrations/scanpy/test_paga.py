@@ -34,6 +34,8 @@ def test_signature_retains_scanpy_defaults_except_omitted_matplotlib_axes():
         "width",
         "height",
         "palette",
+        "edge_slider",
+        "show_node_labels",
         "kwargs",
     }
 

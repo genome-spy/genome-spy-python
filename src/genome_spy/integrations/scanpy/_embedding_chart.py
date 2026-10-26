@@ -21,6 +21,7 @@ from genome_spy.integrations.scanpy._style import (
     EMBEDDING_MARKERS,
     POINTS_TO_PIXELS,
     EmbeddingStyle,
+    zoom_point_size,
 )
 
 
@@ -225,7 +226,7 @@ def _panel(
             size=gs.Size(f"_size_{index}:Q")
             .scale(
                 domain=[0, maximum_size],
-                range=[0, maximum_size * diameter**2],
+                range=[0, zoom_point_size(maximum_size * diameter**2, zoom)],
                 nice=False,
                 zero=True,
             )
@@ -274,7 +275,12 @@ def _panel(
                     size=gs.Size(f"_size_{index}:Q")
                     .scale(
                         domain=[0, maximum_size],
-                        range=[0, maximum_size * (diameter * factor) ** 2],
+                        range=[
+                            0,
+                            zoom_point_size(
+                                maximum_size * (diameter * factor) ** 2, zoom
+                            ),
+                        ],
                         nice=False,
                         zero=True,
                     )

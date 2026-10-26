@@ -27,6 +27,8 @@ def test_signature_preserves_scanpy_defaults_without_matplotlib_axes():
         "hover",
         "zoom",
         "show_values",
+        "series_select",
+        "ruler",
         "width",
         "height",
     }

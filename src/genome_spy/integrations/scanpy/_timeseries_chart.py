@@ -2,6 +2,7 @@
 
 from collections.abc import Collection, Mapping, Sequence
 from typing import Any
+from math import ceil
 
 import numpy as np
 
@@ -12,12 +13,16 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     vertical_highlights,
     zoom_axes,
     horizontal_tick_labels,
+    profile_ruler,
+    profile_segments,
+    series_focus,
 )
 from genome_spy.integrations.scanpy._style import (
     EMBEDDING_MARKERS,
     FONT,
     POINTS_TO_PIXELS as PT,
     native_scheme,
+    zoom_point_size,
 )
 from genome_spy.integrations.scanpy._timeseries_data import CONTEXT, prepare_timeseries
 
@@ -43,6 +48,11 @@ def build_timeseries(
     height: float | None,
     context: str = CONTEXT,
     xtick_labels: Mapping[float, str] | None = None,
+    series_select: bool = False,
+    ruler: bool = False,
+    realization_length: float | None = None,
+    run_select: bool = False,
+    connect: bool = False,
 ) -> gs.TopLevelSpec:
     """Return native points and guides from supplied profiles using Scanpy's defaults."""
     for name, value in {"xlabel": xlabel, "ylabel": ylabel}.items():
@@ -113,13 +123,33 @@ def build_timeseries(
     x, y = zoom_axes(x, y, enabled="xy" if zoom else False, name=None)
     shape, path_width = EMBEDDING_MARKERS[marker]
     size = 6 * (PT * path_width) ** 2
+    focus = None
+    opacity = gs.Expression("0.8")
+    if series_select:
+        focus, opacity = series_focus(
+            list(dict.fromkeys(prepared.table["_series"])), "_series"
+        )
+    source = gs.Chart(prepared.table)
+    run = None
+    if realization_length is not None and (run_select or connect):
+        source = source.transform_calculate(
+            _run=gs.expr.format(
+                gs.expr.floor(gs.datum._sample / realization_length) + 1, "d"
+            )
+        )
+        if run_select:
+            labels = [str(i + 1) for i in range(ceil(len(X) / realization_length))]
+            run, run_opacity = series_focus(
+                labels, "_run", name="simulation_run", title="Run: "
+            )
+            opacity = gs.expr.min(opacity, run_opacity)
     guide = (
         gs.Legend(
             title=None,
             orient="bottom",
             direction="horizontal",
             symbolSize=size,
-            symbolStrokeWidth=PT,
+            symbolStrokeWidth=0,
             symbolType=shape,
         )
         if prepared.legend
@@ -147,16 +177,16 @@ def build_timeseries(
         fill = fill.legend(guide if prepared.color_domain is None else None)
         stroke = stroke.legend(None)
     points = (
-        gs.Chart(prepared.table)
-        .transform_filter(
+        source.transform_filter(
             "isValid(datum._time) && isValid(datum._value)"
             + (" && isValid(datum._color)" if prepared.color_domain is not None else "")
         )
         .mark_point(
             filled=True,
-            size=size,
-            strokeWidth=PT,
+            size=zoom_point_size(size, zoom),
+            strokeWidth=0,
             inwardStroke=False,
+            minPickingSize=5,
             clip=True,
             tooltip={"handler": "default"} if hover else None,
         )
@@ -164,6 +194,12 @@ def build_timeseries(
             x=x, y=y, fill=fill, stroke=stroke, shape=gs.value(shape), key=gs.Key("_id")
         )
     )
+    if focus is not None or run is not None:
+        points = points.transform_calculate(_focus_opacity=opacity).encode(
+            opacity=gs.Opacity("_focus_opacity:Q").scale(None).legend(None)
+        )
+    else:
+        points = points.encode(opacity=gs.value(0.8))
     if prepared.color_domain is not None and guide is not None:
         first = prepared.table.iloc[0]
         visible = np.isfinite(
@@ -200,12 +236,29 @@ def build_timeseries(
             )
         )
     chart = gs.layer(points)
+    if connect:
+        lines = (
+            profile_segments(source, ["_series", "_run"], "_time", "_value")
+            .transform_calculate(_focus_opacity=opacity)
+            .mark_rule(size=1.5, strokeCap="round", clip=True, tooltip=None)
+            .encode(
+                x=x,
+                x2="_next_time:Q",
+                y=y,
+                y2="_next_value:Q",
+                color=gs.Color(**paint).legend(None),
+                opacity=gs.Opacity("_focus_opacity:Q").scale(None).legend(None),
+            )
+        )
+        chart = gs.layer(lines, points)
     if highlights:
         chart = chart + vertical_highlights(highlights, *prepared.highlight_y)
+    if ruler:
+        chart = chart.add_params(profile_ruler())
     result: gs.LayerChart | gs.SurroundChart = chart.properties(
         width=width,
         height=height,
-        view={"stroke": "black", "strokeWidth": 0.8 * PT},
+        view={"stroke": "transparent", "strokeWidth": 0},
     )
     if xtick_labels is not None:
         result = gs.surround(
@@ -215,6 +268,10 @@ def build_timeseries(
             ),
             spacing=0,
         )
+    if focus is not None:
+        result = result.add_params(focus)
+    if run is not None:
+        result = result.add_params(run)
     return result.configure_axis(
         labelFont=FONT,
         titleFont=FONT,

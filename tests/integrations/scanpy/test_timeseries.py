@@ -117,6 +117,8 @@ def test_subplot_keeps_explicit_upstream_arguments_and_native_defaults():
         "save",
         "hover",
         "zoom",
+        "series_select",
+        "ruler",
         "width",
         "height",
         "kwargs",

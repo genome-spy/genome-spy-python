@@ -12,12 +12,29 @@ import warnings
 import numpy as np
 import pandas as pd
 
+import genome_spy as gs
+
 from genome_spy.integrations.scanpy._data import number
 
 
 FONT = "Lato"
 POINTS_TO_PIXELS = 100 / 72
 GROUPED_FONT_SIZE = 10 * 0.833 * POINTS_TO_PIXELS
+
+
+def zoom_point_size(
+    size: float, zoom: bool, *, maximum: gs.Expression | None = None
+) -> float | gs.ExprRef:
+    """Return an area that grows gently on zoom, up to twice the initial diameter."""
+    if not zoom and maximum is None:
+        return size
+    area = (
+        gs.expr.min(gs.expr.pow(gs.Expression("zoomLevel"), 0.75), 4) * size
+        if zoom
+        else gs.Expression(str(size))
+    )
+    return gs.expr(gs.expr.min(area, maximum) if maximum is not None else area)
+
 
 # Scanpy scales each marker's path width by the square root of its size.
 EMBEDDING_MARKERS = {

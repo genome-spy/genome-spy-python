@@ -8,7 +8,13 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._data import coordinate_domain, number
-from genome_spy.integrations.scanpy._grid_interactions import with_values, zoom_axes
+from genome_spy.integrations.scanpy._grid_interactions import (
+    with_values,
+    zoom_axes,
+    profile_ruler,
+    profile_segments,
+    series_focus,
+)
 from genome_spy.integrations.scanpy._grouped_chart import _slot_labels
 from genome_spy.integrations.scanpy._matrix_chart import matrix_tiles
 from genome_spy.integrations.scanpy._paga_path_data import (
@@ -41,10 +47,16 @@ def _path_color(values: np.ndarray, scheme: str, *, colorbar: bool) -> gs.Color:
 
 
 def _path_track(
-    values: Any, name: str, color: gs.Color, samples: int, height: float, hover: bool
+    values: Any,
+    name: str,
+    color: gs.Color,
+    samples: int,
+    height: float,
+    hover: bool,
+    offset: int = 0,
 ) -> gs.Chart:
     """Stretch one original or smoothed annotation across the profile width, as Scanpy does."""
-    edges = np.linspace(-0.5, samples - 0.5, len(values) + 1)
+    edges = np.linspace(-0.5, samples - 0.5, len(values) + 1) - offset
     track = (
         gs.Chart(
             pd.DataFrame({"_start": edges[:-1], "_end": edges[1:], "_value": values})
@@ -57,6 +69,65 @@ def _path_track(
     if hover:
         track = track.encode(tooltip=[gs.Tooltip("_value", title=name)])
     return track
+
+
+def _group_track(
+    data: PagaPathData,
+    categories: list[str],
+    palette: tuple[str, ...],
+    *,
+    samples: int,
+    height: float,
+    hover: bool,
+    show_node_names: bool,
+    offset: int = 0,
+) -> gs.Chart | gs.LayerChart:
+    """Return a labeled group strip aligned to full or cropped path samples."""
+    group_values = np.asarray(categories)[data.groups]
+    group_color = (
+        gs.Color("_value:N")
+        .scale(type="ordinal", domain=categories, range=list(palette))
+        .legend(
+            gs.Legend(
+                title=data.group_key,
+                orient="bottom",
+                direction="horizontal",
+                symbolType="square",
+                values=list(dict.fromkeys(data.node_names)),
+            )
+        )
+    )
+    groups: gs.Chart | gs.LayerChart = _path_track(
+        group_values, data.group_key, group_color, samples, height, hover, offset
+    )
+    if show_node_names:
+        # The original group image keeps its own sample count after smoothing.
+        edges = data.boundaries * samples / len(data.groups) - 0.5 - offset
+        labels = (
+            gs.Chart(
+                pd.DataFrame(
+                    {"_start": edges[:-1], "_end": edges[1:], "_label": data.node_names}
+                )
+            )
+            .mark_text(
+                font=FONT,
+                size=10 * PT,
+                baseline="middle",
+                align="center",
+                squeeze=False,
+                paddingX=4,
+                clip=True,
+                tooltip=None,
+            )
+            .encode(
+                x=gs.X("_start:Q").axis(None),
+                x2="_end:Q",
+                y=gs.value(0.5),
+                text="_label:N",
+            )
+        )
+        groups = gs.layer(groups, labels).properties(height=height)
+    return groups
 
 
 def build_paga_path(
@@ -77,6 +148,8 @@ def build_paga_path(
     show_values: bool,
     width: float | None,
     height: float | None,
+    series_select: bool,
+    ruler: bool,
 ) -> gs.TopLevelSpec:
     """Reuse numeric tiles and native surround tracks for prepared path profiles."""
     default_width = 358.4 if show_colorbar else 448
@@ -139,52 +212,25 @@ def build_paga_path(
     tiles = tiles.transform_calculate(
         _x0="datum._x - 0.5", _x1="datum._x + 0.5"
     ).encode(x=gs.X("_x0:Q").axis(None), x2="_x1:Q", y=gs.Y("_y:I").axis(None))
+    focus = None
+    if series_select:
+        focus, opacity = series_focus(list(data.values.columns), "_row")
+        tiles = tiles.transform_calculate(_focus_opacity=opacity).encode(
+            opacity=gs.Opacity("_focus_opacity:Q").scale(None).legend(None)
+        )
     center = with_values(tiles, "_value") if show_values else tiles
+    if ruler:
+        center = center.add_params(profile_ruler())
     center = center.properties(width=width, height=height, name="paga-path-values")
-    group_values = np.asarray(categories)[data.groups]
-    group_color = (
-        gs.Color("_value:N")
-        .scale(type="ordinal", domain=categories, range=list(palette))
-        .legend(
-            gs.Legend(
-                title=data.group_key,
-                orient="bottom",
-                direction="horizontal",
-                symbolType="square",
-                values=list(dict.fromkeys(data.node_names)),
-            )
-        )
+    groups = _group_track(
+        data,
+        categories,
+        palette,
+        samples=samples,
+        height=height / genes,
+        hover=hover,
+        show_node_names=show_node_names,
     )
-    groups: gs.Chart | gs.LayerChart = _path_track(
-        group_values, data.group_key, group_color, samples, height / genes, hover
-    )
-    if show_node_names:
-        # The original group image keeps its own sample count after smoothing.
-        edges = data.boundaries * samples / len(data.groups) - 0.5
-        labels = (
-            gs.Chart(
-                pd.DataFrame(
-                    {"_start": edges[:-1], "_end": edges[1:], "_label": data.node_names}
-                )
-            )
-            .mark_text(
-                font=FONT,
-                size=10 * PT,
-                baseline="middle",
-                align="center",
-                squeeze=False,
-                paddingX=4,
-                clip=True,
-                tooltip=None,
-            )
-            .encode(
-                x=gs.X("_start:Q").axis(None),
-                x2="_end:Q",
-                y=gs.value(0.5),
-                text="_label:N",
-            )
-        )
-        groups = gs.layer(groups, labels).properties(height=height / genes)
     tracks = [groups.properties(name="paga-path-groups")]
     names = [data.group_key]
     for name in data.annotations:
@@ -252,6 +298,8 @@ def build_paga_path(
         .resolve_legend(color="collected")
         .configure_view(stroke="transparent", strokeWidth=0)
     )
+    if focus is not None:
+        chart = chart.add_params(focus)
     if title is not None:
         chart = chart.properties(
             title=gs.Title(
@@ -265,6 +313,10 @@ def build_paga_path_lines(
     data: PagaPathData,
     *,
     xlim: tuple[int | None, int | None],
+    categories: list[str],
+    palette: tuple[str, ...],
+    show_node_names: bool,
+    normalized: bool,
     title: str | None,
     title_fontsize: float | None,
     legend_fontsize: float | str | None,
@@ -272,6 +324,8 @@ def build_paga_path_lines(
     zoom: bool | Literal["xy"],
     width: float | None,
     height: float | None,
+    series_select: bool,
+    ruler: bool,
 ) -> gs.TopLevelSpec:
     """Connect adjacent prepared samples with native rules, keeping gaps and series separate."""
     values = path_line_values(data.values, xlim)
@@ -310,28 +364,26 @@ def build_paga_path_lines(
         gs.Y("_value:Q")
         .scale(domain=list(coordinate_domain(y_values, 0.05)), zero=False, nice=False)
         .axis(
-            title=f"{keys[0]} (a.u.)" if columns == 1 else None,
-            labels=False,
-            ticks=False,
+            title=(keys[0] if columns == 1 else "Value")
+            + (" (0–1)" if normalized else ""),
+            labels=True,
+            ticks=True,
             domain=False,
         ),
         enabled=zoom,
         name=None,
     )
-    guide = gs.Legend(title=None, orient="left", symbolSize=64) if columns > 1 else None
+    focus = None
+    opacity = gs.Expression("1")
+    if series_select:
+        focus, opacity = series_focus(keys, "_key")
+    guide = (
+        gs.Legend(title=None, orient="bottom", direction="horizontal", symbolSize=64)
+        if columns > 1
+        else None
+    )
     lines = (
-        gs.Chart(table)
-        .transform_window(
-            ops=["lead", "lead"],
-            fields=["_sample", "_value"],
-            as_=["_next_sample", "_next_value"],
-            groupby=["_key"],
-            sort={"field": "_sample"},
-        )
-        # Keep missing rows until after lead so gaps never become connecting edges.
-        .transform_filter(
-            "isValid(datum._value) && isValid(datum._next_value) && isValid(datum._next_sample)"
-        )
+        profile_segments(gs.Chart(table), ["_key"], "_sample", "_value")
         .mark_rule(
             size=1.5 * PT,
             strokeCap="round",
@@ -348,6 +400,10 @@ def build_paga_path_lines(
             .legend(guide),
         )
     )
+    if focus is not None:
+        lines = lines.transform_calculate(_focus_opacity=opacity).encode(
+            opacity=gs.Opacity("_focus_opacity:Q").scale(None).legend(None)
+        )
     if hover:
         lines = lines.encode(
             tooltip=[
@@ -358,12 +414,32 @@ def build_paga_path_lines(
                 gs.Tooltip("_next_value:Q", title="Next value", format=".4g"),
             ]
         )
-    chart = lines.properties(
+    if ruler:
+        lines = lines.add_params(profile_ruler())
+    chart: gs.TopLevelSpec = lines.properties(
         width=width,
         height=height,
         name="paga-path-lines",
-        view={"stroke": "black", "strokeWidth": 0.8 * PT},
+        view={"stroke": "transparent", "strokeWidth": 0},
     )
+    offset = slice(*xlim).indices(len(data.values))[0]
+    groups = _group_track(
+        data,
+        categories,
+        palette,
+        samples=len(data.values),
+        height=24,
+        hover=hover,
+        show_node_names=show_node_names,
+        offset=offset,
+    )
+    chart = (
+        gs.surround(chart, surround=gs.SurroundSides(bottom=[groups]), spacing=4)
+        .resolve_scale(color="independent")
+        .resolve_legend(color="collected")
+    )
+    if focus is not None:
+        chart = chart.add_params(focus)
     if title is not None:
         chart = chart.properties(
             title=gs.Title(

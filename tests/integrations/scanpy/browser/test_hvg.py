@@ -26,6 +26,19 @@ def test_both_qc_panels_match_registered_scanpy_points_axes_and_legends(
     with plt.rc_context({"figure.dpi": 100}):
         sc.pl.highly_variable_genes(data, log=log, show=False)
         figure = plt.gcf()
+        # Register Scanpy's positions using the deliberately reviewed native paint.
+        for index, ax in enumerate(figure.axes):
+            for artist, color in zip(
+                ax.collections, ["#2563a6", "#cbd5e1"], strict=True
+            ):
+                artist.set_facecolor(color)
+                artist.set_sizes([9 / (100 / 72) ** 2])
+                artist.set_linewidths([0])
+            ax.set_xlabel("Mean expression")
+            ax.set_ylabel(
+                ("Normalized " if index == 0 else "")
+                + ("variance" if flavor == "seurat_v3" else "dispersion")
+            )
         legend = [text.get_text() for text in figure.axes[0].get_legend().get_texts()]
         # Native guides are collected below the pair rather than over its points.
         figure.axes[0].get_legend().set_visible(False)
@@ -85,7 +98,7 @@ def test_both_qc_panels_match_registered_scanpy_points_axes_and_legends(
     }""",
         svg,
     )
-    assert fills == ["rgb(0, 0, 0)", "rgb(128, 128, 128)"]
+    assert fills == ["rgb(37, 99, 166)", "rgb(203, 213, 225)"]
     assert len([e for e in root.iter() if e.tag.endswith("circle")]) == 2 * len(
         data
     ) + len(legend)
@@ -98,7 +111,10 @@ def test_hover_zoom_and_offline_delivery(page, tmp_path, log):
     )
     spec = chart.to_dict()
     encoding = units(spec)[0]["encoding"]
-    bounds = render(page, chart)
+    for index, panel in enumerate(units(spec)):
+        for axis in ("x", "y"):
+            panel["encoding"][axis]["scale"]["name"] = f"hvg-{axis}-{index}"
+    bounds = render(page, spec)
     domains = [encoding[axis]["scale"]["domain"] for axis in ("x", "y")]
     coordinates = [2, 1.3]
     if log:

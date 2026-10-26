@@ -8,6 +8,55 @@ from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS as PT
 
 
+def series_focus(
+    labels: Collection[str],
+    field: str,
+    *,
+    name: str = "profile_focus",
+    title: str = "Focus: ",
+) -> tuple[gs.Parameter, gs.Expression]:
+    """Return a native dropdown and opacity expression that emphasize one series."""
+    all_series = ""
+    while all_series in labels:
+        all_series += "_"
+    focus = gs.param(
+        name,
+        value=all_series,
+        bind=gs.binding_select(
+            options=[all_series, *labels], labels=["All", *labels], name=title
+        ),
+    )
+    opacity = gs.expr.if_(
+        (focus == all_series) | (focus == gs.datum[field]), 0.85, 0.12
+    )
+    return focus, opacity
+
+
+def profile_segments(chart: gs.Chart, groups: list[str], x: str, y: str) -> gs.Chart:
+    """Pair neighboring profile values within each group, retaining missing-value gaps."""
+    return chart.transform_window(
+        ops=["lead", "lead"],
+        fields=[x, y],
+        as_=[f"_next{x}", f"_next{y}"],
+        groupby=groups,
+        sort={"field": x},
+    ).transform_filter(
+        f"isValid(datum.{y}) && isValid(datum._next{y}) && isValid(datum._next{x})"
+    )
+
+
+def profile_ruler() -> gs.Parameter:
+    """Return a native x ruler for reading aligned profile panels."""
+    return gs.ruler(
+        "profile_cursor",
+        encodings=["x"],
+        display="line",
+        extent="view",
+        persist=False,
+        mark=gs.RulerMarkConfig(stroke="#64748b", opacity=0.5, strokeWidth=1),
+    )
+
+
 def horizontal_tick_labels(ticks: Mapping[float, str], title: str | None) -> gs.Chart:
     """Return a native side track for named numeric ticks, following the shared x scale."""
     chart = (

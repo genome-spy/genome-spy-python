@@ -99,7 +99,13 @@ def test_complete_comparison_has_matched_domains_labels_and_native_guides(
         else {}
     )
     chart = gsc.pl.paga_compare(
-        a, legend_fontweight="normal", width=380, height=300, show=False, **options
+        a,
+        legend_fontweight="normal",
+        show_node_labels=True,
+        width=380,
+        height=300,
+        show=False,
+        **options,
     )
     spec = chart.to_dict()
     first = render(page, chart)

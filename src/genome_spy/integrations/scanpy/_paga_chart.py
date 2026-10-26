@@ -14,6 +14,7 @@ from genome_spy.integrations.scanpy._style import (
     POINTS_TO_PIXELS as PT,
     ColorData,
     color_bounds,
+    zoom_point_size,
 )
 
 CONTEXT = "gsc.pl.paga"
@@ -30,21 +31,40 @@ def build_paga_adjacency(
     show_values: bool,
     width: float | None,
     height: float | None,
+    labels: list[str] | None = None,
 ) -> gs.TopLevelSpec:
-    """Render stored adjacency with shared matrix tiles or native fixed-size stripplot points."""
+    """Render stored adjacency with shared tiles or labeled connectivity points."""
     from genome_spy.integrations.scanpy._matrix_chart import build_matrix
     from genome_spy.integrations.scanpy._paga_data import adjacency_points
 
     context = "gsc.pl.paga_adjacency"
     if not as_heatmap:
         points = adjacency_points(values, points)
+    if labels is not None:
+        points = points.assign(
+            _source_label=np.asarray(labels)[points["_x"]],
+            _target_label=np.asarray(labels)[
+                points["_y"] if as_heatmap else points["_target"]
+            ],
+        )
+    maximum = None
+    if as_heatmap:
+        # Keep tree dots inside their cells even in dense matrices.
+        maximum = gs.expr.pow(
+            0.6
+            * gs.expr.min(
+                gs.Expression("width * bandstep('x', width)"),
+                gs.Expression("height * bandstep('y', height)"),
+            ),
+            2,
+        )
+    size = zoom_point_size(16, bool(zoom), maximum=maximum)
     dots = gs.Chart(points).mark_point(
         filled=True,
         color="black",
-        size=PT**2,
-        stroke="black",
-        strokeWidth=PT,
-        inwardStroke=False,
+        size=size,
+        strokeWidth=0,
+        minPickingSize=5,
         clip=True,
         tooltip={"handler": "default"} if hover else None,
     )
@@ -58,6 +78,14 @@ def build_paga_adjacency(
                     format="d",
                 ),
             ]
+            + (
+                [
+                    gs.Tooltip("_source_label:N", title="Source"),
+                    gs.Tooltip("_target_label:N", title="Target"),
+                ]
+                if labels is not None
+                else []
+            )
             + (
                 []
                 if as_heatmap
@@ -83,20 +111,27 @@ def build_paga_adjacency(
         )
         x, y = zoom_axes(x, y, enabled=zoom, name=None)
         colors = gs.Scale(
-            type="ordinal", domain=["Adjacency", "Tree"], range=["gray", "black"]
+            type="ordinal", domain=["Adjacency", "Tree"], range=["#cbd5e1", "#2563a6"]
         )
-        return (
+        chart: gs.Chart | gs.SurroundChart = (
             dots.transform_filter("isValid(datum._y)")
             .encode(
-                x=x.axis(title=None),
-                y=y.axis(title=None),
-                fill=gs.Fill("_kind:N", scale=colors).legend(None),
+                x=x.axis(title="Source group", labels=labels is None),
+                y=y.axis(title="Connectivity"),
+                fill=gs.Fill("_kind:N", scale=colors).legend(
+                    gs.Legend(
+                        title=None,
+                        orient="bottom",
+                        direction="horizontal",
+                        symbolSize=36,
+                    )
+                ),
                 stroke=gs.Stroke("_kind:N", scale=colors).legend(None),
             )
             .properties(
                 width=width,
                 height=height,
-                view={"stroke": "black", "strokeWidth": 0.8 * PT},
+                view={"stroke": "transparent", "strokeWidth": 0},
             )
             .configure_axis(
                 labelFont=FONT,
@@ -106,12 +141,23 @@ def build_paga_adjacency(
                 titleFontWeight="normal",
             )
         )
+        if labels is not None:
+            from genome_spy.integrations.scanpy._grouped_chart import _slot_labels
+
+            chart = gs.surround(
+                chart,
+                surround=gs.SurroundSides(
+                    bottom=[_slot_labels(labels, x.axis(None), horizontal=True)]
+                ),
+                spacing=0,
+            )
+        return chart.configure_legend(labelFont=FONT, labelFontSize=10 * PT)
     return build_matrix(
         values,
         xlabel=None,
         ylabel=None,
-        xticks=None,
-        yticks=None,
+        xticks=labels,
+        yticks=labels,
         title=None,
         colorbar_shrink=0.5,
         color_map=color_map,
@@ -141,6 +187,8 @@ def build_paga(
     cmap: str,
     colorbar: bool,
     color_data: ColorData | None = None,
+    edge_slider: bool = False,
+    show_node_labels: bool = True,
 ) -> gs.TopLevelSpec:
     """Return native graph layers with shared coordinates, fixed marker sizes and optional navigation."""
     width = number(548 if width is None else width, "width", context=CONTEXT)
@@ -177,6 +225,24 @@ def build_paga(
     )
     x, y = zoom_axes(x, y, enabled="xy" if zoom else False, name=None)
     charts = []
+    cutoff = None
+    if edge_slider:
+        weights = [
+            float(edges["_weight"].max())
+            for edges in (solid, dashed)
+            if not edges.empty
+        ]
+        if not weights:
+            raise ValueError(
+                f"{CONTEXT}: edge_slider needs at least one stored edge above threshold."
+            )
+        cutoff = gs.param(
+            "paga_edge_cutoff",
+            value=0,
+            bind=gs.binding_range(
+                min=0, max=max(1, *weights), step=0.01, name="Displayed edge cutoff: "
+            ),
+        )
     edge_maximum = max(
         [1.0]
         + [float(edges["_width"].max()) for edges in (solid, dashed) if not edges.empty]
@@ -208,6 +274,8 @@ def build_paga(
                 .legend(None),
             )
         )
+        if cutoff is not None:
+            rules = rules.transform_filter(gs.datum._weight >= cutoff)
         if hover:
             rules = rules.encode(
                 tooltip=[
@@ -307,8 +375,11 @@ def build_paga(
         )
         .encode(text="_label:N")
     )
+    layers = [*charts, points]
+    if show_node_labels:
+        layers.append(labels)
     result = (
-        gs.layer(*charts, points, labels)
+        gs.layer(*layers)
         .encode(x=x, y=y)
         .resolve_scale(size="independent")
         .properties(
@@ -321,6 +392,8 @@ def build_paga(
         )
         .configure_legend(labelFont=FONT, labelFontSize=10 * PT)
     )
+    if cutoff is not None:
+        result = result.add_params(cutoff)
     if title is not None:
         result = result.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))
     return result
