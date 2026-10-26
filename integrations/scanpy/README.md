@@ -20,7 +20,8 @@ panels for stored PCA results.
 show stored gene-selection diagnostics without rerunning analysis.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
-The focused [UMAP](guides/umap.ipynb) and [expression](guides/expression.ipynb)
+The focused [UMAP](guides/umap.ipynb), [expression](guides/expression.ipynb),
+[PCA](guides/pca.ipynb) and [ranked-gene](guides/ranked.ipynb)
 guide notebooks each supply their rendered page and notebook download. The longer
 notebooks under `notebooks/` remain the development workflows. Documentation builds execute only
 the guide's page examples; `jupyter-only` cells are shown without running them.

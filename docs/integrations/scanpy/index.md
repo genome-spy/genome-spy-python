@@ -33,7 +33,11 @@ an embedding or change your analysis.
 
 Start with [UMAP and embeddings](umap.md) to plot, select cells and customize a chart.
 Use [expression plots](expression.md) to compare marker genes across cell groups
-with dotplots, matrixplots and heatmaps.
+with dotplots, matrixplots, heatmaps and clustermaps. That guide also covers
+numeric matrices, correlations, dendrograms and builders.
+
+Inspect stored [PCA diagnostics](pca.md) or plot [ranked genes](ranked.md) using
+results already computed by Scanpy.
 Check [supported plots and options](supported.md) for available calls and differences
 from Scanpy. Unsupported options raise an error.
 
@@ -41,7 +45,9 @@ from Scanpy. Unsupported options raise an error.
 :hidden:
 
 UMAP and embeddings <umap>
+PCA diagnostics <pca>
 Expression plots <expression>
+Ranked genes <ranked>
 Supported plots and options <supported>
 API reference <api>
 ```

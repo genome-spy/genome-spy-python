@@ -1311,7 +1311,9 @@ Integrations
   Scanpy
     Start here: analysis ownership, install, first replacement
     UMAP and embeddings: basic plots, select cells, customize
-    Expression plots: dotplot, matrixplot, heatmap, dendrograms
+    PCA diagnostics: loadings, variance ratios, overview
+    Expression plots: summaries, heatmaps, matrices, trees, builders
+    Ranked genes: stored scores and expression plots
     Supported plots and options: tested versions, differences, limits
     API reference
 ```
@@ -1336,7 +1338,7 @@ or customization. STATUS owns delivery states and the active queue.
 | UMAP and embeddings | Categorical/gene UMAP, linked selection and Python retrieval, category order/palettes, continuous bounds, outlines/stored neighbor edges. Extend with stored PCA/other 2D bases, cell/gene scatter and stored embedding density. Show explicit Scanpy preparation where results are absent. |
 | PCA diagnostics | Loadings, variance ratios and the composed PCA overview, using the supplied PCA results. Link back to the embedding guide for PCA scatter. |
 | Expression plots | The same marker dictionary in dotplot, matrixplot and cell heatmap; one explicit Scanpy group tree reused by all three; row zoom, dotplot ruler, optional gaps and zoomed values. Add concise DotPlot/MatrixPlot builder examples after the basic calls. |
-| Matrices and trees | Supplied numeric matrix, stored group correlations, standalone group dendrogram and cell/gene clustermap. Show optional values and zoom; distinguish stored trees from explicitly requested Python clustering. |
+| Matrices and trees (on the expression page) | Supplied numeric matrix, stored group correlations, standalone group dendrogram and cell/gene clustermap. Show optional values and zoom; distinguish stored trees from explicitly requested Python clustering. |
 | Ranked genes | Stored rank/score labels, ranking tables and ranked dotplot/matrixplot/heatmap calls; show fold-change or adjusted-p-value colors on grouped summaries. Compute rankings explicitly with Scanpy when the example needs statistics not already stored. |
 | Data checks | Highest-expression genes on counts; stored highly-variable-gene statistics with an optional cutoff preview; Scrublet score distributions with an optional threshold slider. Explain that previews do not change saved classifications. The legacy dispersion entry can share the variable-gene example. |
 | PAGA | Group and continuous node colors; graph/embedding comparison; adjacency heatmap and connectivity strips; supplied path as heatmap and lines. Use explicitly computed Scanpy PAGA and shared positions. |
@@ -1352,10 +1354,14 @@ example guide has not yet been extracted. As the guides replace development
 workflow sections, retire redundant examples through the existing clearance
 process rather than maintaining two user-facing versions.
 
-Each delivered row needs its own short notebook, live charts, working download,
+Keep related examples together: matrices and trees extend the expression page;
+PCA diagnostics and ranked genes have focused companion pages. Each delivered
+page needs its own notebook, live charts, working download,
 explicit preparation, fresh-kernel run and observed enabled interactions. Check
 normal and narrow widths. Small, bounded preparation such as the packaged PBMC
-group tree is allowed in the build and must be visible in the notebook; expensive
+group tree, density on 700 supplied 2D coordinates, or clustering the bounded
+700-cell × 10-marker clustermap is allowed in the build and must be explicit.
+Expensive
 embedding, differential-expression or graph analysis must use reviewed prepared
 inputs or be shown as a Jupyter-only step with matching prepared page data.
 

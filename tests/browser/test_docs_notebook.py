@@ -64,7 +64,12 @@ def _render_guide(page, monkeypatch, name):
         lambda route: route.fulfill(content_type="text/html", body=markup),
     )
     page.goto("http://guide.test/")
-    page.wait_for_function("guideApis.filter(Boolean).length === 3")
+    page.wait_for_function(
+        "count => guideApis.filter(Boolean).length === count", arg=len(specs)
+    )
+    page.evaluate(
+        "async () => { await document.fonts.ready; await new Promise(requestAnimationFrame); }"
+    )
     page.wait_for_function("""() => [...document.querySelectorAll('canvas')].every((c, i) =>
         Math.abs(c.getBoundingClientRect().width - guideApis[i].getLogicalCanvasSize().width) < 0.1)
     """)
@@ -193,7 +198,15 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
     y = canvas["y"] + bounds["y"] + fractions[1] * bounds["height"]
     page.mouse.move(x - 1, y - 1)
     page.wait_for_timeout(450)
-    page.mouse.move(x, y)
+    for dx, dy in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+        page.mouse.move(x + dx, y + dy)
+        page.wait_for_timeout(100)
+        if (
+            page.locator("table.attributes")
+            .get_by_text(dot["_gene"], exact=True)
+            .is_visible()
+        ):
+            break
     page.locator("table.attributes").get_by_text(dot["_gene"], exact=True).wait_for(
         state="visible"
     )
@@ -240,4 +253,25 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
         page.mouse.wheel(0, -800)
         page.wait_for_timeout(180)
     assert value_texts(exported)
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+
+@pytest.mark.parametrize("name", ["pca.ipynb", "ranked.ipynb"])
+def test_diagnostic_guide_charts_render(monkeypatch, page, name):
+    sc = pytest.importorskip("scanpy")
+    specs = _render_guide(page, monkeypatch, name)
+    assert page.locator("canvas").count() == len(specs)
+    assert page.locator(".message-box").count() == 0
+    exports = page.evaluate("""async () => Promise.all(guideApis.map(async api =>
+        (await api.imageExport.svg()).blob.text()))""")
+    assert all("<svg" in svg and "<text" in svg for svg in exports)
+    if name == "ranked.ipynb":
+        gene = sc.datasets.pbmc68k_reduced().uns["rank_genes_groups"]["names"][
+            "CD19+ B"
+        ][0]
+        assert gene in exports[0]
+        assert "CD19+ B" in exports[0]
+        assert all(gene in svg for svg in exports[1:])
+    else:
+        assert "PC1" in exports[0] and "PC2" in exports[0]
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
