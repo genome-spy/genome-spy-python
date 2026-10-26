@@ -159,6 +159,58 @@ update plus full SVG verification took 0.55 s. Expression access raised througho
 These are local measurements; generated reports, previews and execution state
 remain ignored. The benchmark source is retained for reproduction.
 
+**Native guides and Scrublet cutoff preview — verified (2026-10-26).**
+Implementation: `5eb7d0a`. Scrublet adds optional `threshold_slider=True`, with
+one native range control and collected key per batch. Both histograms share the
+preview cutoff. Wholly above-cutoff bins use the accent color; below-cutoff bins
+are muted and bins containing the cutoff stay neutral. Counts, denominators,
+stored scores and doublet calls are unchanged. A missing threshold starts at 0.5;
+the slider is off by default and uses steps of 0.001.
+
+DPT group plots now have observed-group keys and a native pseudotime guide.
+The simulation point legend is collected below the complete run-label axis.
+PAGA group colors use native named-category keys; numeric, gene and degree colors
+have native colorbars unless `colorbar=False`. `colorbar=True` now shows the guide,
+a deliberate improvement over the pinned upstream behavior. Component filtering
+preserves palette positions and shows only displayed groups in its key; group
+names that collide as strings reject before a position-cache write. The unused
+upstream automatic-guide flag was removed from preparation.
+
+On-data embedding labels retain their median anchors and share native text
+measurement, viewport filtering and `displace2d` in the existing embedding
+renderer. This serves PAGA comparisons and other categorical embeddings without
+another layout implementation. The expression notebook enables the Scrublet
+preview and demonstrates displaced labels. The existing Jupyter session was
+run and saved locally; committed source has no outputs or widget state.
+
+Verification: the broader semantic run passed 490 checks with one retained
+upstream expected failure; final focused reruns cover the revised PAGA helper,
+constant pseudotime, colliding group names and threshold edge cases. The affected
+Scrublet, simulation, DPT, PAGA, comparison and presentation browser checks passed
+across the initial run and corrected-guide/label reruns. They observe bin colors,
+rule coordinates, independent batches, hover, offline delivery, guide names and
+colors, below-axis legend placement and label offsets that reflow on zoom.
+The canonical expression workflow passed independently. Ruff, formatting and
+`mypy src/` passed.
+
+Evidence: [Scrublet behavior](../../tests/integrations/scanpy/test_scrublet.py),
+[native cutoff controls](../../tests/integrations/scanpy/browser/test_scrublet.py),
+[graph guides](../../tests/integrations/scanpy/browser/test_paga.py),
+[label reflow](../../tests/integrations/scanpy/browser/test_paga_compare.py),
+[axis/legend order](../../tests/integrations/scanpy/browser/test_sim.py), and the
+[stored-score resource check](../../tests/integrations/scanpy/benchmark_scrublet.py)
+with `--threshold-slider`. On this machine, 100,000 cells and 200,000 simulated
+scores across four batches produced 392 bins and a 91 KB JSON payload, using
+about 5.8 MB peak Python allocation. First paint took 5.29 s; cutoff update plus
+full SVG verification took 0.24 s. Expression access raised throughout. These
+are local measurements, not a pure interaction-latency benchmark. Generated
+reports and previews remain ignored. Other data preparation and resource limits
+are unchanged; native label layout operates on group medians, not all cells.
+
+This closes the requested native-guide slice. Publication review, remaining
+parameter coverage and released interactive legend adoption stay in their
+existing queues. No Core patch, custom legend or event bridge was added.
+
 The [documentation design](PLAN.md#documentation-delivery) records concise guides
 and one page/notebook example source; delivery remains planned after plot review.
 Retain the live scope until its remaining publication gates are verified.
