@@ -1200,7 +1200,8 @@ CSR/CSC graphs keep their stored edge order. LIL graphs use the same layout path
 after SciPy prepares compatible sparse storage; stored graphs remain unchanged.
 Solid links are muted gray so black labels remain readable. Labels sit eight
 pixels above their nodes. Numeric guides use the same 15-pixel width as matrix
-colorbars. Positions, connectivity weights and node sizes are unchanged.
+colorbars. Their titles sit beside the bars; native layout fits each bar to the
+plot height. Positions, connectivity weights and node sizes are unchanged.
 Core 1.2 rule and link marks do not support a separate edge border, so overlapping
 PAGA edges currently have no white outline.
 

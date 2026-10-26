@@ -328,7 +328,7 @@ def build_paga(
         if colorbar:
             legend = gs.Legend(
                 title=color_title,
-                gradientLength=height,
+                titleOrient="right",
                 gradientThickness=15,
                 gradientStrokeColor="black",
                 gradientStrokeWidth=0.8 * PT,

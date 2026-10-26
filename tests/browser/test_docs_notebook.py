@@ -117,6 +117,7 @@ def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
     for index in [1, 2, 3]:
         page.evaluate("i => window.api = guideApis[i]", index)
         assert sum(e.tag.endswith("linearGradient") for e in svg_root(page).iter()) == 1
+        assert page.evaluate("api.getLogicalCanvasSize().width") <= 786
     page.evaluate("window.api = guideApis[9]")
     page.locator("select").select_option(label="LYZ")
     opacity = {float(r.get("stroke-opacity", "1")) for r in edges()}

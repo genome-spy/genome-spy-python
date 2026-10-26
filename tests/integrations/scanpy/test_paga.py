@@ -548,6 +548,8 @@ def test_numeric_node_guides_are_native_and_can_be_hidden(color, colorbar):
         assert fill["legend"] is None
     else:
         assert fill["legend"]["title"] == color
+        assert fill["legend"]["titleOrient"] == "right"
+        assert "gradientLength" not in fill["legend"]
         assert fill["legend"]["gradientThickness"] == 15
 
 

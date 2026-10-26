@@ -301,6 +301,42 @@ def test_native_node_guide_names_and_colors_are_visible_without_node_labels(
         assert color in texts and len(gradients) == 1
 
 
+@pytest.mark.parametrize("color", ["score", "g1", "degree_solid"])
+@pytest.mark.parametrize("height", [120, 360])
+def test_numeric_colorbar_fits_plot_height_with_title_beside_it(page, color, height):
+    from tests.integrations.scanpy.browser.test_grid_interactions import (
+        position,
+        svg_root,
+    )
+
+    chart = gsc.pl.paga(
+        make_paga("obs_score"),
+        pos=POSITIONS,
+        color=color,
+        width=400,
+        height=height,
+        show_node_labels=False,
+        show=False,
+    )
+    bounds = render(page, chart)
+    root = svg_root(page)
+    bars = [
+        e
+        for e in root.iter()
+        if e.tag.endswith("rect")
+        and e.get("fill", "").startswith("url(#legend-gradient-")
+    ]
+    assert len(bars) == 1
+    bar = bars[0]
+    top, length = float(bar.get("y")), float(bar.get("height"))
+    assert top == pytest.approx(bounds["y"], abs=1.1)
+    assert top + length == pytest.approx(bounds["y"] + bounds["height"], abs=1.1)
+    title = next(e for e in root.iter() if e.tag.endswith("text") and e.text == color)
+    x, y = position(title)
+    assert x > float(bar.get("x")) + float(bar.get("width"))
+    assert y == pytest.approx(bounds["y"] + bounds["height"] / 2, abs=1.1)
+
+
 def test_displaced_label_avoids_its_actual_node_size_and_works_offline(page, tmp_path):
     from tests.integrations.scanpy.browser.test_grid_interactions import position
 

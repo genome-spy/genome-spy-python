@@ -245,6 +245,24 @@ This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.
 
+**PAGA numeric colorbar alignment — verified (2026-10-26).** The renderer fixed
+the ramp to the full plot height while its title added 16–17 pixels above it,
+pushing the bottom outside the plot. Numeric legends now use native automatic
+gradient sizing and `titleOrient="right"`. Scores, genes and degree colors share
+the correction, including PAGA comparisons. Data, domains, palette and bar
+thickness are unchanged; the title is beside the ramp.
+
+Verification: 155 PAGA/comparison semantic checks passed, with the retained C15
+upstream expected failure. Six new browser checks measure both ramp endpoints
+and the centered side title at 120/360-pixel plot heights; the regression failed
+on the previous 17-pixel offset. Ten further native guide, complete-chart,
+comparison and documentation browser checks passed, including guide width at
+normal/narrow page sizes. Ruff, `mypy src/` and the complete Sphinx rebuild
+passed. The shared renderer
+supplies the correction to existing guide/notebook calls without source edits
+or Core changes. The full repository suite and performance workloads were not
+rerun for this presentation fix. Publication and capability gates stay open.
+
 **Documentation — 51 live charts across eight guides.** The expanded UMAP and
 expression pages include stored PCA/scatter/density, numeric matrices,
 correlations, dendrograms, clustermap and both builders. Focused PCA-diagnostic
