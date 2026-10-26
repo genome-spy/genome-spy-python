@@ -44,7 +44,7 @@ automatic guide choices without creating Matplotlib figures.
 Largest-component views retain original node IDs and coordinates through the
 same renderer; their direct disconnected Scanpy reference is blocked by C15.
 PAGA adjacency heatmaps reuse the supplied-matrix renderer with native tree-edge
-points. Connectivity strips reuse the same legacy-key access with gray/black
+points. Connectivity strips reuse the same legacy-key access with light-gray/blue
 native points, stored source/target indices and per-row draw order; neither reads
 expression or computes graph analysis.
 PAGA comparison composes stored embedding points and group graphs with shared
@@ -122,15 +122,46 @@ optional features and new families in the existing backlog. The
 [publication review contract](PLAN.md#publication-review-of-the-implemented-scope)
 defines the review and package/documentation gates.
 
-**Additional presentation proposals — planned.** The user requested clearer
-variable-gene QC, time-series/simulation and PAGA views, with smaller overview
-points that grow on zoom where useful. The
-[proposal scope](PLAN.md#plot-presentation-proposals) records per-plot ideas and
-the optional variable-gene cutoff preview. These have not changed defaults or
-analysis behavior. Review concrete views before implementation. The
-[documentation design](PLAN.md#documentation-delivery) now records the concise
-guide structure, shared page/notebook source and acceptance criteria; plot review
-precedes documentation delivery. Retain this scope until delivery is verified.
+**Native presentation improvements — verified (2026-10-26).**
+The user approved the [native subset](PLAN.md#plot-presentation-proposals).
+Implementation is recorded in `5f6c07b`.
+Shared capped point growth now serves embeddings, variable-gene QC, supplied
+profiles/simulation and adjacency. HVG adds accent colors, selected-last drawing
+and an optional normalized-score cutoff preview with a native count. Saved
+selection remains unchanged; log/constant-score slider cases reject clearly.
+Profiles share optional native series focus and rulers. Simulation adds run focus
+and optional adjacent round-cap rules, sharing segment preparation with PAGA path;
+missing values and run boundaries remain gaps. Shuffled run controls reject.
+Adjacency adds explicit labels, larger bounded tree dots and a native edge-type
+legend. PAGA comparison uses compact cells and graph labels on hover. Optional
+PAGA edge filtering uses a native slider; degree colors reject it to avoid stale
+statistics. Path heatmaps and lines share group strips, gene focus and rulers;
+lines show their value axis and a collected bottom legend.
+
+Legend-click group linking awaits published native category/field selection;
+no Python/JavaScript click bridge is added. A native run selector and
+connecting rules do not infer a trajectory for ordinary supplied profiles.
+Verification: 553 targeted semantic/API/workflow checks passed, with two retained
+upstream expected failures. The affected browser suites passed 148 checks; a final
+19-check control/QC rerun passed after point-size/cutoff refinement. Ruff formatting,
+lint and `mypy src/` passed. Both canonical notebooks passed their workflow tests;
+the existing Jupyter sessions were run and saved locally. Local user zoom/value
+customizations remain separate from the output-free canonical notebook source.
+
+Evidence: [native controls](../../tests/integrations/scanpy/browser/test_presentation.py),
+[data and option checks](../../tests/integrations/scanpy/test_presentation.py),
+[canonical workflows](../../tests/integrations/scanpy/test_notebooks.py), and the
+[HVG resource check](../../tests/integrations/scanpy/benchmark_hvg.py)
+(`--threshold-slider` also checks a live cutoff/count). On this machine, 20,000
+genes over a 100,000-cell sparse AnnData shape used about 35 MB peak Python
+allocation and a 3.85 MB payload with the slider. First paint took 2.91 s; a cutoff
+update plus full SVG verification took 0.55 s. Expression access raised throughout.
+These are local measurements; generated reports, previews and execution state
+remain ignored. The benchmark source is retained for reproduction.
+
+The [documentation design](PLAN.md#documentation-delivery) records concise guides
+and one page/notebook example source; delivery remains planned after plot review.
+Retain the live scope until its remaining publication gates are verified.
 
 **The M13.a DotPlot and M13.b MatrixPlot builder previews are closed** within
 their documented scope. Both reuse family summaries/renderers and share group

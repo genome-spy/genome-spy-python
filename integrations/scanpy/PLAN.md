@@ -1235,24 +1235,24 @@ semantic zoom. Validate the above-threshold performance path before adopting it.
 
 ### Plot presentation proposals
 
-Review these proposals before publishing the guides. They are not accepted new
-defaults or implemented interactions. Use real data and the existing comparison
-document to show the current and proposed views. STATUS owns their review order
-and decisions.
+The user approved implementing the native subset on 26 October 2026. The table
+defines the presentation scope; STATUS records delivered behavior and remaining
+proposals. Use real data and the existing comparison document to review changes.
+Native capability limits do not justify custom event bridges or drawing substitutes.
 
 | Plot | Proposed appearance | Proposed interaction |
 | --- | --- | --- |
 | Highly variable genes | Pale gray background genes and one clear accent for selected genes; draw selected genes last. Shorter axis and legend titles. | Gentle, capped point growth on zoom. An optional score-cutoff slider updates both panels' preview colors and the gene count, with a cutoff line in the normalized-score panel. |
 | Timeseries | Smaller points, lighter outlines and clearer axis labels. Compare several genes in aligned panels when one overlaid view is crowded. | Emphasize one gene while keeping the others visible. Shared time navigation and a native ruler where the composition supports it. |
 | Timeseries subplot | Consistent gene colors, aligned axes and one collected legend when panels share its meaning. | Reuse the timeseries interactions; share navigation only when the coordinates mean the same thing. |
-| Simulation | Clear run labels and boundaries; consistent gene colors. Keep heatmap labels compact and values optional. | Reuse timeseries and matrix interactions. Review an optional gene/run chooser before adding it. |
+| Simulation | Clear run labels and boundaries; consistent gene colors. Keep heatmap labels compact and values optional. | Reuse timeseries and matrix interactions. Optional gene/run dropdowns emphasize their intersection. Optional connected profiles retain missing-value gaps and run boundaries; shuffled output rejects these run options. |
 | PAGA adjacency | Larger tree-edge dots over the heatmap. In point mode, label the group axis and connectivity axis and explain tree versus other edges with a native legend. Use group names where the stored mapping is available. | Capped dot growth on zoom. Review source/target group focus if labels and hover alone are insufficient. |
 | PAGA comparison | Much smaller embedding points at the overview; matching group colors across panels and fewer permanent labels. | Use the shared embedding renderer for point growth. Review linked group focus and an optional stored-edge cutoff control. |
 | PAGA path | Clear path order and group names; readable expression scale in line mode. Match group colors to the graph and embedding. | Focus one gene and read values along the path. Reuse matrix hover, zoom and fitted labels in heatmap mode. |
 
-Point growth uses native GenomeSpy geometric zoom or the existing gallery's
-zoom-based size expression. Choose one after checking overview size, x-only,
-y-only and combined zoom, maximum size, picking and legends. Keep explicit user
+Point growth uses the gallery's native zoom-based size expression, capped at four
+times the starting area (twice the diameter). Check overview size, x-only, y-only
+and combined zoom, maximum size, picking and legends. Keep explicit user
 sizes meaningful and preserve ratios where size encodes a measurement. Cap
 adjacency dots so they do not obscure the heatmap. Reuse a small helper across
 actual consumers if needed; do not add a styling or interaction framework.
@@ -1268,9 +1268,8 @@ reproduces it. Gene selection remains an explicit Python analysis step; use
 Scanpy for that computation. See the [Scanpy selection rules](https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.highly_variable_genes.html).
 
 The timeseries example uses stored S-phase scores, not elapsed time. Do not join
-those cells into a curve. Connected simulation profiles are a separate optional
-proposal for genuinely ordered samples; they must preserve missing values and
-never connect different realizations. Do not add smoothing, jitter, normalization
+those cells into a curve. Connected simulation profiles are optional for genuinely ordered samples; they
+must preserve missing values and never connect different realizations. Do not add smoothing, jitter, normalization
 or inferred trajectories as styling changes. Keep group gaps and numeric tile
 labels optional. Use released native capabilities; pending Core features do not
 justify local patches or duplicate drawing layers.
