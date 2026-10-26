@@ -140,6 +140,25 @@ neighbors and UMAP. The archive checksum comes from the
 Raw and prepared H5AD files stay in ignored caches; only plot data is embedded
 in the built documentation. No source dataset is added to Git.
 
+## Scanpy simulation examples
+
+The profiles guide displays Scanpy 1.11.5's packaged `krumsiek11()` simulation
+(640 samples × 11 genes, four runs of 160 samples), based on
+[Krumsiek et al. (2011)](https://doi.org/10.1371/journal.pone.0022649).
+Credit the model authors and Scanpy's simulation contributors. The stored
+simulation is loaded without rerunning it; five genes are shown. Sample names
+are made unique and integer highlight keys are stored as strings for H5AD,
+without changing values or row order. Scanpy explicitly prepares neighbors,
+diffusion components and DPT annotations for the later examples.
+The source table is supplied by Scanpy and is not vendored here. Its repository's
+copyright notice and BSD-3-Clause terms are retained in
+`LICENSES/SCANPY-BSD-3-Clause.txt`, including in the published documentation.
+
+The PAGA guide reuses the PBMC68k subset credited above. Scanpy explicitly
+prepares PAGA, graph positions and pseudotime; supplied UMAP coordinates and
+expression snapshots are retained. No new biological trajectory is claimed
+by the example's chosen group order.
+
 ## Bundled TCGA example tables
 
 | Files | Source and processing |

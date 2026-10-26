@@ -162,7 +162,10 @@ uv run jupyter lab integrations/scanpy/notebooks/
 ## Documentation guides
 
 Focused, output-free notebooks in [guides/](guides/) supply both the live pages
-and their downloads. Data checks use full Scanpy PBMC3k counts; the larger-data
+and their downloads. [PAGA](guides/paga.ipynb) covers networks, comparisons,
+adjacency and paths. [Profiles and simulations](guides/profiles.ipynb) covers
+supplied profiles, Krumsiek11 runs and DPT results, with native run/gene focus.
+Data checks use full Scanpy PBMC3k counts; the larger-data
 guide uses the separate 10x PBMC10k v3 cohort from Scanpy's tutorial. Attribution
 and processing are recorded in each notebook and [third-party notices](../../THIRD_PARTY_NOTICES.md).
 
@@ -177,8 +180,9 @@ The preparation command runs the notebooks' analysis cells and caches AnnData
 under ignored `tmp/scanpy-guide-data/`. It reuses matching inputs and rejects
 stale or corrupted caches during page builds. Scanpy-version and preparation-code
 changes require preparation again. CI runs the same command before Sphinx.
-Ordinary Sphinx builds read those files without downloads, Scrublet or embedding
-analysis. Downloaded notebooks run the shown Scanpy steps independently.
+Ordinary Sphinx builds read those files without downloads, Scrublet, PAGA/layout,
+DPT or embedding analysis. Downloaded notebooks run the shown Scanpy steps
+independently. The docs dependency group includes Scanpy's existing PAGA extra.
 
 ## Validation
 

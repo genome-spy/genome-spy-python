@@ -20,6 +20,8 @@ PCA_GUIDE = GUIDE.with_name("pca.ipynb")
 RANKED_GUIDE = GUIDE.with_name("ranked.ipynb")
 QUALITY_GUIDE = GUIDE.with_name("quality.ipynb")
 LARGER_GUIDE = GUIDE.with_name("larger_data.ipynb")
+PAGA_GUIDE = GUIDE.with_name("paga.ipynb")
+PROFILES_GUIDE = GUIDE.with_name("profiles.ipynb")
 
 
 @pytest.fixture
@@ -94,6 +96,8 @@ def test_umap_page_preserves_coordinates_and_prepares_density(
         (RANKED_GUIDE, "Ranked genes", "inspect-ranking-scores", 4),
         (QUALITY_GUIDE, "Data checks", "check-the-most-abundant-genes", 3),
         (LARGER_GUIDE, "A larger PBMC dataset", "inspect-the-original-counts", 4),
+        (PAGA_GUIDE, "PAGA graphs and paths", "plot-group-connections", 10),
+        (PROFILES_GUIDE, "Profiles and simulations", "plot-simulation-runs", 7),
     ],
 )
 def test_notebook_download_and_page_build_from_one_source(
@@ -160,7 +164,16 @@ def test_notebook_failures_identify_the_cell(notebook_extension, tmp_path):
 
 @pytest.mark.parametrize(
     "path",
-    [GUIDE, EXPRESSION_GUIDE, PCA_GUIDE, RANKED_GUIDE, QUALITY_GUIDE, LARGER_GUIDE],
+    [
+        GUIDE,
+        EXPRESSION_GUIDE,
+        PCA_GUIDE,
+        RANKED_GUIDE,
+        QUALITY_GUIDE,
+        LARGER_GUIDE,
+        PAGA_GUIDE,
+        PROFILES_GUIDE,
+    ],
 )
 def test_guide_source_has_no_saved_outputs(path):
     notebook = json.loads(path.read_text())
@@ -342,6 +355,75 @@ def test_real_data_pages_use_sparse_prepared_inputs(
         np.testing.assert_array_equal(
             [[r["_coord_0"], r["_coord_1"]] for r in rows], prepared.obsm["X_umap"]
         )
+
+
+@pytest.mark.parametrize("path, charts", [(PAGA_GUIDE, 10), (PROFILES_GUIDE, 7)])
+def test_graph_and_profile_pages_read_prepared_results(
+    notebook_extension, monkeypatch, path, charts
+):
+    sc = pytest.importorskip("scanpy")
+    notebook = json.loads(path.read_text())
+    if not notebook_extension._preparation_current(notebook, ROOT):
+        pytest.skip("Run integrations/scanpy/prepare_guide_data.py first")
+    files = notebook_extension._prepared_paths(notebook, ROOT)
+    pbmc = sc.read_h5ad(files["pbmc"])
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("A graph/profile page reran analysis, layout or simulation")
+
+    for module, name in [
+        (sc.pp, "neighbors"),
+        (sc.tl, "paga"),
+        (sc.pl, "paga"),
+        (sc.tl, "diffmap"),
+        (sc.tl, "dpt"),
+        (sc.tl, "sim"),
+        (sc.datasets, "pbmc68k_reduced"),
+        (sc.datasets, "krumsiek11"),
+    ]:
+        monkeypatch.setattr(module, name, forbidden)
+    markdown = notebook_extension._notebook_markdown(
+        path, download_path=path.name, bundle_url="/core.js"
+    )
+    specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
+    assert len(specs) == charts
+    if path == PAGA_GUIDE:
+        for spec in specs[:4]:
+            nodes = next(
+                rows for rows in spec["datasets"].values() if "_group" in rows[0]
+            )
+            assert len(nodes) == 10
+            np.testing.assert_array_equal(
+                [[r["_x"], r["_y"]] for r in nodes], pbmc.uns["paga"]["pos"]
+            )
+        rows = next(
+            rows for rows in specs[7]["datasets"].values() if "_coord_0" in rows[0]
+        )
+        np.testing.assert_array_equal(
+            [[r["_coord_0"], r["_coord_1"]] for r in rows], pbmc.obsm["X_umap"]
+        )
+    else:
+        simulation = sc.read_h5ad(files["simulation"])
+        assert simulation.shape == (640, 11)
+        assert simulation.obs_names.is_unique
+        assert "dpt_order_indices" in simulation.obs
+        genes = ["Gata2", "Gata1", "Cebpa", "Pu.1", "Gfi1"]
+        points = next(
+            rows for rows in specs[3]["datasets"].values() if "_series" in rows[0]
+        )
+        assert len(points) == 640 * len(genes)
+        for row in points:
+            assert row["_time"] == row["_sample"]
+            gene = simulation.var_names.get_loc(row["_series"])
+            assert row["_value"] == simulation.X[row["_sample"], gene]
+        tiles = next(
+            rows for rows in specs[6]["datasets"].values() if "_value" in rows[0]
+        )
+        assert len(tiles) == len(points)
+        order = simulation.obs["dpt_order_indices"].to_numpy()
+        values = simulation[:, genes].X[order]
+        for row in tiles:
+            assert row["_value"] == values[row["_x"], row["_y"]]
 
 
 def test_expression_page_reuses_one_explicit_tree(notebook_extension, monkeypatch):

@@ -1345,6 +1345,15 @@ or customization. STATUS owns delivery states and the active queue.
 | PAGA | Group and continuous node colors; graph/embedding comparison; adjacency heatmap and connectivity strips; supplied path as heatmap and lines. Use explicitly computed Scanpy PAGA and shared positions. |
 | Ordered profiles | Stored DPT groups/pseudotime and DPT expression; supplied time-series heatmap, points and subplot composition; stored simulation points/heatmap with optional run focus. Explain actual sample order and keep separate runs separate. |
 
+The PAGA guide shows group, gene, numeric-score and degree colors, a largest
+component, both adjacency modes, the linked graph/UMAP comparison and both path
+modes. Its basic network demonstrates the native edge cutoff. The profiles guide
+shows supplied heatmap/points/subplots, stored Krumsiek11 runs as points and a
+heatmap, and DPT groups/expression. Demonstrate native run/gene focus and fitted
+values where offered. Keep the PBMC score order distinct from simulation time
+and inferred pseudotime. Use the existing preparation cache for PAGA/layout/DPT;
+ordinary Sphinx builds must not compute those results or simulate new data.
+
 For each guide, adapt an existing working example rather than invent a new
 analysis. Reuse packaged data or a reviewed prepared fixture instead of invented
 cells or analysis results. Label simulations as simulations. A missing released

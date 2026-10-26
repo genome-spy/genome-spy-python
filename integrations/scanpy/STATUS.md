@@ -245,16 +245,18 @@ This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.
 
-**Documentation — 34 live charts across six guides.** The expanded UMAP and
+**Documentation — 51 live charts across eight guides.** The expanded UMAP and
 expression pages include stored PCA/scatter/density, numeric matrices,
 correlations, dendrograms, clustermap and both builders. Focused PCA-diagnostic
 and ranked-gene pages are implemented too. Data checks now use full PBMC3k counts;
 a larger-data guide uses the separate 10x PBMC10k v3 cohort. Page and notebook
-share one source. See [expanded guides](#m14e-expanded-guides) and
-[real-data coverage](#m14e-data-checks-and-larger-data).
-Next: PAGA and ordered profiles, with reviewed preparation inputs.
-Optional embedding variants and prepared t-SNE/diffusion/graph-layout
-examples remain in the checklist. These drafts are not a deployment or a claim
+share one source. Focused PAGA and profile/simulation guides now cover networks,
+comparisons, adjacency, paths, supplied profiles, stored simulation and DPT.
+See [expanded guides](#m14e-expanded-guides), [real-data coverage](#m14e-data-checks-and-larger-data)
+and [PAGA/profile coverage](#m14e-paga-profiles-and-simulations).
+Next: complete-ranking statistic-color examples and additional prepared 2D
+bases; remaining style reviews and publication checks retain their owners.
+Optional embedding variants remain in the checklist. These drafts are not a deployment or a claim
 that the preview shipped. Retain the live publication scope.
 
 **The M13.a DotPlot and M13.b MatrixPlot builder previews are closed** within
@@ -597,10 +599,58 @@ browser checks approach them through a one-pixel neighborhood. These are local
 observations, not portable performance promises or million-cell evidence.
 Reports, source archives, executed notebooks and images remain ignored/temporary.
 
-Next: the focused PAGA guide, then ordered profiles; review their preparation
-inputs and presentation before publishing. Full-suite testing was not repeated.
+The focused PAGA and ordered-profile guides are delivered below.
+Full-suite testing was not repeated.
 The existing publication and native capability gates remain open.
 **Clearance: retain.** No research or active plan is cleared.
+
+## M14.e PAGA, profiles and simulations
+
+Verified (2026-10-26) for the documented examples.
+The [PAGA notebook](guides/paga.ipynb) adds ten live examples: group, gene,
+numeric-score and graph-degree colors; largest component; adjacency heatmap and
+connectivity strips; graph/UMAP comparison; path heatmap and lines. The basic
+graph demonstrates the existing native edge-cutoff slider; path lines offer
+gene focus. Common graph options retain explicitly prepared positions without
+writing a position cache during plotting. All guides are independent downloads.
+
+The [profiles notebook](guides/profiles.ipynb) adds seven live examples: supplied
+time-series heatmap and points; categorical/numeric subplot composition; stored
+simulation points and heatmap; DPT groups/pseudotime and expression. The stored
+Krumsiek11 fixture supplies four 160-sample runs and eleven genes; five genes
+are shown. Run/gene menus, native connecting rules, zoom, rulers and fitted
+values reuse existing plot options. Rules stop at run boundaries. PBMC rows
+are explicitly ordered by stored S-phase score, not described as measured time.
+
+PAGA/layout and diffusion/DPT computation use explicit public Scanpy calls in
+preparation cells. The existing cache command and docs renderer are reused
+unchanged; page builds load results and never rerun graph/layout/DPT/simulation.
+The Krumsiek11 cache makes sample names unique and highlight keys strings for
+H5AD, retaining all numeric values and row order. Scanpy's loader still emits
+its documented duplicate-name warning before names are made unique. No warning
+filter or runtime adapter change was added. Model/source credit and the pinned
+Scanpy BSD notice accompany the rendered simulation data; the docs group now
+requests Scanpy's existing PAGA extra. No downloaded data is vendored.
+
+Evidence: 30 [documentation/cache/source checks](../../tests/test_docs_notebook.py)
+passed, including exact page/download source, stored graph/UMAP coordinates,
+simulation sample/value order and DPT-permuted heatmap values. Analysis, layout
+and simulation entry points raise during prepared-page tests. Four new
+[browser cases](../../tests/browser/test_docs_notebook.py) pass at 1,200 and 430
+pixels: native PAGA keys/colorbars, cutoff changes without moving nodes, path
+focus, intersecting simulation run/gene focus and values appearing on native
+zoom. Both notebooks ran in fresh kernels; executed files remain temporary.
+The broader previous guide checks cover unchanged embed/cache code. No new
+large-data resource benchmark or full repository suite was run for these docs.
+The full Sphinx rebuild passed with warnings treated as errors; native page
+layouts were inspected. Ruff and lock checks passed. The built wheel and site
+both contain the exact new Scanpy license notice. Public plotting code is
+unchanged. The three existing local notebook edits remain untouched.
+
+Next: complete-ranking statistic-color examples, then additional prepared 2D
+bases and optional variants in the checklist. Finish plot-by-plot styling review
+and publication checks before calling the integration released.
+**Clearance: retain.** No active or research plan is cleared.
 
 ## Dotplot and shared expression presentation review
 

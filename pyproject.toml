@@ -15,6 +15,7 @@ license-files = [
     "LICENSES/DATA-SOURCE-REPOSITORIES-MIT.txt",
     "LICENSES/GENOMESPY-MIT.txt",
     "LICENSES/LATO-OFL-1.1.txt",
+    "LICENSES/SCANPY-BSD-3-Clause.txt",
     "LICENSES/VEGA-LITE-BSD-3-Clause.txt",
     "LICENSES/VEGA-BSD-3-Clause.txt",
     "THIRD_PARTY_NOTICES.md",
@@ -65,7 +66,7 @@ scanpy-test = [
 ]
 docs = [
     "anndata>=0.11.0",
-    "scanpy==1.11.5",
+    "scanpy[paga]==1.11.5",
     "furo>=2024.8.6",
     "sphinx>=7.3",
     "myst-parser>=3.0",

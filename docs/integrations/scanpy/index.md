@@ -39,6 +39,9 @@ numeric matrices, correlations, dendrograms and builders.
 Inspect stored [PCA diagnostics](pca.md) or plot [ranked genes](ranked.md) using
 results already computed by Scanpy.
 
+Explore [PAGA graphs and paths](paga.md), or compare [ordered profiles and
+simulations](profiles.md), including simulation heatmaps and DPT plots.
+
 Use [data checks](quality.md) with Scanpy's full PBMC3k counts, or try
 [a larger PBMC dataset](larger_data.md) with 11,769 cells.
 Check [supported plots and options](supported.md) for available calls and differences
@@ -51,6 +54,8 @@ UMAP and embeddings <umap>
 PCA diagnostics <pca>
 Expression plots <expression>
 Ranked genes <ranked>
+PAGA graphs and paths <paga>
+Profiles and simulations <profiles>
 Data checks <quality>
 A larger dataset <larger_data>
 Supported plots and options <supported>

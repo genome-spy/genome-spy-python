@@ -81,6 +81,108 @@ def _render_guide(page, monkeypatch, name):
     return specs
 
 
+def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
+    pytest.importorskip("scanpy")
+    from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
+    from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
+
+    specs = _render_guide(page, monkeypatch, "paga.ipynb")
+    assert len(specs) == 10
+    page.evaluate("window.api = guideApis[0]")
+    root = svg_root(page)
+    symbols = [
+        p
+        for g in root.iter()
+        if g.get("data-mark-type") == "point" and not g.get("clip-path")
+        for p in g
+    ]
+    assert len(symbols) == 10
+    before = point_coordinates(page)[0]
+
+    def edges():
+        return [
+            r
+            for g in svg_root(page).iter()
+            if g.get("data-mark-type") == "rule" and g.get("clip-path")
+            for r in g
+        ]
+
+    count = len(edges())
+    assert count > 0
+    page.locator('input[type="range"]').evaluate(
+        "el => {el.value=1; el.dispatchEvent(new Event('input', {bubbles:true}));}"
+    )
+    assert len(edges()) < count
+    np.testing.assert_array_equal(point_coordinates(page)[0], before)
+    for index in [1, 2, 3]:
+        page.evaluate("i => window.api = guideApis[i]", index)
+        assert sum(e.tag.endswith("linearGradient") for e in svg_root(page).iter()) == 1
+    page.evaluate("window.api = guideApis[9]")
+    page.locator("select").select_option(label="LYZ")
+    opacity = {float(r.get("stroke-opacity", "1")) for r in edges()}
+    assert len(opacity) == 2 and min(opacity) < max(opacity)
+    assert page.evaluate("guideApis[7].getLogicalCanvasSize().width") <= 786
+
+
+def test_profiles_guide_run_gene_focus_and_heatmap_zoom(monkeypatch, page):
+    pytest.importorskip("scanpy")
+    from tests.integrations.scanpy.browser.test_grid_interactions import (
+        svg_root,
+        value_texts,
+    )
+
+    specs = _render_guide(page, monkeypatch, "profiles.ipynb")
+    assert len(specs) == 7
+    controls = page.locator("select")
+    assert controls.count() == 5
+    # The first control belongs to the supplied profiles; the next pair to simulation points.
+    controls.nth(1).select_option(label="Gata1")
+    controls.nth(2).select_option(label="2")
+    page.evaluate("window.api = guideApis[3]")
+    root = svg_root(page)
+    points = [
+        p
+        for g in root.iter()
+        if g.get("data-mark-type") == "point" and g.get("clip-path")
+        for p in g
+    ]
+    assert len(points) == 3200
+    assert sum(float(p.get("fill-opacity", "1")) == 0.85 for p in points) == 160
+    assert sum(float(p.get("fill-opacity", "1")) == 0.12 for p in points) == 3040
+    page.evaluate("window.api = guideApis[4]")
+    assert not value_texts(svg_root(page))
+    chart = page.locator("canvas").nth(4)
+    chart.scroll_into_view_if_needed()
+    bounds = page.evaluate("""() => {
+        const view = api.debug.getViewRoot().getDescendants()
+            .find(v => v.spec.encoding?.color?.field === '_value' && v.spec.mark?.type === 'rect');
+        window.simGrid = view;
+        const {x,y,width,height} = view.coords; return {x,y,width,height};
+    }""")
+    scroller = page.locator(".canvas-wrapper").nth(4)
+    scroller.evaluate(
+        "(el, x) => el.scrollLeft = Math.max(0, x-el.clientWidth/2)",
+        bounds["x"] + bounds["width"] / 2,
+    )
+    canvas = chart.bounding_box()
+    before = page.evaluate("simGrid.getScaleResolution('x').getDomain()")
+    page.mouse.move(
+        canvas["x"] + bounds["x"] + bounds["width"] / 2,
+        canvas["y"] + bounds["y"] + bounds["height"] / 2,
+    )
+    page.mouse.wheel(0, -2400)
+    page.wait_for_function(
+        "before => {const d=simGrid.getScaleResolution('x').getDomain(); return d[1]-d[0] < before[1]-before[0];}",
+        arg=before,
+    )
+    for _ in range(6):
+        if value_texts(svg_root(page)):
+            break
+        page.mouse.wheel(0, -800)
+        page.wait_for_timeout(200)
+    assert value_texts(svg_root(page))
+
+
 def test_data_check_guide_sliders_update_saved_results_preview(monkeypatch, page):
     sc = pytest.importorskip("scanpy")
     specs = _render_guide(page, monkeypatch, "quality.ipynb")
