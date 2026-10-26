@@ -292,7 +292,12 @@ def build_paga(
     colors: dict[str, Any]
     fill, stroke = gs.Fill("_group:N"), gs.Stroke("_group:N")
     legend: gs.Legend | None = gs.Legend(
-        title=group_key, values=nodes["_group"].tolist(), symbolSize=49
+        title=group_key,
+        values=nodes["_group"].tolist(),
+        symbolSize=49,
+        orient="bottom",
+        direction="horizontal",
+        columns=2,
     )
     if color_data is not None:
         colors = dict(type="ordinal", domain=group_labels, scheme=color_data.scheme)

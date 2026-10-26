@@ -1952,8 +1952,8 @@ def paga_compare(
         Reuse the embedding and PAGA plotting entries without computing analysis.
         With the PAGA group color, omitted positions are group medians in the
         selected embedding components. Other colors use cached PAGA positions.
-        Both panels share the embedding limits and optional navigation; colors,
-        point sizes and guides remain independent.
+        Both panels share the embedding limits and optional navigation. Colors
+        and point sizes stay independent; the group key sits below both views.
 
     Args:
         adata: AnnData with stored embedding coordinates and PAGA results.
@@ -2147,7 +2147,7 @@ def paga_compare(
             stroke="independent",
             size="independent",
         )
-        .resolve_legend(default="independent")
+        .resolve_legend(default="independent", fill="collected")
     )
     if common_title:
         chart = chart.properties(title=common_title)

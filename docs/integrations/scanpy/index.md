@@ -1210,7 +1210,7 @@ PAGA edges currently have no white outline.
 | degree_solid, degree_dashed | Use these strings as color keys. Compute weighted degrees from the displayed solid or dashed graph after thresholding, then normalize to 0–1. degree_dashed requires dashed_edges. Equal degrees have undefined normalization in Scanpy and raise a clear error. The existing graph helper preserves CSR/CSC edge order, including asymmetric weights. |
 | use_raw | Gene colors default to raw when present, otherwise X; False uses X. No layer or gene-symbol option is added. Reuse the grouped public getter and mean helpers; only the selected gene column is materialized. Resident dense/CSR/CSC and views follow the shared getter's limits. Ambiguous observation/gene names and CSS colors that also name annotations/genes reject. |
 | palette (native addition) | Group colors reuse the embedding palette resolver: an opaque CSS sequence or mapping, or a native scheme name. A supplied palette overrides saved colors without writing AnnData, and retains the full category domain when filtering components. Inactive for numeric/gene/degree colors. |
-| cmap, colorbar | Native continuous scheme, default viridis. colorbar=None or True adds a native guide for numeric observation, gene and degree colors. False hides the numeric guide. Group colors have a native categorical legend. These guide defaults deliberately differ from Scanpy 1.11.5. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
+| cmap, colorbar | Native continuous scheme, default viridis. colorbar=None or True adds a native guide for numeric observation, gene and degree colors. False hides the numeric guide. Group colors have a native categorical legend below the plot, arranged in two columns. These guide defaults deliberately differ from Scanpy 1.11.5. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
 | labels, groups | One string label per node, defaulting to category names. The deprecated groups alias overrides labels with Scanpy's warning. |
 | single_component | True shows the largest thresholded solid component by node count; ties choose the first component in original group order. Keep original node IDs and coordinates. Filtering a disconnected graph requires dashed_edges=None. Inactive when plot=False. |
 | node_size_scale, node_size_power | Preserve Scanpy's areas from stored group sizes divided by their median. With component filtering, the node count and median use displayed groups. Missing sizes use ones. Nodes retain fixed pixel sizes while zooming. |
@@ -1240,8 +1240,8 @@ The broader PAGA milestone remains open; see the maintained
 ### Compare cells and their PAGA graph
 
 `paga_compare` places a stored embedding beside the stored group graph. Both
-panels share the embedding's coordinate limits and optional zoom/pan, while
-colors, point sizes and guides remain independent:
+panels share the embedding's coordinate limits and optional zoom/pan. Colors
+and point sizes stay independent. The group key sits below both views:
 
 ```python
 chart = gsc.pl.paga_compare(

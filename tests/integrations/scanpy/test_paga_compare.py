@@ -234,7 +234,7 @@ def test_reuses_parent_data_labels_aliases_and_independent_color_scales():
         "stroke": "independent",
         "size": "independent",
     }
-    assert spec["resolve"]["legend"] == {"default": "independent"}
+    assert spec["resolve"]["legend"] == {"default": "independent", "fill": "collected"}
     assert all(
         points(embedding)["encoding"][axis]["scale"]["zoom"] for axis in ("x", "y")
     )

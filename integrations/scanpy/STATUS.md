@@ -207,6 +207,17 @@ are local measurements, not a pure interaction-latency benchmark. Generated
 reports and previews remain ignored. Other data preparation and resource limits
 are unchanged; native label layout operates on group medians, not all cells.
 
+**Legend visibility follow-up:** the notebook's 1,108-pixel comparison exceeded
+its 786-pixel visible output. Categorical PAGA keys now sit below the plot in two
+native columns. Comparisons collect the graph key below both views, and the
+notebook uses 300-pixel panels. A browser regression verifies long group labels,
+below-plot placement and a total width within 786 pixels. PAGA/comparison checks
+passed (154 checks, one retained upstream expected failure); Ruff and mypy passed.
+The workflow was rerun through the visible Jupyter tab. Its comparison canvas
+now measures 630 pixels within the 786-pixel output, with the complete native
+key visible. Six further guide/navigation browser checks passed. Local edits
+and execution outputs remain separate from the output-free committed source.
+
 This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.

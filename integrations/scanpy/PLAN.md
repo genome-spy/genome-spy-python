@@ -911,8 +911,9 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   selected-component group medians when color is the PAGA group key, cached
   positions for other colors, supplied positions, title/label precedence and
   add_pos behavior. Both native panels share the embedding limits and optional
-  x/y navigation; color, size and guides stay independent. Never infer an embedding
-  or recompute PAGA. Retain the existing parent rendering restrictions: on-data
+  x/y navigation; color and size scales stay independent. Collect the graph
+  guide on the comparison container; categorical keys sit below both views.
+  Never infer an embedding or recompute PAGA. Retain the existing parent rendering restrictions: on-data
   labels require explicit legend_fontweight="normal" with the bundled regular
   atlas; the pinned bold default errors. Support one color/component pair and
   reject custom margins, plot=False and unsupported parent options explicitly.

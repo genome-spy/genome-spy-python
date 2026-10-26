@@ -339,3 +339,36 @@ def test_on_data_labels_displace_and_reflow_on_zoom(page):
     after = label_offsets()
     assert set(after) == set(before)
     assert any(np.linalg.norm(after[key] - before[key]) > 1 for key in names)
+
+
+def test_long_group_key_fits_below_a_notebook_sized_comparison(page):
+    from tests.integrations.scanpy.browser.test_grid_interactions import position
+
+    a = make_compare()
+    names = [
+        "CD4+/CD45RA+/CD25- Naive T",
+        "CD4+/CD45RO+ Memory",
+        "CD8+ Cytotoxic T",
+        "CD14+ Monocyte",
+    ]
+    a.obs["cluster"] = a.obs["cluster"].cat.rename_categories(names)
+    chart = gsc.pl.paga_compare(
+        a, legend_fontweight="normal", width=300, height=300, show=False
+    )
+    render(page, chart)
+    assert page.evaluate("api.getLogicalCanvasSize().width") <= 786
+    root = svg_root(page)
+    key = [
+        e
+        for g in root.iter()
+        if g.get("data-mark-type") == "text" and not g.get("clip-path")
+        for e in g
+        if e.text in names
+    ]
+    assert {e.text for e in key} == set(names)
+    bottom = max(
+        float(e[0].get("y")) + float(e[0].get("height"))
+        for e in root.iter()
+        if e.tag.endswith("clipPath")
+    )
+    assert all(position(e)[1] > bottom for e in key)
