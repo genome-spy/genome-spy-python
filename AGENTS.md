@@ -83,3 +83,17 @@ explicitly asked.
 | `integrations/<library>/STATUS.md` | Current implementation, next slice, blockers, and retained evidence |
 | `integrations/<library>/PLAN.md` | Planning or extending a library integration; update status with implementation |
 | `plans/` | Optional ignored local context; may be absent. Tracked integration plans and status own current scope and delivery. |
+
+## GitHub review evidence
+
+- For PR/issue screenshots and recordings, use the authenticated GitHub CLI's
+  native `--attach` support; it does not require a browser login. Check
+  `gh pr comment --help` before assuming the installed CLI supports uploads.
+- The default `gh` on this machine is older. A working official CLI is cached at
+  `tmp/github-cli-2.103.2/gh_2.103.2_macOS_arm64/bin/gh` in this repository. Use
+  that binary when present, or a newer official CLI with `--attach` support.
+- Write multiline comment text to a temporary file, then run the capable binary:
+  `gh pr comment NUMBER --repo OWNER/REPO --body-file /private/tmp/comment.md --attach /absolute/demo.webm`.
+  The upload becomes a playable GitHub attachment. Verify the posted comment
+  contains its `github.com/user-attachments/assets/` URL. Keep media out of Git,
+  reuse configured CLI authentication, and never print tokens.
