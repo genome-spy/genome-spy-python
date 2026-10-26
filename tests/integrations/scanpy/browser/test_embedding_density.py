@@ -83,14 +83,15 @@ def test_default_palette_and_under_over_colors_use_native_point_encodings(page):
         assert sum(e.tag.endswith("circle") for e in layer.iter()) == 2
 
 
+@pytest.mark.parametrize("group", [["A", "B"], "A"])
 def test_hover_reports_stored_density_and_shared_zoom_including_background_cells(
-    page, tmp_path
+    page, tmp_path, group
 ):
     a = make_density()
     chart = gsc.pl.embedding_density(
         a,
         key="scores",
-        group=["A", "B"],
+        group=group,
         obs_id="cell_id",
         zoom=True,
         width=280,

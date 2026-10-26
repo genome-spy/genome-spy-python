@@ -411,6 +411,21 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 
 ## Review of recent native presentation changes
 
+### Layered embedding scale ownership
+
+Guide expansion exposed a rendering failure for a single-group density plot
+with zoom enabled. Several point layers shared a size scale whose `zoomLevel`
+parameter was local to a mark. The shared embedding renderer now gives layered
+marks independent native size scales, as outlined points already required.
+Explicit size domains/ranges, point order, coordinates and input data stay the
+same. No Core patch, custom geometry or event handler is involved.
+
+Verification: 329 targeted documentation/embedding/scatter/density/outline checks
+passed, and the density browser regression passed for both one and two groups.
+It observes foreground/background hover, navigation and offline HTML. Regression
+source: [density browser checks](../../tests/integrations/scanpy/browser/test_embedding_density.py).
+Ruff and `mypy src/` passed. Broader integration/release gates remain open.
+
 Three Sol reviewers independently checked `f479fab..1b53fea` on 2026-10-26 for
 reuse, self-containment, readability, correctness and YAGNI. Their scopes covered
 shared point sizing/labels/embedding helpers, QC/profile/simulation controls,

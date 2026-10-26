@@ -356,13 +356,14 @@ def _panel(
                 font=style.font,
             ).encode(x=x.field("x"), y=y.field("y"))
         )
-    result = (gs.layer(*layers) if len(layers) > 1 else layers[0]).properties(
-        width=style.width, height=style.height
-    )
+    # Size ranges use each mark's zoom, so layers keep their own size scales.
+    result = (
+        gs.layer(*layers).resolve_scale(size="independent")
+        if len(layers) > 1
+        else layers[0]
+    ).properties(width=style.width, height=style.height)
     if source:
         result = result.properties(**source)
-    if style.outline_width is not None:
-        result = result.resolve_scale(size="independent")
     # Only the first panel edits the shared brush bounds.
     if selection is not None and index == 0:
         result = brush_owner(result, selection, prepared.basis)
