@@ -31,6 +31,8 @@ jobs:
       # Example modules that back the gallery need the example runtime
       # (pandas/numpy) plus the docs toolchain.
       - run: uv sync --locked --group docs --group dev
+      - name: Prepare Scanpy guide data
+        run: uv run integrations/scanpy/prepare_guide_data.py
       # Render real chart screenshots for the gallery cards.
       - name: Render gallery thumbnails
         run: |

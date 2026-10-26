@@ -30,6 +30,11 @@ def _render_guide(page, monkeypatch, name):
     """Render a notebook's charts with the shipped bundle for observed checks."""
     monkeypatch.syspath_prepend(str(ROOT / "docs/_ext"))
     extension = importlib.import_module("genomespy_notebook")
+    notebook = json.loads((ROOT / "integrations/scanpy/guides" / name).read_text())
+    if extension._prepared_paths(notebook, ROOT) and not extension._preparation_current(
+        notebook, ROOT
+    ):
+        pytest.skip("Run integrations/scanpy/prepare_guide_data.py first")
     markdown = extension._notebook_markdown(
         ROOT / "integrations/scanpy/guides" / name,
         download_path=name,
@@ -74,6 +79,120 @@ def _render_guide(page, monkeypatch, name):
         Math.abs(c.getBoundingClientRect().width - guideApis[i].getLogicalCanvasSize().width) < 0.1)
     """)
     return specs
+
+
+def test_data_check_guide_sliders_update_saved_results_preview(monkeypatch, page):
+    sc = pytest.importorskip("scanpy")
+    specs = _render_guide(page, monkeypatch, "quality.ipynb")
+    assert len(specs) == 3
+    sliders = page.locator('input[type="range"]')
+    assert sliders.count() == 2
+    saved = sc.read_h5ad(ROOT / "tmp/scanpy-guide-data/quality/hvg.h5ad")
+    before = saved.var["highly_variable"].copy()
+    sliders.nth(0).evaluate(
+        "(el) => {el.value=1; el.dispatchEvent(new Event('input', {bubbles:true}));}"
+    )
+    count = int((saved.var["dispersions_norm"] >= 1).sum())
+    page.wait_for_function(
+        "async count => (await (await guideApis[1].imageExport.svg()).blob.text()).includes(count + ' genes above cutoff (preview)')",
+        arg=count,
+    )
+
+    def bins():
+        root = ET.fromstring(
+            page.evaluate(
+                "async () => (await guideApis[2].imageExport.svg()).blob.text()"
+            )
+        )
+        return [
+            r
+            for g in root.iter()
+            if g.get("data-mark-type") == "rect" and g.get("clip-path")
+            for r in g
+        ]
+
+    original = bins()
+    sliders.nth(1).evaluate(
+        "(el) => {el.value=0.7; el.dispatchEvent(new Event('input', {bubbles:true}));}"
+    )
+    updated = bins()
+    assert [r.get("fill") for r in original] != [r.get("fill") for r in updated]
+    assert [[r.get(k) for k in ["x", "y", "width", "height"]] for r in original] == [
+        [r.get(k) for k in ["x", "y", "width", "height"]] for r in updated
+    ]
+    reloaded = sc.read_h5ad(ROOT / "tmp/scanpy-guide-data/quality/hvg.h5ad")
+    assert reloaded.var["highly_variable"].equals(before)
+
+
+def test_larger_data_guide_hover_zoom_and_point_growth(monkeypatch, page):
+    pytest.importorskip("scanpy")
+    from scipy.spatial import cKDTree
+
+    specs = _render_guide(page, monkeypatch, "larger_data.ipynb")
+    assert len(specs) == 4
+    rows = next(iter(specs[2]["datasets"].values()))
+    assert len(rows) == 11537
+    coordinates = np.array([[r["_coord_0"], r["_coord_1"]] for r in rows])
+    nearest, _ = cKDTree(coordinates).query(coordinates, k=2)
+    isolated = rows[int(nearest[:, 1].argmax())]
+    page.evaluate("""() => {
+        window.largePoints = () => guideApis[2].debug.getViewRoot().getDescendants()
+            .find(v => v.spec.mark?.type === 'point' && v.spec.encoding?.x?.field === '_coord_0');
+        window.largeDomains = () => ['x','y'].map(c => largePoints().getScaleResolution(c).getDomain());
+    }""")
+    chart = page.locator("canvas").nth(2)
+    chart.scroll_into_view_if_needed()
+    bounds = page.evaluate("""() => {
+        const {x,y,width,height} = largePoints().coords; return {x,y,width,height};
+    }""")
+    domains = page.evaluate("largeDomains()")
+    fraction = [
+        (isolated[f"_coord_{i}"] - low) / (high - low)
+        for i, (low, high) in enumerate(domains)
+    ]
+    local_x = bounds["x"] + fraction[0] * bounds["width"]
+    page.locator(".canvas-wrapper").nth(2).evaluate(
+        "(el, x) => el.scrollLeft = Math.max(0, x - el.clientWidth / 2)", local_x
+    )
+    canvas = chart.bounding_box()
+    x = canvas["x"] + local_x
+    y = canvas["y"] + bounds["y"] + (1 - fraction[1]) * bounds["height"]
+    page.mouse.move(x - 1, y - 1)
+    page.wait_for_timeout(400)
+    tooltip_id = (
+        page.locator("table.attributes")
+        .get_by_text(isolated["_obs_id"], exact=True)
+        .first
+    )
+    for dx, dy in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+        page.mouse.move(x + dx, y + dy)
+        page.wait_for_timeout(100)
+        if tooltip_id.is_visible():
+            break
+    tooltip_id.wait_for(state="visible", timeout=2000)
+
+    def radii():
+        root = ET.fromstring(
+            page.evaluate(
+                "async () => (await guideApis[2].imageExport.svg()).blob.text()"
+            )
+        )
+        return [
+            float(p.get("r"))
+            for g in root.iter()
+            if g.get("data-mark-type") == "point" and g.get("clip-path")
+            for p in g
+            if p.tag.endswith("circle")
+        ]
+
+    before = radii()
+    assert len(before) == 2 * len(rows)
+    page.mouse.wheel(0, -450)
+    page.wait_for_function(
+        "before => largeDomains()[0][1]-largeDomains()[0][0] < before[0][1]-before[0][0]",
+        arg=domains,
+    )
+    assert min(radii()) > max(before)
 
 
 def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):

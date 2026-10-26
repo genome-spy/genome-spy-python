@@ -1341,6 +1341,7 @@ or customization. STATUS owns delivery states and the active queue.
 | Matrices and trees (on the expression page) | Supplied numeric matrix, stored group correlations, standalone group dendrogram and cell/gene clustermap. Show optional values and zoom; distinguish stored trees from explicitly requested Python clustering. |
 | Ranked genes | Stored rank/score labels, ranking tables and ranked dotplot/matrixplot/heatmap calls; show fold-change or adjusted-p-value colors on grouped summaries. Compute rankings explicitly with Scanpy when the example needs statistics not already stored. |
 | Data checks | Highest-expression genes on counts; stored highly-variable-gene statistics with an optional cutoff preview; Scrublet score distributions with an optional threshold slider. Explain that previews do not change saved classifications. The legacy dispersion entry can share the variable-gene example. |
+| Larger real data | Use full PBMC3k counts for data checks and the separate 10x PBMC10k v3 cohort for count summaries, cell QC, marker UMAP and PCA variance. Show explicit filtering/normalization/analysis and retain sparse expression. Verify actual input sizes, selected-column access, complete charts, hover/zoom and local resource costs. Record provenance; do not commit downloaded or prepared datasets. |
 | PAGA | Group and continuous node colors; graph/embedding comparison; adjacency heatmap and connectivity strips; supplied path as heatmap and lines. Use explicitly computed Scanpy PAGA and shared positions. |
 | Ordered profiles | Stored DPT groups/pseudotime and DPT expression; supplied time-series heatmap, points and subplot composition; stored simulation points/heatmap with optional run focus. Explain actual sample order and keep separate runs separate. |
 
@@ -1388,6 +1389,15 @@ notebook must run independently with explicit preparation and tested versions.
 Add examples only when their plotting APIs are implemented. The
 ordinary Sphinx build must not run unbounded analysis or downloads. A static page
 can run hover/brush/count; Python subset retrieval requires a live kernel.
+
+For the count/Scrublet and larger-data guides, run
+`uv run integrations/scanpy/prepare_guide_data.py` explicitly before Sphinx.
+Notebook metadata names the ignored H5AD inputs; preparation uses the notebook's
+own code, and page builds load those inputs while showing that code. Source,
+Scanpy-version and file hashes prevent silent reuse of stale/corrupt results.
+Downloaded notebooks perform the same visible preparation in a fresh kernel.
+Keep this build helper in the Scanpy workspace and rendering in the existing
+notebook extension; no production plotting code depends on either.
 
 The documentation design is ready to implement when the navigation and UMAP page
 layout are reviewed, the page/notebook source approach is demonstrated, every

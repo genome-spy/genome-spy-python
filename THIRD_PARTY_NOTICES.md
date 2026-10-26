@@ -126,6 +126,20 @@ Euclidean group tree, and plotting coordinates. `tools/prepare_pbmc_gallery_data
 the source checksum is retained in the bundle. The CC BY 4.0 text is in
 `LICENSES/CC-BY-4.0.txt`.
 
+The Scanpy data-check guide uses the full raw PBMC3k counts loaded through
+`scanpy.datasets.pbmc3k()` (2,700 cells × 32,738 genes). Scanpy prepares the
+normalization, variable-gene statistics and Scrublet results explicitly.
+
+The larger-data guide uses the [10x Genomics PBMC10k v3 dataset](https://www.10xgenomics.com/datasets/10-k-pbm-cs-from-a-healthy-donor-v-3-chemistry-3-standard-3-0-0),
+Cell Ranger 3.0.0 (11,769 cells × 33,538 genes), licensed CC BY 4.0.
+Credit 10x Genomics. Its filtered feature-matrix archive is read by
+`scanpy.read_10x_mtx`; the guide filters cells/genes, calculates quality metrics,
+normalizes/log-transforms counts, selects variable genes and computes PCA,
+neighbors and UMAP. The archive checksum comes from the
+[Scanpy tutorial source](https://github.com/scverse/scanpy-tutorials/blob/897eef59b945f88f9c86715656286796eea43853/tutorial_pearson_residuals.ipynb).
+Raw and prepared H5AD files stay in ignored caches; only plot data is embedded
+in the built documentation. No source dataset is added to Git.
+
 ## Bundled TCGA example tables
 
 | Files | Source and processing |

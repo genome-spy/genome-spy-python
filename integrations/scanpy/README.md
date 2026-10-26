@@ -159,6 +159,27 @@ uv sync --dev --extra scanpy --group scanpy-test
 uv run jupyter lab integrations/scanpy/notebooks/
 ```
 
+## Documentation guides
+
+Focused, output-free notebooks in [guides/](guides/) supply both the live pages
+and their downloads. Data checks use full Scanpy PBMC3k counts; the larger-data
+guide uses the separate 10x PBMC10k v3 cohort from Scanpy's tutorial. Attribution
+and processing are recorded in each notebook and [third-party notices](../../THIRD_PARTY_NOTICES.md).
+
+Prepare their inputs explicitly before building the docs (Python 3.11+):
+
+```sh
+uv run integrations/scanpy/prepare_guide_data.py
+uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+```
+
+The preparation command runs the notebooks' analysis cells and caches AnnData
+under ignored `tmp/scanpy-guide-data/`. It reuses matching inputs and rejects
+stale or corrupted caches during page builds. Scanpy-version and preparation-code
+changes require preparation again. CI runs the same command before Sphinx.
+Ordinary Sphinx builds read those files without downloads, Scrublet or embedding
+analysis. Downloaded notebooks run the shown Scanpy steps independently.
+
 ## Validation
 
 [Validation sources](../../tests/integrations/scanpy/) contain the tests,

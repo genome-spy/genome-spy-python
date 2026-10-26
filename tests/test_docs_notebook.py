@@ -18,6 +18,8 @@ GUIDE = ROOT / "integrations/scanpy/guides/umap.ipynb"
 EXPRESSION_GUIDE = GUIDE.with_name("expression.ipynb")
 PCA_GUIDE = GUIDE.with_name("pca.ipynb")
 RANKED_GUIDE = GUIDE.with_name("ranked.ipynb")
+QUALITY_GUIDE = GUIDE.with_name("quality.ipynb")
+LARGER_GUIDE = GUIDE.with_name("larger_data.ipynb")
 
 
 @pytest.fixture
@@ -90,6 +92,8 @@ def test_umap_page_preserves_coordinates_and_prepares_density(
         (EXPRESSION_GUIDE, "Expression plots", "heatmap", 9),
         (PCA_GUIDE, "PCA diagnostics", "show-the-pca-overview", 3),
         (RANKED_GUIDE, "Ranked genes", "inspect-ranking-scores", 4),
+        (QUALITY_GUIDE, "Data checks", "check-the-most-abundant-genes", 3),
+        (LARGER_GUIDE, "A larger PBMC dataset", "inspect-the-original-counts", 4),
     ],
 )
 def test_notebook_download_and_page_build_from_one_source(
@@ -103,6 +107,15 @@ def test_notebook_download_and_page_build_from_one_source(
     guide = tmp_path / "integrations/scanpy/guides" / notebook.name
     guide.parent.mkdir(parents=True)
     shutil.copyfile(notebook, guide)
+    content = json.loads(notebook.read_text())
+    prepared = notebook_extension._prepared_paths(content, ROOT)
+    if prepared and not notebook_extension._preparation_current(content, ROOT):
+        pytest.skip("Run integrations/scanpy/prepare_guide_data.py first")
+    for path in prepared.values():
+        target = tmp_path / path.relative_to(ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
+        shutil.copyfile(path.with_suffix(".sha256"), target.with_suffix(".sha256"))
     (source / "conf.py").write_text(
         'extensions = ["myst_parser", "genomespy_notebook"]\n'
         'myst_enable_extensions = ["colon_fence"]\n'
@@ -145,7 +158,10 @@ def test_notebook_failures_identify_the_cell(notebook_extension, tmp_path):
         )
 
 
-@pytest.mark.parametrize("path", [GUIDE, EXPRESSION_GUIDE, PCA_GUIDE, RANKED_GUIDE])
+@pytest.mark.parametrize(
+    "path",
+    [GUIDE, EXPRESSION_GUIDE, PCA_GUIDE, RANKED_GUIDE, QUALITY_GUIDE, LARGER_GUIDE],
+)
 def test_guide_source_has_no_saved_outputs(path):
     notebook = json.loads(path.read_text())
     assert "widgets" not in notebook["metadata"]
@@ -155,6 +171,177 @@ def test_guide_source_has_no_saved_outputs(path):
         if cell["cell_type"] == "code":
             assert cell["outputs"] == []
             assert cell["execution_count"] is None
+
+
+def test_prepared_inputs_skip_analysis_and_detect_stale_data(
+    notebook_extension, tmp_path, monkeypatch
+):
+    """Prepared pages load matching data and fail before executing analysis."""
+    ad = pytest.importorskip("anndata")
+    pytest.importorskip("scanpy")
+    data = tmp_path / "tmp/input.h5ad"
+    data.parent.mkdir()
+    ad.AnnData(np.ones((2, 3))).write_h5ad(data)
+    notebook = {
+        "metadata": {"genomespy": {"prepared_data": {"adata": "tmp/input.h5ad"}}},
+        "cells": [
+            {
+                "cell_type": "code",
+                "source": ["raise RuntimeError('analysis ran')"],
+                "metadata": {"tags": ["prepare-data"]},
+            },
+            {
+                "cell_type": "code",
+                "source": ["assert adata.shape == (2, 3)"],
+                "metadata": {},
+            },
+        ],
+    }
+    path = tmp_path / "example.ipynb"
+    path.write_text(json.dumps(notebook))
+
+    def render():
+        return notebook_extension._notebook_markdown(
+            path, download_path=path.name, bundle_url="/core.js", root=tmp_path
+        )
+
+    with pytest.raises(ValueError, match="Missing or stale prepared data"):
+        render()
+    signature = notebook_extension._preparation_digest(notebook)
+    data.with_suffix(".sha256").write_text(
+        f"{signature}\n{notebook_extension._file_digest(data)}\n"
+    )
+    assert "analysis ran" in render()
+    with monkeypatch.context() as changed_version:
+        changed_version.setattr(
+            notebook_extension, "version", lambda name: "new-version"
+        )
+        with pytest.raises(ValueError, match="Missing or stale prepared data"):
+            render()
+    # New analysis invalidates a cached file even when its bytes are unchanged.
+    notebook["cells"][0]["source"] = ["raise RuntimeError('new analysis ran')"]
+    path.write_text(json.dumps(notebook))
+    with pytest.raises(ValueError, match="Missing or stale prepared data"):
+        render()
+    path.write_text(path.read_text().replace("new analysis ran", "analysis ran"))
+    data.write_bytes(b"corrupted data")
+    with pytest.raises(ValueError, match="Missing or stale prepared data"):
+        render()
+
+
+@pytest.mark.parametrize("filename", ["../input.h5ad", "input.h5ad", "tmp/input.csv"])
+def test_prepared_paths_stay_in_ignored_cache(notebook_extension, tmp_path, filename):
+    notebook = {"metadata": {"genomespy": {"prepared_data": {"adata": filename}}}}
+    with pytest.raises(ValueError, match="H5AD files inside tmp/"):
+        notebook_extension._prepared_paths(notebook, tmp_path)
+
+
+def test_preparation_command_reuses_matching_inputs(
+    notebook_extension, monkeypatch, tmp_path
+):
+    """The explicit command runs analysis once and restores its working folder."""
+    sc = pytest.importorskip("scanpy")
+    spec = importlib.util.spec_from_file_location(
+        "prepare_guide_data", ROOT / "integrations/scanpy/prepare_guide_data.py"
+    )
+    command = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(command)
+    monkeypatch.setattr(command, "ROOT", tmp_path)
+    monkeypatch.setattr(sc.settings, "_datasetdir", sc.settings.datasetdir)
+    monkeypatch.setattr("sys.argv", ["prepare_guide_data.py", "example"])
+    guide = tmp_path / "integrations/scanpy/guides/example.ipynb"
+    guide.parent.mkdir(parents=True)
+    guide.write_text(
+        json.dumps(
+            {
+                "metadata": {
+                    "genomespy": {"prepared_data": {"adata": "tmp/input.h5ad"}}
+                },
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "metadata": {"tags": ["prepare-data"]},
+                        "source": [
+                            "import anndata as ad\nimport numpy as np\nadata = ad.AnnData(np.ones((2, 3)))"
+                        ],
+                    }
+                ],
+            }
+        )
+    )
+    cwd = Path.cwd()
+    command.main()
+    assert Path.cwd() == cwd
+    target = tmp_path / "tmp/input.h5ad"
+    stamp = target.stat().st_mtime_ns
+    command.main()
+    assert target.stat().st_mtime_ns == stamp
+    assert notebook_extension._preparation_current(
+        json.loads(guide.read_text()), tmp_path
+    )
+    monkeypatch.setattr("sys.argv", ["prepare_guide_data.py", "../../../outside"])
+    with pytest.raises(SystemExit):
+        command.main()
+
+
+@pytest.mark.parametrize("path, charts", [(QUALITY_GUIDE, 3), (LARGER_GUIDE, 4)])
+def test_real_data_pages_use_sparse_prepared_inputs(
+    notebook_extension, monkeypatch, path, charts
+):
+    sc = pytest.importorskip("scanpy")
+    from scipy.sparse import csc_matrix, csr_matrix, issparse
+
+    notebook = json.loads(path.read_text())
+    if not notebook_extension._preparation_current(notebook, ROOT):
+        pytest.skip("Run integrations/scanpy/prepare_guide_data.py first")
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("A prepared page downloaded data or reran analysis")
+
+    for module, name in [
+        (sc.pp, "scrublet"),
+        (sc.pp, "highly_variable_genes"),
+        (sc.pp, "pca"),
+        (sc.pp, "neighbors"),
+        (sc.tl, "umap"),
+        (sc.datasets, "pbmc3k"),
+        (sc, "read_10x_mtx"),
+    ]:
+        monkeypatch.setattr(module, name, forbidden)
+    toarrays = {csr_matrix: csr_matrix.toarray, csc_matrix: csc_matrix.toarray}
+    dense_shapes = []
+
+    def selected_columns(matrix, *args, **kwargs):
+        assert matrix.shape[1] <= 20, (
+            "Plotting densified an unselected expression matrix"
+        )
+        dense_shapes.append(matrix.shape)
+        return toarrays[type(matrix)](matrix, *args, **kwargs)
+
+    for matrix_type in toarrays:
+        monkeypatch.setattr(matrix_type, "toarray", selected_columns)
+    markdown = notebook_extension._notebook_markdown(
+        path, download_path=path.name, bundle_url="/core.js"
+    )
+    specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
+    assert len(specs) == charts
+    assert dense_shapes
+    assert max(rows for rows, _ in dense_shapes) == (
+        2700 if path == QUALITY_GUIDE else 11769
+    )
+    files = notebook_extension._prepared_paths(notebook, ROOT)
+    counts = sc.read_h5ad(files["counts" if path == QUALITY_GUIDE else "raw"])
+    assert counts.shape == ((2700, 32738) if path == QUALITY_GUIDE else (11769, 33538))
+    assert issparse(counts.X)
+    if path == LARGER_GUIDE:
+        prepared = sc.read_h5ad(files["adata"])
+        assert prepared.shape == (11537, 20292)
+        assert isinstance(prepared.X, csr_matrix)
+        rows = next(iter(specs[2]["datasets"].values()))
+        assert len(rows) == 11537
+        np.testing.assert_array_equal(
+            [[r["_coord_0"], r["_coord_1"]] for r in rows], prepared.obsm["X_umap"]
+        )
 
 
 def test_expression_page_reuses_one_explicit_tree(notebook_extension, monkeypatch):

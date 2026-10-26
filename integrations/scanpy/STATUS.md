@@ -245,13 +245,15 @@ This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.
 
-**Documentation — 27 live charts across four guides.** The expanded UMAP and
+**Documentation — 34 live charts across six guides.** The expanded UMAP and
 expression pages include stored PCA/scatter/density, numeric matrices,
 correlations, dendrograms, clustermap and both builders. Focused PCA-diagnostic
-and ranked-gene pages are implemented too. Page and notebook share one source.
-See [coverage and evidence](#m14e-expanded-guides).
-Next: data checks, then PAGA and ordered profiles, with reviewed preparation
-inputs. Optional embedding variants and prepared t-SNE/diffusion/graph-layout
+and ranked-gene pages are implemented too. Data checks now use full PBMC3k counts;
+a larger-data guide uses the separate 10x PBMC10k v3 cohort. Page and notebook
+share one source. See [expanded guides](#m14e-expanded-guides) and
+[real-data coverage](#m14e-data-checks-and-larger-data).
+Next: PAGA and ordered profiles, with reviewed preparation inputs.
+Optional embedding variants and prepared t-SNE/diffusion/graph-layout
 examples remain in the checklist. These drafts are not a deployment or a claim
 that the preview shipped. Retain the live publication scope.
 
@@ -540,10 +542,65 @@ offline HTML. Ruff and `mypy src/` passed. The full repository suite and new lar
 resource workloads were not rerun; examples use the bounded packaged workload.
 Generated exports, screenshots and executed notebooks remain temporary.
 
-Next: the data-check guide, beginning with stored variable-gene statistics;
-review count/Scrublet inputs before publishing those examples. PAGA and ordered
+The data-check and larger-data guides are delivered below. PAGA and ordered
 profiles follow their preparation and presentation review. Other optional
 embedding examples retain their checklist owner. **Clearance: retain.**
+
+## M14.e data checks and larger data
+
+Verified (2026-10-26): [data checks](guides/quality.ipynb) adds count-percentage
+boxes, variable-gene cutoff previews and Scrublet threshold previews on the full
+Scanpy PBMC3k dataset: **2,700 × 32,738**, rather than the 700-cell reduced fixture.
+The notebook computes statistics explicitly with public Scanpy calls. Sliders
+change browser previews, leaving saved selections and doublet calls unchanged.
+
+[A larger dataset](guides/larger_data.ipynb) adds full-count summaries, cell QC
+scatter, two marker UMAP panels and PCA variance on **10x PBMC10k v3**. This is a
+separate cohort used in Scanpy's official tutorial, read with `sc.read_10x_mtx`;
+it is not a packaged Scanpy fixture. Its checksum-verified archive contains
+**11,769 × 33,538** counts. Explicit filtering leaves **11,537 × 20,292** for
+normalization, variable-gene selection, PCA, neighbors and UMAP. Counts and
+processed expression remain sparse; plotting retains supplied coordinates.
+Attribution and processing are in the notebooks and third-party notices.
+
+The explicit [preparation command](prepare_guide_data.py) executes those same
+notebook cells once and writes ignored H5AD inputs. The existing notebook docs
+extension reads matching caches and shows preparation code without running it.
+Source/version and file hashes reject stale/corrupt data. CI prepares inputs
+before Sphinx; ordinary page builds perform no dataset download, Scrublet or
+embedding analysis. The downloadable notebooks run independently in Python
+3.11+. No runtime adapter imports the preparation command or docs extension.
+
+Evidence: [page/cache/source checks](../../tests/test_docs_notebook.py) passed
+24 checks, covering downloads matching the notebook source, output-free files,
+safe cache paths, stale versions/code/files, cache reuse, preserved coordinates
+and selected-column densification. Real-data checks skip with an explicit
+preparation instruction when ignored inputs are absent; small cache tests run
+without external datasets. [Browser checks](../../tests/browser/test_docs_notebook.py)
+passed all 12 cases across six guides at 1,200 and 430 pixels, including actual
+HVG/Scrublet control changes and PBMC10k hover, zoom and point growth. Both new
+notebooks completed in fresh kernels. The complete Sphinx build passed with
+warnings treated as errors; Ruff passed. Public library code is unchanged.
+
+Local PBMC10k measurements (macOS arm64, Scanpy 1.11.5, Core 1.2.0): two marker
+UMAP panels produced **3.06 MB JSON**, with **33.7 MB peak traced Python
+allocation** and 2.58 s creation/serialization under allocation tracing.
+Highest-expression summaries produced 1.02 MB JSON, using **613.8 MB** extra
+Python allocation and 1.93 s. These scopes exclude input loading/Scanpy analysis;
+full sparse normalization copies remain substantial. Peak process RSS while
+holding both input objects and plotting was 1.52 GB. No full expression matrix
+was densified. The existing embedding benchmark's native browser helper measured
+1.22 s first paint and 0.042 s wheel-to-domain change, with 17.6 MB retained JS
+heap. A single isolated hover probe took 0.34 s after dwell; this is not a hover
+latency distribution. Tiny overview points have pixel-sensitive picking, so the
+browser checks approach them through a one-pixel neighborhood. These are local
+observations, not portable performance promises or million-cell evidence.
+Reports, source archives, executed notebooks and images remain ignored/temporary.
+
+Next: the focused PAGA guide, then ordered profiles; review their preparation
+inputs and presentation before publishing. Full-suite testing was not repeated.
+The existing publication and native capability gates remain open.
+**Clearance: retain.** No research or active plan is cleared.
 
 ## Dotplot and shared expression presentation review
 
