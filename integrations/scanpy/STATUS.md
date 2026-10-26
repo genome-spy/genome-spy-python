@@ -245,13 +245,15 @@ This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.
 
-**Documentation — first slice implemented.** The [documentation design](PLAN.md#documentation-delivery)
-now has an integrations landing page, a short Scanpy start page and a live UMAP
-guide with a notebook download from one source. The compatibility facts and API
-reference have their own pages. See [delivery and remaining work](#m14e-first-documentation-slice).
-Next: review the page design, then extract the focused expression guide. PAGA
-and data-check guides follow their plot reviews. This draft is not a deployment
-or a claim that the preview shipped. Retain the live publication scope.
+**Documentation — UMAP and expression starters implemented.** The
+[example checklist](PLAN.md#example-checklist) now names eight focused guides
+drawn from the existing workflows and Scanpy tutorials. The live expression page
+adds dotplot, matrixplot and heatmap, reusing one explicit Scanpy group tree.
+Page and notebook share one source. See [delivery and remaining work](#m14e-expression-guide-and-example-checklist).
+Next: PCA diagnostics and the remaining embedding examples, then matrices/trees.
+Ranked-gene, data-check, PAGA and ordered-profile guides remain planned, following
+their plot/preparation reviews. These drafts are not a deployment or a claim that
+the preview shipped. Retain the live publication scope.
 
 **The M13.a DotPlot and M13.b MatrixPlot builder previews are closed** within
 their documented scope. Both reuse family summaries/renderers and share group
@@ -405,7 +407,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M11 trajectories/graphs/series | In progress; supplied-series/simulation, DPT-expression and both adjacency previews closed; PAGA/compare available and path heatmap implemented | DPT/PAGA direct-reference gates, comparison corrections and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
 | M13 builders | In progress; DotPlot and MatrixPlot previews closed | Both share concrete group layout and their existing functional statistics/renderers, with upstream/native/workflow/resource checks. StackedViolin and remaining styles/constants stay open. |
-| M14 compatibility/docs/release | In progress; Core 1.2 adopted | Native layout previews are closed for their recorded scope. The first M14.e page/notebook rendering slice is implemented below; page design review, expression/PAGA/QC guides, compatibility closure and release gates remain open. |
+| M14 compatibility/docs/release | In progress; Core 1.2 adopted | Native layout previews are closed for their recorded scope. M14.e has live UMAP and expression starter guides and an eight-guide checklist; expanded examples, design review, compatibility closure and release gates remain open. |
 
 ## Review of recent native presentation changes
 
@@ -449,11 +451,51 @@ Executed notebooks, exports and screenshots remain temporary. Ruff and
 `mypy src/` passed. Tests: [source/build](../../tests/test_docs_notebook.py) and
 [browser behavior](../../tests/browser/test_docs_notebook.py).
 
-Remaining: user review of this first page layout, a focused expression notebook
-and guide, later PAGA/data-check guides, compatibility prose editing and the
-parent publication gates. Python subset retrieval uses the normal live widget;
+The expression starter is delivered below. Remaining: page layout review,
+expanded examples, compatibility prose editing and the parent publication gates.
+Python subset retrieval uses the normal live widget;
 the static page offers selection/count only. Core upgrades and the parallel UMAP
 design review remain separate. **Clearance: retain; no plan is eligible for removal.**
+
+## M14.e expression guide and example checklist
+
+The [plan checklist](PLAN.md#example-checklist) now maps the implemented families
+to focused guides. The current UMAP page remains the first rendering proof, with
+its other embedding examples still to extract. This is a guide inventory, not a
+new promise of full Scanpy support or a set of empty navigation entries.
+
+The [expression notebook](guides/expression.ipynb) supplies its live page and
+download through the existing renderer. Its markers come from the canonical
+development workflow and Scanpy's core plotting tutorial. One visible
+`sc.tl.dendrogram(pbmc, groupby="bulk_labels")` call uses the packaged PCA
+coordinates; all three plots reuse the stored result. The page build permits this
+small, bounded preparation. No embeddings, rankings, downloads or widgets run
+during the build. Optional heatmap gaps and values are explicit arguments.
+
+| Guide | Current state and next increment |
+| --- | --- |
+| UMAP and embeddings | Starter implemented; category/color/outline/edge, other stored bases, scatter and density examples remain to extract. |
+| PCA diagnostics | Ready: stored loadings, variance ratios and overview already run in the development workflow. |
+| Expression plots | Basic dotplot/matrixplot/heatmap implemented; short builder examples remain planned. |
+| Matrices and trees | Ready: numeric matrix, stored correlations, standalone tree and clustermap already have working examples. |
+| Ranked genes | Planned: extract stored ranking and statistic-colored summaries; review bounded preparation first. |
+| Data checks | Planned: review packaged/prepared counts, saved scores and optional cutoff previews. |
+| PAGA | Planned: extract graph, comparison, adjacency and path examples after presentation/input review. |
+| Ordered profiles | Planned: extract stored DPT and supplied profile/simulation examples with explicit preparation. |
+
+Verification: seven source/build checks passed, including one explicit tree call,
+unchanged PCA/observation metadata, shared group order, raw expression fractions
+and cell values. Four browser checks cover both guides at 1,200 and 430 pixels;
+they observe hover, y-only grid zoom and values appearing after heatmap zoom.
+Browser hosts now share one test helper. The expression notebook ran in a fresh
+kernel and its heatmap export was checked offline. The complete Sphinx build
+passed with warnings treated as errors; Ruff passed. Source tests and notebook
+downloads are retained; generated exports, execution outputs and screenshots are
+temporary. Runtime modules, the three locally edited notebooks and the parallel
+Core/UMAP work are unchanged. The full integration suite was not rerun.
+
+Next: PCA diagnostics and the remaining embedding examples. Parent publication
+and plot-design gates stay open. **Clearance: retain.**
 
 ## Dotplot and shared expression presentation review
 

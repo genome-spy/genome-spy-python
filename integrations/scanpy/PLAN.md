@@ -1322,6 +1322,43 @@ expression notebook as one long page. Keep one example source for the rendered
 page and its downloadable notebook. Extract focused guides from the current
 workflows when their layout is agreed; do not maintain hand-copied examples.
 
+#### Example checklist
+
+The first UMAP page proves page/notebook rendering. It is not the full example
+set. Expand the section by user task, drawing from the two existing development
+workflows and the official Scanpy plotting tutorials. Each distinct supported
+plot gets a runnable example; aliases and small option changes can share one
+example. Keep the first plotting call short, then demonstrate useful interaction
+or customization. STATUS owns delivery states and the active queue.
+
+| Guide | Examples to include |
+| --- | --- |
+| UMAP and embeddings | Categorical/gene UMAP, linked selection and Python retrieval, category order/palettes, continuous bounds, outlines/stored neighbor edges. Extend with stored PCA/other 2D bases, cell/gene scatter and stored embedding density. Show explicit Scanpy preparation where results are absent. |
+| PCA diagnostics | Loadings, variance ratios and the composed PCA overview, using the supplied PCA results. Link back to the embedding guide for PCA scatter. |
+| Expression plots | The same marker dictionary in dotplot, matrixplot and cell heatmap; one explicit Scanpy group tree reused by all three; row zoom, dotplot ruler, optional gaps and zoomed values. Add concise DotPlot/MatrixPlot builder examples after the basic calls. |
+| Matrices and trees | Supplied numeric matrix, stored group correlations, standalone group dendrogram and cell/gene clustermap. Show optional values and zoom; distinguish stored trees from explicitly requested Python clustering. |
+| Ranked genes | Stored rank/score labels, ranking tables and ranked dotplot/matrixplot/heatmap calls; show fold-change or adjusted-p-value colors on grouped summaries. Compute rankings explicitly with Scanpy when the example needs statistics not already stored. |
+| Data checks | Highest-expression genes on counts; stored highly-variable-gene statistics with an optional cutoff preview; Scrublet score distributions with an optional threshold slider. Explain that previews do not change saved classifications. The legacy dispersion entry can share the variable-gene example. |
+| PAGA | Group and continuous node colors; graph/embedding comparison; adjacency heatmap and connectivity strips; supplied path as heatmap and lines. Use explicitly computed Scanpy PAGA and shared positions. |
+| Ordered profiles | Stored DPT groups/pseudotime and DPT expression; supplied time-series heatmap, points and subplot composition; stored simulation points/heatmap with optional run focus. Explain actual sample order and keep separate runs separate. |
+
+For each guide, adapt an existing working example rather than invent a new
+analysis. Reuse packaged data or a reviewed prepared fixture instead of invented
+cells or analysis results. Label simulations as simulations. A missing released
+native capability stays out of the guide. Violin, tracks and spatial examples
+follow their implemented and reviewed APIs, rather than appearing as placeholders.
+Do not publish empty guide pages. Keep the API reference complete even when an
+example guide has not yet been extracted. As the guides replace development
+workflow sections, retire redundant examples through the existing clearance
+process rather than maintaining two user-facing versions.
+
+Each delivered row needs its own short notebook, live charts, working download,
+explicit preparation, fresh-kernel run and observed enabled interactions. Check
+normal and narrow widths. Small, bounded preparation such as the packaged PBMC
+group tree is allowed in the build and must be visible in the notebook; expensive
+embedding, differential-expression or graph analysis must use reviewed prepared
+inputs or be shown as a Jupyter-only step with matching prepared page data.
+
 Each example has one or two short sentences, code and a live chart, in that order.
 Use plain user-facing language. Explain what the plot shows, how to use it and
 any limit that affects the task. Put module details, helper reuse, milestone IDs,

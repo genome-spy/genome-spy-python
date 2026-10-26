@@ -32,6 +32,8 @@ The plot reads the existing `adata.obsm["X_umap"]` coordinates. It does not comp
 an embedding or change your analysis.
 
 Start with [UMAP and embeddings](umap.md) to plot, select cells and customize a chart.
+Use [expression plots](expression.md) to compare marker genes across cell groups
+with dotplots, matrixplots and heatmaps.
 Check [supported plots and options](supported.md) for available calls and differences
 from Scanpy. Unsupported options raise an error.
 
@@ -39,6 +41,7 @@ from Scanpy. Unsupported options raise an error.
 :hidden:
 
 UMAP and embeddings <umap>
+Expression plots <expression>
 Supported plots and options <supported>
 API reference <api>
 ```
