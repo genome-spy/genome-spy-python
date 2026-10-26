@@ -2849,7 +2849,8 @@ def dpt_groups_pseudotime(
         Read categorical dpt_groups, dpt_order, dpt_pseudotime and stored
         dpt_changepoints without reading expression or running analysis. Preserve
         category codes and supplied order coordinates. Palette assignment follows
-        Scanpy's sorted observed groups; the lower panel colors by pseudotime.
+        Scanpy's sorted observed groups, with a native DPT group legend.
+        The lower panel colors by pseudotime, with a colorbar for continuous values.
         Missing or infinite pseudotimes are omitted from the lower panel only.
 
     Args:
@@ -2912,6 +2913,9 @@ def dpt_groups_pseudotime(
         if len(groups.cat.categories) < 5
         else None,
         palette=palette,
+        legend_style=gs.Legend(
+            title="DPT group", orient="right", direction="vertical", symbolSize=49
+        ),
         **options,
     )
     time_chart = build_timeseries(

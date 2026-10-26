@@ -192,3 +192,29 @@ def test_hover_and_navigation_stay_independent_and_export_offline(page, tmp_path
     page.goto(path.as_uri())
     page.locator("canvas").first.wait_for(state="visible")
     assert not page.locator(".message-box").count()
+
+
+def test_categorical_group_key_is_readable_and_matches_the_plotted_colors(page):
+    from tests.integrations.scanpy.browser.test_umap import render
+
+    chart = gsc.pl.dpt_groups_pseudotime(make_dpt(), width=480, height=180, show=False)
+    bounds = render(page, chart)
+    root = svg_root(page)
+    texts = [e.text for e in root.iter() if e.tag.endswith("text")]
+    assert "DPT group" in texts and "alpha" in texts and "beta" in texts
+    assert "unused" not in texts
+    plots = [
+        g
+        for g in root.iter()
+        if g.get("data-mark-type") == "point" and g.get("clip-path")
+    ]
+    keys = [
+        e
+        for g in root.iter()
+        if g.get("data-mark-type") == "point" and not g.get("clip-path")
+        for e in g
+    ]
+    assert len(keys) == 2
+    assert {e.get("fill") for e in keys} == {e.get("fill") for e in plots[0]}
+    assert all(float(e.get("r")) == pytest.approx(3.5, abs=0.05) for e in keys)
+    assert all(float(e.get("cx")) > bounds["x"] + bounds["width"] for e in keys)

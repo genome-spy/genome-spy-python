@@ -232,6 +232,16 @@ expression workflow passed and the visible Jupyter notebook was rerun. Ruff and
 mypy passed. These are native labels, not custom layout or event handling;
 publication review and remaining PAGA parameter coverage stay open.
 
+**DPT category-key readability — verified.** The upper panel now has a native
+“DPT group” key on the right, with seven-pixel symbols. It retains observed
+category names, palette colors and marker shapes without increasing point sizes.
+The lower panel keeps its own pseudotime colorbar. This uses a native Legend
+style override in the shared timeseries renderer, with no custom legend marks.
+DPT/timeseries/simulation semantic checks passed (140 tests), as did all nine DPT
+browser checks, including key colors, size and placement. The notebook's existing
+DPT preparation and plot cells were rerun in its current session. Ruff and mypy
+passed; broader integration coverage and the upstream parent-call gate are unchanged.
+
 This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.

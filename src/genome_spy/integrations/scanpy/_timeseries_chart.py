@@ -55,6 +55,7 @@ def build_timeseries(
     run_select: bool = False,
     connect: bool = False,
     colorbar: bool = False,
+    legend_style: gs.Legend | None = None,
 ) -> gs.TopLevelSpec:
     """Return native points and guides from supplied profiles and plotting options."""
     for name, value in {"xlabel": xlabel, "ylabel": ylabel}.items():
@@ -157,6 +158,9 @@ def build_timeseries(
         if prepared.legend or colorbar
         else None
     )
+    # Allow readable keys without enlarging the plotted points.
+    if guide is not None and legend_style is not None:
+        guide = guide.copy(**legend_style.to_dict())
     if prepared.color_domain is None:
         labels = list(dict.fromkeys(prepared.table["_series"]))
         scale = gs.Scale(type="ordinal", domain=labels, range=list(prepared.palette))

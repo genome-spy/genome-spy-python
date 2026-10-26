@@ -196,7 +196,9 @@ def test_native_group_guide_uses_observed_names_and_time_guide_uses_visible_rang
         for p in spec["vconcat"]
     ]
     assert group["encoding"]["fill"]["scale"]["domain"] == ["alpha", "beta"]
-    assert group["encoding"]["fill"]["legend"]["orient"] == "bottom"
+    guide = group["encoding"]["fill"]["legend"]
+    assert guide["title"] == "DPT group" and guide["orient"] == "right"
+    assert guide["symbolSize"] == 49
     assert time["encoding"]["fill"]["legend"]["title"] == "pseudotime"
     assert time["encoding"]["fill"]["scale"]["domain"] == [0.2, 1.0]
 
@@ -210,3 +212,16 @@ def test_constant_pseudotime_uses_the_shared_expanded_native_guide():
     )["encoding"]["fill"]
     assert fill["field"] == "_color" and fill["legend"]["title"] == "pseudotime"
     np.testing.assert_allclose(fill["scale"]["domain"], [0.45, 0.55])
+
+
+@pytest.mark.parametrize(
+    "marker,shape", [(".", "circle"), ("o", "circle"), ("s", "square")]
+)
+def test_group_key_keeps_the_native_marker_shape(marker, shape):
+    spec = gsc.pl.dpt_groups_pseudotime(make_dpt(), marker=marker, show=False).to_dict()
+    points = next(
+        m for m in leaf_marks(spec["vconcat"][0]) if m["mark"]["type"] == "point"
+    )
+    guide = points["encoding"]["fill"]["legend"]
+    assert guide["symbolType"] == shape
+    assert guide["symbolStrokeWidth"] == 0

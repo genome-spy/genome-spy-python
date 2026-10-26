@@ -1126,8 +1126,9 @@ boundaries are preserved without sorting or rewriting observations.
 Native `color_map=None` uses viridis; palettes and markers have the existing
 time-series restrictions. Hover reports original row position, stored order and
 value. `zoom=True` enables independent x/y zoom and pan in each panel. Dimensions
-are per panel, defaulting to 496 × 168 pixels. A native group legend names the
-observed groups. A native colorbar explains continuous pseudotime; integer
+are per panel, defaulting to 496 × 168 pixels. The native “DPT group” legend sits
+beside the upper panel. Readable markers match the plotted category names,
+colors and shapes. A native colorbar explains continuous pseudotime; integer
 pseudotime has a category key. These guides are added to help read the native
 plot. Native show/save rules apply.
 

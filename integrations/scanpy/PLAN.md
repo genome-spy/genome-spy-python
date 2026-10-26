@@ -808,7 +808,8 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   including from backed data. Reuse time-series coordinate validation, preserving
   global ranks and saved boundaries in filtered/reordered views. Native hover,
   independent navigation and 496 × 168-pixel per-panel defaults reuse the existing
-  helpers. Add native observed-group keys and continuous pseudotime guides.
+  helpers. Add a readable native DPT group key beside the upper panel, preserving
+  observed names, colors and marker shapes; keep the continuous pseudotime guide.
   Verify masks, category/paint order, palettes, markers, defaults, read-only
   behavior, complete registered panels, observed navigation, workflow and resources.
   The pinned parent entry fails on pandas Series indexing; use its public
