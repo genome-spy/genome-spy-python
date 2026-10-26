@@ -194,8 +194,13 @@ def test_paga_edge_slider_filters_rules_without_changing_nodes(page):
         )
         > 0
     )
+    assert {"A", "B", "C", "D"}.issubset(
+        e.text for e in root.iter() if e.tag.endswith("text")
+    )
     assert not any(
-        e.text in {"A", "B", "C", "D"} for e in root.iter() if e.tag.endswith("text")
+        g.get("clip-path") and len(g)
+        for g in root.iter()
+        if g.get("data-mark-type") == "text"
     )
     page.locator('input[type="range"]').evaluate(
         "el => {el.value=1; el.dispatchEvent(new Event('input', {bubbles:true}));}"

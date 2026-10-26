@@ -13,7 +13,7 @@ from scipy import sparse
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
-from tests.integrations.scanpy.helpers import points, units
+from tests.integrations.scanpy.helpers import points, units, leaf_marks
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
@@ -393,6 +393,18 @@ def test_on_data_labels_use_semantic_medians(adata):
     )
     assert [r["label"] for r in labels] == ["C", "B", "A", "NA"]
     assert labels[1] == {"label": "B", "x": 0.5, "y": -1.0}
+    mark = next(m for m in leaf_marks(spec) if m["mark"]["type"] == "text")
+    measure = next(t for t in mark["transform"] if t["type"] == "measureText")
+    assert measure["fontSize"] == mark["mark"]["size"]
+    assert measure["font"] == mark["mark"]["font"]
+    displacement = next(t for t in mark["transform"] if t["type"] == "displace2d")
+    assert displacement["key"] == "label" and displacement["width"] == measure["as"]
+    for axis, field in zip(("xOffset", "yOffset"), displacement["as"], strict=True):
+        assert mark["encoding"][axis] == {
+            "field": field,
+            "type": "quantitative",
+            "scale": None,
+        }
 
 
 def test_missing_numeric_colors_and_ambiguous_genes_fail(adata):

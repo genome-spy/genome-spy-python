@@ -329,7 +329,7 @@ def _panel(
             )
     else:
         layers.append(colored)
-    # Place each group label at the middle of its cells, as Scanpy does.
+    # Keep group medians as anchors while native layout separates their labels.
     if panel.categorical and style.legend_loc == "on data":
         labels = [
             {
@@ -346,8 +346,43 @@ def _panel(
         ]
         layers.append(
             gs.Chart(labels)
-            .mark_text(size=style.legend_fontsize, font=style.font, fontWeight="normal")
-            .encode(x=x.field("x"), y=y.field("y"), text="label:N")
+            .transform_measure_text(
+                field="label",
+                fontSize=style.legend_fontsize,
+                font=style.font,
+                as_="_label_width",
+            )
+            .transform_collect()
+            .transform_filter(
+                gs.expr.inrange(gs.datum.x, gs.expr.domain("x"))
+                & gs.expr.inrange(gs.datum.y, gs.expr.domain("y"))
+            )
+            .transform_displace2d(
+                key="label",
+                x="x",
+                y="y",
+                width="_label_width",
+                height=style.legend_fontsize * 1.2,
+                anchorWidth=6,
+                anchorHeight=6,
+                as_=["_label_dx", "_label_dy"],
+            )
+            .mark_text(
+                size=style.legend_fontsize,
+                font=style.font,
+                fontWeight="normal",
+                align="center",
+                baseline="middle",
+                clip=True,
+                tooltip=None,
+            )
+            .encode(
+                x=x.field("x"),
+                y=y.field("y"),
+                text="label:N",
+                xOffset=gs.XOffset("_label_dx:Q").scale(None),
+                yOffset=gs.YOffset("_label_dy:Q").scale(None),
+            )
         )
     result = (gs.layer(*layers) if len(layers) > 1 else layers[0]).properties(
         width=style.width, height=style.height

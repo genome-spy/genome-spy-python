@@ -270,3 +270,72 @@ def test_composed_comparisons_keep_navigation_inside_their_own_pair(page, tmp_pa
     page.goto(output.as_uri())
     page.locator("canvas").wait_for(state="visible")
     assert not page.locator(".message-box").count()
+
+
+def test_on_data_labels_displace_and_reflow_on_zoom(page):
+    from tests.integrations.scanpy.browser.test_grid_interactions import (
+        pointer,
+        position,
+    )
+    from tests.integrations.scanpy.helpers import name_embedding_scales
+
+    a = make_compare()
+    names = ["Alpha cells", "Beta cells", "Gamma cells", "Delta cells"]
+    a.obs["cluster"] = a.obs["cluster"].cat.rename_categories(names)
+    xy = np.column_stack(
+        [a.obs["cluster"].cat.codes.to_numpy() * 0.1, np.zeros(a.n_obs)]
+    )
+    xy[:2, 0] = [-10, 10]
+    a.obsm["X_umap"] = xy
+    chart = gsc.pl.paga_compare(
+        a,
+        legend_fontweight="normal",
+        legend_fontsize=12,
+        width=400,
+        height=300,
+        zoom=True,
+        show=False,
+    )
+    bounds = render(page, name_embedding_scales(chart.to_dict(), "labels"))
+    page.wait_for_timeout(1200)
+
+    def label_offsets():
+        """Read native label offsets from their median anchors in the current viewport."""
+        root = svg_root(page)
+        group = next(
+            g
+            for g in root.iter()
+            if g.get("data-mark-type") == "text"
+            and g.get("clip-path")
+            and {e.text for e in g} == set(names)
+        )
+        clip_id = group.get("clip-path").removeprefix("url(#").removesuffix(")")
+        box = next(e[0] for e in root.iter() if e.get("id") == clip_id)
+        domains = page.evaluate(
+            "['x-0', 'y-1'].map(n=>api.getScaleResolutionByName('labels-'+n).getDomain())"
+        )
+        offsets = {}
+        for element in group:
+            i = names.index(element.text)
+            anchor = np.array(
+                [
+                    float(box.get("x"))
+                    + (i * 0.1 - domains[0][0])
+                    / np.ptp(domains[0])
+                    * float(box.get("width")),
+                    float(box.get("y"))
+                    + domains[1][1] / np.ptp(domains[1]) * float(box.get("height")),
+                ]
+            )
+            offsets[element.text] = np.array(position(element)) - anchor
+        return offsets
+
+    before = label_offsets()
+    assert set(before) == set(names)
+    assert max(np.linalg.norm(value) for value in before.values()) > 10
+    pointer(page, bounds)
+    page.mouse.wheel(0, -600)
+    page.wait_for_timeout(1200)
+    after = label_offsets()
+    assert set(after) == set(before)
+    assert any(np.linalg.norm(after[key] - before[key]) > 1 for key in names)

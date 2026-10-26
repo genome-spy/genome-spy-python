@@ -190,10 +190,14 @@ def paga_nodes(
     use_raw: bool,
     indices: np.ndarray | None = None,
     palette: Any = None,
-) -> tuple[pd.DataFrame, bool, ColorData | None]:
-    """Return node values, labels and areas, plus Scanpy's automatic colorbar choice."""
+) -> tuple[pd.DataFrame, ColorData | None]:
+    """Return node values, labels, areas and any native category scheme."""
     categories = adata.obs[key].cat.categories
     count = len(categories)
+    if len({str(category) for category in categories}) != count:
+        raise ValueError(
+            f"{CONTEXT}: category labels collide when serialized as strings."
+        )
     if labels is None:
         labels = list(map(str, categories))
     if (
@@ -204,7 +208,7 @@ def paga_nodes(
         raise ValueError(f"{CONTEXT}: labels requires one string label per group.")
     if any(not isinstance(label, str) for label in labels):
         raise TypeError(f"{CONTEXT}: labels must be strings.")
-    colors, colorbar = _node_colors(adata, key, color, solid, dashed, use_raw, palette)
+    colors = _node_colors(adata, key, color, solid, dashed, use_raw, palette)
     color_data = colors if isinstance(colors, ColorData) else None
     if color_data is not None:
         colors = color_data.values
@@ -249,7 +253,7 @@ def paga_nodes(
             .to_numpy(),
         }
     )
-    return nodes, colorbar, color_data
+    return nodes, color_data
 
 
 def largest_component(graph: Any) -> np.ndarray:
@@ -269,8 +273,8 @@ def _node_colors(
     dashed: Any,
     use_raw: bool,
     palette: Any,
-) -> tuple[Any, bool]:
-    """Return per-group colors and the default guide flag from a color key or CSS colors."""
+) -> Any:
+    """Return per-group color values from a stored color key or supplied CSS colors."""
     from genome_spy.integrations.scanpy._grouped_data import (
         grouped_expression,
         group_means,
@@ -288,13 +292,11 @@ def _node_colors(
         if scheme is not None:
             return ColorData(
                 np.arange(count), tuple(range(count)), (), scheme, (), True
-            ), False
-        return colors, False
+            )
+        return colors
     if not isinstance(color, str):
         if isinstance(color, (Sequence, np.ndarray)) and len(color) == count:
-            return tuple(
-                native_color(c, "color", context=CONTEXT) for c in color
-            ), False
+            return tuple(native_color(c, "color", context=CONTEXT) for c in color)
         raise NotImplementedError(
             f"{CONTEXT}: mixtures/pies and multiple color panels are unsupported."
         )
@@ -309,7 +311,7 @@ def _node_colors(
             raise NotImplementedError(
                 f"{CONTEXT}: CSS colors that also name annotations or genes are unsupported."
             )
-        return (css,) * count, False
+        return (css,) * count
     if color.startswith("degree"):
         if color not in {"degree_solid", "degree_dashed"}:
             raise ValueError(f"{CONTEXT}: use 'degree_solid' or 'degree_dashed'.")
@@ -321,7 +323,7 @@ def _node_colors(
             raise ValueError(
                 f"{CONTEXT}: equal weighted degrees have undefined 0–1 normalization."
             )
-        return (degrees - degrees.min()) / np.ptp(degrees), False
+        return (degrees - degrees.min()) / np.ptp(degrees)
 
     genes = adata.var_names if adata.raw is None else adata.raw.var_names
     gene = color in genes
@@ -346,7 +348,7 @@ def _node_colors(
             .reindex(categories, fill_value=False)[color]
         )
         means = means.mask(missing)
-    return numeric_values(means.to_frame(), context=CONTEXT).ravel(), True
+    return numeric_values(means.to_frame(), context=CONTEXT).ravel()
 
 
 def paga_edges(

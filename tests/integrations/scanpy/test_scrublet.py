@@ -24,10 +24,17 @@ def test_signature_preserves_scanpy_defaults_and_omits_matplotlib_return():
             assert name not in actual
         else:
             assert actual[name].kind == p.kind and actual[name].default == p.default
-    assert set(actual) - set(expected) == {"hover", "zoom", "width", "height", "kwargs"}
+    assert set(actual) - set(expected) == {
+        "hover",
+        "zoom",
+        "threshold_slider",
+        "width",
+        "height",
+        "kwargs",
+    }
     assert all(
         actual[name].kind == inspect.Parameter.KEYWORD_ONLY
-        for name in ("hover", "zoom", "width", "height")
+        for name in ("hover", "zoom", "threshold_slider", "width", "height")
     )
 
 
@@ -107,13 +114,22 @@ def test_denominator_ignores_missing_and_out_of_range_and_includes_right_edge():
 
 
 @pytest.mark.parametrize("threshold", [-0.2, 0, 1, 1.4, None])
-def test_thresholds_preserve_expanded_x_limits_and_density_limits(threshold):
+@pytest.mark.parametrize("threshold_slider", [False, True])
+def test_thresholds_preserve_expanded_x_limits_and_density_limits(
+    threshold, threshold_slider
+):
     import matplotlib.pyplot as plt
 
     a = make_scrublet()
     a.uns["scrublet"]["threshold"] = threshold
     axes = sc.pl.scrublet_score_distribution(a, show=False)
-    spec = gsc.pl.scrublet_score_distribution(a, show=False).to_dict()
+    spec = gsc.pl.scrublet_score_distribution(
+        a, threshold_slider=threshold_slider, show=False
+    ).to_dict()
+    if threshold_slider:
+        control = spec["vconcat"][0]["params"][0]
+        assert control["value"] == (0.5 if threshold is None else threshold)
+        assert control["bind"]["min"] <= control["value"] <= control["bind"]["max"]
     for panel, ax in zip(units(spec), axes, strict=True):
         bars = leaf_marks(panel)[0]
         for axis in ("x", "y"):
@@ -178,6 +194,7 @@ def test_metadata_only_views_backed_and_no_analysis_fallback(monkeypatch, tmp_pa
         ({"figsize": (10, 4), "width": 200}, TypeError),
         ({"hover": 1}, TypeError),
         ({"zoom": "xy"}, TypeError),
+        ({"threshold_slider": 1}, TypeError),
         ({"width": 0}, ValueError),
     ],
 )
@@ -283,3 +300,25 @@ def test_duplicate_metadata_columns_fail_with_plot_context():
         match="gsc.pl.scrublet_score_distribution: obs column names must be unique",
     ):
         gsc.pl.scrublet_score_distribution(a, show=False)
+
+
+@pytest.mark.parametrize("batched", [False, True])
+def test_slider_reuses_stored_bins_and_cutoffs_without_mutation(batched):
+    a = make_scrublet(batched)
+    before_obs, before_uns = a.obs.copy(deep=True), deepcopy(a.uns)
+    plain = gsc.pl.scrublet_score_distribution(a, show=False).to_dict()
+    preview = gsc.pl.scrublet_score_distribution(
+        a, threshold_slider=True, show=False
+    ).to_dict()
+    for datasets in (plain["datasets"], preview["datasets"]):
+        bins = next(rows for rows in datasets.values() if rows and "density" in rows[0])
+        assert bins == prepare_scrublet(a)[0].to_dict("records")
+    pairs = preview["vconcat"]
+    assert len(pairs) == (2 if batched else 1)
+    assert [p["params"][0]["value"] for p in pairs] == (
+        [0.27, 0.5] if batched else [0.3]
+    )
+    assert all(p["params"][0]["bind"]["input"] == "range" for p in pairs)
+    assert all("params" not in p for p in plain["vconcat"])
+    pd.testing.assert_frame_equal(a.obs, before_obs)
+    np.testing.assert_equal(a.uns, before_uns)

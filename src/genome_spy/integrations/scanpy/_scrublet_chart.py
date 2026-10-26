@@ -17,13 +17,29 @@ def build_scrublet(
     zoom: bool,
     width: float,
     height: float,
+    threshold_slider: bool = False,
 ) -> gs.TopLevelSpec:
     """Return one observed/simulated pair per batch from prepared densities and cutoffs."""
     panels = []
+    cutoffs = []
     for index, rows in bins.groupby("panel", sort=False):
         index = int(index)
         scale = scales[index % 2]
         threshold = thresholds[index]
+        if threshold_slider and index % 2 == 0:
+            initial = 0.5 if threshold is None else threshold
+            cutoffs.append(
+                gs.param(
+                    "scrublet_threshold",
+                    value=initial,
+                    bind=gs.binding_range(
+                        min=min(0, initial),
+                        max=max(1, initial),
+                        step=0.001,
+                        name=f"Preview threshold ({rows.batch.iloc[0]}): ",
+                    ),
+                )
+            )
         density = rows.density.to_numpy()
         if scale == "log":
             ydomain = coordinate_domain(density[density > 0], 0.05, log=True)
@@ -74,24 +90,57 @@ def build_scrublet(
                 ),
             )
         )
+        if threshold_slider:
+            cutoff = cutoffs[-1]
+            bars = bars.transform_calculate(
+                _preview_cutoff=cutoff,
+                _threshold_status=gs.expr.if_(
+                    gs.datum.end <= cutoff,
+                    "Below cutoff",
+                    gs.expr.if_(
+                        gs.datum.start > cutoff, "Above cutoff", "Contains cutoff"
+                    ),
+                ),
+            ).encode(
+                color=gs.Color("_threshold_status:N")
+                .scale(
+                    type="ordinal",
+                    domain=["Below cutoff", "Contains cutoff", "Above cutoff"],
+                    range=["#cbd5e1", "#94a3b8", "#2563a6"],
+                )
+                .legend(
+                    gs.Legend(title="Bins", orient="bottom", direction="horizontal")
+                )
+            )
         if hover:
-            bars = bars.encode(
-                tooltip=[
-                    gs.Tooltip("batch:N", title="Batch"),
-                    gs.Tooltip("sample:N", title="Sample"),
-                    gs.Tooltip("start:Q", title="Bin start", format=".4g"),
-                    gs.Tooltip("end:Q", title="Bin end", format=".4g"),
-                    gs.Tooltip("count:Q", title="Count", format="d"),
-                    gs.Tooltip("density:Q", title="Probability density", format=".4g"),
-                ]
-            )
+            tooltips = [
+                gs.Tooltip("batch:N", title="Batch"),
+                gs.Tooltip("sample:N", title="Sample"),
+                gs.Tooltip("start:Q", title="Bin start", format=".4g"),
+                gs.Tooltip("end:Q", title="Bin end", format=".4g"),
+                gs.Tooltip("count:Q", title="Count", format="d"),
+                gs.Tooltip("density:Q", title="Probability density", format=".4g"),
+            ]
+            if threshold_slider:
+                tooltips.extend(
+                    [
+                        gs.Tooltip("_threshold_status:N", title="Preview bin"),
+                        gs.Tooltip(
+                            "_preview_cutoff:Q", title="Preview cutoff", format=".4g"
+                        ),
+                    ]
+                )
+            bars = bars.encode(tooltip=tooltips)
         panel = gs.layer(bars)
-        if threshold is not None:
-            rule = (
+        if threshold is not None or threshold_slider:
+            source = (
                 gs.Chart([{"threshold": threshold}])
-                .mark_rule(color="black", size=PT, clip=True, tooltip=None)
-                .encode(x="threshold:Q", y=gs.value(0), y2=gs.value(1))
+                if not threshold_slider
+                else gs.Chart([{}]).transform_calculate(threshold=cutoffs[-1])
             )
+            rule = source.mark_rule(
+                color="black", size=PT, clip=True, tooltip=None
+            ).encode(x="threshold:Q", y=gs.value(0), y2=gs.value(1))
             panel = panel + rule
         panels.append(
             panel.properties(
@@ -112,6 +161,13 @@ def build_scrublet(
         )
         for i in range(0, len(panels), 2)
     ]
+    if threshold_slider:
+        pairs = [
+            pair.add_params(cutoff)
+            .resolve_scale(x="independent", y="independent", color="shared")
+            .resolve_legend(default="collected")
+            for pair, cutoff in zip(pairs, cutoffs, strict=True)
+        ]
     return (
         gs.vconcat(*pairs, spacing=60)
         .resolve_scale(x="independent", y="independent")

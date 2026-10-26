@@ -632,6 +632,7 @@ def scrublet_score_distribution(
     save: str | bool | None = None,
     hover: bool = True,
     zoom: bool = False,
+    threshold_slider: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwargs: Any,
@@ -650,6 +651,8 @@ def scrublet_score_distribution(
         save: None or False; use native chart.save for HTML/JSON.
         hover: Show each populated bin's boundaries, count and density.
         zoom: Enable independent score-axis zoom in each panel.
+        threshold_slider: Preview a cutoff per batch and highlight bins above it.
+            Bins containing the cutoff stay neutral; saved doublet calls are unchanged.
         width: Plot width per panel, default 340 logical pixels.
         height: Plot height per panel, default 210 logical pixels.
         **kwargs: Matplotlib ax/return_fig and other options are omitted.
@@ -676,6 +679,7 @@ def scrublet_score_distribution(
         frameon=None,
         hover=hover,
         zoom=zoom,
+        threshold_slider=threshold_slider,
     )
     for name, scale in (
         ("scale_hist_obs", scale_hist_obs),
@@ -713,6 +717,7 @@ def scrublet_score_distribution(
         scales=(scale_hist_obs, scale_hist_sim),
         hover=hover,
         zoom=zoom,
+        threshold_slider=threshold_slider,
         width=figure_width * 50 - 60 if width is None else width,
         height=figure_height * 100 - 90 if height is None else height,
     )
@@ -2534,8 +2539,8 @@ def paga(
         pos: Two coordinates per node; file-based positions are unsupported.
         normalize_to_color: Inactive without categorical mixtures.
         cmap: Native continuous scheme, default viridis; inactive for CSS colors.
-        colorbar: None adds a native guide for numeric annotations and genes.
-            Explicit True/False suppress it, matching Scanpy 1.11.5.
+        colorbar: None or True shows a native guide for numeric node colors.
+            False hides that guide. Group colors have a native categorical legend.
         cb_kwds: Only empty in this preview.
         frameon: Draw the native view frame; None uses Scanpy's frame setting.
         add_pos: Store successful positions in uns['paga']['pos'], as in Scanpy.
@@ -2664,7 +2669,7 @@ def paga(
                         f"{context}: single_component requires dashed_edges=None on disconnected graphs."
                     )
                 indices = kept
-        nodes, automatic_colorbar, color_data = paga_nodes(
+        nodes, color_data = paga_nodes(
             adata,
             key,
             positions,
@@ -2711,7 +2716,10 @@ def paga(
             width=width,
             height=height,
             cmap=cmap,
-            colorbar=colorbar is None and automatic_colorbar,
+            colorbar=colorbar is not False,
+            group_key=key,
+            group_labels=list(map(str, adata.obs[key].cat.categories)),
+            color_title=node_color if isinstance(node_color, str) else key,
             color_data=color_data,
             edge_slider=edge_slider,
             show_node_labels=show_node_labels,
@@ -2896,6 +2904,7 @@ def dpt_groups_pseudotime(
     group_chart = build_timeseries(
         groups.cat.codes.to_numpy(),
         color=groups.to_numpy(),
+        var_names=[str(v) for v in sorted(groups.unique())],
         ylabel="dpt groups",
         yticks=list(range(len(groups.cat.categories)))
         if len(groups.cat.categories) < 5
@@ -2910,6 +2919,7 @@ def dpt_groups_pseudotime(
         ylabel="pseudotime",
         yticks=[0, 1],
         color_map=color_map,
+        colorbar=True,
         **options,
     )
     chart = gs.vconcat(group_chart, time_chart, spacing=10).resolve_scale(

@@ -98,10 +98,10 @@ def test_native_named_palette_has_one_full_category_domain_in_both_panels(compon
     assert points(embedding)["encoding"]["color"]["scale"]["scheme"] == "set1"
     assert nodes["encoding"]["fill"]["scale"] == {
         "type": "ordinal",
-        "domain": [0, 1, 2, 3],
+        "domain": ["A", "B", "C", "D"],
         "scheme": "set1",
     }
-    assert nodes["encoding"]["fill"]["field"] == "_color"
+    assert nodes["encoding"]["fill"]["field"] == "_group"
     assert a.uns["cluster_colors"] == before
 
 

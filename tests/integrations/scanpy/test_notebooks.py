@@ -400,6 +400,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         m for m in leaf_marks(comparison["hconcat"][1]) if m["mark"]["type"] == "point"
     )
     assert graph_points["encoding"]["fill"]["scale"]["scheme"] == "tableau10"
+    assert graph_points["encoding"]["fill"]["legend"]["title"] == "bulk_labels"
+    label = next(
+        m for m in leaf_marks(comparison["hconcat"][0]) if m["mark"]["type"] == "text"
+    )
+    assert any(t["type"] == "displace2d" for t in label["transform"])
     paired = namespace["independent_comparisons"].to_dict()
     assert len(paired["vconcat"]) == 2
     assert paired["resolve"]["scale"]["default"] == "independent"
@@ -538,6 +543,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             dpt_cells.obs["dpt_order"].to_numpy()[positions],
         )
         assert len(rows) == dpt_cells.n_obs
+        assert point["encoding"]["fill"]["legend"] is not None
     dpt_profiles = namespace["dpt_profiles"]
     assert dpt_profiles.is_view and dpt_profiles.n_obs == simulation.n_obs
     expected = dpt_profiles.X[simulation.obs["dpt_order_indices"].to_numpy()].T
@@ -656,6 +662,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert doublets.shape == (2700, 32738)
     assert len(doublets.uns["scrublet"]["doublet_scores_sim"]) == 5400
     scrublet_spec = namespace["scrublet_scores"].to_dict()
+    assert scrublet_spec["vconcat"][0]["params"][0]["bind"]["input"] == "range"
     bins = next(
         rows for rows in scrublet_spec["datasets"].values() if "density" in rows[0]
     )

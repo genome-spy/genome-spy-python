@@ -15,6 +15,7 @@ import tracemalloc
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--threshold-slider", action="store_true")
     args = parser.parse_args()
     import anndata as ad
     import numpy as np
@@ -48,7 +49,12 @@ def main() -> None:
     start = perf_counter()
     try:
         chart = gsc.pl.scrublet_score_distribution(
-            a, zoom=True, width=300, height=220, show=False
+            a,
+            zoom=True,
+            threshold_slider=args.threshold_slider,
+            width=300,
+            height=220,
+            show=False,
         )
         prepared = perf_counter()
         spec = chart.to_dict()
@@ -73,6 +79,7 @@ def main() -> None:
             "batches": batches,
             "simulated_scores": 200_000,
             "panels": 2 * batches,
+            "threshold_slider": args.threshold_slider,
         },
         "scope": "Imports/fixture excluded; validated JSON includes allocation tracing. Expression access raises. Browser timing excludes JSON validation.",
         "seconds": {
@@ -89,6 +96,31 @@ def main() -> None:
         start = perf_counter()
         render(page, spec)
         report["seconds"]["browser_first_paint"] = perf_counter() - start
+        if args.threshold_slider:
+            controls = page.locator('input[type="range"]')
+            assert controls.count() == batches
+            bins = next(
+                rows
+                for rows in spec["datasets"].values()
+                if rows and "density" in rows[0]
+            )
+            expected = sum(
+                row["panel"] == 0 and row["density"] > 0 and row["start"] > 0.1
+                for row in bins
+            )
+            start = perf_counter()
+            controls.first.evaluate(
+                "el => {el.value=0.1; el.dispatchEvent(new Event('input', {bubbles:true}));}"
+            )
+            page.wait_for_function(
+                """async expected => {
+                const root = new DOMParser().parseFromString(await (await api.imageExport.svg()).blob.text(), 'image/svg+xml');
+                return [...root.querySelectorAll('[data-mark-type="rect"][clip-path]')][0]
+                    .querySelectorAll('[fill="#2563a6"]').length === expected;
+            }""",
+                arg=expected,
+            )
+            report["seconds"]["cutoff_and_svg_check"] = perf_counter() - start
         report["bytes"]["reported_js_heap"] = page.evaluate(
             "performance.memory.usedJSHeapSize"
         )

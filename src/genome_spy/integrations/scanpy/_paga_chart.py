@@ -186,6 +186,9 @@ def build_paga(
     height: float | None,
     cmap: str,
     colorbar: bool,
+    group_key: str,
+    group_labels: list[str],
+    color_title: str,
     color_data: ColorData | None = None,
     edge_slider: bool = False,
     show_node_labels: bool = True,
@@ -287,13 +290,12 @@ def build_paga(
         charts.append(rules)
     numeric = color_data is None and pd.api.types.is_numeric_dtype(nodes["_color"])
     colors: dict[str, Any]
-    fill, stroke = gs.Fill("_id:N"), gs.Stroke("_id:N")
-    legend = None
+    fill, stroke = gs.Fill("_group:N"), gs.Stroke("_group:N")
+    legend: gs.Legend | None = gs.Legend(
+        title=group_key, values=nodes["_group"].tolist(), symbolSize=49
+    )
     if color_data is not None:
-        fill, stroke = gs.Fill("_color:N"), gs.Stroke("_color:N")
-        colors = dict(
-            type="ordinal", domain=list(color_data.domain), scheme=color_data.scheme
-        )
+        colors = dict(type="ordinal", domain=group_labels, scheme=color_data.scheme)
     elif numeric:
         low, high, constant = color_bounds(
             nodes["_color"].to_numpy(),
@@ -303,6 +305,7 @@ def build_paga(
             expand_constant=colorbar,
         )
         fill, stroke = gs.Fill("_color:Q"), gs.Stroke("_color:Q")
+        legend = None
         if constant and not colorbar:
             # Scanpy maps a constant range without a guide to the first palette color.
             _, high, _ = color_bounds(
@@ -318,7 +321,7 @@ def build_paga(
         )
         if colorbar:
             legend = gs.Legend(
-                title=None,
+                title=color_title,
                 gradientLength=height,
                 gradientThickness=15,
                 gradientStrokeColor="black",
@@ -326,7 +329,9 @@ def build_paga(
             )
     else:
         colors = dict(
-            type="ordinal", domain=nodes["_id"].tolist(), range=nodes["_color"].tolist()
+            type="ordinal",
+            domain=nodes["_group"].tolist(),
+            range=nodes["_color"].tolist(),
         )
     maximum = max(1.0, float(nodes["_area"].max()))
     points = (
@@ -390,7 +395,7 @@ def build_paga(
                 "strokeWidth": 0.8 * PT if frameon else 0,
             },
         )
-        .configure_legend(labelFont=FONT, labelFontSize=10 * PT)
+        .configure_legend(labelFont=FONT, labelFontSize=10 * PT, labelLimit=300)
     )
     if cutoff is not None:
         result = result.add_params(cutoff)

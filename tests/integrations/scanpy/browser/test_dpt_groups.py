@@ -64,11 +64,13 @@ def test_complete_dpt_panels_match_scanpy_points_and_guides(page, tmp_path, case
     root = svg_root(page)
     texts = [e.text for e in root.iter() if e.tag.endswith("text")]
     assert all(label in texts for label in ["dpt groups", "pseudotime", "dpt order"])
-    assert not [
+    gradients = [
         e
         for e in root.iter()
         if e.tag.endswith("rect") and e.get("fill", "").startswith("url(")
     ]
+    assert bool(gradients) == (case != "integer_time")
+    assert all(str(group) in texts for group in adata.obs["dpt_groups"].unique())
     for i, (bbox, expected, xy, dx, dy) in enumerate(references):
         bounds = page.evaluate(
             "view=>api.views.getLayoutBounds({scope:[],view})", f"panel-{i}"

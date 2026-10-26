@@ -23,6 +23,7 @@ from genome_spy.integrations.scanpy._style import (
     POINTS_TO_PIXELS as PT,
     native_scheme,
     zoom_point_size,
+    color_bounds,
 )
 from genome_spy.integrations.scanpy._timeseries_data import CONTEXT, prepare_timeseries
 
@@ -53,8 +54,9 @@ def build_timeseries(
     realization_length: float | None = None,
     run_select: bool = False,
     connect: bool = False,
+    colorbar: bool = False,
 ) -> gs.TopLevelSpec:
-    """Return native points and guides from supplied profiles using Scanpy's defaults."""
+    """Return native points and guides from supplied profiles and plotting options."""
     for name, value in {"xlabel": xlabel, "ylabel": ylabel}.items():
         if value is not None and not isinstance(value, str):
             raise TypeError(f"{context}: {name} must be a string or None.")
@@ -152,7 +154,7 @@ def build_timeseries(
             symbolStrokeWidth=0,
             symbolType=shape,
         )
-        if prepared.legend
+        if prepared.legend or colorbar
         else None
     )
     if prepared.color_domain is None:
@@ -161,6 +163,10 @@ def build_timeseries(
         paint: dict[str, Any] = {"field": "_series", "type": "nominal", "scale": scale}
     else:
         low, high = prepared.color_domain
+        if colorbar:
+            low, high, _ = color_bounds(
+                np.array([low, high]), None, None, context=context, expand_constant=True
+            )
         scale = gs.Scale(
             type="linear",
             domain=[low, high] if low != high else [0, 1],
@@ -176,6 +182,15 @@ def build_timeseries(
     if "field" in paint:
         fill = fill.legend(guide if prepared.color_domain is None else None)
         stroke = stroke.legend(None)
+    if colorbar and prepared.color_domain is not None:
+        fill = fill.legend(
+            gs.Legend(
+                title=ylabel,
+                orient="right",
+                gradientLength=height,
+                gradientThickness=15,
+            )
+        )
     points = (
         source.transform_filter(
             "isValid(datum._time) && isValid(datum._value)"
@@ -200,7 +215,7 @@ def build_timeseries(
         )
     else:
         points = points.encode(opacity=gs.value(0.8))
-    if prepared.color_domain is not None and guide is not None:
+    if prepared.color_domain is not None and guide is not None and not colorbar:
         first = prepared.table.iloc[0]
         visible = np.isfinite(
             first[["_time", "_value", "_color"]].to_numpy(dtype=float)
@@ -267,7 +282,7 @@ def build_timeseries(
                 bottom=[horizontal_tick_labels(xtick_labels, xlabel)]
             ),
             spacing=0,
-        )
+        ).resolve_legend(default="collected")
     if focus is not None:
         result = result.add_params(focus)
     if run is not None:

@@ -175,3 +175,109 @@ def test_native_bin_hover_independent_zoom_and_offline_html(page, tmp_path):
     page.goto(path.as_uri())
     page.locator("canvas").first.wait_for(state="visible")
     assert not page.locator(".message-box").count()
+
+
+def test_threshold_slider_updates_pair_colors_and_rule_with_independent_batches(
+    page, tmp_path
+):
+    from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
+    from genome_spy.integrations.scanpy._scrublet_data import prepare_scrublet
+
+    a = make_scrublet(True)
+    table, _ = prepare_scrublet(a)
+    chart = gsc.pl.scrublet_score_distribution(a, threshold_slider=True, show=False)
+    render(page, chart)
+    sliders = page.locator('input[type="range"]')
+    assert sliders.count() == 2
+    before = svg_root(page)
+    assert sum(e.text == "Bins" for e in before.iter() if e.tag.endswith("text")) == 2
+
+    def rectangles(root):
+        """Read histogram bins, excluding legend and frame rectangles."""
+        return [
+            list(g)
+            for g in root.iter()
+            if g.get("data-mark-type") == "rect" and g.get("clip-path")
+        ]
+
+    original = rectangles(before)
+    for proposed in [0.15, 0.7]:
+        sliders.nth(0).evaluate(
+            "(el, value) => {el.value=value; el.dispatchEvent(new Event('input', {bubbles:true}));}",
+            proposed,
+        )
+        cutoff = float(sliders.nth(0).input_value())
+        page.wait_for_timeout(100)
+        root = svg_root(page)
+        bars = rectangles(root)
+        assert len(bars) == 4
+        assert [[r.attrib for r in b] for b in bars[2:]] == [
+            [r.attrib for r in b] for b in original[2:]
+        ]
+        for index in [0, 1]:
+            rows = table[(table.panel == index) & (table.density > 0)]
+            expected = [
+                "#cbd5e1"
+                if r.end <= cutoff
+                else "#2563a6"
+                if r.start > cutoff
+                else "#94a3b8"
+                for r in rows.itertuples()
+            ]
+            assert [r.get("fill") for r in bars[index]] == expected
+            for actual, saved in zip(bars[index], original[index], strict=True):
+                assert all(
+                    actual.get(k) == saved.get(k) for k in ["x", "y", "width", "height"]
+                )
+            domain = leaf_marks(units(chart.to_dict())[index])[0]["encoding"]["x"][
+                "scale"
+            ]["domain"]
+            groups = [
+                g
+                for g in root.iter()
+                if g.get("data-mark-type") == "rect" and g.get("clip-path")
+            ]
+            clip_id = (
+                groups[index].get("clip-path").removeprefix("url(#").removesuffix(")")
+            )
+            bounds = {
+                k: float(v)
+                for e in root.iter()
+                if e.get("id") == clip_id
+                for k, v in e[0].attrib.items()
+            }
+            expected_x = (
+                bounds["x"] + (cutoff - domain[0]) / np.ptp(domain) * bounds["width"]
+            )
+            rules = [
+                e
+                for g in root.iter()
+                if g.get("data-mark-type") == "rule" and g.get("clip-path")
+                for e in g
+            ]
+            assert any(abs(float(r.get("x1")) - expected_x) < 0.3 for r in rules), (
+                cutoff,
+                expected_x,
+                [r.attrib for r in rules],
+            )
+    assert a.uns["scrublet"]["batches"]["B"]["threshold"] == 0.27
+    row = table[(table.panel == 0) & (table.start < 0.8) & (table.end > 0.8)].iloc[0]
+    encoding = leaf_marks(units(chart.to_dict())[0])[0]["encoding"]
+    bounds = page.evaluate("api.views.getLayoutBounds({scope:[],view:'panel-0'})")
+    ydomain = encoding["y"]["scale"]["domain"]
+    move_to(
+        page,
+        bounds,
+        float((row.start + row.end) / 2),
+        float(np.log10((ydomain[0] * row.density) ** 0.5)),
+        encoding["x"]["scale"]["domain"],
+        np.log10(ydomain).tolist(),
+        "Above cutoff",
+    )
+    page.get_by_text("Preview cutoff", exact=True).wait_for(state="visible")
+    output = tmp_path / "scrublet-slider.html"
+    chart.save(output, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(output.as_uri())
+    page.locator("canvas").first.wait_for(state="visible")
+    assert page.locator('input[type="range"]').count() == 2

@@ -721,6 +721,11 @@ their native filled-geometry gate; this order does not close those milestones.
   never pool batches or recompute Scrublet. Native rectangles and full-height
   threshold rules use independent density scales within each pair and across
   batches. Offer populated-bin hover and optional independent score-axis zoom.
+  The optional threshold_slider previews one cutoff per batch, shared by its two
+  panels. Above-cutoff bins are accented, below-cutoff bins muted and bins crossing
+  the cutoff neutral. Preserve saved scores/calls, fixed bins and denominators.
+  Observe independent batch controls, the moving rule, hover and offline HTML;
+  measure the preview against the existing stored-score workload.
   Verify linear/log modes, bin boundaries, missing/out-of-range scores, thresholds,
   constants, read-only views/backed metadata, registered geometry/overlays and a
   large stored-score workload with forbidden expression access. The PBMC3k
@@ -803,7 +808,8 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   including from backed data. Reuse time-series coordinate validation, preserving
   global ranks and saved boundaries in filtered/reordered views. Native hover,
   independent navigation and 496 × 168-pixel per-panel defaults reuse the existing
-  helpers. Verify masks, category/paint order, palettes, markers, defaults, read-only
+  helpers. Add native observed-group keys and continuous pseudotime guides.
+  Verify masks, category/paint order, palettes, markers, defaults, read-only
   behavior, complete registered panels, observed navigation, workflow and resources.
   The pinned parent entry fails on pandas Series indexing; use its public
   time-series component calls with NumPy codes for baseline verification, and
@@ -854,8 +860,9 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   Weighted degrees come from the same thresholded solid/dashed graphs and are
   normalized to 0–1. Reuse shared color bounds and native scales/guides; test
   constant and missing means, sparse views, raw/X fallback and graph edge order.
-  Preserve Scanpy 1.11.5's automatic annotation/gene colorbar and suppression
-  for explicit True/False; degree colors have no automatic guide. All-missing
+  Native node guides deliberately improve on Scanpy 1.11.5: group colors get
+  category keys; numeric observation/gene/degree colors get a colorbar unless
+  colorbar=False. Explicit True shows the guide. All-missing
   data and equal-degree normalization fail clearly instead of inventing values.
   CSS/annotation-name collisions, numeric vectors and other categorical colors
   remain explicit limits. Packaged-data examples reuse supplied positions.
@@ -1242,12 +1249,14 @@ Native capability limits do not justify custom event bridges or drawing substitu
 
 | Plot | Proposed appearance | Proposed interaction |
 | --- | --- | --- |
+| Scrublet score distribution | Keep fixed histogram bins. A native legend explains preview colors. | Optional threshold slider per batch shares its cutoff between observed and simulated panels. Highlight wholly above-cutoff bins; keep straddling bins neutral. Preserve saved analysis. |
+| DPT groups/pseudotime | Native observed-group key and pseudotime colorbar. | Reuse independent profile navigation. |
 | Highly variable genes | Pale gray background genes and one clear accent for selected genes; draw selected genes last. Shorter axis and legend titles. | Gentle, capped point growth on zoom. An optional score-cutoff slider updates both panels' preview colors and the gene count, with a cutoff line in the normalized-score panel. |
 | Timeseries | Smaller points, lighter outlines and clearer axis labels. Compare several genes in aligned panels when one overlaid view is crowded. | Emphasize one gene while keeping the others visible. Shared time navigation and a native ruler where the composition supports it. |
 | Timeseries subplot | Consistent gene colors, aligned axes and one collected legend when panels share its meaning. | Reuse the timeseries interactions; share navigation only when the coordinates mean the same thing. |
-| Simulation | Clear run labels and boundaries; consistent gene colors. Keep heatmap labels compact and values optional. | Reuse timeseries and matrix interactions. Optional gene/run dropdowns emphasize their intersection. Optional connected profiles retain missing-value gaps and run boundaries; shuffled output rejects these run options. |
+| Simulation | Clear run labels and boundaries; consistent gene colors. Collect the point legend below the entire x-axis. Keep heatmap labels compact and values optional. | Reuse timeseries and matrix interactions. Optional gene/run dropdowns emphasize their intersection. Optional connected profiles retain missing-value gaps and run boundaries; shuffled output rejects these run options. |
 | PAGA adjacency | Larger tree-edge dots over the heatmap. In point mode, label the group axis and connectivity axis and explain tree versus other edges with a native legend. Use group names where the stored mapping is available. | Capped dot growth on zoom. Review source/target group focus if labels and hover alone are insufficient. |
-| PAGA comparison | Much smaller embedding points at the overview; matching group colors across panels and fewer permanent labels. | Use the shared embedding renderer for point growth. Review linked group focus and an optional stored-edge cutoff control. |
+| PAGA comparison | Much smaller embedding points at the overview; matching group colors across panels and fewer permanent labels. All network views have native node-color guides. Group-median embedding labels use native displace2d and text measurement. | Use the shared embedding renderer for point growth. Review linked group focus and an optional stored-edge cutoff control. |
 | PAGA path | Clear path order and group names; readable expression scale in line mode. Match group colors to the graph and embedding. | Focus one gene and read values along the path. Reuse matrix hover, zoom and fitted labels in heatmap mode. |
 
 Point growth uses the gallery's native zoom-based size expression, capped at four

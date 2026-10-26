@@ -279,7 +279,9 @@ margin, label and storage limits retain M07.d/M14 owners.
 ```python
 counts = sc.datasets.pbmc3k()
 sc.pp.scrublet(counts, threshold=0.25, random_state=0, use_approx_neighbors=False)
-chart = gsc.pl.scrublet_score_distribution(counts, zoom=True, show=False)
+chart = gsc.pl.scrublet_score_distribution(
+    counts, zoom=True, threshold_slider=True, show=False
+)
 chart.display(inline=True, controls=False)
 ```
 
@@ -301,7 +303,7 @@ their initial score/density limits, including thresholds outside [0, 1].
 | Single result | Read `uns["scrublet"]["doublet_scores_sim"]` and optional `threshold`. |
 | Batched result | Read `batched_by`, the named obs column and each `batches[batch]` result. Preserve categorical order, or Scanpy's category conversion for other labels; missing batch labels are omitted. No pooling. |
 | `figsize=(8, 3)` | Approximate per-batch figure dimensions at 100 logical pixels/inch, reserving space for axes/titles. Native layout controls fonts/ticks; physical export DPI is independent. |
-| Native additions | Keyword-only `hover=True`, `zoom=False`, `width=None`, `height=None`. Width/height set plot area per panel (default 340 × 210); they cannot be mixed with a nondefault figsize. |
+| Native additions | Keyword-only `hover=True`, `zoom=False`, `threshold_slider=False`, `width=None`, `height=None`. Width/height set plot area per panel (default 340 × 210); they cannot be mixed with a nondefault figsize. |
 | Hover/zoom | Populated-bin hover shows batch, sample, boundaries, count and density. Optional score-axis zoom is independent per panel, with thresholds following the same score scale. Bins stay fixed. |
 | Display | Scanpy's `show=True` default is retained; False returns one native chart for the full layout. Common native save/HTML rules apply; `return_fig`/`ax` are omitted. |
 
@@ -309,6 +311,14 @@ Scores must be resident one-dimensional numeric vectors. Infinity, malformed
 results and unused batch categories fail clearly. Unused categories can be
 removed explicitly before plotting; they are not silently pooled or discarded.
 Histograms are aggregate marks, so hover describes bins rather than cell IDs.
+
+Set `threshold_slider=True` to preview a cutoff. Each batch gets one slider for
+both panels. Blue bars lie wholly above the cutoff. Pale bars lie below it.
+A bin containing the cutoff stays neutral because it can contain scores on both
+sides. The rule moves with the slider; bin counts and densities stay fixed.
+Scrublet calls scores strictly greater than its threshold doublets. This preview
+does not change saved scores, thresholds or doublet calls. A missing saved
+threshold starts the preview at 0.5. The slider uses steps of 0.001.
 
 ## Highest-expression genes
 
@@ -465,7 +475,7 @@ raise an error instead of being ignored.
 | components, dimensions | One-based component pairs or zero-based dimension pairs; broadcasting follows Scanpy. Both cannot be supplied together. |
 | frameon, title, ncols, hspace, wspace | Frame defaults to Scanpy's frame setting; panel layout uses explicit native defaults. Titles and guides remain per panel; guides are not automatically collected. |
 | width, height (GenomeSpy additions) | Plot-area dimensions per panel in logical pixels. None uses 300 by 300 logical pixels. Explicit dimensions size each panel and its guide directly; axes and legends add space. Marker and font sizes are unchanged. |
-| legend_loc, legend_fontsize, legend_fontweight | Centered right-margin legend, on-data median labels, or no legend; point font sizes use the fixed native conversion. On-data labels currently require legend_fontweight="normal" (or 400); the upstream bold default errors for that location because its glyph atlas is not bundled. |
+| legend_loc, legend_fontsize, legend_fontweight | Centered right-margin legend, labels anchored at group medians with native displacement, or no legend; point font sizes use the fixed native conversion. On-data labels currently require legend_fontweight="normal" (or 400); the upstream bold default errors for that location because its glyph atlas is not bundled. |
 | alpha, edgecolor/edgecolors, linewidth/linewidths | Scalar opacity and edge styling; conflicting aliases error. Matplotlib color shorthands, numeric RGB(A) tuples, cyclers, and per-entry alpha are rejected. Use opaque CSS names/hex and scalar alpha. |
 | show | False returns a native chart; True displays once through anywidget and returns None. None uses Scanpy settings.autoshow. |
 | save | None/False are supported when no automatic image save is requested. Image formats and automatic save currently error; native chart.save supports HTML/JSON. |
@@ -1077,6 +1087,7 @@ each run. Missing values leave gaps. This is available for point output only.
 Set `run_select=True` to add a run dropdown in either view. Combine it with
 `series_select=True` to emphasize one gene in one run. Neither dropdown removes
 data. Shuffled output rejects both `connect` and `run_select`.
+The point legend sits below the run labels and x-axis title.
 
 The preview supports resident dense AnnData and read-only views; it rejects
 backed, lazy and sparse X before loading or densifying. Point output retains the
@@ -1115,8 +1126,10 @@ boundaries are preserved without sorting or rewriting observations.
 Native `color_map=None` uses viridis; palettes and markers have the existing
 time-series restrictions. Hover reports original row position, stored order and
 value. `zoom=True` enables independent x/y zoom and pan in each panel. Dimensions
-are per panel, defaulting to 496 × 168 pixels. No legend is added upstream or in
-the native plot. Native show/save rules apply.
+are per panel, defaulting to 496 × 168 pixels. A native group legend names the
+observed groups. A native colorbar explains continuous pseudotime; integer
+pseudotime has a category key. These guides are added to help read the native
+plot. Native show/save rules apply.
 
 Reference limitation: Scanpy 1.11.5's parent plotting entry fails with installed
 pandas 2.3.3 because it indexes a Series as `X[:, None]`. Validation uses its two
@@ -1197,7 +1210,7 @@ PAGA edges currently have no white outline.
 | degree_solid, degree_dashed | Use these strings as color keys. Compute weighted degrees from the displayed solid or dashed graph after thresholding, then normalize to 0–1. degree_dashed requires dashed_edges. Equal degrees have undefined normalization in Scanpy and raise a clear error. The existing graph helper preserves CSR/CSC edge order, including asymmetric weights. |
 | use_raw | Gene colors default to raw when present, otherwise X; False uses X. No layer or gene-symbol option is added. Reuse the grouped public getter and mean helpers; only the selected gene column is materialized. Resident dense/CSR/CSC and views follow the shared getter's limits. Ambiguous observation/gene names and CSS colors that also name annotations/genes reject. |
 | palette (native addition) | Group colors reuse the embedding palette resolver: an opaque CSS sequence or mapping, or a native scheme name. A supplied palette overrides saved colors without writing AnnData, and retains the full category domain when filtering components. Inactive for numeric/gene/degree colors. |
-| cmap, colorbar | Native continuous scheme, default viridis. colorbar=None automatically adds a guide for numeric observation and gene colors. Degree colors have no default guide. Explicit True or False both suppress the guide, matching Scanpy 1.11.5's behavior. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
+| cmap, colorbar | Native continuous scheme, default viridis. colorbar=None or True adds a native guide for numeric observation, gene and degree colors. False hides the numeric guide. Group colors have a native categorical legend. These guide defaults deliberately differ from Scanpy 1.11.5. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
 | labels, groups | One string label per node, defaulting to category names. The deprecated groups alias overrides labels with Scanpy's warning. |
 | single_component | True shows the largest thresholded solid component by node count; ties choose the first component in original group order. Keep original node IDs and coordinates. Filtering a disconnected graph requires dashed_edges=None. Inactive when plot=False. |
 | node_size_scale, node_size_power | Preserve Scanpy's areas from stored group sizes divided by their median. With component filtering, the node count and median use displayed groups. Missing sizes use ones. Nodes retain fixed pixel sizes while zooming. |
@@ -1283,7 +1296,10 @@ renderer boundary; this is not full `paga_compare` parameter compatibility.
 PAGA comparisons use compact embedding points when `size` is omitted. Supply
 `size` to choose another starting area. Points grow on zoom; graph node sizes
 continue to represent their stored group sizes. Group names appear on hover.
-Use `show_node_labels=True` for permanent graph labels.
+Use `show_node_labels=True` for permanent graph labels. Native legends identify
+the node colors in every graph, including comparisons. On-data embedding labels
+keep their group-median anchors and use native `displace2d` to avoid overlap as
+you zoom. Labels whose anchors leave the viewport are hidden.
 
 Set `edge_slider=True` on `paga` or `paga_compare` to hide weaker displayed edges.
 The slider filters the graph already selected by `threshold`; it does not restore

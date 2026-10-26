@@ -100,7 +100,11 @@ def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, c
     )
     texts = [e.text for e in root.iter() if e.tag.endswith("text")]
     assert set(labels) <= set(texts)
-    assert any(e.tag.endswith("linearGradient") for e in root.iter()) == colorbar
+    expected_guide = colorbar or options.get("color") in {
+        "degree_solid",
+        "degree_dashed",
+    }
+    assert any(e.tag.endswith("linearGradient") for e in root.iter()) == expected_guide
     if "title" in options:
         assert options["title"] in texts
     centers = point_coordinates(page)[0]
@@ -266,3 +270,32 @@ def test_disabled_hover_does_not_show_node_tooltips(page):
     render(page, gsc.pl.paga(make_paga(), pos=POSITIONS, hover=False, show=False))
     hover_at(page, *point_coordinates(page)[0][0])
     assert not page.locator("table.attributes").count()
+
+
+@pytest.mark.parametrize("color", [None, "score", "degree_solid"])
+def test_native_node_guide_names_and_colors_are_visible_without_node_labels(
+    page, color
+):
+    from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
+
+    a = make_paga("obs_score")
+    chart = gsc.pl.paga(
+        a, pos=POSITIONS, color=color, show_node_labels=False, show=False
+    )
+    render(page, chart)
+    root = svg_root(page)
+    texts = [e.text for e in root.iter() if e.tag.endswith("text")]
+    gradients = [e for e in root.iter() if e.tag.endswith("linearGradient")]
+    if color is None:
+        assert "cluster" in texts and all(
+            name in texts for name in ["A", "B", "C", "D"]
+        )
+        assert not gradients
+        guide_points = [
+            g
+            for g in root.iter()
+            if g.get("data-mark-type") == "point" and not g.get("clip-path")
+        ]
+        assert sum(len(g) for g in guide_points) == 4
+    else:
+        assert color in texts and len(gradients) == 1

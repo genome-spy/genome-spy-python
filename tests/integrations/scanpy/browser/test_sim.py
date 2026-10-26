@@ -309,3 +309,15 @@ def test_hover_navigation_realization_labels_and_offline_delivery(page, tmp_path
     page.goto(path.as_uri())
     page.locator("canvas").first.wait_for(state="visible")
     assert not page.locator(".message-box").count()
+
+
+def test_point_simulation_legend_is_below_the_realization_axis(page):
+    from tests.integrations.scanpy.browser.test_grid_interactions import position
+
+    render(page, gsc.pl.sim(make_sim(), show=False))
+    root = svg_root(page)
+    texts = [e for e in root.iter() if e.tag.endswith("text")]
+    keys = [position(e)[1] for e in texts if e.text in {"A", "B"}]
+    axis = [position(e)[1] for e in texts if e.text == "realizations"]
+    assert len(keys) == 2 and len(axis) == 1
+    assert min(keys) > max(axis) + 5

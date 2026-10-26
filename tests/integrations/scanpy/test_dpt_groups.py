@@ -184,3 +184,29 @@ def test_invalid_options_precede_optional_imports(options, error, monkeypatch):
     )
     with pytest.raises(error, match=r"gsc\.pl\.dpt_groups_pseudotime:"):
         gsc.pl.dpt_groups_pseudotime(object(), **options)
+
+
+def test_native_group_guide_uses_observed_names_and_time_guide_uses_visible_range():
+    a = make_dpt()
+    a.obs.loc["cell-0", "dpt_order"] = np.nan
+    a.obs.loc["cell-0", "dpt_pseudotime"] = -100
+    spec = gsc.pl.dpt_groups_pseudotime(a, show=False).to_dict()
+    group, time = [
+        next(m for m in leaf_marks(p) if m["mark"]["type"] == "point")
+        for p in spec["vconcat"]
+    ]
+    assert group["encoding"]["fill"]["scale"]["domain"] == ["alpha", "beta"]
+    assert group["encoding"]["fill"]["legend"]["orient"] == "bottom"
+    assert time["encoding"]["fill"]["legend"]["title"] == "pseudotime"
+    assert time["encoding"]["fill"]["scale"]["domain"] == [0.2, 1.0]
+
+
+def test_constant_pseudotime_uses_the_shared_expanded_native_guide():
+    a = make_dpt()
+    a.obs["dpt_pseudotime"] = 0.5
+    spec = gsc.pl.dpt_groups_pseudotime(a, show=False).to_dict()
+    fill = next(
+        m for m in leaf_marks(spec["vconcat"][1]) if m["mark"]["type"] == "point"
+    )["encoding"]["fill"]
+    assert fill["field"] == "_color" and fill["legend"]["title"] == "pseudotime"
+    np.testing.assert_allclose(fill["scale"]["domain"], [0.45, 0.55])

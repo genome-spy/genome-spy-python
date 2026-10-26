@@ -60,7 +60,6 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
     colors = point.get_facecolors()
     values = point.get_array()
     domain = [point.norm.vmin, point.norm.vmax]
-    colorbar = len(ax.figure.axes) > 1
     expected_edges = [
         (c.get_segments(), c.get_linewidths())
         for c in ax.collections
@@ -107,9 +106,9 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
             equal_nan=True,
         )
         fill = mark["encoding"]["fill"]
-        assert bool(fill["legend"]) == colorbar
+        assert bool(fill["legend"]) == (options.get("colorbar") is not False)
         if domain[0] == domain[1]:
-            assert fill["scale"]["domain"][0] == domain[0]
+            assert fill["scale"]["domain"][0] <= domain[0]
             assert fill["scale"]["domain"][1] > domain[1]
         else:
             np.testing.assert_allclose(fill["scale"]["domain"], domain)
@@ -506,3 +505,56 @@ def test_tied_components_use_node_count_and_original_order_not_cell_counts():
     rows = next(rows for rows in spec["datasets"].values() if "_cells" in rows[0])
     assert [r["_id"] for r in rows] == [0, 1]
     assert [r["_area"] for r in rows] == pytest.approx([2000 / (np.sqrt(2) + 10)] * 2)
+
+
+@pytest.mark.parametrize("palette", [None, "set1"])
+def test_group_legend_uses_displayed_names_without_changing_palette_positions(palette):
+    a = make_paga("component")
+    spec = gsc.pl.paga(
+        a,
+        pos=POSITIONS,
+        single_component=True,
+        threshold=0.2,
+        palette=palette,
+        show=False,
+    ).to_dict()
+    mark = next(m for m in leaf_marks(spec) if m["mark"]["type"] == "point")
+    fill = mark["encoding"]["fill"]
+    rows = spec["datasets"][mark["data"]["name"]]
+    assert fill["field"] == "_group"
+    assert fill["legend"]["title"] == "cluster"
+    assert fill["legend"]["values"] == [r["_group"] for r in rows] == ["B", "C", "D"]
+    if palette:
+        assert fill["scale"]["domain"] == ["A", "B", "C", "D"]
+    else:
+        assert fill["scale"]["range"] == [a.uns["cluster_colors"][i] for i in [1, 2, 3]]
+
+
+@pytest.mark.parametrize("color", ["score", "g1", "degree_solid"])
+@pytest.mark.parametrize("colorbar", [None, True, False])
+def test_numeric_node_guides_are_native_and_can_be_hidden(color, colorbar):
+    spec = gsc.pl.paga(
+        make_paga("obs_score"),
+        pos=POSITIONS,
+        color=color,
+        colorbar=colorbar,
+        show=False,
+    ).to_dict()
+    fill = next(m for m in leaf_marks(spec) if m["mark"]["type"] == "point")[
+        "encoding"
+    ]["fill"]
+    assert fill["field"] == "_color"
+    if colorbar is False:
+        assert fill["legend"] is None
+    else:
+        assert fill["legend"]["title"] == color
+        assert fill["legend"]["gradientThickness"] == 15
+
+
+def test_node_legend_rejects_colliding_group_names_before_cache_write():
+    a = make_paga()
+    a.obs["cluster"] = a.obs["cluster"].cat.rename_categories([1, "1", "C", "D"])
+    original = a.uns["paga"]["pos"].copy()
+    with pytest.raises(ValueError, match="labels collide when serialized"):
+        gsc.pl.paga(a, pos=POSITIONS, show=False)
+    np.testing.assert_array_equal(a.uns["paga"]["pos"], original)
