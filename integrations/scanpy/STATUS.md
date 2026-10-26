@@ -122,6 +122,16 @@ optional features and new families in the existing backlog. The
 [publication review contract](PLAN.md#publication-review-of-the-implemented-scope)
 defines the review and package/documentation gates.
 
+**Additional presentation proposals — planned.** The user requested clearer
+variable-gene QC, time-series/simulation and PAGA views, with smaller overview
+points that grow on zoom where useful. The
+[proposal scope](PLAN.md#plot-presentation-proposals) records per-plot ideas and
+the optional variable-gene cutoff preview. These have not changed defaults or
+analysis behavior. Review concrete views before implementation. The
+[documentation design](PLAN.md#documentation-delivery) now records the concise
+guide structure, shared page/notebook source and acceptance criteria; plot review
+precedes documentation delivery. Retain this scope until delivery is verified.
+
 **The M13.a DotPlot and M13.b MatrixPlot builder previews are closed** within
 their documented scope. Both reuse family summaries/renderers and share group
 ordering, trees and totals. Square-background dot styling remains

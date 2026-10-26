@@ -1233,31 +1233,109 @@ retain full point drawing. Review styling on sufficiently dense embeddings with
 semantic thinning disabled; keep point growth on coordinate zoom separate from
 semantic zoom. Validate the above-threshold performance path before adopting it.
 
+### Plot presentation proposals
+
+Review these proposals before publishing the guides. They are not accepted new
+defaults or implemented interactions. Use real data and the existing comparison
+document to show the current and proposed views. STATUS owns their review order
+and decisions.
+
+| Plot | Proposed appearance | Proposed interaction |
+| --- | --- | --- |
+| Highly variable genes | Pale gray background genes and one clear accent for selected genes; draw selected genes last. Shorter axis and legend titles. | Gentle, capped point growth on zoom. An optional score-cutoff slider updates both panels' preview colors and the gene count, with a cutoff line in the normalized-score panel. |
+| Timeseries | Smaller points, lighter outlines and clearer axis labels. Compare several genes in aligned panels when one overlaid view is crowded. | Emphasize one gene while keeping the others visible. Shared time navigation and a native ruler where the composition supports it. |
+| Timeseries subplot | Consistent gene colors, aligned axes and one collected legend when panels share its meaning. | Reuse the timeseries interactions; share navigation only when the coordinates mean the same thing. |
+| Simulation | Clear run labels and boundaries; consistent gene colors. Keep heatmap labels compact and values optional. | Reuse timeseries and matrix interactions. Review an optional gene/run chooser before adding it. |
+| PAGA adjacency | Larger tree-edge dots over the heatmap. In point mode, label the group axis and connectivity axis and explain tree versus other edges with a native legend. Use group names where the stored mapping is available. | Capped dot growth on zoom. Review source/target group focus if labels and hover alone are insufficient. |
+| PAGA comparison | Much smaller embedding points at the overview; matching group colors across panels and fewer permanent labels. | Use the shared embedding renderer for point growth. Review linked group focus and an optional stored-edge cutoff control. |
+| PAGA path | Clear path order and group names; readable expression scale in line mode. Match group colors to the graph and embedding. | Focus one gene and read values along the path. Reuse matrix hover, zoom and fitted labels in heatmap mode. |
+
+Point growth uses native GenomeSpy geometric zoom or the existing gallery's
+zoom-based size expression. Choose one after checking overview size, x-only,
+y-only and combined zoom, maximum size, picking and legends. Keep explicit user
+sizes meaningful and preserve ratios where size encodes a measurement. Cap
+adjacency dots so they do not obscure the heatmap. Reuse a small helper across
+actual consumers if needed; do not add a styling or interaction framework.
+Point growth does not require dropping records.
+
+The variable-gene slider is off by default. Its first scope is a clearly labeled
+preview cutoff on stored normalized scores, not a rerun of gene selection.
+Scanpy's mean limits, top-N selection and batch-aware ranking cannot all be
+represented by one cutoff. Preserve the saved selection and AnnData, distinguish
+preview status from saved status in hover, and use stable gene IDs across panels.
+Reject an unsupported selection mode rather than imply that a score cutoff
+reproduces it. Gene selection remains an explicit Python analysis step; use
+Scanpy for that computation. See the [Scanpy selection rules](https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.highly_variable_genes.html).
+
+The timeseries example uses stored S-phase scores, not elapsed time. Do not join
+those cells into a curve. Connected simulation profiles are a separate optional
+proposal for genuinely ordered samples; they must preserve missing values and
+never connect different realizations. Do not add smoothing, jitter, normalization
+or inferred trajectories as styling changes. Keep group gaps and numeric tile
+labels optional. Use released native capabilities; pending Core features do not
+justify local patches or duplicate drawing layers.
+
+For each accepted slice, verify unchanged values, identities and stored analysis;
+inspect overview and zoomed views; observe hover, controls and reset behavior in
+the notebook and standalone HTML. Check long labels, missing values, dense data
+and narrow displays. Check parameter/scale names when composing two charts.
+Update the relevant workflow and permanent guide after the design is accepted.
+Generated comparisons and executed notebook state remain outside Git.
+
 ### Documentation delivery
 
 M14.e designs the integrations landing page and one workflow page before choosing
 and implementing notebook rendering. Keep the general visualization skill and
 focused agent guides general; Scanpy policy/tutorials belong in this integration.
+Review plot appearance and interactions first. Documentation work must not delay
+those fixes.
 
 ```text
 Integrations
   Overview: actual libraries, status, tested versions
   Scanpy
     Start here: analysis ownership, install, first replacement
-    Compatibility: plots, parameters, methods, returns, exports, limits
-    UMAP workflow: basics, linked selection, customization
-    Expression workflow: dotplot, matrixplot, heatmap
+    UMAP and embeddings: basic plots, select cells, customize
+    Expression plots: dotplot, matrixplot, heatmap, dendrograms
+    Supported plots and options: tested versions, differences, limits
     API reference
 ```
 
+Start with the UMAP and expression guides. Give PAGA and data-check examples their
+own guides as those plots are reviewed, rather than publishing the whole current
+expression notebook as one long page. Keep one example source for the rendered
+page and its downloadable notebook. Extract focused guides from the current
+workflows when their layout is agreed; do not maintain hand-copied examples.
+
+Each example has one or two short sentences, code and a live chart, in that order.
+Use plain user-facing language. Explain what the plot shows, how to use it and
+any limit that affects the task. Put module details, helper reuse, milestone IDs,
+test counts and benchmark notes in contributor/project records. Shorten the
+existing guide while keeping its compatibility facts accessible in the supported
+options page and API reference.
+
+The first page design is **plot, select cells, customize**. Start with packaged
+Scanpy data that already contains coordinates. Show
+`import genome_spy.integrations.scanpy as gsc` and one plotting replacement.
+Say that users calculate their own embeddings with Scanpy first. Use direct
+instructions such as "Scroll over a plot to zoom. Drag to pan. Hover over a cell
+for details." Mark live Python examples with "Run this cell in Jupyter."
+Check these instructions against the actual enabled interactions.
+
 Review navigation, status/version labels, code visibility, chart placement,
 download/run links, narrow-screen/large-chart behavior and Python-only retrieval.
-No empty library cards. Use the dedicated UMAP notebook and a shared expression
-notebook for dotplot, matrixplot and heatmap examples under this workspace. Each
-notebook runs independently with explicit pinned preparation and reusable native
-chart artifacts. Add examples only when their plotting APIs are implemented. The
+No empty library cards. Retain the dedicated UMAP workflow and shared expression
+workflow under this workspace as the starting examples. Each downloadable guide
+notebook must run independently with explicit preparation and tested versions.
+Add examples only when their plotting APIs are implemented. The
 ordinary Sphinx build must not run unbounded analysis or downloads. A static page
 can run hover/brush/count; Python subset retrieval requires a live kernel.
+
+The documentation design is ready to implement when the navigation and UMAP page
+layout are reviewed, the page/notebook source approach is demonstrated, every
+example has a short purpose and interaction instruction, and browser-only versus
+live-Python behavior is clear. Publication requires the notebook download to run
+from a fresh kernel and the rendered page to work at normal and narrow widths.
 
 Adapt the official [core plotting tutorial](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html)
 and [customization tutorial](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
