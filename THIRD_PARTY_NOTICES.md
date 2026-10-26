@@ -108,6 +108,13 @@ selection, formatting and example contributions.
 
 ## PBMC marker expression
 
+The Scanpy documentation also displays `scanpy.datasets.pbmc68k_reduced()` from
+Scanpy 1.11.5. This packaged subset contains 700 cells from the
+[10x Genomics PBMC68k dataset](https://www.10xgenomics.com/datasets/fresh-68-k-pbm-cs-donor-a-1-standard-1-1-0),
+licensed CC BY 4.0. Credit 10x Genomics and Scanpy's preprocessing contributors;
+the examples retain the supplied UMAP coordinates, expression and annotations.
+The source H5AD is loaded from Scanpy and is not vendored in this repository.
+
 `pbmc_markers.json.gz` contains selected markers from 2,638 cells in Scanpy's processed
 PBMC3k fixture, obtained from [cellxgene revision
 68dfbcc](https://github.com/chanzuckerberg/cellxgene/blob/68dfbcc2eb675e96c6a5e2a6b7a0d3465ccf46bc/example-dataset/pbmc3k.h5ad).

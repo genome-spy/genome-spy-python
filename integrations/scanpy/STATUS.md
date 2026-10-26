@@ -110,9 +110,8 @@ scope is the documented implemented subset, not full Scanpy compatibility.
 
 **UMAP review — in progress.** Current and proposed categorical/continuous views
 are ready for the user's design feedback; see the [review record](#umap-publication-review).
-This chat owns embedding work and this ledger. The other chat owns DotPlot-first
-review and grouped/clustermap/PAGA presentation fixes, following its completed
-expression-comparison PDF. Coordinate shared plan and notebook edits before each
+The parallel UMAP review and grouped/clustermap/PAGA presentation work retain
+their existing scope. Coordinate shared plan and notebook edits before each
 implementation slice. Remaining plot reviews are unstarted.
 
 For each plot, record appearance and interaction decisions, code findings,
@@ -246,9 +245,13 @@ This closes the requested native-guide slice. Publication review, remaining
 parameter coverage and released interactive legend adoption stay in their
 existing queues. No Core patch, custom legend or event bridge was added.
 
-The [documentation design](PLAN.md#documentation-delivery) records concise guides
-and one page/notebook example source; delivery remains planned after plot review.
-Retain the live scope until its remaining publication gates are verified.
+**Documentation — first slice implemented.** The [documentation design](PLAN.md#documentation-delivery)
+now has an integrations landing page, a short Scanpy start page and a live UMAP
+guide with a notebook download from one source. The compatibility facts and API
+reference have their own pages. See [delivery and remaining work](#m14e-first-documentation-slice).
+Next: review the page design, then extract the focused expression guide. PAGA
+and data-check guides follow their plot reviews. This draft is not a deployment
+or a claim that the preview shipped. Retain the live publication scope.
 
 **The M13.a DotPlot and M13.b MatrixPlot builder previews are closed** within
 their documented scope. Both reuse family summaries/renderers and share group
@@ -402,7 +405,55 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M11 trajectories/graphs/series | In progress; supplied-series/simulation, DPT-expression and both adjacency previews closed; PAGA/compare available and path heatmap implemented | DPT/PAGA direct-reference gates, comparison corrections and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
 | M13 builders | In progress; DotPlot and MatrixPlot previews closed | Both share concrete group layout and their existing functional statistics/renderers, with upstream/native/workflow/resource checks. StackedViolin and remaining styles/constants stay open. |
-| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
+| M14 compatibility/docs/release | In progress; Core 1.2 adopted | Native layout previews are closed for their recorded scope. The first M14.e page/notebook rendering slice is implemented below; page design review, expression/PAGA/QC guides, compatibility closure and release gates remain open. |
+
+## Review of recent native presentation changes
+
+Three Sol reviewers independently checked `f479fab..1b53fea` on 2026-10-26 for
+reuse, self-containment, readability, correctness and YAGNI. Their scopes covered
+shared point sizing/labels/embedding helpers, QC/profile/simulation controls,
+and PAGA/DPT guides and annotations. No significant issues remained.
+
+The shared-helper review passed 221 targeted unit and 10 browser checks. The
+QC/profile review passed seven browser checks and 220 unit checks; its remaining
+image check passed after using CI's non-Retina Agg backend. The graph/DPT review
+passed 310 unit checks with two retained upstream expected failures. These
+overlapping subsets are evidence for that revision range, not a new suite total.
+No code changes were needed from these reviews.
+
+## M14.e first documentation slice
+
+Implemented: [Integrations](../../docs/integrations/index.md), the
+[Scanpy start page](../../docs/integrations/scanpy/index.md), and the
+[focused UMAP notebook](guides/umap.ipynb). The notebook is the source for the
+rendered page and its download. The existing long workflows remain development
+sources, with local edits preserved. Detailed compatibility facts moved to
+[supported options](../../docs/integrations/scanpy/supported.md); the
+[API page](../../docs/integrations/scanpy/api.md) reads the public exports.
+
+The generic Sphinx directive reuses the existing direct static embed helper.
+It runs packaged-data/chart cells and shows `jupyter-only` cells without running
+them. No analysis, downloads, widgets or file exports run during the page build.
+Documentation dependencies include pinned Scanpy; base library imports and
+optional runtime dependencies are unchanged. PBMC68k attribution is retained in
+the notebook and third-party notices. Plain horizontal page styling keeps wide
+chart canvases reachable on narrow displays, without chart transforms, extra
+marks, custom interaction handlers or Core patches.
+
+Verification: the complete Sphinx build passed with warnings treated as errors.
+Four focused source/build checks passed. Chromium observed hover, both-axis
+zoom, plain-drag selection, exact counts, clear and narrow-page scrolling at
+1,200 and 430 pixels. All seven code cells ran in a fresh Jupyter kernel; the
+exported HTML rendered offline with no network requests or browser errors.
+Executed notebooks, exports and screenshots remain temporary. Ruff and
+`mypy src/` passed. Tests: [source/build](../../tests/test_docs_notebook.py) and
+[browser behavior](../../tests/browser/test_docs_notebook.py).
+
+Remaining: user review of this first page layout, a focused expression notebook
+and guide, later PAGA/data-check guides, compatibility prose editing and the
+parent publication gates. Python subset retrieval uses the normal live widget;
+the static page offers selection/count only. Core upgrades and the parallel UMAP
+design review remain separate. **Clearance: retain; no plan is eligible for removal.**
 
 ## Dotplot and shared expression presentation review
 
@@ -1790,7 +1841,7 @@ horizontal composition so narrow plots retain their dimensions instead of
 stretching to the three-loading-panel width. No data/chart module, analysis,
 color conversion or Core patch was added.
 
-The [maintained contract](../../docs/integrations/scanpy/index.md#pca-overview)
+The [maintained contract](../../docs/integrations/scanpy/supported.md#pca-overview)
 keeps Scanpy's forwarded scatter options and diagnostic defaults. Explicit
 show/save follow the common native contract. Unsupported kwargs or missing
 results fail before any output; genes are never silently filtered.
@@ -2252,7 +2303,7 @@ Retained evidence: [semantic tests](../../tests/integrations/scanpy/test_embeddi
 [workflow guard](../../tests/integrations/scanpy/test_notebooks.py),
 the existing [embedding benchmark](../../tests/integrations/scanpy/benchmark.py)
 with --plot embedding_density, and the
-[user contract](../../docs/integrations/scanpy/index.md#stored-embedding-density).
+[user contract](../../docs/integrations/scanpy/supported.md#stored-embedding-density).
 Generated reference images, overlays, exports and resource reports stay in
 temporary directories. Broader group types, missing densities, unsorted mixed
 colors, typography and image export retain M14 owners; native brushing is not
@@ -2297,7 +2348,7 @@ sample. Optional score-axis zoom is independent per panel; threshold rules stay
 on the same score scale and bins remain fixed. Aggregate marks do not claim cell
 selection. Native width/height set panel areas; figsize reserves native title/axis
 space at 100 logical pixels per inch. Fonts/ticks/export sizing retain the native
-renderer boundary. See the [user contract](../../docs/integrations/scanpy/index.md#scrublet-score-distributions).
+renderer boundary. See the [user contract](../../docs/integrations/scanpy/supported.md#scrublet-score-distributions).
 
 Verification: **522 distinct targeted Python/workflow checks** pass across the new
 [semantic tests](../../tests/integrations/scanpy/test_scrublet.py), shared contract,
@@ -2421,7 +2472,7 @@ preserving differing initial limits when missing pairs remove different genes.
 Native fonts/ticks/guide placement remain deliberate renderer boundaries.
 The legacy wrapper preserves its deprecation warning and returns a native chart
 for show=False, rather than the old wrapper's None. See the
-[maintained contract](../../docs/integrations/scanpy/index.md#variable-gene-diagnostics).
+[maintained contract](../../docs/integrations/scanpy/supported.md#variable-gene-diagnostics).
 
 Verification: **299 targeted Python tests** and the canonical expression workflow
 pass, plus **seven browser checks**. The
@@ -2649,7 +2700,7 @@ Chromium first paint took 0.86 s with 10 MB JS heap. The earlier baseline remain
 retained; these are local observations, not portable timing limits. Other plot
 families and the complete documentation site were not rerun for this slice.
 
-Preview limits, retained in the [compatibility guide](../../docs/integrations/scanpy/index.md#dotplot-compatibility):
+Preview limits, retained in the [compatibility guide](../../docs/integrations/scanpy/supported.md#dotplot-compatibility):
 unused/empty groups error; all-zero fractions require explicit `dot_max=1`;
 missing statistics retain slots but do not paint. M05.e adds navigation and hover
 highlighting; summary brushing remains deferred.
@@ -2749,7 +2800,7 @@ support optional trees/numbers, native colors, numeric bounds and summary hover.
 Grouped trees attach for more than two groups, matching Scanpy. M05.e adds optional grouped wheel
 navigation with live leaf-to-row/column alignment; resizing remains supported.
 Native fonts, palette interpolation and outer layout remain documented renderer
-differences. The [user contract](../../docs/integrations/scanpy/index.md#dendrograms-and-correlation-matrices)
+differences. The [user contract](../../docs/integrations/scanpy/supported.md#dendrograms-and-correlation-matrices)
 records exact options and boundaries.
 
 Evidence:
@@ -2864,7 +2915,7 @@ Evidence:
 The expression notebook ran all four code cells in a fresh live Jupyter kernel,
 saved successful outputs and was inspected. It uses all 700 packaged PBMC cells,
 the existing marker dictionary and the explicitly computed shared Scanpy tree.
-The [maintained contract](../../docs/integrations/scanpy/index.md#heatmap-compatibility)
+The [maintained contract](../../docs/integrations/scanpy/supported.md#heatmap-compatibility)
 records palette, missing-group, storage, normalization and size limits.
 Validation: the 418-check integration suite and all 104 browser checks passed.
 The final 44-check heatmap rerun also covers scaling before a tree's marker subset
@@ -2886,7 +2937,7 @@ AnnData categorization on its detached table. UMAP already uses public AnnData
 vectors, existing embedding coordinates, the shared projection helper and public
 Scanpy palette lists. It never computes embeddings.
 
-The [maintained reuse contract](../../docs/integrations/scanpy/index.md#reusing-scanpy-computations)
+The [maintained reuse contract](../../docs/integrations/scanpy/supported.md#reusing-scanpy-computations)
 records deliberate limits: get.aggregate's NaN propagation/nonzero counts differ
 from plotting means/strict-cutoff fractions; pp.scale's z-scores differ from plot
 min–max scaling. Grouped plots share the same small pandas/NumPy operations as
@@ -2971,7 +3022,7 @@ pixel dimensions. Resident numeric arrays, masked arrays, nested sequences and
 DataFrames retain value/row/column order; explicit repeated labels keep distinct
 index slots. Reuse is confined to existing numeric validation, color bounds,
 index encodings, text and style helpers; no new data module or analysis is added.
-See the [matrix contract](../../docs/integrations/scanpy/index.md#supplied-matrix-compatibility)
+See the [matrix contract](../../docs/integrations/scanpy/supported.md#supplied-matrix-compatibility)
 for source, tick-count, color and layout limits.
 
 Heatmap `zoom=True` enables native y-only wheel zoom and drag panning;
@@ -3043,7 +3094,7 @@ An `obs_keys` strip retains its categorical values and saved palette/order to
 generate a native legend alongside the expression colorbar. Plain CSS tracks
 have no category names and do not generate a legend.
 
-The [maintained contract](../../docs/integrations/scanpy/index.md#clustermap-compatibility)
+The [maintained contract](../../docs/integrations/scanpy/supported.md#clustermap-compatibility)
 records scaling, masks, duplicates, raw vocabulary, kwargs and layout boundaries.
 Native magma and a right color guide replace Seaborn's rocket/inset defaults;
 explicit viridis references isolate those differences. Shared grid navigation and
@@ -3152,7 +3203,7 @@ changed; unrelated tests and the full documentation build were not rerun.
 ## M11.a supplied time-series heatmaps
 
 The resident-profile preview is closed on 2026-10-22. Its
-[public contract](../../docs/integrations/scanpy/index.md#supplied-time-series-heatmaps)
+[public contract](../../docs/integrations/scanpy/supported.md#supplied-time-series-heatmaps)
 keeps Scanpy 1.11.5's `X`, `var_names`, `highlights_x` and `color_map` defaults,
 adding native delivery, dimensions, hover, zoom and fitted values.
 It never orders samples or runs analysis. The expression workflow explicitly
@@ -3218,7 +3269,7 @@ The resident-profile `timeseries` preview is closed on 2026-10-22. The pinned
 public helper delegates to `timeseries_subplot`, which uses **scatter points**,
 not connecting lines. This corrects the earlier connected-path assumption; C04
 is not a dependency of these two helpers. The
-[public contract](../../docs/integrations/scanpy/index.md#supplied-time-series-points)
+[public contract](../../docs/integrations/scanpy/supported.md#supplied-time-series-points)
 preserves `X, **kwargs` and the forwarded defaults while adding native delivery,
 dimensions, hover and both-axis navigation. No time ordering or analysis runs.
 
@@ -3273,7 +3324,7 @@ PAGA remain M11. The live plan and ledger remain **retain**; no document is clea
 ## M11.a native time-series subplots
 
 The `timeseries_subplot` preview is closed on 2026-10-22. Its
-[contract](../../docs/integrations/scanpy/index.md#compose-time-series-subplots)
+[contract](../../docs/integrations/scanpy/supported.md#compose-time-series-subplots)
 preserves the pinned helper's explicit argument names/defaults, omitting `ax`
 and adding the shared native show/save, hover, zoom and dimensions. The default
 native plot area is 496 × 369.6 pixels. `show=False` returns a panel for native
@@ -3325,7 +3376,7 @@ with DPT and PAGA keeping M11 open. The live plan and ledger remain **retain**; 
 ## M11.a stored simulation plots
 
 The bounded `sim` preview is closed on 2026-10-22. Its
-[contract](../../docs/integrations/scanpy/index.md#plot-stored-simulation-realizations)
+[contract](../../docs/integrations/scanpy/supported.md#plot-stored-simulation-realizations)
 preserves Scanpy 1.11.5's signature/defaults and adds native hover, zoom, fitted
 heatmap values and dimensions. The implementation lives in
 [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) and the existing
@@ -3398,7 +3449,7 @@ Implemented on 2026-10-22 through the existing
 [_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py)
 and [public plotting module](../../src/genome_spy/integrations/scanpy/pl.py), with
 no new production module or renderer. The
-[contract](../../docs/integrations/scanpy/index.md#inspect-stored-dpt-groups-and-pseudotime)
+[contract](../../docs/integrations/scanpy/supported.md#inspect-stored-dpt-groups-and-pseudotime)
 preserves Scanpy's signature/defaults and adds native hover, independent x/y
 zoom/pan and per-panel dimensions. Metadata-only access supports views and backed
 AnnData without reading X, raw or layers. Plotting never computes neighbors,
@@ -3478,7 +3529,7 @@ Closed for the resident dense-X preview on 2026-10-22. The
 [_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py)
 preserve Scanpy 1.11.5's signature/defaults, adding native hover, navigation,
 fitted heatmap values and dimensions. No new production module is needed.
-The [contract](../../docs/integrations/scanpy/index.md#plot-expression-in-stored-dpt-order)
+The [contract](../../docs/integrations/scanpy/supported.md#plot-expression-in-stored-dpt-order)
 uses X and var_names only, applies stored dpt_order_indices verbatim and retains
 dpt_changepoints. Missing/stale metadata errors; no analysis, sorting, rank
 reconstruction, smoothing or scaling runs. Gene-only views work; backed/lazy and
@@ -4381,15 +4432,15 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 
 | Scatter parameter group | Current support | Completion owner |
 | --- | --- | --- |
-| Observation/variable x/y, exact X_ basis/components, per-axis layers, palettes/groups/order, multiple panels | Tested bounded preview; [contract](../../docs/integrations/scanpy/index.md#scatter-cells-or-genes) | M07.b preview retained |
+| Observation/variable x/y, exact X_ basis/components, per-axis layers, palettes/groups/order, multiple panels | Tested bounded preview; [contract](../../docs/integrations/scanpy/supported.md#scatter-cells-or-genes) | M07.b preview retained |
 | Native numeric axes, points/guides, cell/gene hover, optional x/y zoom and dimensions | Shared embedding helpers; no scatter brush/Python membership yet | M07.b; broader selection M14 |
 | On-data labels/centroids, margins, highlights, more markers/sizes, 3D and storage/export | Nondefault forms reject; native layout/typography differences recorded | M07.d/M14 |
 
 | PCA diagnostics parameter group | Current support | Completion owner |
 | --- | --- | --- |
-| Stored finite NumPy loadings, component order/repeats, high/low/top ranks, native sizing/hover and common delivery | Bounded loadings preview; [contract](../../docs/integrations/scanpy/index.md#pca-loadings) | M07.c loadings preview retained |
+| Stored finite NumPy loadings, component order/repeats, high/low/top ranks, native sizing/hover and common delivery | Bounded loadings preview; [contract](../../docs/integrations/scanpy/supported.md#pca-loadings) | M07.c loadings preview retained |
 | Sparse/lazy or nonfinite loadings, full typography and image export | Explicit restrictions; no automatic filtering/analysis | M14 |
-| Stored variance ratios, PC numbering, linear/natural-log scores, native sizing/hover and common delivery | Bounded variance preview; [contract](../../docs/integrations/scanpy/index.md#pca-variance-ratios) | M07.c variance preview retained |
+| Stored variance ratios, PC numbering, linear/natural-log scores, native sizing/hover and common delivery | Bounded variance preview; [contract](../../docs/integrations/scanpy/supported.md#pca-variance-ratios) | M07.c variance preview retained |
 | Overview | Verified bounded native composition, parent dimensions/defaults, scatter-only kwargs and one display | M07.c preview retained; parent limits M07.d/M14 |
 
 | Matrixplot parameter group | Current support | Completion owner |

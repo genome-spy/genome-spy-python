@@ -65,6 +65,7 @@ scanpy-test = [
 ]
 docs = [
     "anndata>=0.11.0",
+    "scanpy==1.11.5",
     "furo>=2024.8.6",
     "sphinx>=7.3",
     "myst-parser>=3.0",

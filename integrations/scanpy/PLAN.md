@@ -131,7 +131,7 @@ raw-symbol and duplicate-label behavior. Do not force a single accessor onto
 families with different lookup semantics. Do not call upstream plotting, inspect
 rendered artists, import benchmark scripts, or promote prototype geometry as
 runtime preparation. Source and dataset provenance are reviewed before reuse.
-The [Scanpy 1.11.5 reuse audit](../../docs/integrations/scanpy/index.md#reusing-scanpy-computations)
+The [Scanpy 1.11.5 reuse audit](../../docs/integrations/scanpy/supported.md#reusing-scanpy-computations)
 and [delegation/counterexample tests](../../tests/integrations/scanpy/test_upstream_reuse.py)
 make these boundaries explicit. Recheck them when adding support for a version
 that exposes suitable public plotting-preparation methods.
@@ -387,7 +387,7 @@ in M14, not an excuse to declare full automatic compatibility.
 
 Heatmap M05.a/b is delivered as a bounded preview; see the
 [status record](STATUS.md#m05ab-cell-heatmap-preview) and maintained
-[heatmap contract](../../docs/integrations/scanpy/index.md#heatmap-compatibility).
+[heatmap contract](../../docs/integrations/scanpy/supported.md#heatmap-compatibility).
 It adds one chart module and small functions in the existing grouped data/tree
 modules, reusing access, scaling, palettes, feature ordering, labels and branches.
 The 250,000-value limit is checked before extraction; the 100k × 50 case tests

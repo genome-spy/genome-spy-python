@@ -485,7 +485,7 @@ def embedding_density(
 
     Args:
         adata: AnnData containing explicitly computed embedding-density results.
-        basis: Stored X_ embedding; lowercase names and the fa alias match Scanpy.
+        basis: Stored ``X_`` embedding; lowercase names and the fa alias match Scanpy.
         key: Stored obs density key with a matching uns key_params mapping.
         groupby: Append this suffix to the pinned default umap_density key.
         group: All stored categories by default; select a string/list, or None for ungrouped results.
@@ -969,7 +969,7 @@ def _embedding_signature(
 def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
     """Plot supplied 2D embedding coordinates with Scanpy-compatible colors.
 
-    Reads an existing obsm basis using direct-name then X_ precedence. Shared
+    Reads an existing obsm basis using direct-name then ``X_`` precedence. Shared
     options cover categorical/continuous colors, component panels, masks, native
     sizing, hover, zoom and interval selection. Analysis stays in Scanpy.
 

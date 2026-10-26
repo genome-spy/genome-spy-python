@@ -35,6 +35,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
     "genomespy_gallery",
+    "genomespy_notebook",
     "genomespy_agents",
 ]
 

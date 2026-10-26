@@ -1,7 +1,7 @@
 # Scanpy integration workspace
 
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
-[current compatibility guide](../../docs/integrations/scanpy/index.md).
+[current compatibility guide](../../docs/integrations/scanpy/supported.md).
 Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
 `gsc.pl.scatter(...)`, `gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
 `gsc.pl.correlation_matrix(...)` or `gsc.pl.clustermap(...)`.
@@ -19,6 +19,11 @@ panels for stored PCA results.
 `gsc.pl.highly_variable_genes(...)` and the legacy `filter_genes_dispersion(...)`
 show stored gene-selection diagnostics without rerunning analysis.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
+
+The focused [UMAP guide notebook](guides/umap.ipynb) is the single source for its
+rendered documentation page and notebook download. The longer notebooks under
+`notebooks/` remain the development workflows. Documentation builds execute only
+the guide's page examples; `jupyter-only` cells are shown without running them.
 `gsc.pl.sim(...)` displays stored simulation realizations using the time-series
 point and heatmap renderers; it never runs simulation.
 `gsc.pl.dpt_groups_pseudotime(...)` reuses the point renderer for stored DPT
@@ -87,7 +92,7 @@ raw symbol lookup differ from UMAP's behavior. Grouped plots use that public
 getter directly, with only selected unique keys. Public AnnData string conversion
 operates on the detached table, preserving category order without mutating AnnData.
 Grouped statistics are independently tested before adding the dotplot chart.
-The [computation reuse audit](../../docs/integrations/scanpy/index.md#reusing-scanpy-computations)
+The [computation reuse audit](../../docs/integrations/scanpy/supported.md#reusing-scanpy-computations)
 records which public methods are used and why aggregate/scale or plotting-class
 shortcuts would change semantics or ownership.
 
