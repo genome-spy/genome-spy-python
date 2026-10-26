@@ -83,7 +83,11 @@ def _render_guide(page, monkeypatch, name):
 
 def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
     pytest.importorskip("scanpy")
-    from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
+    from tests.integrations.scanpy.browser.test_grid_interactions import (
+        position,
+        svg_root,
+        value_texts,
+    )
     from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
 
     specs = _render_guide(page, monkeypatch, "paga.ipynb")
@@ -118,6 +122,24 @@ def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
         page.evaluate("i => window.api = guideApis[i]", index)
         assert sum(e.tag.endswith("linearGradient") for e in svg_root(page).iter()) == 1
         assert page.evaluate("api.getLogicalCanvasSize().width") <= 786
+    page.evaluate("window.api = guideApis[5]")
+    assert not value_texts(svg_root(page))
+    page.evaluate("window.api = guideApis[6]")
+    text = [e for e in svg_root(page).iter() if e.tag.endswith("text")]
+    title = next(e for e in text if e.text == "Source group")
+    legend = [e for e in text if e.text in ["Adjacency", "Tree"]]
+    assert len(legend) == 2
+    label_bottom = page.evaluate("""() => {
+        const view = api.debug.getViewRoot().getDescendants()
+            .find(v => v.spec.encoding?.x?.field === 'slot');
+        return view.coords.y + view.coords.height;
+    }""")
+    assert position(title)[1] > label_bottom
+    assert min(position(e)[1] for e in legend) > position(title)[1]
+    assert (
+        page.evaluate("api.getLogicalCanvasSize().height")
+        <= page.locator(".gs-doc-embed").nth(6).bounding_box()["height"]
+    )
     page.evaluate("window.api = guideApis[9]")
     page.locator("select").select_option(label="LYZ")
     opacity = {float(r.get("stroke-opacity", "1")) for r in edges()}

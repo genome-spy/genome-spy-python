@@ -1459,7 +1459,11 @@ connectivity and edge type. Both zoom modes and independent composition work for
 strips too. `color_map` is inactive, and `show_values=True` requires heatmap mode.
 The stripplot area defaults to 496 by 369.6 pixels. Points grow on zoom. A native
 legend explains the two edge types, and the vertical axis shows connectivity.
-The optional `labels` also appear in tree-edge tooltips.
+With explicit `labels`, source groups use index-scaled slots. The legend sits
+below the group names and x-axis title. Named labels share the index scale in a
+native side view: the released axis API cannot map index ticks to arbitrary
+names. Repeated labels retain separate slots. Unlabelled strips keep Scanpy's
+numeric x limits. The optional `labels` also appear in tree-edge tooltips.
 
 Zoomable matrix charts can use independent native panels and guides:
 

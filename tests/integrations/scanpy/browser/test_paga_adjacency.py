@@ -203,6 +203,65 @@ def test_tree_points_follow_matrix_zoom_pan_with_hover_and_values(page, tmp_path
     assert not page.locator(".message-box").count()
 
 
+@pytest.mark.parametrize("zoom", [True, "xy"])
+def test_named_strips_keep_index_labels_aligned_and_legend_below_axis(page, zoom):
+    from tests.integrations.scanpy.browser.test_grid_interactions import position
+
+    labels = ["Repeated long group", "Middle group", "Repeated long group"]
+    chart = gsc.pl.paga_adjacency(
+        make_adjacency(),
+        as_heatmap=False,
+        labels=labels,
+        zoom=zoom,
+        width=400,
+        height=240,
+        show=False,
+    )
+    bounds = render(page, chart)
+    for navigated in [False, True]:
+        if navigated:
+            pointer(page, bounds)
+            page.mouse.wheel(0, -150)
+            page.wait_for_timeout(250)
+        root = svg_root(page)
+        text = [e for e in root.iter() if e.tag.endswith("text")]
+        ticks = [e for e in text if e.text in labels]
+        assert len(ticks) == 3
+        names = [e for e in text if e.text in ["Adjacency", "Tree"]]
+        assert len(names) == 2
+        title = next(e for e in text if e.text == "Source group")
+        # Native text bounds include rotation and the full long label, not just its anchor.
+        box = page.evaluate("""() => {
+            const views=api.debug.getViewRoot().getDescendants();
+            const labelView=views.find(v=>v.spec.mark?.type==='text' && v.spec.encoding?.x?.field==='slot');
+            const scale=labelView.getScaleResolution('x').getScale();
+            return {bottom:labelView.coords.y+labelView.coords.height,
+                    centers:[0,1,2].map(i=>labelView.coords.x+(scale(i)+scale.bandwidth()/2)*labelView.coords.width)};
+        }""")
+        assert all(position(e)[1] > bounds["y"] + bounds["height"] for e in ticks)
+        assert position(title)[1] >= box["bottom"]
+        assert min(position(e)[1] for e in names) > position(title)[1]
+        np.testing.assert_allclose(
+            [position(e)[0] for e in ticks], box["centers"], atol=0.6
+        )
+    combined = (
+        (chart | chart)
+        .resolve_scale(default="independent")
+        .resolve_legend(default="independent")
+    )
+    bounds = render(page, combined)
+    before = point_coordinates(page)
+    assert len(before) == 2
+    pointer(page, bounds)
+    page.mouse.wheel(0, -150)
+    page.wait_for_timeout(250)
+    after = point_coordinates(page)
+    assert not np.array_equal(after[0], before[0])
+    np.testing.assert_allclose(after[1], before[1], atol=0.1)
+    text = [e.text for e in svg_root(page).iter() if e.tag.endswith("text")]
+    assert text.count("Adjacency") == text.count("Tree") == 2
+
+
 def test_hover_false_disables_matrix_and_tree_tooltips(page):
     bounds = render(
         page, gsc.pl.paga_adjacency(make_adjacency(), hover=False, show=False)

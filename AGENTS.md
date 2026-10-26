@@ -38,6 +38,8 @@ before app-specific concepts. Notebook rendering is first-class; prefer `anywidg
 - Keep comments to one-line explanations of why. Document deliberate shortcuts
   as `shortcut: <the limit>, <when to upgrade>`.
 - Set verifiable goals and give a brief plan for multi-step work.
+- When work requires an upstream GenomeSpy PR, use
+  [contribute-genomespy](.agents/skills/contribute-genomespy/SKILL.md).
 - Keep core logic pure Python; isolate I/O and integration at the edges.
 - Follow the linked [language, docstring, formatting, and gallery standards](docs/contributing/standards.md).
   Read the relevant sections before Python or gallery edits; they are requirements.

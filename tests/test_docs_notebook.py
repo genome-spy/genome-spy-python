@@ -388,6 +388,12 @@ def test_graph_and_profile_pages_read_prepared_results(
     specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
     assert len(specs) == charts
     if path == PAGA_GUIDE:
+        from tests.integrations.scanpy.helpers import leaf_marks
+
+        assert not any(
+            mark.get("encoding", {}).get("text", {}).get("field") == "_value"
+            for mark in leaf_marks(specs[5])
+        )
         for spec in specs[:4]:
             nodes = next(
                 rows for rows in spec["datasets"].values() if "_group" in rows[0]

@@ -260,3 +260,22 @@ def test_stripplot_keeps_inactive_colormap_and_disables_hover():
     assert "tooltip" not in spec["encoding"]
     assert spec["encoding"]["x"]["scale"]["zoom"] is False
     assert spec["encoding"]["y"]["scale"]["zoom"] is True
+
+
+@pytest.mark.parametrize("zoom", [True, "xy"])
+def test_named_strips_use_index_slots_and_collect_legend_outside_labels(zoom):
+    labels = ["Repeated", "Middle", "Repeated"]
+    spec = gsc.pl.paga_adjacency(
+        make_adjacency(), as_heatmap=False, labels=labels, zoom=zoom, show=False
+    ).to_dict()
+    points, text = leaf_marks(spec)
+    x = points["encoding"]["x"]
+    assert x["type"] == "index"
+    assert x["scale"]["domain"] == [0, 2]
+    assert x["scale"]["zoom"] is (zoom == "xy")
+    assert x["axis"]["title"] is None
+    rows = spec["datasets"][text["data"]["name"]]
+    assert rows == [{"slot": i, "label": value} for i, value in enumerate(labels)]
+    assert spec["resolve"]["legend"]["default"] == "collected"
+    title = spec["surround"]["bottom"][0]["title"]
+    assert title["text"] == "Source group" and title["orient"] == "bottom"

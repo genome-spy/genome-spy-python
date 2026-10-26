@@ -104,9 +104,17 @@ def build_paga_adjacency(
         visible = points.loc[np.isfinite(points["_y"])]
         # Empty plots retain Matplotlib's default limits around zero.
         extent = visible[["_x", "_y"]].to_numpy() if len(visible) else np.zeros((1, 2))
-        x = gs.X("_x:Q").scale(
-            domain=list(coordinate_domain(extent[:, 0], 0.05)), zero=False, nice=False
-        )
+        # Named groups use slots; numeric calls retain Scanpy's original limits.
+        if labels is None:
+            x = gs.X("_x:Q").scale(
+                domain=list(coordinate_domain(extent[:, 0], 0.05)),
+                zero=False,
+                nice=False,
+            )
+        else:
+            from genome_spy.integrations.scanpy._grouped_chart import coordinate
+
+            x = coordinate(gs.X, "_x", len(values), 0)
         y = gs.Y("_y:Q").scale(
             domain=list(coordinate_domain(extent[:, 1], 0.05)), zero=False, nice=False
         )
@@ -117,7 +125,10 @@ def build_paga_adjacency(
         chart: gs.Chart | gs.SurroundChart = (
             dots.transform_filter("isValid(datum._y)")
             .encode(
-                x=x.axis(title="Source group", labels=labels is None),
+                x=x.axis(
+                    title="Source group" if labels is None else None,
+                    labels=labels is None,
+                ),
                 y=y.axis(title="Connectivity"),
                 fill=gs.Fill("_kind:N", scale=colors).legend(
                     gs.Legend(
@@ -145,13 +156,23 @@ def build_paga_adjacency(
         if labels is not None:
             from genome_spy.integrations.scanpy._grouped_chart import _slot_labels
 
+            source_labels = _slot_labels(
+                labels, x.axis(None), horizontal=True
+            ).properties(
+                title=gs.Title(
+                    text="Source group",
+                    orient="bottom",
+                    offset=4,
+                    font=FONT,
+                    fontSize=10 * PT,
+                    fontWeight="normal",
+                )
+            )
             chart = gs.surround(
                 chart,
-                surround=gs.SurroundSides(
-                    bottom=[_slot_labels(labels, x.axis(None), horizontal=True)]
-                ),
+                surround=gs.SurroundSides(bottom=[source_labels]),
                 spacing=0,
-            )
+            ).resolve_legend(default="collected")
         return chart.configure_legend(labelFont=FONT, labelFontSize=10 * PT)
     return build_matrix(
         values,

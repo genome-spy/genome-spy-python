@@ -263,6 +263,31 @@ supplies the correction to existing guide/notebook calls without source edits
 or Core changes. The full repository suite and performance workloads were not
 rerun for this presentation fix. Publication and capability gates stay open.
 
+**PAGA adjacency axis/legend order — verified (2026-10-26).** The heatmap guide
+leaves `show_values` off so numeric labels do not cover tree dots; the optional
+API flag remains available. Named connectivity strips use the shared native
+index coordinate helper, preserving explicit source order and repeated names.
+Unlabelled calls retain Scanpy's original numeric x limits. Legend collection
+belongs to the outer surround; its key now follows the group labels and the
+bottom x-axis title instead of appearing between marks and labels.
+
+The Core 1.2 axis schema/runtime supports numeric index ticks but no arbitrary
+position-to-name mapping. Names therefore retain the existing shared label view;
+changing the scale does not supply native named ticks. This is the C08 boundary,
+not a claim that an index axis now draws group names. No new label renderer,
+custom legend or browser listener was added.
+
+Verification: 129 adjacency/presentation checks and three prepared-guide checks
+passed. All 20 adjacency browser cases passed, covering registered default
+charts, sparse/missing inputs, repeated names on zoom, complete axis/key order,
+hover, composition and offline delivery. Two point-growth cases and two PAGA
+guide cases at normal/narrow widths also passed. The guide checks that heatmap
+values stay absent and its long strip labels precede the native key. The updated
+guide notebook ran in a fresh kernel; outputs remain temporary. Ruff, mypy and
+the complete Sphinx rebuild passed. No new resource benchmark or full repository
+suite was run.
+Publication/capability gates remain open; no plan is cleared.
+
 **Documentation — 51 live charts across eight guides.** The expanded UMAP and
 expression pages include stored PCA/scatter/density, numeric matrices,
 correlations, dendrograms, clustermap and both builders. Focused PCA-diagnostic
@@ -4725,7 +4750,7 @@ affected slice.
 | C05 | Font/text-outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Core 1.2 typed surround/facet APIs and native index gaps available; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example; verify viewport/scale/guide ownership, required heatmap group gaps and existing navigation/selection contracts |
 | C07 | Python linkage + shared native orthogonal branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Stored parent/child edges project into equal summary slots or unequal cell-group centers. Complete SVG elbows, four orientations, zero heights, resize and navigation pass; recheck later families. |
-| C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
+| C08 | Native index slots plus label views retain repeated names; Core 1.2 axes lack arbitrary index-to-name mapping | Grouped grids, ranked plots and named PAGA connectivity strips | Shared slots and views align on zoom; named PAGA strips collect their key after the full axis. Recheck native axis name mapping before removing label views. |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |
 | C10 | Heatmap/clustermap bands and native gap navigation verified in their own viewports. | Closed for M05.f native WebGL/notebook/HTML scope | Native clipped rects use the released Core; no patched bundle or custom listeners. C12 remains independent. |
 | C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | [Minimal native regression](../../tests/integrations/scanpy/browser/test_native_legend_extent.py) strictly xfails on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |

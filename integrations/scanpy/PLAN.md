@@ -907,6 +907,9 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   entries (including selected diagonals). Preserve per-source gray-then-black
   draw order and numeric indices. Missing points do not affect limits; preserve
   Scanpy's five-percent margins and empty/constant limits through shared helpers.
+  Explicit group names use index slots and the shared label view; collect their
+  native legend below the names and bottom axis title. Index axes cannot yet
+  map positions to arbitrary names, so retain that capability boundary.
   color_map is inactive; show_values=True requires heatmap mode. Default strip
   plot area is 496 by 369.6 pixels. Reuse native hover, y/both-axis navigation,
   composition and HTML delivery; verify sparse formats, source/target IDs, points,
@@ -1262,7 +1265,7 @@ Native capability limits do not justify custom event bridges or drawing substitu
 | Timeseries | Smaller points, lighter outlines and clearer axis labels. Compare several genes in aligned panels when one overlaid view is crowded. | Emphasize one gene while keeping the others visible. Shared time navigation and a native ruler where the composition supports it. |
 | Timeseries subplot | Consistent gene colors, aligned axes and one collected legend when panels share its meaning. | Reuse the timeseries interactions; share navigation only when the coordinates mean the same thing. |
 | Simulation | Clear run labels and boundaries; consistent gene colors. Collect the point legend below the entire x-axis. Keep heatmap labels compact and values optional. | Reuse timeseries and matrix interactions. Optional gene/run dropdowns emphasize their intersection. Optional connected profiles retain missing-value gaps and run boundaries; shuffled output rejects these run options. |
-| PAGA adjacency | Larger tree-edge dots over the heatmap. In point mode, label the group axis and connectivity axis and explain tree versus other edges with a native legend. Use group names where the stored mapping is available. | Capped dot growth on zoom. Review source/target group focus if labels and hover alone are insufficient. |
+| PAGA adjacency | Larger tree-edge dots over the heatmap; leave values off in the basic example. In point mode, label the group axis and connectivity axis and explain tree versus other edges with a native legend below the complete x-axis. Explicit group names use index slots and the shared label view until native index axes support name mapping. | Capped dot growth on zoom. Review source/target group focus if labels and hover alone are insufficient. |
 | PAGA comparison | Much smaller embedding points at the overview; matching group colors across panels and fewer permanent labels. All network views have native node-color guides. Group-median embedding labels use native displace2d and text measurement. | Use the shared embedding renderer for point growth. Review linked group focus and an optional stored-edge cutoff control. |
 | PAGA path | Clear path order and group names; readable expression scale in line mode. Match group colors to the graph and embedding. | Focus one gene and read values along the path. Reuse matrix hover, zoom and fitted labels in heatmap mode. |
 
