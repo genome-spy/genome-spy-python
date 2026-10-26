@@ -1,4 +1,4 @@
-"""Observe native brush highlights/counts and ordinary widget trait delivery."""
+"""Observe native brush counts and ordinary widget trait delivery."""
 
 import asyncio
 import base64
@@ -100,6 +100,16 @@ def test_native_count_updates_during_drag_without_changing_points(page):
     page.keyboard.up("Shift")
     page.mouse.dblclick(*position(3.8, 3.8))
     assert observe(0) == original
+    for intervals in (
+        {"x": [3.5, 3.8], "y": [3.5, 3.8]},
+        {"x": [1, 1], "y": [0, 4]},
+        {"x": [0, 4], "y": None},
+    ):
+        page.evaluate(
+            "intervals => api.getParam('cells').setValue({type:'interval',intervals})",
+            intervals,
+        )
+        assert observe(0) == original
 
 
 @pytest.mark.parametrize("zoom", [False, True])
@@ -229,7 +239,7 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                       return [...svg.querySelectorAll('text')].map(t=>t.textContent).find(t=>t.endsWith(' cells selected'));
                     }""")
 
-                async def drag(panel, start, end):
+                async def drag(panel, start, end, *, count_during_drag=False):
                     if zoom:
                         await page.keyboard.down("Shift")
                     x, y = position(panel, *start)
@@ -237,6 +247,8 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                     await page.mouse.down()
                     x, y = position(panel, *end)
                     await page.mouse.move(box["x"] + x, box["y"] + y, steps=15)
+                    if count_during_drag:
+                        assert await count() == "3 cells selected"
                     await page.mouse.up()
                     if zoom:
                         await page.keyboard.up("Shift")
@@ -247,7 +259,7 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                 ).any()
                 before = await samples()
                 # Start inside the plot; its lower y boundary is exactly 0.95.
-                await drag(0, (0.98, 0.98), (2.4, 2.05))
+                await drag(0, (0.98, 0.98), (2.4, 2.05), count_during_drag=True)
                 await page.screenshot(path=str(tmp_path / "brush-gesture.png"))
                 assert await page.evaluate(
                     "api.getParam('cells').getValue().intervals.x !== null"
@@ -261,17 +273,13 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                 assert await count() == "3 cells selected"
                 assert await page.evaluate("hostDrags") == 0
                 after = await samples()
-                assert np.max(np.abs(before[:, :2] - after[:, :2])) < 15
-                for panel in range(2):
-                    assert (255 - after[panel, 2]).sum() < 0.3 * (
-                        255 - before[panel, 2]
-                    ).sum()
+                np.testing.assert_allclose(after, before, atol=15)
                 await page.screenshot(path=str(tmp_path / "linked-brush.png"))
                 await drag(1, (2.6, 0.98), (3.05, 1.4))
                 assert (
                     await page.evaluate("api.getParam('cells').getValue()") == snapshot
                 )
-                # Exact lower/upper edges agree across the shader, count, and Python.
+                # Exact lower/upper edges agree across the native count and Python.
                 await page.evaluate(
                     "api.getParam('cells').setValue({type:'interval',intervals:{x:[1,3],y:[1,3]}})"
                 )
@@ -323,10 +331,7 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                 await drag(0, (0.98, 0.98), (2.4, 2.05))
                 offline_after = await samples()
                 await page.screenshot(path=str(tmp_path / "offline-brush.png"))
-                for panel in range(2):
-                    assert (255 - offline_after[panel, 2]).sum() < 0.3 * (
-                        255 - offline_before[panel, 2]
-                    ).sum()
+                np.testing.assert_allclose(offline_after, offline_before, atol=15)
                 assert not requests
                 assert not errors
             finally:

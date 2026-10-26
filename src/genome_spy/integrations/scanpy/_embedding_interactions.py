@@ -8,7 +8,7 @@ from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedd
 from genome_spy.integrations.scanpy._style import EmbeddingStyle
 
 
-def point_interactions(
+def point_hover(
     chart: gs.Chart,
     panel: Panel,
     index: int,
@@ -16,13 +16,10 @@ def point_interactions(
     axis_labels: tuple[str, ...],
     row_label: str,
     hover: bool,
-    selection: gs.Parameter | None,
-    opacity: float,
-    stroke_opacity: float,
 ) -> gs.Chart:
-    """Return a point chart with requested hover and brush highlighting applied.
+    """Return a point chart with the requested native hover fields.
 
-    Use the panel's prepared fields and shared selection without dropping cells.
+    Use the panel's prepared fields without dropping cells.
     """
     if hover:
         x, y = panel.dimensions
@@ -37,15 +34,6 @@ def point_interactions(
                 gs.Tooltip(f"_coord_{x}:Q", title=axis_labels[x]),
                 gs.Tooltip(f"_coord_{y}:Q", title=axis_labels[y]),
             ]
-        )
-    if selection is not None:
-        chart = chart.encode(
-            fillOpacity=gs.when(selection)
-            .then(gs.value(opacity))
-            .otherwise(gs.value(opacity * 0.2)),
-            strokeOpacity=gs.when(selection)
-            .then(gs.value(stroke_opacity))
-            .otherwise(gs.value(stroke_opacity * 0.2)),
         )
     return chart
 
@@ -71,6 +59,7 @@ def brush_count(
     """
     x, y = fields
     parameter = selection.name
+    # shortcut: sum preserves zero counts in Core 1.2.0; replace after its fix ships.
     # Match the shader's lower-inclusive, upper-exclusive point membership.
     predicate = (
         f"{parameter}.intervals.x && {parameter}.intervals.y && "
@@ -97,7 +86,7 @@ def with_brush_count(
 ) -> gs.TopLevelSpec:
     """Return the embedding chart with a count row driven by the supplied brush.
 
-    Count prepared cells in the browser using the same bounds as point highlighting.
+    Count prepared cells in the browser without changing point appearance.
     """
     x, y = (f"_coord_{d}" for d in prepared.panels[0].dimensions)
     name = selection.name

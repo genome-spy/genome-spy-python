@@ -208,21 +208,21 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(
         assert not any(e.tag.endswith("circle") for e in root.iter())
     page.mouse.move(1, 1)
     pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
-    for x, expected in ((-0.4, 0), (0.4, 204)):
+    for x in (-0.4, 0.4):
         px, py = location(x, 0)
         # Sample the outer black halo, clear of the white gap and foreground.
         # The native brush overlay can lightly tint the selected halo.
         np.testing.assert_allclose(
             pixels[round(py), round(px + 11 * (np.sqrt(2) if marker == "D" else 1))],
-            [expected] * 3,
+            [0] * 3,
             atol=15 if x < 0 else 5,
         )
     foreground = np.array([204, 102, 119])
     expected = np.full(3, 255.0)
     for color, alpha in (
-        (np.zeros(3), 0.2),
-        (np.full(3, 255), 0.2),
-        (foreground, 0.14),
+        (np.zeros(3), 1),
+        (np.full(3, 255), 1),
+        (foreground, 0.7),
     ):
         expected = alpha * color + (1 - alpha) * expected
     px, py = location(0.4, 0)

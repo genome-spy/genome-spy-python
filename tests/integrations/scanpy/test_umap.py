@@ -510,16 +510,14 @@ def test_brushing_has_one_owner_without_changing_prepared_data_or_guides(adata):
     assert "params" not in panels[1]
     for panel, baseline in zip(panels, units(original.to_dict()), strict=True):
         point = points(panel)
-        for channel in ("x", "y", "color", "size", "tooltip", "key"):
-            assert point["encoding"][channel] == points(baseline)["encoding"][channel]
-        assert point["encoding"]["fillOpacity"] == {
-            "condition": {"param": brush.name, "empty": True, "value": 1.0},
-            "value": 0.2,
-        }
+        for key in ("encoding", "mark", "transform"):
+            assert point.get(key) == points(baseline).get(key)
 
 
 @pytest.mark.parametrize("legend_loc", [None, "right margin"])
-def test_single_panel_brush_has_an_ancestor_value_and_respects_empty(adata, legend_loc):
+def test_single_panel_brush_has_an_ancestor_value_without_empty_point_effects(
+    adata, legend_loc
+):
     brush = gs.selection_interval("cells", encodings=["x", "y"], empty=False)
     chart = gsc.pl.umap(
         adata, color="cell_type", selection=brush, legend_loc=legend_loc, show=False
@@ -529,7 +527,7 @@ def test_single_panel_brush_has_an_ancestor_value_and_respects_empty(adata, lege
     panel = units(spec["vconcat"][0])[0]
     assert panel["params"][0]["push"] == "outer"
     point = points(panel)
-    assert point["encoding"]["fillOpacity"]["condition"]["empty"] is False
+    assert "fillOpacity" not in point["encoding"]
 
 
 def test_brushing_rejects_different_projection_pairs(adata):
@@ -556,9 +554,8 @@ def test_brushing_preserves_scalar_alpha_and_strokes(adata):
     point = units(spec["vconcat"][0])[0]
     point = points(point)
     for channel in ("fillOpacity", "strokeOpacity"):
-        opacity = point["encoding"][channel]
-        assert opacity["condition"]["value"] == 0.4
-        assert opacity["value"] == pytest.approx(0.08)
+        assert channel not in point["encoding"]
+        assert point["mark"][channel] == 0.4
 
 
 def test_native_defaults_ignore_matplotlib_global_style(adata):

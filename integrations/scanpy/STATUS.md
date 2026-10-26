@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-25. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-26. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -63,7 +63,7 @@ access, with native gray/continuous/black point layers, hover and linked zoom.
 Variable-gene QC panels read stored selection/statistics from AnnData, result
 tables or legacy records, with native hover, optional per-panel zoom and one
 collected bottom legend.
-UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
+UMAP includes native sizing, optional hover/zoom, a plain interval brush/count
 and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
 brackets, native size/color guides and optional summary hover. Matrixplot reuses
 grouped access/means and native layout, with one-pass scaling, authoritative
@@ -608,6 +608,28 @@ not fresh-clone dependencies or release artifacts.
   and emit one summary row on brush changes. Rebuild on source/coordinate changes
   and count all loaded cells independently of semantic visibility. This is a
   design direction, not an implemented or performance-qualified native API.
+- **Plain-brush adoption (2026-10-26):** the user accepted the faster demo and
+  requested adoption through the existing `selection=` parameter, then explicitly
+  chose to **wait for a published Core release**. The shared embedding renderer
+  now removes point/outline fading and keeps hover separate from selection.
+  UMAP, PCA and other supported 2D bases reuse the same brush owner, validation,
+  count composition and Python retrieval; no new public parameter was added.
+  The existing formula/sum count stays in place to preserve empty/cleared zero
+  counts on Core 1.2.0. The faster native filter/count remains deferred, with the
+  ignored candidate and preceding measurements retained as evidence. No bundled
+  runtime, CDN default, source pin or renderer patch was changed. The UMAP guide
+  and canonical notebook describe the plain brush, unchanged points, explicit
+  Python retrieval and remaining large-data count cost. Existing executed
+  notebook outputs and unrelated local source choices remain local.
+  **Verification:** **200 focused Python checks**, including the canonical UMAP
+  workflow, and **seven native browser cases** pass. Browser checks cover counts
+  before mouse release, coincident cells, empty/cleared/zero-width/partial bounds,
+  constant point opacity, outline preservation, widget/Python delivery, offline
+  HTML and the shared PCA path. Repository Ruff checks, formatting and source-wide
+  mypy pass. The 1.1M-cell fast-count timing above belongs to the unreleased-Core
+  demo; it is not a performance claim for the retained package counter.
+  The full repository suite and docs build are not repeated; no data preparation,
+  transport or general embedding style defaults changed. Clearance: retain.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
@@ -631,14 +653,14 @@ not fresh-clone dependencies or release artifacts.
   legend overflowed. The existing C11 multi-column categorical-guide limitation
   remains open and must be accounted for in the publication scope.
 
-Next: gather feedback on the default native brain brush with count-only text;
-review the faster native candidate, obtain a released empty-aggregate fix and
-resolve the remaining full-scan cost in Core. Qualify native interaction/count
-latency above 1,000,000 cells before final public
-integration and canonical-notebook adoption. Apply
-accepted appearance/interaction changes with focused render checks and update
-the canonical notebook and user guide. Generalizing defaults to other embedding
-families requires inspecting those callers first.
+Next: wait for a published Core containing the empty-global-aggregate fix, then
+update the pinned package/runtime together and adopt native cached x/y → selection
+filter → count in the existing helper. Verify initial/empty/cleared/zero-area
+counts, all-loaded-cell membership, unchanged points, widget delivery and both
+ordinary and inline HTML. Repeat the dense count-latency check before claiming
+the demo's performance in the package; a spatial index remains an optional Core
+follow-up only if needed. Continue the remaining appearance/hover/navigation
+review separately; broader embedding style defaults are not yet adopted.
 
 ## M05.e shared grid interactions
 

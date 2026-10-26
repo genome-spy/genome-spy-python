@@ -13,7 +13,7 @@ from genome_spy.integrations.scanpy._data import coordinate_domain
 from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
 from genome_spy.integrations.scanpy._embedding_interactions import (
     brush_owner,
-    point_interactions,
+    point_hover,
     validate_brush,
     with_brush_count,
 )
@@ -281,29 +281,14 @@ def _panel(
                     .legend(None),
                 )
             )
-            layers.append(
-                point_interactions(
-                    outline,
-                    panel,
-                    index,
-                    axis_labels=prepared.axis_labels,
-                    row_label=prepared.row_label,
-                    hover=False,
-                    selection=selection,
-                    opacity=1,
-                    stroke_opacity=style.stroke_opacity,
-                )
-            )
-    points = point_interactions(
+            layers.append(outline)
+    points = point_hover(
         points,
         panel,
         index,
         axis_labels=prepared.axis_labels,
         row_label=prepared.row_label,
         hover=hover,
-        selection=selection,
-        opacity=style.alpha,
-        stroke_opacity=0 if style.outline_width is not None else style.stroke_opacity,
     )
     colored = points.encode(color=_color(panel, index, style))
     # Draw missing values separately because numeric color scales cannot color them.
@@ -365,7 +350,7 @@ def _panel(
         result = result.properties(**source)
     if style.outline_width is not None:
         result = result.resolve_scale(size="independent")
-    # Only the first panel edits the brush; other panels show its selection.
+    # Only the first panel edits the shared brush bounds.
     if selection is not None and index == 0:
         result = brush_owner(result, selection, prepared.basis)
     if panel.title:

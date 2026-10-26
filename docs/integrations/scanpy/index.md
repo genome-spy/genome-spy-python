@@ -504,7 +504,7 @@ available through chart configuration.
 Outlines reuse the same observation records, sorted sizes and coordinate scales;
 they add no data extraction or analysis. Outer outlines draw first, inner outlines
 second, and colored/missing points last. Only foreground points provide tooltips.
-Linked brushing dims all three layers and retains the same stable IDs and count.
+Brushing retains all three layers unchanged and reports the selected-cell count.
 Category legends stay opaque, as in Scanpy. Thin edges can differ at the pixel
 level between WebGL, browser scaling and Matplotlib exports. Outline settings
 have no visual effect while `add_outline` is False or None. All shared embedding
@@ -1616,8 +1616,9 @@ hover=True adds observation ID, original observation name, value/source, and
 coordinate tooltips without changing the initial marks. hover=False disables
 record hover. zoom=True enables coordinate navigation; it is off by default.
 The selection argument supports an x/y interval brush, owned by the first panel,
-with linked highlighting across panels showing the same dimension pair. Point
-selection, initial brush values, and caller-supplied push scopes currently error.
+and a live selected-cell count. Point appearance stays unchanged across panels
+showing the same dimension pair. Point selection, initial brush values, and
+caller-supplied push scopes currently error.
 
 obs_id selects an existing unique, nonmissing observation-column key. Without it,
 unique obs_names supply IDs. Duplicate names receive distinct snapshot-local row
@@ -1658,18 +1659,22 @@ view = chart.widget(parameter_names=[brush.name], inline=True, controls=False)
 view
 ```
 
-**Drag in the first panel without holding any keys.** Both panels highlight the
-same observations and a native text mark below them shows the selected-cell
-count. Double-click in the first panel to clear. Navigation is disabled in this
-example so ordinary dragging always brushes. The second panel displays the
-selection but does not start a brush.
+**Drag in the first panel without holding any keys.** The default brush rectangle
+marks the selected region. A native text mark below the panels updates the exact
+selected-cell count while you drag; point colors and opacity stay unchanged.
+Double-click in the first panel to clear. Navigation is disabled in this example
+so ordinary dragging always brushes. Only the first panel starts a brush; both
+panels retain their original points.
 
-The count and highlighting run entirely in GenomeSpy, including in exported
-interactive HTML. An empty rectangle reports zero selected cells while retaining
-the initial point appearance. Unselected fills and outlines dim to 20% of their
-original opacity. Per-entry transparency requires an explicit scalar `alpha`
-when brushing. All panels must use the same dimension pair; their color scales,
-palettes, guides, and draw orders remain independent.
+The count runs entirely in GenomeSpy, including in exported interactive HTML.
+Clearing or selecting an empty region reports zero. The count uses all plotted
+cells inside the bounds, independently of semantic point visibility. All panels
+must use the same dimension pair; their color scales, palettes, guides, and draw
+orders remain independent.
+
+Live counting currently scans the plotted cells on each brush update and can
+slow dragging on very large datasets. The faster native counting path awaits
+a published Core release with correct empty-selection counts.
 
 The existing JupyterChart synchronizes the named parameter through
 `parameter_values`. After brushing, run an ordinary Python cell:
@@ -1687,8 +1692,8 @@ explicitly request the AnnData subset. Python retrieval requires a live kernel.
 
 `selection_mask` reads the unchanged plotted embedding and returns membership in
 the supplied AnnData's current row order, preserving distinct coincident rows.
-It uses the same lower-inclusive, upper-exclusive bounds as highlighting and the
-native count. It supports reordered/sliced observations that retain their
+It uses the same lower-inclusive, upper-exclusive bounds as the native count.
+It supports reordered/sliced observations that retain their
 coordinates. Do not recompute or edit UMAP between plotting and retrieval.
 Pass `dimensions=(i, j)` if you plotted a nondefault component pair.
 

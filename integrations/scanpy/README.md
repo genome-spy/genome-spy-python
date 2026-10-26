@@ -75,7 +75,7 @@ not in this workspace or the documentation:
 | [_hvg_chart.py](../../src/genome_spy/integrations/scanpy/_hvg_chart.py) | Native paired QC point panels, stored-statistic axis limits, shared bottom legend and optional hover/zoom; no analysis or expression access. |
 | [_embedding_chart.py](../../src/genome_spy/integrations/scanpy/_embedding_chart.py) | Native points, axes, legends, labels, and panel composition. |
 | [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py) | Shared index navigation/projection and native fitted values/contrast; no AnnData access. Dotplot highlighting uses a native ruler. |
-| [_embedding_interactions.py](../../src/genome_spy/integrations/scanpy/_embedding_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
+| [_embedding_interactions.py](../../src/genome_spy/integrations/scanpy/_embedding_interactions.py) | Optional hover, plain brush ownership, and count. |
 | [_selection.py](../../src/genome_spy/integrations/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
 
 Scanpy owns analysis. UMAP's data module only resolves the inputs a plotting call

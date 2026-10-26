@@ -949,7 +949,7 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
 
     Reads an existing obsm basis using direct-name then X_ precedence. Shared
     options cover categorical/continuous colors, component panels, masks, native
-    sizing, hover, zoom and linked interval selection. Analysis stays in Scanpy.
+    sizing, hover, zoom and interval selection. Analysis stays in Scanpy.
 
     Args:
         adata: AnnData containing the supplied coordinates and requested colors.
@@ -969,6 +969,9 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
             edges_width uses points and edges_color requires one opaque CSS color.
             neighbors_key selects saved metadata. Edges currently require the
             first two components and a graph without self-loops.
+            selection accepts a native x/y interval parameter and adds a live
+            cell count without changing point appearance. With zoom=True,
+            Shift-drag brushes and ordinary dragging pans.
 
     Returns:
         A native chart when show=False, otherwise None after display.

@@ -238,7 +238,7 @@ workflows in generic `notebooks/`. This milestone is infrastructure, not full AP
 Categorical/continuous 2D UMAP reads stored coordinates, raw/layer values,
 metadata, masks, components and original identities. Native axes/color guides,
 size/order semantics, optional hover/zoom, and native sizing are implemented.
-One first-panel interval owner supports linked highlighting, a native count, and
+One first-panel interval owner supports a plain brush, a native count, and
 Python `selection_mask` through the ordinary widget. Use the dedicated PBMC
 UMAP notebook and frozen semantic/complete-chart/browser/resource checks as
 evidence. Its order is basic plotting, linked selection, then customization.
@@ -247,9 +247,11 @@ Acceptance: preserve supplied coordinates and independent per-panel color scales
 With zoom enabled, Shift-drag brushing, clearing, coincident cells and half-open
 membership agree in the chart and Python. No local Core patch or notebook connection task.
 The publication interaction direction is a default native interval brush without
-per-cell point highlighting or fading. A user-requested live count is under review
-as a separate native text/dataflow branch driven by the brush parameter; the count
-still checks membership, while point rendering stays independent of selection.
+per-cell point highlighting or fading, using the existing `selection=` parameter.
+A live count uses a separate native dataflow branch driven by the brush parameter;
+point rendering stays independent of selection. Retain the existing zero-safe
+formula/sum counter until the native selection-filter/count path can be adopted
+with a published Core release, as requested by the user.
 Count all loaded cells inside the bounds regardless of semantic visibility.
 Python subset retrieval remains explicit. Review count latency, tooltip content
 and navigation before public/canonical-workflow adoption; keep reset zoom separate
