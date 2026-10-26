@@ -640,6 +640,23 @@ not fresh-clone dependencies or release artifacts.
   demo; it is not a performance claim for the retained package counter.
   The full repository suite and docs build are not repeated; no data preparation,
   transport or general embedding style defaults changed. Clearance: retain.
+- **Accepted brain hover order (2026-10-26):** the user selected **Class,
+  Subclass, Cluster ID, Cell ID**, retaining the class-color swatch. The ignored
+  brain generator now authors that exact order through native tooltip encodings
+  for both point panels and the style/interaction previews. No handler, callback,
+  point effect or data conversion was added. The fast-count preview retains its
+  previously disclosed unreleased Core build; the package release gate is unchanged.
+  Generic package tooltip simplification remains a separate review item: the
+  packaged 700-cell PBMC example repeats every cell name as both ID and label;
+  leading with the plotted value, keeping identity once and omitting coordinates
+  are proposals, not adopted public defaults. Canonical notebook sources do not
+  contain the local Allen brain data or depend on this review preview.
+  Local `check_hover_review.py` verifies the exact row order and matching source
+  metadata for isolated and overlapping cells, one native class-color swatch,
+  unchanged brush bounds and hiding on pointer exit, without browser errors.
+  The preview is reloaded and ready; scripts pass Ruff. No public Python changed,
+  so package tests, mypy and the docs build were not repeated. Screenshots and
+  generated previews remain ignored local evidence. Clearance: retain.
 - **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
