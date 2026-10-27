@@ -83,7 +83,7 @@ def test_all_plots_share_native_display_and_autosave_rules(
         a, options = [[0, 1], [2, 3]], {}
     if family == "clustermap":
         options = {"obs_keys": "group"}
-    if family in ("dotplot", "matrixplot", "heatmap"):
+    if family in ("dotplot", "matrixplot", "heatmap", "tracksplot"):
         options["var_names"] = ["g1", "g2"]
     if family.startswith("rank_genes_groups"):
         from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
@@ -184,7 +184,7 @@ def test_shared_display_validation_precedes_optional_imports(
         args += ([0, 1], ["g1", "g2"])
     elif family == "embedding":
         args += ("umap",)
-    elif family in ("dotplot", "matrixplot", "heatmap"):
+    elif family in ("dotplot", "matrixplot", "heatmap", "tracksplot"):
         args += (["g1"], "group")
     elif family not in EMBEDDINGS | {
         "matrix",

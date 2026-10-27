@@ -108,6 +108,11 @@ semantics while improving native style and deliberately choosing interactions.
 Scanpy's appearance is a reference, not a required visual target. Publication
 scope is the documented implemented subset, not full Scanpy compatibility.
 
+The user authorized M09's native per-cell `tracksplot` preview on 27 October
+2026 as an exception to the new-family deferral. Keep the existing publication
+reviews and linked-expression work separate; ranked tracks remain the next M09
+increment after this preview is verified.
+
 **UMAP review — in progress.** Current and proposed categorical/continuous views
 are ready for the user's design feedback; see the [review record](#umap-publication-review).
 The parallel UMAP review and grouped/clustermap/PAGA presentation work retain
@@ -429,7 +434,8 @@ The [simulation preview](#m11a-stored-simulation-plots), supplied heatmap/point
 previews and native subplot preview are closed within their declared bounds.
 The DPT/PAGA parent-reference gates and broader PAGA options keep M11 open. C04
 does not block native straight undirected rule segments; connected-path audits
-remain plot-specific; M08/M09 filled plots still require C01.
+remain plot-specific; M08 filled densities and exact M09 continuous profiles
+still require C01. Native per-cell tracks are available independently.
 
 Remaining marker details are deferred to M14's compatibility backlog by user
 priority. They must not precede new plot families. The
@@ -532,7 +538,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M06 ranking/ranked summaries | Closed (bounded preview) | M06.a–d have semantic/chart/workflow/interaction and resource evidence. Broader compatibility remains M14; native builders remain M13 and ranked distributions/tracks remain M08/M09. |
 | M07 embeddings/scatter/PCA | In progress | M07.a/b resource gates pass; categorical-guide rendering remains open under C11. M07.c loadings/variance/overview and M07.d colorbar placement are Closed for their stated scope; other options remain open. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
-| M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
+| M09 tracks/ranked tracks | In progress; cell-track preview verified | Shared heatmap preparation and native per-cell rects. See [M09 evidence](#m09ab-native-cell-tracks). Ranked tracks remain unimplemented; exact fill remains C01. |
 | M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
 | M11 trajectories/graphs/series | In progress; supplied-series/simulation, DPT-expression and both adjacency previews closed; PAGA/compare available and path heatmap implemented | DPT/PAGA direct-reference gates, comparison corrections and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
@@ -4666,11 +4672,50 @@ padding below 0.5 and public constant customization remain separate increments.
 Broader storage/style/normalization/palette/typography/export limits retain M14
 owners. Clearance: **retain**.
 
+## M09.a/b native cell tracks
+
+`tracksplot` is a bounded native per-cell preview. It shares selected-column
+access, row/marker permutations, group intervals and the value ceiling with
+heatmap through `ordered_cell_expression`. Existing palettes, native index
+positions, category strips and orthogonal tree rendering are reused. Each cell
+is one rect; independent gene scales retain Scanpy's zero baselines and log1p
+followed by log-axis behavior. Missing values remain missing, repeated names
+retain distinct tracks and duplicate cell labels retain original row IDs.
+The native chart sends one metadata row per cell with selected gene fields;
+it does not repeat metadata for every gene or import any reference renderer.
+
+Verification: 26 direct tests compare values/order/colors against pinned Scanpy
+calls and cover raw/layer/symbol precedence, cached trees, sparse CSR/CSC views,
+duplicates, missing/zero/negative values, guards and detached results. Four real
+browser cases at DPR 1/1.5 check rect footprints against values, log baselines,
+axes/labels, native legends, hover, shared tree/track positions and wheel/pan.
+The targeted contract/grouped/heatmap suite passes. All 49 expression notebook
+code cells execute in a fresh kernel; the executed copy is ignored local output.
+The current user-edited notebook also has older PAGA/zoom choices that disagree
+with its existing full-workflow assertions; those edits are preserved.
+
+Local resource observation: seed 42, CSR 25,000 cells × 2,000 genes, density 0.005,
+10 requested genes and 10 categorical groups; Python 3.11, Chromium
+156.0.8078.4/WebGL. Only a 25,000 × 10 block was densified. Preparation took
+3.40 s with tracemalloc enabled, peaking at 88.9 MiB; validation/serialization
+took 0.87 s and JSON was 6.07 MiB. First render took 6.46 s; three broad-to-narrow
+native zoom calls plus two frames took 345/94/62 ms. Post-GC JavaScript heap was
+67.0 MiB, excluding GPU/process memory. These observations are not CI limits or
+a smooth-frame guarantee at the 250,000-value ceiling. Repeated replacements,
+retained-memory cleanup and broader export/browser fidelity remain unverified.
+
+Limit: per-cell bars are stepped; Scanpy fills between adjacent values. Native
+legend/typography and independent y-axis styling are documented preview choices.
+Explicit marker spans must partition the genes; forwarded styling, backed/lazy
+sources and oversized inputs fail clearly. Ranked tracks remain the next M09
+increment. C01 owns exact continuous-area parity, not this per-cell renderer.
+Clearance: **retain**; M09 is not closed.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 40 plotting functions/builders are available as partial previews; 8 plot/builder
+helpers. 41 plotting functions/builders are available as partial previews; 7 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -4723,7 +4768,7 @@ No placeholder functions are exported for planned work.
 | `timeseries` | Partial supplied-point preview available | M11.a; remaining storage/markers/layout M14 |
 | `timeseries_as_heatmap` | Partial supplied-profile preview available | M11.a heatmap; broader storage/layout M14; transport M05.d |
 | `timeseries_subplot` | Partial supplied-point panel preview available | M11.a; broader storage/markers/layout M14 |
-| `tracksplot` | Not implemented | M09 |
+| `tracksplot` | Verified bounded preview | M09.a/b; native per-cell rects; ranked tracks and exact fill remain open |
 | `tsne` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `umap` | Partial preview available | M01; completion M07/M14 |
 | `violin` | Not implemented | M08 |
@@ -4826,7 +4871,7 @@ affected slice.
 
 | ID | Gap or available capability | Affected work | Resolution/recheck trigger |
 | --- | --- | --- | --- |
-| C01 | No native filled-area/polygon primitive in bundled schema | Full violin/stacked/tracks M08/M09 | Released filled geometry and density/profile chart tests; no custom trial geometry promotion |
+| C01 | No native filled-area/polygon primitive in bundled schema | Filled violin/stacked densities M08 and exact continuous tracks M09; native per-cell rect tracks are available | Released filled geometry and density/profile chart tests for exact fill; no custom trial geometry promotion |
 | C02 | No native raster/image primitive | Full spatial M12 | Released image capability with crop/aspect/zoom registration tests |
 | C03 | No native 3D projection | 3D embedding options M07/M14 | Released capability or explicit product scope decision; keep unresolved until then |
 | C04 | No general joined-path mark; exact shared-join/end-cap parity is a visual limit | PAGA path lines use verified native window/lead/rules with minor documented stroke differences; other connected cases require their own audit | A released path mark may improve stroke parity but is not required for PAGA path. Keep per-entry gap/order/interaction checks. Native rules also support independent undirected PAGA edges. |

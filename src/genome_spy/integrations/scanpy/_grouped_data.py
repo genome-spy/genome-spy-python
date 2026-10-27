@@ -6,7 +6,7 @@ from collections.abc import Mapping, Sequence
 from collections import Counter
 from dataclasses import dataclass
 from numbers import Integral
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -17,6 +17,9 @@ from genome_spy.integrations.scanpy._data import (
     require_resident_expression,
     resolve_use_raw,
 )
+
+if TYPE_CHECKING:
+    from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 
 
 @dataclass(frozen=True, slots=True)
@@ -448,6 +451,7 @@ def heatmap_values(
     standard_scale: Literal["var", "obs"] | None,
     category_order: Sequence[Any] | None = None,
     feature_order: Sequence[int] | None = None,
+    context: str = "gsc.pl.heatmap",
 ) -> HeatmapData:
     """Return ordered cell values, original row positions and group spans.
 
@@ -455,12 +459,12 @@ def heatmap_values(
     """
     if values.index.isna().any():
         raise ValueError(
-            "gsc.pl.heatmap: missing groups are unsupported; label or filter them explicitly."
+            f"{context}: missing groups are unsupported; label or filter them explicitly."
         )
     counts = values.index.value_counts(sort=False)
     if (counts == 0).any():
         raise ValueError(
-            "gsc.pl.heatmap: remove unused categories explicitly before plotting."
+            f"{context}: remove unused categories explicitly before plotting."
         )
 
     # Heatmap calls row scaling 'obs'; summary plots call the same operation 'group'.
@@ -471,7 +475,7 @@ def heatmap_values(
         scaled = scaled.iloc[:, list(feature_order)]
     if scaled.size > MAX_HEATMAP_VALUES:
         raise ValueError(
-            "gsc.pl.heatmap: reordered marker blocks exceed the 250,000-value limit; subset markers explicitly."
+            f"{context}: reordered marker blocks exceed the 250,000-value limit; subset markers explicitly."
         )
     if category_order is not None:
         scaled.index = scaled.index.reorder_categories(
@@ -500,7 +504,46 @@ def heatmap_values(
         }
     )
     if not intervals["label"].is_unique:
-        raise ValueError(
-            "gsc.pl.heatmap: group labels collide when converted to strings."
-        )
+        raise ValueError(f"{context}: group labels collide when converted to strings.")
     return HeatmapData(scaled, positions, intervals)
+
+
+def ordered_cell_expression(
+    adata: Any,
+    var_names: str | Sequence[str] | Mapping[str, str | Sequence[str]],
+    groupby: str | Sequence[str],
+    *,
+    dendrogram: bool | str,
+    standard_scale: Literal["var", "obs"] | None = None,
+    context: str,
+    **options: Any,
+) -> tuple[HeatmapData, tuple[FeatureGroup, ...], DendrogramData | None]:
+    """Return cell values, marker spans and a tree in one shared display order.
+
+    Read selected genes once; keep original row positions for cell identities.
+    """
+    from genome_spy.integrations.scanpy._dendrogram_data import (
+        prepare_dendrogram,
+        reorder_features,
+    )
+
+    selected = grouped_expression(
+        adata, var_names, groupby, value_limit=MAX_HEATMAP_VALUES, **options
+    )
+    tree = None
+    # Cell plots attach two-group trees too, unlike grouped summary plots.
+    if dendrogram is not False and len(selected.counts) > 1:
+        tree = prepare_dendrogram(
+            adata, groupby, dendrogram if isinstance(dendrogram, str) else None
+        )
+    groups, slots = selected.feature_groups, None
+    if tree is not None:
+        groups, slots = reorder_features(tree, groups, selected.values.shape[1])
+    prepared = heatmap_values(
+        selected.values,
+        standard_scale=standard_scale,
+        category_order=tree.order if tree else None,
+        feature_order=slots,
+        context=context,
+    )
+    return prepared, groups, tree

@@ -32,6 +32,7 @@ __all__ = [
     "dendrogram",
     "dotplot",
     "heatmap",
+    "tracksplot",
     "matrix",
     "timeseries_as_heatmap",
     "timeseries",
@@ -1495,6 +1496,137 @@ def matrixplot(
     return _finish_plot(plot.to_chart(), show, sc)
 
 
+def tracksplot(
+    adata: AnnData,
+    var_names: str | Sequence[str] | Mapping[str, str | Sequence[str]],
+    groupby: str,
+    *,
+    use_raw: bool | None = None,
+    log: bool = False,
+    dendrogram: bool | str = False,
+    gene_symbols: str | None = None,
+    var_group_positions: Sequence[tuple[int, int]] | None = None,
+    var_group_labels: Sequence[str] | None = None,
+    layer: str | None = None,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    figsize: tuple[float, float] | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot cell-level expression tracks ordered by a categorical annotation.
+
+    Description:
+        Read selected genes through Scanpy's public getter, preserving raw/layer
+        precedence and cell order within groups. Each cell is one native rect,
+        giving stepped profiles rather than Scanpy's fill between adjacent values.
+        Optional trees reuse stored linkage or Scanpy's existing tree helper;
+        plotting never fits embeddings or rankings. The preview reads at most
+        250,000 cell–gene values from resident data, without changing AnnData.
+
+    Args:
+        adata: Annotated expression data.
+        var_names: Gene keys or a marker dictionary; repeated genes retain tracks.
+        groupby: Categorical observation column defining cell order and colors.
+        use_raw: Use raw by default when available and no layer is requested.
+        log: Apply log1p to values, then use logarithmic y-axes, as in Scanpy.
+        dendrogram: Attach a group tree, optionally naming a stored result.
+        gene_symbols: Variable annotation containing requested gene symbols.
+        var_group_positions: Inclusive marker spans, covering all genes in order.
+        var_group_labels: Labels defining those marker groups.
+        layer: Expression layer; incompatible with explicit use_raw=True.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use the returned chart's HTML/JSON export.
+        figsize: Overall size in inches; cannot be combined with native dimensions.
+        hover: Include cell ID, label, group, gene and plotted-value tooltips.
+        zoom: Enable linked x-only zoom and panning across cells.
+        width: Track plotting width in pixels; defaults to 1200.
+        height: Combined expression-track height in pixels; defaults to 25 per gene.
+        **kwds: Forwarded styling is unsupported and fails by name.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If options or expression storage are unsupported.
+        ValueError: If groups, values, sources, marker spans or dimensions are invalid.
+        NotImplementedError: If marker spans do not partition the requested genes.
+
+    Example:
+        >>> chart = gsc.pl.tracksplot(
+        ...     pbmc, ["CD79A", "CD3D"], "bulk_labels", zoom=True, show=False
+        ... )
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.tracksplot"
+    _check_kwargs(kwds, set(), context=context)
+    for name, value in {"log": log, "hover": hover, "zoom": zoom}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
+        raise TypeError(f"{context}: dendrogram must be False, True or a nonempty key.")
+    sc = _prepare_plot(show, save, context=context)
+    import numpy as np
+    import pandas as pd
+    from anndata import AnnData
+    from genome_spy.integrations.scanpy._grouped_data import ordered_cell_expression
+    from genome_spy.integrations.scanpy._style import _palette
+    from genome_spy.integrations.scanpy._tracksplot_chart import build_tracksplot
+
+    # Tracks require one explicit categorical column, unlike heatmap's numeric bins.
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: expected AnnData.")
+    if (
+        not isinstance(groupby, str)
+        or groupby not in adata.obs
+        or not isinstance(adata.obs[groupby].dtype, pd.CategoricalDtype)
+    ):
+        raise ValueError(f"{context}: groupby must name a categorical observation.")
+    prepared, groups, tree = ordered_cell_expression(
+        adata,
+        var_names,
+        groupby,
+        use_raw=use_raw,
+        log=log,
+        gene_symbols=gene_symbols,
+        layer=layer,
+        var_group_positions=var_group_positions,
+        var_group_labels=var_group_labels,
+        dendrogram=dendrogram,
+        context=context,
+    )
+    categories = adata.obs[groupby].cat.categories
+    palette, _ = _palette(adata, groupby, categories, None)
+    names = adata.obs_names.to_numpy().copy()
+    ids = (
+        names
+        if adata.obs_names.is_unique
+        else np.array([f"row-{i}" for i in range(len(adata))])
+    )
+    positions = prepared.observation_positions
+    chart = build_tracksplot(
+        prepared,
+        groups,
+        names[positions],
+        ids[positions],
+        groupby=groupby,
+        categories=list(map(str, categories)),
+        palette=palette,
+        tree=tree,
+        log=log,
+        hover=hover,
+        zoom=zoom,
+        width=width,
+        height=height,
+        figsize=figsize,
+    )
+    return _finish_plot(chart, show, sc)
+
+
 def heatmap(
     adata: AnnData,
     var_names: str | Sequence[str] | Mapping[str, str | Sequence[str]],
@@ -1615,19 +1747,13 @@ def heatmap(
     import numpy as np
     import pandas as pd
     from genome_spy.integrations.scanpy._grouped_data import (
-        MAX_HEATMAP_VALUES,
-        grouped_expression,
-        heatmap_values,
-    )
-    from genome_spy.integrations.scanpy._dendrogram_data import (
-        prepare_dendrogram,
-        reorder_features,
+        ordered_cell_expression,
     )
     from genome_spy.integrations.scanpy._heatmap_chart import build_heatmap
     from genome_spy.integrations.scanpy._style import _palette
 
     # Reuse expression access without replacing cells with group means.
-    selected = grouped_expression(
+    prepared, feature_groups, tree = ordered_cell_expression(
         adata,
         var_names,
         groupby,
@@ -1638,26 +1764,11 @@ def heatmap(
         layer=layer,
         var_group_positions=var_group_positions,
         var_group_labels=var_group_labels,
-        value_limit=MAX_HEATMAP_VALUES,
-    )
-    categories = selected.values.index.categories
-    # Heatmap attaches two-group trees too, unlike dotplot and matrixplot.
-    tree = None
-    if dendrogram is not False and len(categories) > 1:
-        tree = prepare_dendrogram(
-            adata, groupby, dendrogram if isinstance(dendrogram, str) else None
-        )
-    feature_groups = selected.feature_groups
-    values = selected.values
-    slots = None
-    if tree is not None:
-        feature_groups, slots = reorder_features(tree, feature_groups, values.shape[1])
-    prepared = heatmap_values(
-        values,
+        dendrogram=dendrogram,
         standard_scale=standard_scale,
-        category_order=tree.order if tree else None,
-        feature_order=slots,
+        context=context,
     )
+    categories = prepared.values.index.categories
 
     # Saved category colors stay tied to labels even after tree reordering.
     palette: tuple[str, ...] = ()
@@ -1667,8 +1778,9 @@ def heatmap(
         and groupby in adata.obs
         and isinstance(adata.obs[groupby].dtype, pd.CategoricalDtype)
     ):
-        original, _ = _palette(adata, groupby, categories, None)
-        lookup = dict(zip(map(str, categories), original, strict=True))
+        source_categories = adata.obs[groupby].cat.categories
+        original, _ = _palette(adata, groupby, source_categories, None)
+        lookup = dict(zip(map(str, source_categories), original, strict=True))
         palette = tuple(lookup[label] for label in prepared.intervals["label"])
     else:
         if len(categories) > 20:

@@ -210,7 +210,7 @@ geometry does not stop diagnostics or graph work.
 | M06 | Ranking and ranked dot/matrix/heatmap | M02–M05 |
 | M07 | Other embeddings, PCA and outstanding UMAP options | M01 |
 | M08 | Violin, stacked violin, ranked forms | Grouped access; released filled geometry |
-| M09 | Tracksplot and ranked tracks | Grouped access; released filled geometry |
+| M09 | Tracksplot and ranked tracks | Grouped access; native per-cell rects available; continuous fill remains C01 |
 | M10 | Quality-control diagnostics | M00; reusable distributions/scatter |
 | M11 | DPT, PAGA, time series and simulation | M05/M07 and native graph/layout checks |
 | M12 | Spatial and embedding density | M07; released image support for full spatial |
@@ -680,22 +680,32 @@ rendering is blocked.
 - M09.a: prepare selected gene tracks in category/observation order, apply the
   correct log/value scaling and baselines, and retain category intervals, palettes,
   tree permutation, feature slots and original IDs.
-- M09.b: `_tracksplot_chart.py` authors filled profiles using a released native
-  area capability, with brackets, axes and trees. Ranked tracks reuse M06 slots.
-  Test isolated peaks, zero/negative values where accepted, uneven groups, repeated
-  genes and swapped/unsupported options explicitly.
+- M09.b: use the gallery's native per-cell rect approach for a tracks preview,
+  with shared grouping, palettes, cell ordering, aligned index scales and the
+  existing dendrogram renderer. Each rect represents one original observation;
+  do not recover values from Matplotlib or approximate a polygon with sampled
+  rectangles. Reuse the rendering approach, not the gallery's packaged-data or
+  tree preparation. Ranked tracks reuse M06 slots.
+- Scanpy 1.11.5 fills linearly between adjacent cell values; per-cell rects give
+  a stepped profile. Document this explicit visual difference in the preview.
+  Exact continuous-fill parity remains C01; it does not prevent
+  a native per-cell preview. Test isolated peaks, zero/negative values where
+  accepted, uneven groups, repeated genes and unsupported options explicitly.
 
-Acceptance: profiles, baselines and panel extents match references; native zoom
-keeps annotations aligned, realistic cell×track costs are measured. Python
-preparation alone does not close rendering; experimental filled rectangles are
-not an accepted replacement.
+Acceptance: values, source/log semantics, category and cell order, baselines and
+panel extents match Scanpy references. Record the interpolation difference rather
+than claiming exact profile parity. Native zoom keeps tracks, labels and trees
+aligned; tooltips retain original observation IDs. Measure realistic cell×track
+costs. Prototype geometry is not production code, and the full milestone remains
+open while ranked tracks or declared compatibility gates are unfinished.
 
 ### M10 — quality-control diagnostics
 
 Prioritize new plot families over remaining marker-shape details; those stay in
 M14's compatibility backlog. Start M10.b with stored-statistic scatter panels,
-then M10.a's highest-expression summaries and M10.c's histograms. M08/M09 keep
-their native filled-geometry gate; this order does not close those milestones.
+then M10.a's highest-expression summaries and M10.c's histograms. M08 retains its
+native filled-geometry gate; M09 can use the per-cell approach above. This order
+does not close those milestones.
 
 - M10.a: `highest_expr_genes` preserves source/layer/symbol rules, per-cell total
   denominators, zero totals, percentage summaries, top-n selection and log axes.

@@ -303,6 +303,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["dotplot"],
         namespace["matrixplot"],
         namespace["heatmap"],
+        namespace["tracks"],
         namespace["matrix"],
         namespace["correlations"],
         namespace["clustermap"],
@@ -340,6 +341,14 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["matrix_builder_totals_chart"],
     ]
     assert display_options == [{"inline": True, "controls": False}] * len(charts)
+    tracks = namespace["tracks"].to_dict()
+    track_rows = tracks["datasets"][tracks["data"]["name"]]
+    assert len(track_rows) == 700
+    assert sum(key.startswith("_value_") for key in track_rows[0]) == sum(
+        map(len, namespace["marker_genes"].values())
+    )
+    assert len({row["_obs_id"] for row in track_rows}) == 700
+    assert tracks["scales"]["x"]["zoom"] is True
     builder_tree = namespace["builder_tree_chart"].to_dict()
     builder_totals = namespace["builder_totals_chart"].to_dict()
     assert builder_tree["surround"]["top"][0]["name"] == "dotplot-tree"
@@ -829,7 +838,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         for group in namespace["ranked_groups"]
         for gene in namespace["pbmc"].uns[namespace["rank_key"]]["names"][group][:3]
     ]
-    for chart in charts[7:10]:
+    for chart in (
+        namespace["ranked_dotplot"],
+        namespace["ranked_matrixplot"],
+        namespace["ranked_heatmap"],
+    ):
         spec = chart.to_dict()
         records = next(
             rows

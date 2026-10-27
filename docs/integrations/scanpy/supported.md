@@ -1826,6 +1826,34 @@ For a multi-panel result, setting dimensions on the outer composition with
 `.properties()` does not resize its fixed child panels. Pass `width`/`height`
 at the plotting call to size the panels and guides together.
 
+## Expression tracks
+
+Show one gene per track and one bar per cell:
+
+```python
+tracks = gsc.pl.tracksplot(
+    pbmc, ["CD79A", "MS4A1", "CD3D"], "bulk_labels",
+    dendrogram=True, zoom=True, width=650, show=False,
+)
+tracks.display(inline=True, controls=False)
+```
+
+Hover a bar to read its cell, gene, group and expression. Wheel zoom and drag pan
+across cells; all tracks, category colors and the tree follow together. Each gene
+has its own y-scale. `height` sets the combined track height, excluding the tree
+and legends. `zoom` and `hover` can be turned off.
+
+The adapter reuses heatmap's selected-gene access and cell ordering. Raw is used
+when available unless a layer or `use_raw=False` selects another source. A marker
+dictionary adds a colored gene-group strip. Explicit marker spans must cover all
+genes once, in order. Stored group colors are preserved without changing AnnData.
+The preview supports up to 250,000 resident cell–gene values; subset explicitly for
+larger inputs. Backed/lazy expression and extra styling keywords fail clearly.
+
+Native bars give stepped profiles. Scanpy 1.11.5 fills between neighboring cell
+values. `log=True` preserves Scanpy's log1p values and logarithmic y-axis;
+nonpositive values do not draw on that axis. Ranked tracks are still planned.
+
 ## Full plotting coverage inventory
 
 The tracked API snapshot contains 50 public callables, including aliases,
@@ -1834,8 +1862,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | DotPlot, umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
-| Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
+| Available as partial previews | DotPlot, umap, dotplot, matrixplot, heatmap, tracksplot, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
+| Distributions and ranked tracks | violin, stacked_violin, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Trajectories and graphs | Broader paga/path/adjacency/compare options |
 | Spatial | spatial |
 | Remaining builders and methods | MatrixPlot, StackedViolin; DotPlot square-background styling and broader native parameter closure |
