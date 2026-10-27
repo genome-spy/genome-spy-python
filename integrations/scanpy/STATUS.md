@@ -4711,6 +4711,33 @@ sources and oversized inputs fail clearly. Ranked tracks remain the next M09
 increment. C01 owns exact continuous-area parity, not this per-cell renderer.
 Clearance: **retain**; M09 is not closed.
 
+### Tracksplot review and guide
+
+The 27 October review of `0c269e8` found no significant correctness issues or
+custom rendering/interaction workarounds. Shared expression access and ordering,
+palette resolution, tree geometry, numeric validation and native delivery remain
+the existing helpers' responsibility. One metadata row per cell avoids repeating
+it per gene. No new data abstraction or adapter framework is needed. The small
+category-strip helper now lives in `_grouped_chart`, shared directly by heatmap
+and tracksplot instead of importing another plot's renderer. Its native definition
+is unchanged. The browser regression waits for wheel animation to settle before
+checking that panning preserves the domain span; its strict assertion is retained.
+
+The [expression tracks page](../../docs/integrations/scanpy/tracks.md) and
+[downloadable notebook](guides/tracks.ipynb) share one source. Two live packaged
+PBMC examples cover per-cell tracks and marker groups with an explicitly computed
+Scanpy tree, x zoom/pan, cell hover and native legends. The guide is short and
+records source selection, dimensions, provenance and the stepped-profile limit.
+Ranked tracks remain unimplemented. Verification and clearance retain the M09
+limits above; this documentation does not close the milestone.
+
+Verification: 143 targeted tracks/heatmap/grid checks, 11 notebook/docs checks,
+five native tracks/category-strip browser cases and two guide cases at 1200/430
+pixels pass. The four guide code cells run in a fresh kernel. Warning-strict
+Sphinx, the byte-identical notebook download, Ruff and mypy pass. Resource behavior
+uses the unchanged M09 data/rendering path above; the helper move adds no dataflow.
+The full repository suite and broader retained-memory/export gates were not rerun.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50

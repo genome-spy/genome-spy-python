@@ -1828,6 +1828,8 @@ at the plotting call to size the panels and guides together.
 
 ## Expression tracks
 
+Try the [expression tracks guide](tracks.md) for live examples and a notebook.
+
 Show one gene per track and one bar per cell:
 
 ```python

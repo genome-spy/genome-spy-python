@@ -35,6 +35,8 @@ Start with [UMAP and embeddings](umap.md) to plot, select cells and customize a 
 Use [expression plots](expression.md) to compare marker genes across cell groups
 with dotplots, matrixplots, heatmaps and clustermaps. That guide also covers
 numeric matrices, correlations, dendrograms and builders.
+Use [expression tracks](tracks.md) to inspect individual cells with aligned gene
+profiles, hover and zoom.
 
 Inspect stored [PCA diagnostics](pca.md) or plot [ranked genes](ranked.md) using
 results already computed by Scanpy.
@@ -53,6 +55,7 @@ from Scanpy. Unsupported options raise an error.
 UMAP and embeddings <umap>
 PCA diagnostics <pca>
 Expression plots <expression>
+Expression tracks <tracks>
 Ranked genes <ranked>
 PAGA graphs and paths <paga>
 Profiles and simulations <profiles>

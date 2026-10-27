@@ -21,6 +21,7 @@ show stored gene-selection diagnostics without rerunning analysis.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 The focused [UMAP](guides/umap.ipynb), [expression](guides/expression.ipynb),
+[tracks](guides/tracks.ipynb),
 [PCA](guides/pca.ipynb) and [ranked-gene](guides/ranked.ipynb)
 guide notebooks each supply their rendered page and notebook download. The longer
 notebooks under `notebooks/` remain the development workflows. Documentation builds execute only
@@ -74,6 +75,7 @@ not in this workspace or the documentation:
 | [_clustermap_data.py](../../src/genome_spy/integrations/scanpy/_clustermap_data.py) | Bounded full-subset access, Seaborn-compatible scaling and color tracks, public SciPy or supplied row/column linkage. |
 | [_clustermap_chart.py](../../src/genome_spy/integrations/scanpy/_clustermap_chart.py) | Shared matrix tiles, labels, fitted values and native surround tracks; aligned trees, color strips and a native observation-category legend. |
 | [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles and native surround tracks with shared index gaps, category bands, centered labels and stored tree links; reuses grouped labels/brackets and fitted values, with optional aligned zoom (y-only by default). |
+| [_tracksplot_chart.py](../../src/genome_spy/integrations/scanpy/_tracksplot_chart.py) | Native per-cell bars, independent gene scales and shared x navigation; reuses grouped cell preparation, category strips, palettes and tree links. |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_embedding_data.py](../../src/genome_spy/integrations/scanpy/_embedding_data.py) | Resolve stored bases, shared coordinate labels and selected expression/metadata; retain row identity, masks, sizes and draw order. |
 | [_embedding_density_data.py](../../src/genome_spy/integrations/scanpy/_embedding_density_data.py) | Read stored density metadata and group masks into the existing embedding table/panels; no KDE, expression access or independent renderer. |

@@ -16,6 +16,7 @@ pytestmark = pytest.mark.docs
 ROOT = Path(__file__).resolve().parents[1]
 GUIDE = ROOT / "integrations/scanpy/guides/umap.ipynb"
 EXPRESSION_GUIDE = GUIDE.with_name("expression.ipynb")
+TRACKS_GUIDE = GUIDE.with_name("tracks.ipynb")
 PCA_GUIDE = GUIDE.with_name("pca.ipynb")
 RANKED_GUIDE = GUIDE.with_name("ranked.ipynb")
 QUALITY_GUIDE = GUIDE.with_name("quality.ipynb")
@@ -29,6 +30,62 @@ def notebook_extension(monkeypatch):
     pytest.importorskip("sphinx")
     monkeypatch.syspath_prepend(str(ROOT / "docs/_ext"))
     return importlib.import_module("genomespy_notebook")
+
+
+def test_tracks_page_reuses_scanpy_access_and_only_the_explicit_tree(
+    notebook_extension, monkeypatch
+):
+    sc = pytest.importorskip("scanpy")
+    from genome_spy.chart import TopLevelSpec
+
+    original = sc.datasets.pbmc68k_reduced()
+    loaded = original.copy()
+    genes = ["CD79A", "MS4A1", "CST3", "LYZ", "CD3D", "IL32"]
+    expected = sc.get.obs_df(original, keys=genes, use_raw=True)
+    monkeypatch.setattr(sc.datasets, "pbmc68k_reduced", lambda: loaded)
+    getter, tree = sc.get.obs_df, sc.tl.dendrogram
+    reads, analyses = [], []
+
+    def selected(*args, **kwargs):
+        reads.append(kwargs)
+        return getter(*args, **kwargs)
+
+    def prepare_tree(*args, **kwargs):
+        analyses.append(kwargs)
+        return tree(*args, **kwargs)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("The tracks guide refitted analysis or used another renderer")
+
+    monkeypatch.setattr(sc.get, "obs_df", selected)
+    monkeypatch.setattr(sc.tl, "dendrogram", prepare_tree)
+    for module, name in [
+        (sc.pp, "neighbors"),
+        (sc.tl, "pca"),
+        (sc.tl, "umap"),
+        (sc.tl, "rank_genes_groups"),
+        (sc.pl, "tracksplot"),
+        (TopLevelSpec, "widget"),
+    ]:
+        monkeypatch.setattr(module, name, forbidden)
+    markdown = notebook_extension._notebook_markdown(
+        TRACKS_GUIDE, download_path="tracks.ipynb", bundle_url="/core.js"
+    )
+    specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
+    assert len(specs) == 2
+    assert analyses == [{"groupby": "bulk_labels"}]
+    assert len(reads) == 2 and all(call["use_raw"] for call in reads)
+    assert all(call["keys"] == ["bulk_labels", *genes] for call in reads)
+    for spec in specs:
+        rows = spec["datasets"][spec["data"]["name"]]
+        assert len(rows) == 700
+        assert {row["_obs_id"] for row in rows} == set(original.obs_names)
+        np.testing.assert_array_equal(
+            [[row[f"_value_{i}"] for i in range(len(genes))] for row in rows],
+            expected.loc[[row["_obs_id"] for row in rows]].to_numpy(),
+        )
+    assert loaded.obs.equals(original.obs)
+    np.testing.assert_array_equal(loaded.X, original.X)
 
 
 def test_umap_page_preserves_coordinates_and_prepares_density(
@@ -92,6 +149,7 @@ def test_umap_page_preserves_coordinates_and_prepares_density(
     [
         (GUIDE, "UMAP and embeddings", "select-cells", 11),
         (EXPRESSION_GUIDE, "Expression plots", "heatmap", 9),
+        (TRACKS_GUIDE, "Expression tracks", "plot-individual-cells", 2),
         (PCA_GUIDE, "PCA diagnostics", "show-the-pca-overview", 3),
         (RANKED_GUIDE, "Ranked genes", "inspect-ranking-scores", 4),
         (QUALITY_GUIDE, "Data checks", "check-the-most-abundant-genes", 3),
@@ -167,6 +225,7 @@ def test_notebook_failures_identify_the_cell(notebook_extension, tmp_path):
     [
         GUIDE,
         EXPRESSION_GUIDE,
+        TRACKS_GUIDE,
         PCA_GUIDE,
         RANKED_GUIDE,
         QUALITY_GUIDE,

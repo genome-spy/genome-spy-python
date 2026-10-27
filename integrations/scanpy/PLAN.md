@@ -1233,7 +1233,8 @@ Each increment requires:
 
 The target is a Python package and documentation publication during **26 October–
 1 November 2026**. Review the implemented subset before adding new plot families;
-spatial, violin/stacked violin and tracks remain deferred. This publication does
+spatial and violin/stacked violin remain deferred. The user authorized the native
+cell-track preview and its focused guide on 27 October 2026. This publication does
 not require full Scanpy plotting compatibility and must state its supported scope.
 The long-term inventory and capability backlog remain in this plan and STATUS.
 
@@ -1333,6 +1334,7 @@ Integrations
     UMAP and embeddings: basic plots, select cells, customize
     PCA diagnostics: loadings, variance ratios, overview
     Expression plots: summaries, heatmaps, matrices, trees, builders
+    Expression tracks: cell-level profiles, hover, shared zoom and a group tree
     Ranked genes: stored scores and expression plots
     Supported plots and options: tested versions, differences, limits
     API reference
@@ -1359,6 +1361,7 @@ or customization. STATUS owns delivery states and the active queue.
 | PCA diagnostics | Loadings, variance ratios and the composed PCA overview, using the supplied PCA results. Link back to the embedding guide for PCA scatter. |
 | Expression plots | The same marker dictionary in dotplot, matrixplot and cell heatmap; one explicit Scanpy group tree reused by all three; row zoom, dotplot ruler, optional gaps and zoomed values. Add concise DotPlot/MatrixPlot builder examples after the basic calls. |
 | Matrices and trees (on the expression page) | Supplied numeric matrix, stored group correlations, standalone group dendrogram and cell/gene clustermap. Show optional values and zoom; distinguish stored trees from explicitly requested Python clustering. |
+| Expression tracks | Basic per-cell tracks and marker groups ordered by a Scanpy-computed group dendrogram. Reuse packaged PBMC data; demonstrate aligned x zoom and hover. Explain stepped bars versus Scanpy's continuous fill. Ranked tracks follow their future implemented API. |
 | Ranked genes | Stored rank/score labels, ranking tables and ranked dotplot/matrixplot/heatmap calls; show fold-change or adjusted-p-value colors on grouped summaries. Compute rankings explicitly with Scanpy when the example needs statistics not already stored. |
 | Data checks | Highest-expression genes on counts; stored highly-variable-gene statistics with an optional cutoff preview; Scrublet score distributions with an optional threshold slider. Explain that previews do not change saved classifications. The legacy dispersion entry can share the variable-gene example. |
 | Larger real data | Use full PBMC3k counts for data checks and the separate 10x PBMC10k v3 cohort for count summaries, cell QC, marker UMAP and PCA variance. Show explicit filtering/normalization/analysis and retain sparse expression. Verify actual input sizes, selected-column access, complete charts, hover/zoom and local resource costs. Record provenance; do not commit downloaded or prepared datasets. |
@@ -1377,7 +1380,7 @@ ordinary Sphinx builds must not compute those results or simulate new data.
 For each guide, adapt an existing working example rather than invent a new
 analysis. Reuse packaged data or a reviewed prepared fixture instead of invented
 cells or analysis results. Label simulations as simulations. A missing released
-native capability stays out of the guide. Violin, tracks and spatial examples
+native capability stays out of the guide. Violin, ranked tracks and spatial examples
 follow their implemented and reviewed APIs, rather than appearing as placeholders.
 Do not publish empty guide pages. Keep the API reference complete even when an
 example guide has not yet been extracted. As the guides replace development
