@@ -4768,6 +4768,12 @@ The ungapped test retains its strict span assertion. Full-suite, larger retained
 and broad export checks were not rerun. Ranked tracks remain the next M09 slice;
 the continuous-fill limit remains C01. Clearance: **retain**.
 
+The navigation regression now requires all 14 expected views (12 gene tracks,
+the category strip and one dendrogram) to share the cell x scale after zoom.
+Four focused browser cases pass: desktop/narrow guide layouts and gapped linear/log
+tracks at DPR 1/1.5. Ruff passes. This tightens test coverage without changing
+rendering or data; the full repository suite was not rerun.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50

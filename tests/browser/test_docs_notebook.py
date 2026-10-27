@@ -155,9 +155,18 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
         "before => {const d=cellScale.getDomain(); return d[1]-d[0] < before[1]-before[0];}",
         arg=before,
     )
-    assert page.evaluate("""() => guideApis[2].debug.getViewRoot().getDescendants()
-        .filter(view => view.spec.encoding?.x?.field === '_cell' || view.spec.name === 'heatmap-category-strip')
-        .every(view => view.getScaleResolution('x') === cellScale)""")
+    navigation = page.evaluate("""() => {
+        const views = guideApis[2].debug.getViewRoot().getDescendants()
+            .filter(view => ['_cell', 'leaf'].includes(view.spec.encoding?.x?.field)
+                || view.spec.name === 'heatmap-category-strip');
+        return {
+            count: views.length,
+            trees: views.filter(view => view.spec.encoding?.x?.field === 'leaf').length,
+            shared: views.every(view => view.getScaleResolution('x') === cellScale),
+        };
+    }""")
+    # All 12 gene tracks, the category strip and the dendrogram must follow zoom.
+    assert navigation == {"count": 14, "trees": 1, "shared": True}
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
 
 
