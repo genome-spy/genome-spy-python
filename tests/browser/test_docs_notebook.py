@@ -510,6 +510,15 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
     sc = pytest.importorskip("scanpy")
     specs = _render_guide(page, monkeypatch, name)
     assert page.locator("canvas").count() == len(specs)
+    sizes = page.evaluate("""() => [...document.querySelectorAll('.gs-doc-embed')]
+        .map((host, i) => ({height:host.clientHeight,
+            canvas:guideApis[i].getLogicalCanvasSize().height}))""")
+    overflow = [
+        (index, size)
+        for index, size in enumerate(sizes)
+        if size["canvas"] > size["height"]
+    ]
+    assert not overflow, overflow
     assert page.locator(".message-box").count() == 0
     exports = page.evaluate("""async () => Promise.all(guideApis.map(async api =>
         (await api.imageExport.svg()).blob.text()))""")

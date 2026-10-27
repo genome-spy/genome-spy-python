@@ -288,6 +288,19 @@ the complete Sphinx rebuild passed. No new resource benchmark or full repository
 suite was run.
 Publication/capability gates remain open; no plan is cleared.
 
+**Diagnostic page sizing — verified (2026-10-27).** PCA loadings and overview
+now reserve enough page height for their complete native canvases, including
+rotated labels, titles and axes. The same correction covers ranking scores and
+ranked dotplot/matrixplot guides. Only notebook display metadata changed.
+The existing diagnostic browser check now compares every canvas with its page
+container; it reproduced the clipping before the fix and passes at desktop and
+narrow widths afterward (four checks). Both stored-result workflow checks and
+Ruff pass. The affected pages rebuilt and the PCA axes were visually checked.
+The strict whole-docs build currently reports an unrelated unlinked
+`linked_expression.md` from concurrent work. No full suite or new resource
+benchmark was run; chart code, data preparation and the next-work queue are
+unchanged. No plan is cleared.
+
 **Expression layout review — verified (2026-10-27).** Dotplot and matrixplot
 now center native legends below the complete gene-label track. The shared grouped
 renderer supplies the same layout to both builders and ranked variants; native
