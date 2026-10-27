@@ -3867,8 +3867,8 @@ def pca_overview(
     """Combine stored PCA coordinates, loadings and variance ratios.
 
     Reuses pca, pca_loadings and pca_variance_ratio in Scanpy's display order.
-    The native result stacks three labeled sections, with loadings in two columns,
-    and displays once. Plotting never computes PCA, filters genes or modifies results.
+    Cell positions sit above two diagnostic rows: PC1/PC2, then PC3/variance.
+    Plotting never computes PCA, filters genes or modifies supplied results.
 
     Args:
         adata: AnnData containing the stored results required by all three plots.
@@ -3896,18 +3896,25 @@ def pca_overview(
 
     # Build every child before displaying, so a failed diagnostic leaves no output.
     embedding_chart = pca(adata, show=False, save=False, **params)
-    loadings_chart = pca_loadings(adata, width=280, show=False, save=False)
+    loadings_chart = pca_loadings(
+        adata, components="1,2", width=280, show=False, save=False
+    )
+    third_loading = pca_loadings(
+        adata, components="3", width=280, show=False, save=False
+    )
     variance_chart = pca_variance_ratio(adata, show=False, save=False)
     assert embedding_chart is not None and isinstance(loadings_chart, gs.ConcatChart)
-    assert variance_chart is not None
-    # Two loading panels fit a notebook page without shrinking their labels.
-    loadings_chart = loadings_chart.properties(columns=2, spacing=4)
-    # Each row keeps its own width instead of stretching to the widest sibling.
+    assert third_loading is not None and variance_chart is not None
+    # Keep PC3 and variance together to avoid an empty cell.
+    last_row = gs.hconcat(third_loading, variance_chart, spacing=4).resolve_scale(
+        x="independent", y="independent"
+    )
     chart = (
         gs.vconcat(
-            gs.hconcat(embedding_chart).properties(title="Cell positions"),
-            gs.hconcat(loadings_chart).properties(title="Gene loadings"),
-            gs.hconcat(variance_chart).properties(title="Explained variance"),
+            # This wrapper keeps the cell plot at its requested width.
+            gs.hconcat(embedding_chart),
+            loadings_chart.properties(spacing=4),
+            last_row,
             spacing=4,
         )
         .resolve_scale(x="independent", y="independent", color="independent")

@@ -183,10 +183,10 @@ finite linear scores are plotted as given, with no added range or sum constraint
 ## PCA overview
 
 `pca_overview` reuses `pca`, `pca_loadings` and `pca_variance_ratio`, in that order.
-Scanpy opens three plots; the native result arranges their charts vertically and
-displays once. Labeled sections show cell positions, gene loadings and explained
-variance. Loadings use 280-pixel panels in two columns to fit a notebook page. Each section
-keeps its data, axes and independent scales and guides.
+Scanpy opens three plots; the native result displays once. Cell positions sit
+above two compact diagnostic rows: PC1/PC2, then PC3/explained variance. Loadings
+use 280-pixel panels. Each plot keeps its data, axes and independent scales and
+guides.
 
 ```python
 pca_genes = pbmc[:, pbmc.var["highly_variable"]]

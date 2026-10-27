@@ -549,8 +549,9 @@ commit evidence and unmet verification gates live in the
   both diagnostics with the existing PCA chart, without another data/chart module.
   Overview acceptance: `gsc.pl.pca_overview(pca_genes, color="louvain", show=False)`
   reuses `pca`, `pca_loadings` and `pca_variance_ratio` with their existing statistical
-  defaults. The labeled native sections use two 280-pixel columns for loadings,
-  retaining their fonts and all three components while fitting a notebook page.
+  defaults. Cell positions sit above two native diagnostic rows: PC1/PC2, then
+  PC3/variance. Loadings use 280-pixel panels, retaining fonts and all components
+  while fitting a notebook page. Keep the plots' own titles without section wrappers.
   Scanpy opens the three plots in that order; compose the native results vertically
   and display once. Forward supported PCA plotting kwargs only to the embedding,
   keeping the diagnostic statistics unchanged; reject unsupported kwargs before any output.

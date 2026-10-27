@@ -544,6 +544,10 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
         assert len(overview["panels"]) == 4
         if page.viewport_size["width"] >= 1200:
             assert overview["canvas"]["width"] <= 736
+        assert overview["canvas"]["height"] <= 1200
+        assert overview["panels"][2]["y"] == pytest.approx(
+            overview["panels"][3]["y"], abs=1
+        )
         for box in overview["panels"]:
             assert (
                 0 <= box["x"] < box["x"] + box["width"] <= overview["canvas"]["width"]
@@ -551,9 +555,7 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
         assert all(
             title in exports[2]
             for title in (
-                "Cell positions",
-                "Gene loadings",
-                "Explained variance",
+                "variance ratio",
                 "PC1",
                 "PC2",
                 "PC3",

@@ -72,7 +72,8 @@ def test_complete_overview_keeps_parent_axes_guides_and_registered_rank_labels(
     assert max(b["y"] + b["height"] for b in bounds[:2]) < min(
         b["y"] for b in bounds[2:5]
     )
-    assert max(b["y"] + b["height"] for b in bounds[2:5]) < bounds[5]["y"]
+    assert max(b["y"] + b["height"] for b in bounds[2:4]) < bounds[4]["y"]
+    assert bounds[4]["y"] == pytest.approx(bounds[5]["y"], abs=1)
     for panel, box in zip(units(spec)[2:], bounds[2:], strict=True):
         x0, x1 = panel["encoding"]["x"]["scale"]["domain"]
         y0, y1 = panel["encoding"]["y"]["scale"]["domain"]

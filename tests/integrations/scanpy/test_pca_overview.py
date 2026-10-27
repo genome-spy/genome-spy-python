@@ -44,7 +44,8 @@ def test_children_keep_parent_data_configuration_and_diagnostic_defaults(color):
     overview = gsc.pl.pca_overview(a, show=False, **options).to_dict()
     parents = [
         gsc.pl.pca(a, show=False, **options),
-        gsc.pl.pca_loadings(a, width=280, show=False),
+        gsc.pl.pca_loadings(a, components="1,2", width=280, show=False),
+        gsc.pl.pca_loadings(a, components="3", width=280, show=False),
         gsc.pl.pca_variance_ratio(a, show=False),
     ]
     assert len(overview["vconcat"]) == 3
@@ -53,29 +54,29 @@ def test_children_keep_parent_data_configuration_and_diagnostic_defaults(color):
         "scale": {"x": "independent", "y": "independent", "color": "independent"},
         "legend": {"default": "independent"},
     }
-    for index, (child, parent) in enumerate(
-        zip(overview["vconcat"], parents, strict=True)
-    ):
-        assert (
-            child["title"]
-            == ["Cell positions", "Gene loadings", "Explained variance"][index]
-        )
-        assert len(child["hconcat"]) == 1
-        child = child["hconcat"][0]
+    children = [
+        overview["vconcat"][0]["hconcat"][0],
+        overview["vconcat"][1],
+        *overview["vconcat"][2]["hconcat"],
+    ]
+    assert overview["vconcat"][2]["resolve"]["scale"] == {
+        "x": "independent",
+        "y": "independent",
+    }
+    for index, (child, parent) in enumerate(zip(children, parents, strict=True)):
         expected = parent.to_dict(include_schema=False)
         datasets = expected.pop("datasets")
         if index == 1:
-            expected["columns"] = 2
             expected["spacing"] = 4
         assert child == expected
         for name, records in datasets.items():
             assert overview["datasets"][name] == records
     assert "config" not in overview
     assert "legend" in overview["vconcat"][0]["hconcat"][0]["config"]
-    loadings = units(overview["vconcat"][1])
+    loadings = [*units(overview["vconcat"][1]), overview["vconcat"][2]["hconcat"][0]]
     assert [panel["title"] for panel in loadings] == ["PC1", "PC2", "PC3"]
     assert all(panel["width"] == 280 and panel["height"] == 300 for panel in loadings)
-    variance = overview["vconcat"][2]["hconcat"][0]
+    variance = overview["vconcat"][2]["hconcat"][1]
     assert variance["encoding"]["x"]["scale"]["domain"] == [-0.9, 30.9]
     assert variance["width"] == variance["height"] == 300
     assert variance["mark"]["tooltip"] == {"handler": "default"}

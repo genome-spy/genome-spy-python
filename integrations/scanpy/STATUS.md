@@ -288,23 +288,26 @@ the complete Sphinx rebuild passed. No new resource benchmark or full repository
 suite was run.
 Publication/capability gates remain open; no plan is cleared.
 
-**PCA overview layout — verified (2026-10-27).** The native overview now labels
-its cell-position, loading and variance sections. Loadings use two 280-pixel
-columns, with PC3 below PC1/PC2; all three components, gene ranks, font sizes,
-scales and stored-result semantics remain unchanged. The complete loading row
-fits the desktop page instead of requiring horizontal scrolling. Narrow pages
-retain the existing horizontal scroller. The guide reserves the extra height
-and explains the section order. No resize wrapper, custom clipping or new API
-option was added.
+**PCA overview layout — verified (2026-10-27).** Cell positions now sit above
+two compact diagnostic rows: PC1/PC2, then PC3/variance. The same public plotters
+supply the charts; one width-preserving wrapper keeps the cell plot at its
+requested size. Each diagnostic keeps its own title, replacing three section
+headings and the extra loading wrapper. All components, ranks, fonts, plot sizes,
+scales and stored-result semantics remain unchanged. The packaged guide shrinks
+from about 1,580 to 1,150 native pixels (27%) and fits the desktop page. Narrow
+pages retain the existing horizontal scroller. The safe shared label-padding
+estimate remains; no further heuristic, resize wrapper or clipping change was
+added. Exact font padding remains in M14.a/C05 pending a verified native
+measurement/layout path.
 
-Verification: 74 targeted Python checks and six native browser checks passed,
+Verification: 75 targeted Python checks and six native browser checks passed,
 including parent-chart equivalence, complete panel bounds, normal/narrow page
 sizing, isolated embedding zoom, hover and offline HTML. The documentation
 rebuilt with warnings treated as errors; Ruff and `mypy src/` pass. Visual checks
-confirmed both loading columns and PC3 fit. No full repository suite or new
+confirmed all four diagnostics fit. No full repository suite or new
 resource benchmark was run; data preparation is unchanged. No plan is cleared.
 
-Spacing follow-up: overview and loading-row gaps use four native pixels. The
+Earlier spacing follow-up: overview and loading-row gaps use four native pixels. The
 shared ranking renderer subtracts the vertical room already available above each
 score before reserving label padding. Long labels near the top still receive
 space; long labels lower down no longer create unnecessary gaps. PCA page heights
