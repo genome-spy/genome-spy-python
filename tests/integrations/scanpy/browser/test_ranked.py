@@ -58,6 +58,8 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
             x, y = label["position"]
             x0, x1 = panel["x_domain"]
             y0, y1 = panel["y_domain"]
+            if family in ("pca_loadings", "pca_variance_ratio"):
+                y1 += 0.3 * (y1 - y0)
             expected = [
                 bounds["x"] + (x - x0) / (x1 - x0) * bounds["width"],
                 bounds["y"] + (y1 - y) / (y1 - y0) * bounds["height"],
@@ -174,12 +176,22 @@ def test_pca_hover_can_be_disabled(page, family, options, y):
     assert not page.locator("table.attributes").is_visible()
 
 
-def test_packaged_loading_labels_fit_inside_the_complete_chart(page):
+@pytest.mark.parametrize(
+    "family,options,panel_count",
+    [
+        ("pca_loadings", {"components": "1,2", "n_points": 20}, 2),
+        ("pca_variance_ratio", {"n_pcs": 19}, 1),
+        ("pca_variance_ratio", {"n_pcs": 19, "log": True}, 1),
+    ],
+)
+def test_packaged_pca_labels_fit_inside_their_plot_axes(
+    page, family, options, panel_count
+):
     import scanpy as sc
 
     a = sc.datasets.pbmc68k_reduced()
-    chart = gsc.pl.pca_loadings(
-        a[:, a.var["highly_variable"]], "1,2", n_points=20, show=False
+    chart = getattr(gsc.pl, family)(
+        a[:, a.var["highly_variable"]], show=False, **options
     )
     spec = chart.to_dict()
     names = {
@@ -203,11 +215,19 @@ def test_packaged_loading_labels_fit_inside_the_complete_chart(page):
         {"svg": svg, "names": list(names)},
     )
     size = page.evaluate("api.getLogicalCanvasSize()")
-    assert len(boxes) == 40
+    assert len(boxes) == 20 * panel_count
     assert all(
         0 <= b["y"] and b["y"] + b["height"] <= size["height"] + 1 for b in boxes
     )
     assert all(0 <= b["x"] and b["x"] + b["width"] <= size["width"] + 1 for b in boxes)
+    panels = [
+        page.evaluate("i => api.views.getLayoutBounds({scope:[],view:'panel-'+i})", i)
+        for i in range(panel_count)
+    ]
+    for box in boxes:
+        panel = next(p for p in panels if p["x"] - 1 <= box["x"] <= p["x"] + p["width"])
+        assert box["y"] >= panel["y"] - 1
+        assert box["y"] + box["height"] <= panel["y"] + panel["height"] + 1
     assert "?" not in [
         e.text for e in ET.fromstring(svg).iter() if e.tag.endswith("text")
     ]

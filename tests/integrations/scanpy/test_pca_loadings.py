@@ -73,7 +73,12 @@ def test_loadings_is_the_existing_ranking_chart_without_analysis_or_expression(
     }
     actual = gsc.pl.pca_loadings(a, components=np.array([3, 1]), **options)
     expected = gsc.pl.ranking(a, "varm", "PCs", indices=[2, 0], **options)
-    assert actual.to_dict() == expected.to_dict()
+    actual_spec, expected_spec = actual.to_dict(), expected.to_dict()
+    for panel, reference in zip(units(actual_spec), units(expected_spec), strict=True):
+        low, high = reference["encoding"]["y"]["scale"]["domain"]
+        reference["encoding"]["y"]["scale"]["domain"] = [low, high + 0.3 * (high - low)]
+        reference["padding"] = {"top": 0}
+    assert actual_spec == expected_spec
     np.testing.assert_array_equal(a.varm["PCs"], before)
     assert not a.uns
 
@@ -87,7 +92,7 @@ def test_signed_tied_extremes_keep_numpy_order_odd_split_and_omitted_rank_gap():
         (4, "b", -4),
     ]
     assert spec["encoding"]["x"]["scale"]["domain"] == [-0.9, 4.9]
-    np.testing.assert_allclose(spec["encoding"]["y"]["scale"]["domain"], [-4.2, 3.15])
+    np.testing.assert_allclose(spec["encoding"]["y"]["scale"]["domain"], [-4.2, 5.355])
     assert spec["encoding"]["x"]["axis"]["labels"] is False
 
 

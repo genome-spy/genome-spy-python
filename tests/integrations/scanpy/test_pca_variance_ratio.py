@@ -55,7 +55,11 @@ def test_variance_is_the_existing_ranking_chart_without_analysis_or_expression(
     expected = gsc.pl.ranking(
         a, "uns", "variance_ratio", dictionary="pca", labels="PC", n_points=2, **options
     )
-    assert actual.to_dict() == expected.to_dict()
+    reference = expected.to_dict()
+    low, high = reference["encoding"]["y"]["scale"]["domain"]
+    reference["encoding"]["y"]["scale"]["domain"] = [low, high + 0.3 * (high - low)]
+    reference["padding"] = {"top": 0}
+    assert actual.to_dict() == reference
     assert a.uns["pca"]["variance_ratio"] is source
     np.testing.assert_array_equal(source, [0.2, 0.4, 0.1, 0.2, 0.05])
 
@@ -70,7 +74,7 @@ def test_tied_ratios_keep_original_pc_names_and_top_onlys_extra_label():
     assert spec["title"] == "variance ratio"
     assert spec["encoding"]["x"]["scale"]["domain"] == [-0.9, 2.9]
     assert spec["encoding"]["x"]["axis"]["title"] == "ranking"
-    np.testing.assert_allclose(spec["encoding"]["y"]["scale"]["domain"], [0.19, 0.42])
+    np.testing.assert_allclose(spec["encoding"]["y"]["scale"]["domain"], [0.19, 0.489])
 
 
 def test_log_is_a_natural_log_score_transform_before_ranking():
@@ -79,7 +83,7 @@ def test_log_is_a_natural_log_score_transform_before_ranking():
     spec = gsc.pl.pca_variance_ratio(a, 1, log=True, show=False).to_dict()
     assert [r["_label"] for r in rows(spec)] == ["PC2", "PC3"]
     np.testing.assert_allclose([r["_score"] for r in rows(spec)], [-1, -2])
-    np.testing.assert_allclose(spec["encoding"]["y"]["scale"]["domain"], [-2.1, -0.95])
+    np.testing.assert_allclose(spec["encoding"]["y"]["scale"]["domain"], [-2.1, -0.605])
     assert spec["encoding"]["y"]["scale"].get("type", "linear") == "linear"
 
 

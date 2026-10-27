@@ -3663,6 +3663,7 @@ def pca_loadings(
 
     Reads varm["PCs"] and variable names, using the same rank panels as ranking.
     Neither PCA nor expression extraction runs, and AnnData stays unchanged.
+    The display adds 30% of the score range above the labels' loading values.
 
     Args:
         adata: AnnData with resident NumPy loadings in varm["PCs"].
@@ -3758,6 +3759,7 @@ def pca_loadings(
         width=width,
         height=height,
         context=context,
+        headroom=0.3,
     )
     return _finish_plot(chart, show, sc)
 
@@ -3778,6 +3780,7 @@ def pca_variance_ratio(
     Reads uns["pca"]["variance_ratio"] through the shared ranking helpers.
     log=True takes the natural logarithm before sorting, as Scanpy does;
     PCA and expression access never run, and stored results stay unchanged.
+    The display adds 30% of the score range above the plotted values for labels.
 
     Args:
         adata: AnnData with a resident variance-ratio vector in uns["pca"].
@@ -3853,6 +3856,7 @@ def pca_variance_ratio(
         width=width,
         height=height,
         context=context,
+        headroom=0.3,
     )
     return _finish_plot(chart, show, sc)
 

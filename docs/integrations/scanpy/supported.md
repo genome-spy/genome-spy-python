@@ -150,6 +150,10 @@ spacing retain the ranking renderer's documented differences. Rotated ASCII dots
 render the omitted-rank marker because the native font lacks vertical ellipsis.
 `show`/`save` use the common native delivery contract.
 
+PCA text plots add 30% of the score range above the values to leave room inside
+the y-axis for labels. Scores and font sizes stay unchanged; these axis limits
+differ from Scanpy. Very long labels or short panels may need a larger `height`.
+
 ## PCA variance ratios
 
 `pca_variance_ratio` reads `uns["pca"]["variance_ratio"]` and uses the existing

@@ -292,13 +292,25 @@ Publication/capability gates remain open; no plan is cleared.
 two compact diagnostic rows: PC1/PC2, then PC3/variance. The same public plotters
 supply the charts; one width-preserving wrapper keeps the cell plot at its
 requested size. Each diagnostic keeps its own title, replacing three section
-headings and the extra loading wrapper. All components, ranks, fonts, plot sizes,
-scales and stored-result semantics remain unchanged. The packaged guide shrinks
-from about 1,580 to 1,150 native pixels (27%) and fits the desktop page. Narrow
+headings and the extra loading wrapper. All components, ranks, fonts, plot sizes
+and stored-result semantics remain unchanged. Layout compaction reduced the
+packaged guide from about 1,580 to 1,150 native pixels (27%). Narrow
 pages retain the existing horizontal scroller. The safe shared label-padding
 estimate remains; no further heuristic, resize wrapper or clipping change was
 added. Exact font padding remains in M14.a/C05 pending a verified native
 measurement/layout path.
+
+PCA axis follow-up: loading and variance plots now reuse the rank renderer's
+existing `headroom=0.3` to add y-range above scores. Labels in the packaged
+examples stay inside their axes, including log variance; no glyph is moved,
+shrunk or hidden. Display limits deliberately differ from Scanpy. Very long
+names or short panels may still need greater height. The overview now needs
+about 1,023 native pixels, and guide heights follow the smaller canvases.
+Verification: 75 targeted Python checks, 16 PCA/ranking browser cases and four
+normal/narrow guide checks pass across the focused runs. The strengthened
+real-data regression checks every glyph against its plot bounds, rather than
+only the canvas bounds. The warning-strict docs build, Ruff and `mypy src/`
+pass. No full suite or new resource benchmark was run; no plan is cleared.
 
 Verification: 75 targeted Python checks and six native browser checks passed,
 including parent-chart equivalence, complete panel bounds, normal/narrow page
