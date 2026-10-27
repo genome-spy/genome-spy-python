@@ -232,17 +232,9 @@ def build_heatmap(
             cell_axis,
             horizontal=swap_axes,
             positions=centers,
-        ).properties(
-            name="heatmap-groups",
-            title=gs.Title(
-                text=groupby,
-                orient="bottom" if swap_axes else "left",
-                angle=0 if swap_axes else -90,
-                font=FONT,
-                fontSize=10 * PT,
-                fontWeight="normal",
-            ),
-        )
+            # Keep edge labels whole; native culling hides offscreen anchors.
+            clip="y" if swap_axes else "x",
+        ).properties(name="heatmap-groups")
         tracks = [strip, labels] if swap_axes else [labels, strip]
         sides[cell_side] = gs.SurroundSideSpec(views=tracks, spacing=8)
 

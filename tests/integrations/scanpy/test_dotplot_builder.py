@@ -282,8 +282,8 @@ def test_default_legends_match_the_function_before_and_after_a_chain(adata):
     legend = expected["config"]["legend"]
     assert legend["layout"] == {
         "anchor": "middle",
-        "direction": "vertical",
-        "wrap": False,
+        "direction": "horizontal",
+        "wrap": True,
     }
     assert legend["spacing"] == 16
     assert legend["labelFont"] == legend["titleFont"] == "Lato"

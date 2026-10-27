@@ -77,6 +77,7 @@ def _slot_labels(
             baseline="middle",
             yOffset=-8 if opposite else 8,
             clip=clip,
+            cullByVisibleRange="x",
             tooltip=None,
         ).encode(
             x=coordinate.field("slot"),
@@ -91,6 +92,7 @@ def _slot_labels(
         baseline="middle",
         xOffset=8 if opposite else -8,
         clip=clip,
+        cullByVisibleRange="y",
         tooltip=None,
     ).encode(
         x=gs.value(0 if opposite else 1),
@@ -332,7 +334,7 @@ def color_legend(title: str | None) -> gs.Legend:
     """Return a native color guide; surround layout reserves its track space."""
     return gs.Legend(
         title=title.replace("\n", " ") if title else title,
-        orient="right",
+        orient="bottom",
         direction="horizontal",
         gradientLength=150,
         gradientThickness=15,
@@ -384,7 +386,6 @@ def finish_grouped_chart(
     zoom: bool = False,
     tree_size: float = 80,
     group_track: gs.TopLevelSpec | None = None,
-    legend_anchor: Literal["end", "middle"] = "end",
     legend_spacing: float = 25,
 ) -> gs.TopLevelSpec:
     """Combine summary marks, table labels and optional brackets/tree into a chart.
@@ -448,7 +449,7 @@ def finish_grouped_chart(
             titleFontSize=_TICK,
             titleFontWeight="normal",
             titleOrient="top",
-            layout={"anchor": legend_anchor, "direction": "vertical", "wrap": False},
+            layout={"anchor": "middle", "direction": "horizontal", "wrap": True},
             spacing=legend_spacing,
         )
     )

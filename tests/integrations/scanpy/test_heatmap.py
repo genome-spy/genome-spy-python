@@ -213,6 +213,10 @@ def test_native_tracks_share_authoritative_gapped_slot_scales(adata, swapped):
             if encoding.get("type") == "index":
                 assert "scale" not in encoding
     strip = next(mark for mark in marks if mark.get("name") == "heatmap-category-strip")
+    labels = next(mark for mark in marks if mark.get("name") == "heatmap-groups")
+    assert "title" not in labels
+    assert labels["mark"]["clip"] == ("y" if swapped else "x")
+    assert labels["mark"]["cullByVisibleRange"] == cell
     assert len(spec["datasets"][strip["data"]["name"]]) == adata.n_obs
     assert (
         sum(len(rows) for rows in spec["datasets"].values() if "_value" in rows[0])

@@ -248,7 +248,7 @@ def build_dotplot(
             .legend(
                 gs.Legend(
                     title=size_title.replace("\n", " ") if size_title else size_title,
-                    orient="right",
+                    orient="bottom",
                     direction="horizontal",
                     columns=len(ticks),
                     values=ticks,
@@ -305,7 +305,6 @@ def build_dotplot(
         height=height,
         scales=scales,
         name="dotplot",
-        legend_anchor="middle",
         legend_spacing=16,
         tree=tree,
         zoom=bool(zoom),

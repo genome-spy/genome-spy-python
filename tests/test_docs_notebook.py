@@ -468,6 +468,8 @@ def test_expression_page_reuses_one_explicit_tree(notebook_extension, monkeypatc
     np.testing.assert_array_equal(loaded.obsm["X_pca"], original.obsm["X_pca"])
     specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
     assert len(specs) == 9
+    assert "Cell group" not in json.dumps(specs[3])
+    assert all(specs[2]["scales"][axis]["gapWidth"] == 1 for axis in ("x", "y"))
     rows = [
         next(rows for rows in spec["datasets"].values() if "_gene" in rows[0])
         for spec in specs[:3]

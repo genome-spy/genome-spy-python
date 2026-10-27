@@ -8,6 +8,7 @@ import warnings
 import xml.etree.ElementTree as ET
 
 import numpy as np
+import pandas as pd
 from PIL import Image
 import pytest
 
@@ -48,6 +49,64 @@ def hover_at(page, x, y, *, probe=True):
     for dx, dy in offsets:
         page.mouse.move(canvas["x"] + x + dx, canvas["y"] + y + dy)
         page.wait_for_timeout(80)
+
+
+@pytest.mark.parametrize("swapped", [False, True])
+def test_small_terminal_group_label_is_whole_and_culls_on_zoom(page, swapped):
+    from anndata import AnnData
+
+    data = AnnData(
+        np.arange(100, dtype=float).reshape(-1, 1),
+        obs=pd.DataFrame(
+            {
+                "group": pd.Categorical(
+                    ["Other"] * 99 + ["CD34+"], categories=["Other", "CD34+"]
+                )
+            },
+            index=[f"cell-{i}" for i in range(100)],
+        ),
+        var=pd.DataFrame(index=["gene"]),
+    )
+    chart = gsc.pl.heatmap(
+        data,
+        ["gene"],
+        "group",
+        use_raw=False,
+        swap_axes=swapped,
+        group_gap=1,
+        zoom="xy",
+        width=200,
+        height=200,
+        show=False,
+    )
+    bounds = render(page, chart)
+    box = page.evaluate("""async () => {
+        const host = document.createElement('div');
+        host.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+        host.innerHTML = await (await api.imageExport.svg()).blob.text();
+        document.body.append(host);
+        const text = [...host.querySelectorAll('text')].find(e => e.textContent === 'CD34+');
+        const {x, y, width, height} = text.getBoundingClientRect();
+        host.remove();
+        return {x, y, width, height};
+    }""")
+    canvas = page.locator("canvas").first.bounding_box()
+    pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
+    # The last group's glyphs cross the matrix edge, but must remain fully painted.
+    x0, y0 = int(canvas["x"] + box["x"]), int(canvas["y"] + box["y"])
+    x1, y1 = int(x0 + box["width"] + 1), int(y0 + box["height"] + 1)
+    if swapped:
+        x0 = int(np.ceil(canvas["x"] + bounds["x"] + bounds["width"]))
+    else:
+        y0 = int(np.ceil(canvas["y"] + bounds["y"] + bounds["height"]))
+    assert (pixels[y0:y1, x0:x1].max(axis=2) < 100).sum() > 8
+    axis = "x" if swapped else "y"
+    page.evaluate(
+        f"async () => api.getScaleResolutionByName('heatmap-{axis}').zoomTo([0, 60])"
+    )
+    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    assert ">Other<" in svg
+    assert ">CD34+<" not in svg
 
 
 @pytest.mark.parametrize("page", [1, 1.5], indirect=True)

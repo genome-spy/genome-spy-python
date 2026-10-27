@@ -321,6 +321,6 @@ def build_clustermap(
             labelFont=FONT,
             labelFontSize=TICK,
             titleFont=FONT,
-            layout={"anchor": "start", "direction": "vertical", "wrap": False},
+            layout={"anchor": "middle", "direction": "vertical", "wrap": False},
         )
     )

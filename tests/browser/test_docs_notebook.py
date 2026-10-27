@@ -417,6 +417,11 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
     from tests.integrations.scanpy.browser.test_grid_interactions import value_texts
 
     specs = _render_guide(page, monkeypatch, "expression.ipynb")
+    sizes = page.evaluate("""() => [...document.querySelectorAll('.gs-doc-embed')]
+        .map((host, i) => ({height:host.clientHeight,
+            canvas:guideApis[i].getLogicalCanvasSize().height}))""")
+    for index, size in enumerate(sizes):
+        assert size["canvas"] <= size["height"], (index, size)
     page.evaluate("""() => {
         window.plot = index => guideApis[index].debug.getViewRoot().getDescendants()
             .find(view => view.spec.encoding?.color?.field === (index === 2 ? '_value' : '_mean'));

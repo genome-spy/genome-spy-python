@@ -19,17 +19,25 @@ REFERENCE = json.loads((REFERENCE_DIR / "dotplot.json").read_text())
 
 
 @pytest.mark.parametrize("swapped", [False, True])
-def test_native_dotplot_legend_stack_is_centered_beside_the_chart(page, adata, swapped):
-    chart = gsc.pl.dotplot(
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "DotPlot", "MatrixPlot"])
+def test_native_grouped_legends_are_centered_below_labels(page, adata, swapped, family):
+    options = dict(
+        use_raw=False,
+        width=300,
+        height=350,
+    )
+    args = (
         adata,
         {"First": ["g1", "g2"], "Last": ["g3"]},
         "group",
-        use_raw=False,
-        swap_axes=swapped,
-        width=300,
-        height=350,
-        show=False,
     )
+    if family[0].isupper():
+        plot = getattr(gsc.pl, family)(*args, **options)
+        if swapped:
+            plot.swap_axes()
+        chart = plot.to_chart()
+    else:
+        chart = getattr(gsc.pl, family)(*args, **options, swap_axes=swapped, show=False)
     render(page, chart)
     geometry = page.evaluate(
         """async () => {
@@ -39,13 +47,18 @@ def test_native_dotplot_legend_stack_is_centered_beside_the_chart(page, adata, s
             document.body.append(host);
             await document.fonts.ready;
             const chart = host.querySelector('svg').getBoundingClientRect();
-            const legend = host.querySelector('[data-name="legend_region_right"]');
+            const legend = host.querySelector('[data-name="legend_region_bottom"]');
             const bounds = legend.getBoundingClientRect();
+            const labels = [...host.querySelectorAll('text')].filter(e =>
+                ['g1', 'g2', 'g3', 'A', 'B'].includes(e.textContent));
             const result = {
                 top: bounds.top - chart.top,
                 bottom: chart.bottom - bounds.bottom,
                 left: bounds.left - chart.left,
                 right: chart.right - bounds.right,
+                labelBottom: Math.max(...labels.map(e =>
+                    e.getBoundingClientRect().bottom - chart.top)),
+                hasRightLegend: !!host.querySelector('[data-name="legend_region_right"]'),
                 titles: [...legend.querySelectorAll('[data-name="title"] text')]
                     .map(e => e.textContent),
             };
@@ -53,10 +66,16 @@ def test_native_dotplot_legend_stack_is_centered_beside_the_chart(page, adata, s
             return result;
         }"""
     )
-    assert geometry["titles"] == ["Cells expressing (%)", "Mean expression"]
+    assert geometry["titles"] == (
+        ["Cells expressing (%)", "Mean expression"]
+        if family.lower() == "dotplot"
+        else ["Mean expression in group"]
+    )
+    assert not geometry["hasRightLegend"]
     assert geometry["top"] > 0 and geometry["bottom"] > 0
-    assert geometry["left"] > 300 and geometry["right"] >= 0
-    assert geometry["top"] == pytest.approx(geometry["bottom"], abs=8)
+    assert geometry["top"] > geometry["labelBottom"]
+    assert geometry["left"] >= 0 and geometry["right"] >= 0
+    assert geometry["left"] == pytest.approx(geometry["right"], abs=10)
 
 
 @pytest.mark.parametrize("swapped,rotation", [(False, None), (False, 0), (True, None)])

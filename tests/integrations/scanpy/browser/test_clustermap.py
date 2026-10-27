@@ -206,6 +206,21 @@ def test_native_category_legend_matches_strip_and_stays_visible_during_zoom(page
         data, obs_keys="group", zoom=zoom, width=300, height=240, show=False
     )
     bounds = render(page, chart)
+    guide_bounds = page.evaluate("""async () => {
+        const host = document.createElement('div');
+        host.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+        host.innerHTML = await (await api.imageExport.svg()).blob.text();
+        document.body.append(host);
+        const chart = host.querySelector('svg').getBoundingClientRect();
+        const legend = host.querySelector('[data-name="legend_region_right"]')
+            .getBoundingClientRect();
+        host.remove();
+        return {top: legend.top-chart.top, bottom: chart.bottom-legend.bottom,
+                left: legend.left-chart.left};
+    }""")
+    assert guide_bounds["left"] > bounds["x"] + bounds["width"]
+    assert guide_bounds["top"] > 0
+    assert guide_bounds["top"] == pytest.approx(guide_bounds["bottom"], abs=10)
     for navigated in (False, True):
         if navigated:
             pointer(page, bounds)

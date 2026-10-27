@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-26. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-27. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -287,6 +287,33 @@ guide notebook ran in a fresh kernel; outputs remain temporary. Ruff, mypy and
 the complete Sphinx rebuild passed. No new resource benchmark or full repository
 suite was run.
 Publication/capability gates remain open; no plan is cleared.
+
+**Expression layout review — verified (2026-10-27).** Dotplot and matrixplot
+now center native legends below the complete gene-label track. The shared grouped
+renderer supplies the same layout to both builders and ranked variants; native
+wrapping keeps multiple guides within the available width. Clustermap centers its
+native category/color guides on the right. Explicit guide titles and sizes remain
+unchanged. This supersedes the earlier right-side dotplot presentation checkpoint.
+
+The expression guide removes the supplied matrix's `Cell group` axis titles and
+uses one-pixel heatmap gaps. The API's optional `group_gap=0` default is unchanged.
+Heatmap group names no longer repeat the group field as an axis title. Shared slot
+labels use native visible-range culling; heatmap group labels clip only across
+the label track, keeping small terminal labels whole in either orientation while
+offscreen anchors disappear on zoom. No extra marks, callbacks or Core changes
+were added. Guide embed heights reserve space for the bottom legends.
+
+Evidence: [native legend placement](../../tests/integrations/scanpy/browser/test_dotplot.py),
+[edge-label paint and culling](../../tests/integrations/scanpy/browser/test_heatmap.py),
+[clustermap guides](../../tests/integrations/scanpy/browser/test_clustermap.py), and
+[normal/narrow page sizing](../../tests/browser/test_docs_notebook.py).
+Verification: 328 targeted Python checks, all 143 affected expression/browser
+cases and both normal/narrow guide checks passed. The output-free guide ran in a
+fresh kernel; the complete Sphinx build, Ruff formatting/lint and `mypy src/`
+passed. Visual checks confirmed the real-data labels and legend placement.
+No full repository suite or new resource benchmark was run; data preparation
+and transport are unchanged. No new capability gate is closed or plan cleared;
+the existing queue is unchanged.
 
 **Documentation — 51 live charts across eight guides.** The expanded UMAP and
 expression pages include stored PCA/scatter/density, numeric matrices,
