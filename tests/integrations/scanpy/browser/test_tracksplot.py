@@ -88,7 +88,17 @@ def test_tracks_tree_hover_and_linked_x_zoom(page, log):
     page.mouse.move(canvas["x"] + track["x"] + 270, canvas["y"] + track["y"] + 30)
     before = page.evaluate("api.getScaleResolutionByName('cells').getDomain()")
     page.mouse.wheel(0, -250)
-    page.wait_for_timeout(600)
+    # Finish native wheel animation before testing that panning preserves its span.
+    page.evaluate("""async () => {
+        const scale = api.getScaleResolutionByName('cells');
+        let previous = scale.getDomain().slice(), stable = 0;
+        while (stable < 3) {
+            await new Promise(requestAnimationFrame);
+            const current = scale.getDomain();
+            stable = current.every((value, i) => value === previous[i]) ? stable + 1 : 0;
+            previous = current.slice();
+        }
+    }""")
     after = page.evaluate("api.getScaleResolutionByName('cells').getDomain()")
     assert np.ptp(after) < np.ptp(before)
     page.mouse.down()

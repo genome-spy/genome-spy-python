@@ -17,6 +17,7 @@ from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_chart import (
     _brackets,
+    _category_strip,
     _slot_labels,
     bracket_space,
     coordinate,
@@ -295,29 +296,3 @@ def build_heatmap(
             layout={"anchor": "end", "direction": "vertical", "wrap": False},
         )
     )
-
-
-def _category_strip(
-    labels: list[str],
-    coordinate: Any,
-    color: gs.Color,
-    *,
-    horizontal: bool,
-    title: str,
-    hover: bool,
-) -> gs.Chart:
-    """Return one native category band per cell, sharing the gapped cell axis.
-
-    A small metadata table keeps gaps and tooltips aligned without copying expression.
-    """
-    strip = gs.Chart([{"slot": i, "label": label} for i, label in enumerate(labels)])
-    strip = strip.mark_rect(
-        clip=True,
-        minHeight=0,
-        minOpacity=1,
-        tooltip={"handler": "default"} if hover else None,
-    ).encode(color=color, **{"x" if horizontal else "y": coordinate.field("slot")})
-    if hover:
-        strip = strip.encode(tooltip=[gs.Tooltip("label:N", title=title)])
-    strip = strip.properties(name="heatmap-category-strip")
-    return strip.properties(height=14) if horizontal else strip.properties(width=14)
