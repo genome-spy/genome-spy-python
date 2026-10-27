@@ -3867,16 +3867,16 @@ def pca_overview(
     """Combine stored PCA coordinates, loadings and variance ratios.
 
     Reuses pca, pca_loadings and pca_variance_ratio in Scanpy's display order.
-    The native result stacks these charts vertically and displays once. Plotting
-    never computes PCA, filters genes or modifies the supplied results.
+    The native result stacks three labeled sections, with loadings in two columns,
+    and displays once. Plotting never computes PCA, filters genes or modifies results.
 
     Args:
         adata: AnnData containing the stored results required by all three plots.
         show: Display once, return the chart when False, or use Scanpy autoshow.
         save: None or False; use native chart.save for HTML/JSON.
         **params: Supported pca options, including color, components, hover, zoom,
-            width and height. These affect only the embedding row; loadings and
-            variance ratios keep their own defaults.
+            width and height. These affect only the embedding section. Loadings
+            use 280-pixel panels in two columns; other diagnostic defaults remain.
 
     Returns:
         A vertically composed native chart when show=False, otherwise None.
@@ -3896,16 +3896,18 @@ def pca_overview(
 
     # Build every child before displaying, so a failed diagnostic leaves no output.
     embedding_chart = pca(adata, show=False, save=False, **params)
-    loadings_chart = pca_loadings(adata, show=False, save=False)
+    loadings_chart = pca_loadings(adata, width=280, show=False, save=False)
     variance_chart = pca_variance_ratio(adata, show=False, save=False)
-    assert embedding_chart is not None and loadings_chart is not None
+    assert embedding_chart is not None and isinstance(loadings_chart, gs.ConcatChart)
     assert variance_chart is not None
+    # Two loading panels fit a notebook page without shrinking their labels.
+    loadings_chart = loadings_chart.properties(columns=2)
     # Each row keeps its own width instead of stretching to the widest sibling.
     chart = (
         gs.vconcat(
-            gs.hconcat(embedding_chart),
-            gs.hconcat(loadings_chart),
-            gs.hconcat(variance_chart),
+            gs.hconcat(embedding_chart).properties(title="Cell positions"),
+            gs.hconcat(loadings_chart).properties(title="Gene loadings"),
+            gs.hconcat(variance_chart).properties(title="Explained variance"),
         )
         .resolve_scale(x="independent", y="independent", color="independent")
         .resolve_legend(default="independent")

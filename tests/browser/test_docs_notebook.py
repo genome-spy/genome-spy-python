@@ -532,4 +532,30 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
         assert all(gene in svg for svg in exports[1:])
     else:
         assert "PC1" in exports[0] and "PC2" in exports[0]
+        overview = page.evaluate("""() => {
+            const api = guideApis[2];
+            return {canvas:api.getLogicalCanvasSize(),
+                panels:api.debug.getViewRoot().getDescendants()
+                    .filter(v => v.spec.encoding?.y?.field === '_score')
+                    .map(v => {const {x,y,width,height} = v.coords;
+                        return {x,y,width,height};})};
+        }""")
+        assert len(overview["panels"]) == 4
+        if page.viewport_size["width"] >= 1200:
+            assert overview["canvas"]["width"] <= 736
+        for box in overview["panels"]:
+            assert (
+                0 <= box["x"] < box["x"] + box["width"] <= overview["canvas"]["width"]
+            ), overview
+        assert all(
+            title in exports[2]
+            for title in (
+                "Cell positions",
+                "Gene loadings",
+                "Explained variance",
+                "PC1",
+                "PC2",
+                "PC3",
+            )
+        )
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")

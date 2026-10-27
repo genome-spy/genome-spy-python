@@ -57,8 +57,17 @@ def test_complete_overview_keeps_parent_axes_guides_and_registered_rank_labels(
         page.evaluate("i => api.views.getLayoutBounds({scope:[],view:'panel-'+i})", i)
         for i in range(6)
     ]
+    size = page.evaluate("api.getLogicalCanvasSize()")
+    assert size["width"] <= 736
+    assert bounds[2]["y"] == pytest.approx(bounds[3]["y"], abs=1)
+    assert bounds[4]["y"] > bounds[2]["y"] + bounds[2]["height"]
+    assert all(
+        0 <= box["x"] < box["x"] + box["width"] <= size["width"] for box in bounds
+    )
     for i, box in enumerate(bounds):
-        assert box["width"] == pytest.approx(210 if i < 2 else 300, abs=1)
+        assert box["width"] == pytest.approx(
+            210 if i < 2 else 280 if i < 5 else 300, abs=1
+        )
         assert box["height"] == pytest.approx(180 if i < 2 else 300, abs=1)
     assert max(b["y"] + b["height"] for b in bounds[:2]) < min(
         b["y"] for b in bounds[2:5]

@@ -288,6 +288,22 @@ the complete Sphinx rebuild passed. No new resource benchmark or full repository
 suite was run.
 Publication/capability gates remain open; no plan is cleared.
 
+**PCA overview layout — verified (2026-10-27).** The native overview now labels
+its cell-position, loading and variance sections. Loadings use two 280-pixel
+columns, with PC3 below PC1/PC2; all three components, gene ranks, font sizes,
+scales and stored-result semantics remain unchanged. The complete loading row
+fits the desktop page instead of requiring horizontal scrolling. Narrow pages
+retain the existing horizontal scroller. The guide reserves the extra height
+and explains the section order. No resize wrapper, custom clipping or new API
+option was added.
+
+Verification: 74 targeted Python checks and six native browser checks passed,
+including parent-chart equivalence, complete panel bounds, normal/narrow page
+sizing, isolated embedding zoom, hover and offline HTML. The documentation
+rebuilt with warnings treated as errors; Ruff and `mypy src/` pass. Visual checks
+confirmed both loading columns and PC3 fit. No full repository suite or new
+resource benchmark was run; data preparation is unchanged. No plan is cleared.
+
 **Diagnostic page sizing — verified (2026-10-27).** PCA loadings and overview
 now reserve enough page height for their complete native canvases, including
 rotated labels, titles and axes. The same correction covers ranking scores and
@@ -296,8 +312,8 @@ The existing diagnostic browser check now compares every canvas with its page
 container; it reproduced the clipping before the fix and passes at desktop and
 narrow widths afterward (four checks). Both stored-result workflow checks and
 Ruff pass. The affected pages rebuilt and the PCA axes were visually checked.
-The strict whole-docs build currently reports an unrelated unlinked
-`linked_expression.md` from concurrent work. No full suite or new resource
+The initial whole-docs build reported an unrelated unlinked page; subsequent
+rebuilds pass. No full suite or new resource
 benchmark was run; chart code, data preparation and the next-work queue are
 unchanged. No plan is cleared.
 

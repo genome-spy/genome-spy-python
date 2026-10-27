@@ -548,10 +548,12 @@ commit evidence and unmet verification gates live in the
   delivery, references, hover/HTML, resources and the notebook. Overview composes
   both diagnostics with the existing PCA chart, without another data/chart module.
   Overview acceptance: `gsc.pl.pca_overview(pca_genes, color="louvain", show=False)`
-  reuses `pca`, `pca_loadings` and `pca_variance_ratio` with their existing defaults.
+  reuses `pca`, `pca_loadings` and `pca_variance_ratio` with their existing statistical
+  defaults. The labeled native sections use two 280-pixel columns for loadings,
+  retaining their fonts and all three components while fitting a notebook page.
   Scanpy opens the three plots in that order; compose the native results vertically
   and display once. Forward supported PCA plotting kwargs only to the embedding,
-  keeping loadings/variance defaults; reject unsupported kwargs before any output.
+  keeping the diagnostic statistics unchanged; reject unsupported kwargs before any output.
   Test parent-chart equivalence, supplied coordinates/results, native scale/guide
   independence, nested data/configuration, show/save, hover and notebook/HTML
   delivery. Missing or nonfinite inputs retain each parent's explicit errors;
