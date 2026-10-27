@@ -4738,6 +4738,36 @@ Sphinx, the byte-identical notebook download, Ruff and mypy pass. Resource behav
 uses the unchanged M09 data/rendering path above; the helper move adds no dataflow.
 The full repository suite and broader retained-memory/export gates were not rerun.
 
+### Marsilea-inspired PBMC3k tracks and spacing
+
+The user requested the [Scanpy/Marsilea tracks example](https://scanpy.readthedocs.io/en/latest/how-to/plotting-with-marsilea.html#tracksplot)
+on 27 October. The third [tracks guide](guides/tracks.ipynb) example reads Scanpy's
+processed PBMC3k data: 2,638 cells, 12 tutorial markers and its eight-color palette.
+Scanpy explicitly computes the group tree from those raw-snapshot marker values;
+this adapts the workflow rather than claiming identical Marsilea clustering.
+The existing guide-preparation cache owns the dataset and tree. Ordinary page
+builds read its checked input, without downloads or clustering; the downloaded
+notebook runs the shown preparation. Generated data and notebook outputs stay ignored.
+
+`group_gap=0` and `spacing=0` are keyword-only extensions. The shared x index scale
+owns group cuts/width; native vertical concat owns separation between tracks,
+the tree and category strip. Both accept finite nonnegative pixel sizes and keep
+the previous defaults. Expression, IDs, order, palettes and per-gene scales do not
+change. No blank cells, offset coordinates, listeners or custom geometry are added.
+`figsize` reserves space for the requested track spacing; explicit `height` still
+sets the combined gene-track height.
+
+Verification: targeted semantics/API and clean-source checks, native gap/spacing
+geometry at DPR 1/1.5, hover, wheel/pan and three-example guide checks at 1200/430
+pixels pass. All seven notebook code cells run in a fresh kernel; warning-strict
+Sphinx, exact notebook download, Ruff and mypy pass. The guide verifies the
+2,638 × 12 values against the public Scanpy getter, including tree-reordered genes.
+Gapped panning may change numeric domain span as fixed-width gaps enter/leave the
+viewport; tests check direction and retained zoom rather than a linear-scale invariant.
+The ungapped test retains its strict span assertion. Full-suite, larger retained-memory
+and broad export checks were not rerun. Ranked tracks remain the next M09 slice;
+the continuous-fill limit remains C01. Clearance: **retain**.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50

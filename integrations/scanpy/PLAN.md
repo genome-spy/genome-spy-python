@@ -686,6 +686,10 @@ rendering is blocked.
   do not recover values from Matplotlib or approximate a polygon with sampled
   rectangles. Reuse the rendering approach, not the gallery's packaged-data or
   tree preparation. Ranked tracks reuse M06 slots.
+- Optional `group_gap` uses native index-scale gaps at the prepared cell-group
+  boundaries; `spacing` uses native vertical concat spacing. Both default to zero.
+  Keep all tracks, the category strip and tree aligned during navigation; spacing
+  changes no expression, cell order, palette or saved analysis result.
 - Scanpy 1.11.5 fills linearly between adjacent cell values; per-cell rects give
   a stepped profile. Document this explicit visual difference in the preview.
   Exact continuous-fill parity remains C01; it does not prevent

@@ -1844,6 +1844,9 @@ Hover a bar to read its cell, gene, group and expression. Wheel zoom and drag pa
 across cells; all tracks, category colors and the tree follow together. Each gene
 has its own y-scale. `height` sets the combined track height, excluding the tree
 and legends. `zoom` and `hover` can be turned off.
+Use `group_gap=3` to separate cell groups and `spacing=6` to separate tracks,
+the tree and the category strip. Both are measured in pixels and default to zero.
+Gaps follow the shared cell positions while zooming.
 
 The adapter reuses heatmap's selected-gene access and cell ordering. Raw is used
 when available unless a layer or `use_raw=False` selects another source. A marker

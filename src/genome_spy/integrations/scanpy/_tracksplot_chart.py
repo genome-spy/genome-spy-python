@@ -25,6 +25,8 @@ def build_tracksplot(
     log: bool,
     hover: bool,
     zoom: bool,
+    group_gap: float,
+    spacing: float,
     width: float | None,
     height: float | None,
     figsize: tuple[float, float] | None,
@@ -45,7 +47,7 @@ def build_tracksplot(
             raise ValueError(f"{context}: figsize needs width and height in inches.")
         width = number(figsize[0], "figsize width", context=context) * 100
         height = number(figsize[1], "figsize height", context=context) * 100 - (
-            (100 if tree else 0) + 24
+            (100 if tree else 0) + 24 + spacing * (genes + int(tree is not None))
         )
     width = number(1200 if width is None else width, "width", context=context)
     height = number(genes * 25 if height is None else height, "height", context=context)
@@ -206,7 +208,7 @@ def build_tracksplot(
             ).properties(width=width),
         )
     return (
-        gs.vconcat(*tracks, strip, spacing=0)
+        gs.vconcat(*tracks, strip, spacing=spacing)
         .properties(
             data=table,
             width=width,
@@ -216,6 +218,8 @@ def build_tracksplot(
                     domain=[0, cells - 1],
                     paddingOuter=0,
                     zoom=zoom,
+                    gapPositions=prepared.intervals["stop"].iloc[:-1].tolist(),
+                    gapWidth=group_gap,
                 )
             ),
         )

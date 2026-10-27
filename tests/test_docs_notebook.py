@@ -37,11 +37,32 @@ def test_tracks_page_reuses_scanpy_access_and_only_the_explicit_tree(
 ):
     sc = pytest.importorskip("scanpy")
     from genome_spy.chart import TopLevelSpec
+    from anndata import read_h5ad
+
+    notebook = json.loads(TRACKS_GUIDE.read_text())
+    if not notebook_extension._preparation_current(notebook, ROOT):
+        pytest.skip("Run integrations/scanpy/prepare_guide_data.py tracks first")
 
     original = sc.datasets.pbmc68k_reduced()
     loaded = original.copy()
     genes = ["CD79A", "MS4A1", "CST3", "LYZ", "CD3D", "IL32"]
     expected = sc.get.obs_df(original, keys=genes, use_raw=True)
+    large = read_h5ad(notebook_extension._prepared_paths(notebook, ROOT)["pbmc3k"])
+    large_genes = [
+        "IL7R",
+        "CD14",
+        "LYZ",
+        "MS4A1",
+        "CD8A",
+        "GNLY",
+        "NKG7",
+        "FCGR3A",
+        "MS4A7",
+        "FCER1A",
+        "CST3",
+        "PPBP",
+    ]
+    large_expected = sc.get.obs_df(large, keys=large_genes, use_raw=True)
     monkeypatch.setattr(sc.datasets, "pbmc68k_reduced", lambda: loaded)
     getter, tree = sc.get.obs_df, sc.tl.dendrogram
     reads, analyses = [], []
@@ -65,6 +86,8 @@ def test_tracks_page_reuses_scanpy_access_and_only_the_explicit_tree(
         (sc.tl, "umap"),
         (sc.tl, "rank_genes_groups"),
         (sc.pl, "tracksplot"),
+        (sc.datasets, "pbmc3k_processed"),
+        (sc.readwrite, "_download"),
         (TopLevelSpec, "widget"),
     ]:
         monkeypatch.setattr(module, name, forbidden)
@@ -72,18 +95,32 @@ def test_tracks_page_reuses_scanpy_access_and_only_the_explicit_tree(
         TRACKS_GUIDE, download_path="tracks.ipynb", bundle_url="/core.js"
     )
     specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
-    assert len(specs) == 2
+    assert len(specs) == 3
     assert analyses == [{"groupby": "bulk_labels"}]
-    assert len(reads) == 2 and all(call["use_raw"] for call in reads)
-    assert all(call["keys"] == ["bulk_labels", *genes] for call in reads)
-    for spec in specs:
+    assert len(reads) == 3 and all(call["use_raw"] for call in reads)
+    assert all(call["keys"] == ["bulk_labels", *genes] for call in reads[:2])
+    assert reads[2]["keys"] == ["louvain", *large_genes]
+    for spec, source, oracle in zip(
+        specs,
+        [original, original, large],
+        [expected, expected, large_expected],
+        strict=True,
+    ):
         rows = spec["datasets"][spec["data"]["name"]]
-        assert len(rows) == 700
-        assert {row["_obs_id"] for row in rows} == set(original.obs_names)
+        assert len(rows) == len(source)
+        assert {row["_obs_id"] for row in rows} == set(source.obs_names)
+        labels = [
+            panel["title"]["text"]
+            for panel in spec["vconcat"]
+            if "layer" in panel.get("spec", panel)
+        ]
+        assert set(labels) == set(oracle.columns)
         np.testing.assert_array_equal(
-            [[row[f"_value_{i}"] for i in range(len(genes))] for row in rows],
-            expected.loc[[row["_obs_id"] for row in rows]].to_numpy(),
+            [[row[f"_value_{i}"] for i in range(len(labels))] for row in rows],
+            oracle.loc[[row["_obs_id"] for row in rows], labels].to_numpy(),
         )
+    assert len(large) == 2638 and len(large_genes) == 12
+    assert specs[2]["spacing"] == 6 and specs[2]["scales"]["x"]["gapWidth"] == 3
     assert loaded.obs.equals(original.obs)
     np.testing.assert_array_equal(loaded.X, original.X)
 
@@ -149,7 +186,7 @@ def test_umap_page_preserves_coordinates_and_prepares_density(
     [
         (GUIDE, "UMAP and embeddings", "select-cells", 11),
         (EXPRESSION_GUIDE, "Expression plots", "heatmap", 9),
-        (TRACKS_GUIDE, "Expression tracks", "plot-individual-cells", 2),
+        (TRACKS_GUIDE, "Expression tracks", "plot-individual-cells", 3),
         (PCA_GUIDE, "PCA diagnostics", "show-the-pca-overview", 3),
         (RANKED_GUIDE, "Ranked genes", "inspect-ranking-scores", 4),
         (QUALITY_GUIDE, "Data checks", "check-the-most-abundant-genes", 3),

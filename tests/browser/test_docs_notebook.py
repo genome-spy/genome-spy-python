@@ -84,9 +84,9 @@ def _render_guide(page, monkeypatch, name):
 def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
     pytest.importorskip("scanpy")
     specs = _render_guide(page, monkeypatch, "tracks.ipynb")
-    assert len(specs) == 2
+    assert len(specs) == 3
     assert page.locator(".message-box").count() == 0
-    for index in range(2):
+    for index in range(3):
         size = page.evaluate("i => guideApis[i].getLogicalCanvasSize()", index)
         assert size["width"] <= 786
         assert (
@@ -98,29 +98,48 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
         )
         root = ET.fromstring(svg)
         labels = [e.text for e in root.iter() if e.tag.endswith("}text")]
-        assert all(
-            label in labels
-            for label in [
+        genes = (
+            [
                 "CD79A",
                 "MS4A1",
                 "CST3",
                 "LYZ",
                 "CD3D",
                 "IL32",
-                "bulk_labels",
+            ]
+            if index < 2
+            else [
+                "IL7R",
+                "CD14",
+                "LYZ",
+                "MS4A1",
+                "CD8A",
+                "GNLY",
+                "NKG7",
+                "FCGR3A",
+                "MS4A7",
+                "FCER1A",
+                "CST3",
+                "PPBP",
             ]
         )
-    canvas = page.locator("canvas").nth(1)
+        assert all(
+            label in labels
+            for label in [*genes, "bulk_labels" if index < 2 else "louvain"]
+        )
+    assert specs[2]["scales"]["x"]["gapWidth"] == 3
+    assert specs[2]["spacing"] == 6
+    canvas = page.locator("canvas").nth(2)
     canvas.scroll_into_view_if_needed()
     page.evaluate("""() => {
-        window.track = guideApis[1].debug.getViewRoot().getDescendants()
+        window.track = guideApis[2].debug.getViewRoot().getDescendants()
             .find(view => view.spec.encoding?.y?.field === '_value_0');
         window.cellScale = track.getScaleResolution('x');
     }""")
     bounds = page.evaluate(
         "() => {const {x,y,width,height} = track.coords; return {x,y,width,height};}"
     )
-    scroller = page.locator(".canvas-wrapper").nth(1)
+    scroller = page.locator(".canvas-wrapper").nth(2)
     scroller.evaluate(
         "(el, x) => el.scrollLeft = Math.max(0, x - el.clientWidth / 2)",
         bounds["x"] + bounds["width"] / 2,
@@ -136,7 +155,7 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
         "before => {const d=cellScale.getDomain(); return d[1]-d[0] < before[1]-before[0];}",
         arg=before,
     )
-    assert page.evaluate("""() => guideApis[1].debug.getViewRoot().getDescendants()
+    assert page.evaluate("""() => guideApis[2].debug.getViewRoot().getDescendants()
         .filter(view => view.spec.encoding?.x?.field === '_cell' || view.spec.name === 'heatmap-category-strip')
         .every(view => view.getScaleResolution('x') === cellScale)""")
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")

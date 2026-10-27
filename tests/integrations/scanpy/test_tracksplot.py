@@ -70,13 +70,57 @@ def test_signature_preserves_upstream_and_keyword_only_controls():
     assert set(actual) - {p["name"] for p in parameters} == {
         "hover",
         "zoom",
+        "group_gap",
+        "spacing",
         "width",
         "height",
     }
     assert all(
         actual[name].kind is inspect.Parameter.KEYWORD_ONLY
-        for name in ("hover", "zoom", "width", "height")
+        for name in ("hover", "zoom", "group_gap", "spacing", "width", "height")
     )
+
+
+@pytest.mark.parametrize("group_gap,spacing", [(0, 0), (3, 6), (7.5, 2.5)])
+def test_spacing_preserves_values_ids_and_cell_order(adata, group_gap, spacing):
+    reference = plot(adata, dendrogram=True).to_dict()
+    actual = plot(
+        adata, dendrogram=True, group_gap=group_gap, spacing=spacing
+    ).to_dict()
+    assert actual["datasets"] == reference["datasets"]
+    assert reference["spacing"] == 0 and reference["scales"]["x"]["gapWidth"] == 0
+    assert actual["spacing"] == spacing
+    assert actual["scales"]["x"]["gapWidth"] == group_gap
+    assert actual["scales"]["x"]["gapPositions"] == [3, 4, 7]
+    assert actual["scales"]["x"]["domain"] == [0, adata.n_obs - 1]
+    assert [panel.get("spec", panel)["height"] for panel in actual["vconcat"]] == [
+        100,
+        25,
+        25,
+        25,
+        14,
+    ]
+
+
+@pytest.mark.parametrize("name", ["group_gap", "spacing"])
+@pytest.mark.parametrize("value", [-1, True, "4", None, float("nan"), float("inf")])
+def test_invalid_spacing_fails_before_loading_scanpy(monkeypatch, name, value):
+    monkeypatch.setattr(pl, "_require_scanpy", lambda *a: pytest.fail("Loaded Scanpy"))
+    with pytest.raises(ValueError, match=name):
+        plot(object(), **{name: value})
+
+
+def test_figsize_reserves_room_for_track_spacing(adata):
+    plain = plot(adata, dendrogram=True, figsize=(6, 4)).to_dict()
+    spaced = plot(adata, dendrogram=True, figsize=(6, 4), spacing=7).to_dict()
+
+    def extent(spec):
+        return sum(panel["height"] for panel in spec["vconcat"]) + spec["spacing"] * (
+            len(spec["vconcat"]) - 1
+        )
+
+    assert extent(spaced) == pytest.approx(extent(plain))
+    assert spaced["vconcat"][1]["height"] < plain["vconcat"][1]["height"]
 
 
 @pytest.mark.parametrize("log", [False, True])

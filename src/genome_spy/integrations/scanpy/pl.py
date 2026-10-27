@@ -1513,6 +1513,8 @@ def tracksplot(
     figsize: tuple[float, float] | None = None,
     hover: bool = True,
     zoom: bool = False,
+    group_gap: float = 0,
+    spacing: float = 0,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1543,6 +1545,8 @@ def tracksplot(
         figsize: Overall size in inches; cannot be combined with native dimensions.
         hover: Include cell ID, label, group, gene and plotted-value tooltips.
         zoom: Enable linked x-only zoom and panning across cells.
+        group_gap: Space between cell groups in pixels; defaults to 0.
+        spacing: Space between tracks, the tree and category strip in pixels.
         width: Track plotting width in pixels; defaults to 1200.
         height: Combined expression-track height in pixels; defaults to 25 per gene.
         **kwds: Forwarded styling is unsupported and fails by name.
@@ -1569,6 +1573,10 @@ def tracksplot(
             raise TypeError(f"{context}: {name} must be boolean.")
     if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
         raise TypeError(f"{context}: dendrogram must be False, True or a nonempty key.")
+    from genome_spy.integrations.scanpy._data import number
+
+    group_gap = number(group_gap, "group_gap", context=context)
+    spacing = number(spacing, "spacing", context=context)
     sc = _prepare_plot(show, save, context=context)
     import numpy as np
     import pandas as pd
@@ -1620,6 +1628,8 @@ def tracksplot(
         log=log,
         hover=hover,
         zoom=zoom,
+        group_gap=group_gap,
+        spacing=spacing,
         width=width,
         height=height,
         figsize=figsize,
