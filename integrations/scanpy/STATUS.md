@@ -294,6 +294,7 @@ renderer supplies the same layout to both builders and ranked variants; native
 wrapping keeps multiple guides within the available width. Clustermap centers its
 native category/color guides on the right. Explicit guide titles and sizes remain
 unchanged. This supersedes the earlier right-side dotplot presentation checkpoint.
+The clustermap guide also uses `show_values=True` to reveal tile values on zoom.
 
 The expression guide removes the supplied matrix's `Cell group` axis titles and
 uses one-pixel heatmap gaps. The API's optional `group_gap=0` default is unchanged.
