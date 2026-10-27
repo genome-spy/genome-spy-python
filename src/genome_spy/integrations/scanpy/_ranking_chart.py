@@ -79,8 +79,17 @@ def build_ranking(
                     gs.Tooltip("_rank:Q", title="Rank", format="d"),
                 ]
             )
-        # Rotated gene names can extend above the plot's score limits.
-        top_space = max(map(len, panel.values["_label"])) * fontsize * POINTS_TO_PIXELS
+        # Reserve only the part of a rotated label that can extend above the plot.
+        top_space = max(
+            0,
+            max(
+                len(label) * fontsize * POINTS_TO_PIXELS
+                - (domain[1] - score) / (domain[1] - domain[0]) * height
+                for label, score in panel.values[["_label", "_score"]].itertuples(
+                    index=False, name=None
+                )
+            ),
+        )
         charts.append(
             chart.properties(
                 width=width,

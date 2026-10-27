@@ -3901,13 +3901,14 @@ def pca_overview(
     assert embedding_chart is not None and isinstance(loadings_chart, gs.ConcatChart)
     assert variance_chart is not None
     # Two loading panels fit a notebook page without shrinking their labels.
-    loadings_chart = loadings_chart.properties(columns=2)
+    loadings_chart = loadings_chart.properties(columns=2, spacing=4)
     # Each row keeps its own width instead of stretching to the widest sibling.
     chart = (
         gs.vconcat(
             gs.hconcat(embedding_chart).properties(title="Cell positions"),
             gs.hconcat(loadings_chart).properties(title="Gene loadings"),
             gs.hconcat(variance_chart).properties(title="Explained variance"),
+            spacing=4,
         )
         .resolve_scale(x="independent", y="independent", color="independent")
         .resolve_legend(default="independent")

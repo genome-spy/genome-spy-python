@@ -48,6 +48,7 @@ def test_children_keep_parent_data_configuration_and_diagnostic_defaults(color):
         gsc.pl.pca_variance_ratio(a, show=False),
     ]
     assert len(overview["vconcat"]) == 3
+    assert overview["spacing"] == 4
     assert overview["resolve"] == {
         "scale": {"x": "independent", "y": "independent", "color": "independent"},
         "legend": {"default": "independent"},
@@ -65,6 +66,7 @@ def test_children_keep_parent_data_configuration_and_diagnostic_defaults(color):
         datasets = expected.pop("datasets")
         if index == 1:
             expected["columns"] = 2
+            expected["spacing"] = 4
         assert child == expected
         for name, records in datasets.items():
             assert overview["datasets"][name] == records

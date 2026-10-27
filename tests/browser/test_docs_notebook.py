@@ -532,6 +532,7 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
         assert all(gene in svg for svg in exports[1:])
     else:
         assert "PC1" in exports[0] and "PC2" in exports[0]
+        assert all(size["height"] - size["canvas"] <= 40 for size in sizes), sizes
         overview = page.evaluate("""() => {
             const api = guideApis[2];
             return {canvas:api.getLogicalCanvasSize(),

@@ -304,6 +304,17 @@ rebuilt with warnings treated as errors; Ruff and `mypy src/` pass. Visual check
 confirmed both loading columns and PC3 fit. No full repository suite or new
 resource benchmark was run; data preparation is unchanged. No plan is cleared.
 
+Spacing follow-up: overview and loading-row gaps use four native pixels. The
+shared ranking renderer subtracts the vertical room already available above each
+score before reserving label padding. Long labels near the top still receive
+space; long labels lower down no longer create unnecessary gaps. PCA page heights
+also follow the smaller canvases. Verification: 127 targeted Python checks,
+19 ranking/PCA browser checks and four normal/narrow guide checks pass, including
+real-data label bounds, independent navigation, hover and offline delivery.
+The fresh warning-strict docs build, Ruff and `mypy src/` pass. Visual checks
+confirm all three loading panels remain whole. Data, score coordinates, fonts
+and plot sizes are unchanged.
+
 **Diagnostic page sizing — verified (2026-10-27).** PCA loadings and overview
 now reserve enough page height for their complete native canvases, including
 rotated labels, titles and axes. The same correction covers ranking scores and

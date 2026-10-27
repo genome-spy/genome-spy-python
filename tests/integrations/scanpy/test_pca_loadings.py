@@ -103,6 +103,16 @@ def test_top_only_includes_scanpys_extra_label():
     assert spec["encoding"]["x"]["axis"]["labels"] is True
 
 
+def test_label_padding_accounts_for_its_score_position():
+    a = loadings_data()
+    a.var_names = ["a", "LOWEST_LOADING", "c", "d", "e", "f"]
+    low = gsc.pl.pca_loadings(a, "1", n_points=6, height=210, show=False).to_dict()
+    assert 0 <= low["padding"]["top"] < 15
+    a.var_names = ["HIGHEST_LOADING", "b", "c", "d", "e", "f"]
+    high = gsc.pl.pca_loadings(a, "1", n_points=6, height=210, show=False).to_dict()
+    assert high["padding"]["top"] > 100
+
+
 def test_defaults_cap_rank_count_at_variables_and_keep_the_first_three_components():
     spec = gsc.pl.pca_loadings(loadings_data(), show=False).to_dict()
     assert [p["title"] for p in units(spec)] == ["PC1", "PC2", "PC3"]
