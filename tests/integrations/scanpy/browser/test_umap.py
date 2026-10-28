@@ -9,7 +9,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
-from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.embedding_fixtures import reference_cases
 from tests.integrations.scanpy.embedding_fixtures import umap_data as fixture
 from tests.integrations.scanpy.helpers import name_embedding_scales, points, units
@@ -150,19 +150,7 @@ def test_rendered_marker_footprint_matches_registered_scanpy_export(
             linewidths=linewidth,
         )
     bounds = render(page, chart)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     reference = Image.open(reference_images("umap") / f"footprint-{token}.png").convert(
         "RGB"
     )
@@ -303,7 +291,6 @@ def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
         show=False,
     )
     render(page, chart)
-    canvas = page.locator("canvas").first.bounding_box()
     for i, panel in enumerate(REFERENCE["cases"][case]["panels"]):
         bounds = page.evaluate(
             "i=>api.views.getLayoutBounds({scope:[],view:`panel-${i}`})", i
@@ -314,18 +301,7 @@ def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
             # Native layout rounds panel edges to backing pixels.
             atol=1,
         )
-        actual = Image.open(
-            BytesIO(
-                page.screenshot(
-                    clip={
-                        "x": canvas["x"] + bounds["x"],
-                        "y": canvas["y"] + bounds["y"],
-                        "width": bounds["width"],
-                        "height": bounds["height"],
-                    }
-                )
-            )
-        ).convert("RGB")
+        actual = panel_image(page, bounds)
         expected = Image.open(
             reference_images("umap") / f"{case}-panel-{i}.png"
         ).convert("RGB")

@@ -12,7 +12,7 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import pointer
-from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.helpers import index_position, points, scanpy_rank_labels
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
 
@@ -301,19 +301,7 @@ def test_statistic_colors_labels_and_complete_guides_match_scanpy(
     )
     assert mark["encoding"]["color"]["legend"]["title"] == reference["legend_title"]
     bounds = render(page, chart)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     expected = Image.open(
         reference_images("ranked") / f"ranked-statistic-{family}-panel.png"
     ).convert("RGB")

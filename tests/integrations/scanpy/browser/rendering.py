@@ -41,6 +41,18 @@ def guide_geometry(page):
     )
 
 
+def panel_image(page, bounds):
+    """Capture the plot area at the browser's original pixel scale."""
+    canvas = page.locator("canvas").first.bounding_box()
+    clip = {
+        "x": canvas["x"] + bounds["x"],
+        "y": canvas["y"] + bounds["y"],
+        "width": bounds["width"],
+        "height": bounds["height"],
+    }
+    return Image.open(BytesIO(page.screenshot(clip=clip))).convert("RGB")
+
+
 def assert_complete_chart(
     page, tmp_path, chart, expected, reference_image, case, *, panel_index=0
 ):
@@ -50,19 +62,7 @@ def assert_complete_chart(
         bounds = page.evaluate(
             "i=>api.views.getLayoutBounds({scope:[],view:'panel-'+i})", panel_index
         )
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     oracle = Image.open(reference_image).convert("RGB")
     assert (
         abs(actual.width - oracle.width) <= 2

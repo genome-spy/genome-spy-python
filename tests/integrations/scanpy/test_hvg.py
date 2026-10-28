@@ -238,11 +238,8 @@ def test_missing_analysis_metadata_is_not_invented():
 @pytest.mark.parametrize(
     "options,error",
     [
-        ({"hover": 1}, TypeError),
         ({"zoom": "xy"}, TypeError),
         ({"log": None}, TypeError),
-        ({"width": 0}, ValueError),
-        ({"height": np.inf}, ValueError),
     ],
 )
 def test_native_options_fail_before_optional_imports(

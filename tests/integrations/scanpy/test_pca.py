@@ -427,8 +427,6 @@ def test_stored_results_are_not_recomputed_mutated_or_read_from_expression(monke
 @pytest.mark.parametrize(
     "options,error,message",
     [
-        ({"ax": object()}, TypeError, "ax is omitted"),
-        ({"return_fig": True}, TypeError, "return_fig is omitted"),
         ({"n_points": 2}, TypeError, "n_points"),
         ({"n_pcs": 2}, TypeError, "n_pcs"),
         ({"edges": True}, ValueError, "neighbors"),

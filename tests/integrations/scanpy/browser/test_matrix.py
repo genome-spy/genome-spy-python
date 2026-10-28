@@ -3,7 +3,6 @@
 import json
 import re
 import xml.etree.ElementTree as ET
-from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -18,7 +17,7 @@ from tests.integrations.scanpy.browser.interactions import (
     position,
     svg_root,
 )
-from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.expression_fixtures import matrix_cases
 from tests.integrations.scanpy.paga_fixtures import make_adjacency
 
@@ -227,19 +226,7 @@ def test_complete_matrix_tiles_and_labels(page, tmp_path, reference_images, case
         **options,
     )
     bounds = render(page, chart)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     expected = Image.open(
         reference_images("matrix") / f"matrix-{case}-panel.png"
     ).convert("RGB")

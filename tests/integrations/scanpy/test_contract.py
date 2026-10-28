@@ -16,16 +16,6 @@ from genome_spy.integrations.scanpy import _guards, pl
 sc = pytest.importorskip("scanpy")
 
 FIXTURES = Path(__file__).with_name("fixtures")
-EMBEDDINGS = {
-    "umap",
-    "embedding",
-    "tsne",
-    "diffmap",
-    "draw_graph",
-    "pca",
-    "pca_scatter",
-    "scatter",
-}
 
 
 def test_progress_inventory_matches_the_pinned_api_and_available_exports():
@@ -51,114 +41,34 @@ def test_progress_inventory_matches_the_pinned_api_and_available_exports():
     )
 
 
-@pytest.mark.parametrize(
-    "family",
-    [
-        name
-        for name in pl.__all__
-        if name != "ranking" and inspect.isfunction(getattr(pl, name))
-    ],
-)
-def test_all_plots_share_native_display_and_autosave_rules(monkeypatch, family):
-    show, autoshow = True, False
-    sc = pytest.importorskip("scanpy")
-    from tests.integrations.scanpy.expression_fixtures import make_tree_adata
+@pytest.mark.parametrize("family", ["matrix", "umap", "pca_overview"])
+def test_single_and_composed_charts_display_once(monkeypatch, family):
+    from tests.integrations.scanpy.embedding_fixtures import make_pca_adata
 
-    a = make_tree_adata()
-    a.obsm["X_umap"] = a.X[:, :2].copy()
-    for basis in ("tsne", "diffmap", "pca", "draw_graph_fa"):
-        a.obsm[f"X_{basis}"] = a.obsm["X_umap"].copy()
-    a.uns["draw_graph"] = {"params": {"layout": "fa"}}
-    options = {"color": "group"} if family in EMBEDDINGS else {"groupby": "group"}
-    if family in ("embedding", "scatter"):
-        options["basis"] = "umap"
-    if family in (
-        "matrix",
-        "timeseries_as_heatmap",
-        "timeseries",
-        "timeseries_subplot",
-    ):
-        a, options = [[0, 1], [2, 3]], {}
-    if family == "clustermap":
-        options = {"obs_keys": "group"}
-    if family in ("dotplot", "matrixplot", "heatmap", "tracksplot"):
-        options["var_names"] = ["g1", "g2"]
-    if family.startswith("rank_genes_groups"):
-        from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
-
-        a, options = make_ranked_adata(), {}
-    if family == "pca_loadings":
-        from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
-
-        a, options = make_ranked_adata(), {"components": "1,2"}
-    if family == "pca_variance_ratio":
-        from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
-
-        a, options = make_ranked_adata(), {}
-    if family == "pca_overview":
-        from tests.integrations.scanpy.embedding_fixtures import make_pca_adata
-
-        a, options = make_pca_adata(), {}
-    if family in {"highly_variable_genes", "filter_genes_dispersion"}:
-        from tests.integrations.scanpy.qc_fixtures import make_hvg_result
-
-        a, options = make_hvg_result("records"), {}
-    if family == "highest_expr_genes":
-        from tests.integrations.scanpy.qc_fixtures import make_counts
-
-        a, options = make_counts(), {}
-    if family == "scrublet_score_distribution":
-        from tests.integrations.scanpy.qc_fixtures import make_scrublet
-
-        a, options = make_scrublet(), {}
-    if family == "embedding_density":
-        from tests.integrations.scanpy.embedding_fixtures import make_density
-
-        a, options = make_density(), {}
-    if family == "sim":
-        from tests.integrations.scanpy.profile_fixtures import make_sim
-
-        a, options = make_sim(), {}
-    if family == "dpt_groups_pseudotime":
-        from tests.integrations.scanpy.profile_fixtures import make_dpt
-
-        a, options = make_dpt(), {}
-    if family == "dpt_timeseries":
-        from tests.integrations.scanpy.profile_fixtures import make_dpt_profiles
-
-        a, options = make_dpt_profiles(), {}
-    if family == "paga":
-        from tests.integrations.scanpy.paga_fixtures import make_paga
-
-        a, options = make_paga(), {}
-    if family == "paga_compare":
-        from tests.integrations.scanpy.paga_fixtures import make_compare
-
-        a, options = make_compare(), {"legend_fontweight": "normal"}
-    if family == "paga_path":
-        from tests.integrations.scanpy.paga_fixtures import make_path
-
-        a, options = make_path(), {"nodes": ["beta", "alpha"], "keys": ["g1", "g2"]}
-    if family == "paga_adjacency":
-        from tests.integrations.scanpy.paga_fixtures import make_adjacency
-
-        a, options = make_adjacency(), {}
-    monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
-    monkeypatch.setattr(sc.settings, "_autosave", False)
+    source = [[0, 1], [2, 3]] if family == "matrix" else make_pca_adata()
+    if family == "umap":
+        source.obsm["X_umap"] = source.obsm["X_pca"][:, :2].copy()
+    options = {"color": ["group", "g1"]} if family != "matrix" else {}
     displayed = []
+    monkeypatch.setattr(sc.settings, "_autosave", False)
     monkeypatch.setattr(gs.TopLevelSpec, "display", lambda self: displayed.append(self))
-    result = getattr(pl, family)(a, show=show, **options)
-    should_show = autoshow if show is None else show
-    if should_show:
-        assert result is None and len(displayed) == 1
+    assert getattr(pl, family)(source, show=True, **options) is None
+    assert len(displayed) == 1
+
+
+@pytest.mark.parametrize(
+    "autosave,save,rejected",
+    [(False, None, False), (True, None, True), (True, False, False)],
+)
+def test_shared_preparation_handles_automatic_saving(
+    monkeypatch, autosave, save, rejected
+):
+    monkeypatch.setattr(sc.settings, "_autosave", autosave)
+    if rejected:
+        with pytest.raises(NotImplementedError, match="automatic image saving"):
+            pl._prepare_plot(False, save, context="gsc.pl.matrix")
     else:
-        assert isinstance(result, gs.TopLevelSpec) and not displayed
-    monkeypatch.setattr(sc.settings, "_autosave", True)
-    with pytest.raises(NotImplementedError, match="automatic image saving"):
-        getattr(pl, family)(a, show=False, **options)
-    assert isinstance(
-        getattr(pl, family)(a, show=False, save=False, **options), gs.TopLevelSpec
-    )
+        assert pl._prepare_plot(False, save, context="gsc.pl.matrix") is sc
 
 
 @pytest.mark.parametrize(
@@ -177,35 +87,14 @@ def test_shared_display_validation_precedes_optional_imports(
     monkeypatch, family, options, error
 ):
     monkeypatch.setattr(pl, "_require_scanpy", lambda *a: pytest.fail("Loaded Scanpy"))
-    args = (object(),)
-    if family == "paga_path":
-        args += ([0, 1], ["g1", "g2"])
-    elif family == "embedding":
-        args += ("umap",)
-    elif family in ("dotplot", "matrixplot", "heatmap", "tracksplot"):
-        args += (["g1"], "group")
-    elif family not in EMBEDDINGS | {
-        "matrix",
-        "timeseries_as_heatmap",
-        "timeseries",
-        "timeseries_subplot",
-        "sim",
-        "dpt_groups_pseudotime",
-        "dpt_timeseries",
-        "paga",
-        "paga_adjacency",
-        "paga_compare",
-        "clustermap",
-        "pca_loadings",
-        "pca_variance_ratio",
-        "pca_overview",
-        "highly_variable_genes",
-        "filter_genes_dispersion",
-        "highest_expr_genes",
-        "scrublet_score_distribution",
-        "embedding_density",
-    } and not family.startswith("rank_genes_groups"):
-        args += ("group",)
+    required = [
+        p
+        for p in inspect.signature(getattr(pl, family)).parameters.values()
+        if p.default is inspect.Parameter.empty
+        and p.kind
+        in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+    ]
+    args = (object(),) * len(required)
     context = {
         "pca_scatter": "pca",
         "filter_genes_dispersion": "highly_variable_genes",

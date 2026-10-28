@@ -1,7 +1,6 @@
 """Registered DPT expression charts and observed shared native interactions."""
 
 import warnings
-from io import BytesIO
 
 import numpy as np
 import pytest
@@ -15,8 +14,11 @@ from tests.integrations.scanpy.browser.interactions import (
     svg_root,
     value_texts,
 )
+from tests.integrations.scanpy.browser.rendering import (
+    panel_image,
+    style_profile_reference,
+)
 from tests.integrations.scanpy.browser.rendering import render_heatmap as render
-from tests.integrations.scanpy.browser.rendering import style_profile_reference
 from tests.integrations.scanpy.profile_fixtures import (
     dpt_profile_cases,
     make_dpt_profiles,
@@ -80,19 +82,7 @@ def test_complete_dpt_expression_matches_scanpy_paint_labels_and_boundaries(
             bounds["x"] + (x - limits[0][0]) / np.ptp(limits[0]) * bounds["width"],
             abs=1,
         )
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     a, b = np.asarray(actual).astype(int), np.asarray(expected).astype(int)
     checked = 0
     if heatmap:

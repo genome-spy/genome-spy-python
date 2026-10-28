@@ -2,7 +2,6 @@
 
 import warnings
 import xml.etree.ElementTree as ET
-from io import BytesIO
 
 import numpy as np
 import pytest
@@ -15,7 +14,11 @@ from tests.integrations.scanpy.browser.interactions import (
     point_coordinates,
     svg_root,
 )
-from tests.integrations.scanpy.browser.rendering import render, style_profile_reference
+from tests.integrations.scanpy.browser.rendering import (
+    panel_image,
+    render,
+    style_profile_reference,
+)
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.profile_fixtures import timeseries_cases
 
@@ -94,19 +97,7 @@ def test_complete_time_series_native_points_and_guides(page, tmp_path, case, fam
         for e in root.iter()
         if e.tag.endswith("rect") and e.get("fill", "").startswith("url(")
     ]
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     target, pixels = np.asarray(expected).astype(int), np.asarray(actual).astype(int)
     for time, value in xy:
         x = (time - domains[0][0]) / (domains[0][1] - domains[0][0])

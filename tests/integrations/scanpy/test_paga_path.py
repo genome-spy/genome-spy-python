@@ -114,7 +114,6 @@ def test_values_tracks_labels_and_return_data_match_public_scanpy(case, monkeypa
         ),
         ({"annotations": ("cluster",)}, NotImplementedError, "categorical"),
         ({"color_map": "invented"}, NotImplementedError, "color_map"),
-        ({"ax": None}, TypeError, "ax"),
         ({"zoom": "x"}, TypeError, "zoom"),
     ],
 )

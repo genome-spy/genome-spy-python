@@ -276,12 +276,9 @@ def test_backed_rejection_precedes_expression_access(adata, monkeypatch, tmp_pat
 @pytest.mark.parametrize(
     "options,error",
     [
-        ({"ax": None}, TypeError),
-        ({"return_fig": True}, TypeError),
         ({"cmap": "viridis"}, TypeError),
         ({"alpha": 0.5}, TypeError),
         ({"log": 1}, TypeError),
-        ({"hover": "yes"}, TypeError),
         ({"zoom": "xy"}, TypeError),
         ({"dendrogram": ""}, TypeError),
     ],
@@ -295,8 +292,6 @@ def test_options_fail_before_optional_import(monkeypatch, options, error):
 @pytest.mark.parametrize(
     "options,error",
     [
-        ({"width": 0}, ValueError),
-        ({"height": -1}, ValueError),
         ({"figsize": (4, 4), "width": 300}, TypeError),
         (
             {"var_group_positions": [(0, 0)], "var_group_labels": ["partial"]},

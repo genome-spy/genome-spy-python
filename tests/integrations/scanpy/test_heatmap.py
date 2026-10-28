@@ -380,15 +380,12 @@ def test_invalid_groups_fail_explicitly(adata, kind):
 @pytest.mark.parametrize(
     "options,error,match",
     [
-        ({"ax": None}, TypeError, "ax"),
-        ({"return_fig": True}, TypeError, "return_fig"),
         ({"norm": object()}, NotImplementedError, "norm"),
         ({"vcenter": 0}, NotImplementedError, "vcenter"),
         ({"interpolation": "bilinear"}, NotImplementedError, "interpolation"),
         ({"standard_scale": "group"}, ValueError, "standard_scale"),
         ({"show_gene_labels": 1}, TypeError, "show_gene_labels"),
         ({"dendrogram": ""}, TypeError, "dendrogram"),
-        ({"hover": "yes"}, TypeError, "hover"),
         ({"zoom": "yes"}, TypeError, "zoom"),
         ({"group_gap": -1}, ValueError, "group_gap"),
         ({"group_gap": float("nan")}, ValueError, "group_gap"),

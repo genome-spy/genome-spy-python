@@ -1,7 +1,6 @@
 """Observed native time-series heatmaps, including cropped edges and highlights."""
 
 import xml.etree.ElementTree as ET
-from io import BytesIO
 
 import numpy as np
 import pytest
@@ -14,7 +13,7 @@ from tests.integrations.scanpy.browser.interactions import (
     svg_root,
     value_texts,
 )
-from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 
 
 @pytest.mark.reference
@@ -56,19 +55,7 @@ def test_complete_chart_matches_scanpy_crop_orientation_and_highlights(
     bounds = render(page, chart)
     assert bounds["width"] == pytest.approx(bbox.width, abs=0.6)
     assert bounds["height"] == pytest.approx(bbox.height, abs=0.6)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     # Register both exports on the actual plotting limits, away from glyph/edge antialiasing.
     for x in np.linspace(0.08, 0.92, 15):
         if abs(x - expected_x / bbox.width) < 0.015:

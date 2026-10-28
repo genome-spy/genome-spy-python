@@ -165,7 +165,6 @@ def test_backed_and_sparse_sources_fail_without_loading_or_densifying(
     "options,error",
     [
         ({"as_heatmap": 1}, TypeError),
-        ({"hover": 1}, TypeError),
         ({"show_values": 1}, TypeError),
         ({"zoom": "x"}, TypeError),
         ({"as_heatmap": False, "show_values": True}, NotImplementedError),

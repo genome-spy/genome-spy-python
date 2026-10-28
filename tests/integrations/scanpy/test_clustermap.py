@@ -315,8 +315,6 @@ def test_large_clustermaps_use_requested_clustering_without_size_caps(shape):
     [
         ({"norm": object()}, TypeError, "norm"),
         ({"tree_kws": {}}, TypeError, "tree_kws"),
-        ({"ax": None}, TypeError, "ax is omitted"),
-        ({"hover": 1}, TypeError, "hover"),
         ({"obs_keys": ["group"]}, TypeError, "obs_keys"),
         ({"obs_keys": "missing"}, ValueError, "obs_keys"),
         ({"z_score": 0, "standard_scale": 1}, ValueError, "cannot be combined"),

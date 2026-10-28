@@ -10,7 +10,7 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
-from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.expression_fixtures import dotplot_cases
 from tests.integrations.scanpy.helpers import index_position
 
@@ -281,19 +281,7 @@ def test_registered_dotplot_positions_paints_and_footprints(
         **options,
     )
     bounds = render(page, chart)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     expected = Image.open(
         reference_images("dotplot") / f"dotplot-{case}-panel.png"
     ).convert("RGB")

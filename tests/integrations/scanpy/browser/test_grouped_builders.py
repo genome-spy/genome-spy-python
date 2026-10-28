@@ -13,43 +13,71 @@ from tests.integrations.scanpy.grid_fixture_support import builder
 from tests.integrations.scanpy.helpers import index_position
 
 
+@pytest.mark.parametrize("family", ["DotPlot", "MatrixPlot"])
 @pytest.mark.parametrize("swapped", [False, True])
-def test_tree_chain_renders_complete_labels_guides_and_native_styling(page, swapped):
+def test_tree_chain_renders_complete_labels_guides_and_native_styling(
+    page, family, swapped
+):
+    legend = (
+        {"size_title": "Expressing cells", "colorbar_title": "Group mean"}
+        if family == "DotPlot"
+        else {"title": "Group mean"}
+    )
     chart = (
-        builder()
+        builder(family)
         .add_dendrogram(size=0.6)
         .swap_axes(swap_axes=swapped)
-        .legend(
-            size_title="Expressing cells",
-            colorbar_title="Group mean",
-            width=1.8,
-        )
+        .legend(width=1.8, **legend)
         .to_chart()
     )
     bounds = render(page, chart)
     assert bounds["width"] == pytest.approx(360, abs=1)
     assert bounds["height"] == pytest.approx(260, abs=1)
-    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
-    assert all(
-        label in svg
-        for label in (
-            "First",
-            "Again",
-            "g1",
-            "g2",
-            "C",
-            "A",
-            "D",
-            "B",
-            "Expressing cells",
-            "Group mean",
-        )
+    root = ET.fromstring(
+        page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
     )
-    track = page.evaluate("api.views.getLayoutBounds({scope:[],view:'dotplot-tree'})")
+    labels = {e.text for e in root.iter() if e.tag.endswith("text")}
+    assert {
+        "First",
+        "Again",
+        "g1",
+        "g2",
+        "C",
+        "A",
+        "D",
+        "B",
+        *legend.values(),
+    } <= labels
+    track = page.evaluate(
+        "name=>api.views.getLayoutBounds({scope:[],view:name})",
+        f"{family.lower()}-tree",
+    )
     assert track["height" if swapped else "width"] == pytest.approx(60, abs=1)
-    root = ET.fromstring(svg)
-    assert any(element.get("stroke") == "navy" for element in root.iter())
-    assert any(element.get("stroke") == "gray" for element in root.iter())
+    if family == "DotPlot":
+        assert any(e.get("stroke") == "navy" for e in root.iter())
+        assert any(e.get("stroke") == "gray" for e in root.iter())
+    else:
+        tiles = [
+            e
+            for e in root.iter()
+            if e.tag.endswith("rect") and e.get("fill", "").startswith("rgb(")
+        ]
+        assert len(tiles) == 12
+        columns, rows = (4, 3) if swapped else (3, 4)
+        assert all(
+            float(e.get("width")) == pytest.approx(360 / columns, abs=0.1)
+            for e in tiles
+        )
+        assert all(
+            float(e.get("height")) == pytest.approx(260 / rows, abs=0.1) for e in tiles
+        )
+        pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
+        x = round(bounds["x"] + bounds["width"] / columns)
+        y = round(bounds["y"] + bounds["height"] / rows / 2)
+        assert (
+            np.abs(pixels[y, x - 1 : x + 2].astype(int) - [0, 0, 128]).max(axis=1).min()
+            <= 8
+        )
     pointer(page, bounds)
     page.mouse.wheel(0, -250)
     page.wait_for_timeout(300)

@@ -194,8 +194,6 @@ def test_shared_preparation_keeps_stable_ids_raw_hover_and_detached_values():
 @pytest.mark.parametrize(
     "options,error",
     [
-        ({"ax": None}, TypeError),
-        ({"return_fig": False}, TypeError),
         ({"components": "1,2"}, TypeError),
         ({"norm": object()}, NotImplementedError),
         ({"key": "scores", "groupby": "condition"}, ValueError),
@@ -206,8 +204,6 @@ def test_shared_preparation_keeps_stable_ids_raw_hover_and_detached_values():
         ({"bg_dotsize": None}, ValueError),
         ({"fg_dotsize": -1}, ValueError),
         ({"bg_dotsize": float("inf")}, ValueError),
-        ({"width": 0}, ValueError),
-        ({"hover": 1}, TypeError),
         ({"zoom": "xy"}, TypeError),
         ({"ncols": None}, NotImplementedError),
         ({"hspace": None}, NotImplementedError),

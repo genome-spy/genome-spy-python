@@ -1,7 +1,6 @@
 """Observed matrixplot tiles, color bounds, missing cells, hover and HTML delivery."""
 
 import json
-from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -10,9 +9,9 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
-from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.helpers import index_position
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.expression_fixtures import matrixplot_cases
+from tests.integrations.scanpy.helpers import index_position
 
 REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "matrixplot.json").read_text())
@@ -37,19 +36,7 @@ def test_registered_matrixplot_tiles_paint_and_grid(
         **options,
     )
     bounds = render(page, chart)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     expected = Image.open(
         reference_images("matrixplot") / f"matrixplot-{case}-panel.png"
     ).convert("RGB")

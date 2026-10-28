@@ -104,12 +104,9 @@ def test_custom_keys_and_tree_nonzeros_preserve_sources_without_analysis(
             "as_heatmap=True",
         ),
         ({"as_heatmap": 1}, TypeError, "as_heatmap"),
-        ({"hover": 1}, TypeError, "hover"),
         ({"show_values": "yes"}, TypeError, "show_values"),
         ({"zoom": "x"}, TypeError, "zoom"),
-        ({"width": 0}, ValueError, "width"),
         ({"color_map": "invented"}, NotImplementedError, "color_map"),
-        ({"ax": None}, TypeError, "ax"),
     ],
 )
 def test_unsupported_options_fail_clearly(options, error, match):

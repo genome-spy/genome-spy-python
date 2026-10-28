@@ -1,7 +1,6 @@
 """Registered DPT panels and native hover/navigation without trajectory inference."""
 
 import warnings
-from io import BytesIO
 
 import numpy as np
 import pytest
@@ -13,8 +12,11 @@ from tests.integrations.scanpy.browser.interactions import (
     point_coordinates,
     svg_root,
 )
+from tests.integrations.scanpy.browser.rendering import (
+    panel_image,
+    style_profile_reference,
+)
 from tests.integrations.scanpy.browser.rendering import render_heatmap as render
-from tests.integrations.scanpy.browser.rendering import style_profile_reference
 from tests.integrations.scanpy.profile_fixtures import (
     dpt_cases,
     dpt_reference,
@@ -65,7 +67,6 @@ def test_complete_dpt_panels_match_scanpy_points_and_guides(page, tmp_path, case
         plt.close(fig)
     chart = gsc.pl.dpt_groups_pseudotime(adata, show=False, **options)
     render(page, chart)
-    canvas = page.locator("canvas").first.bounding_box()
     root = svg_root(page)
     texts = [e.text for e in root.iter() if e.tag.endswith("text")]
     assert all(label in texts for label in ["dpt groups", "pseudotime", "dpt order"])
@@ -82,18 +83,7 @@ def test_complete_dpt_panels_match_scanpy_points_and_guides(page, tmp_path, case
         )
         assert bounds["width"] == pytest.approx(bbox.width, abs=0.6)
         assert bounds["height"] == pytest.approx(bbox.height, abs=0.6)
-        actual = Image.open(
-            BytesIO(
-                page.screenshot(
-                    clip={
-                        "x": canvas["x"] + bounds["x"],
-                        "y": canvas["y"] + bounds["y"],
-                        "width": bounds["width"],
-                        "height": bounds["height"],
-                    }
-                )
-            )
-        ).convert("RGB")
+        actual = panel_image(page, bounds)
         a, b = np.asarray(actual).astype(int), np.asarray(expected).astype(int)
         checked = 0
         for x, y in xy:

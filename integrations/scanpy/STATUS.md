@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-28. [PLAN.md](PLAN.md) owns scope and acceptance criteria;
+Updated: 2026-10-29. [PLAN.md](PLAN.md) owns scope and acceptance criteria;
 [README.md](README.md) maps the source files; [COMPATIBILITY.md](COMPATIBILITY.md)
 records detailed parameter contracts. This ledger describes the integration
 branch, rather than the published 0.7.0 package.
@@ -69,13 +69,13 @@ The deeper pass also reduces the maintained file and reference footprint:
 
 | Measure | Before deeper cleanup | After |
 | --- | ---: | ---: |
-| Integration test/support/fixture files | 140 | 108 |
-| Python files | 127 | 95 |
-| Python lines | 27,586 | 25,846 |
+| Integration test/support/fixture files | 140 | 106 |
+| Python files | 127 | 93 |
+| Python lines | 27,586 | 25,369 |
 | JSON fixture lines | 18,504 | 13,574 |
 | Separate reference generators | 11 | 0 |
 | Image-only reference helpers | 0 | 1 |
-| Total PR files | 252 | 220 |
+| Total PR files | 252 | 218 |
 
 Twenty-three tiny data/fixture modules are consolidated into five family modules;
 ranked inputs remain separate. PCA diagnostics and shared grid options each have
@@ -94,28 +94,37 @@ The CSC/LIL, sparse orientation, filtered-view, dense/raw allocation, source
 precedence, mutation, stable selection, tie-order and observed interaction tests
 remain. Small allocation regressions replace the removed timing/heap reports.
 
-Current collection: 1,739 fast Python cases, 321 live-reference cases, two
+A follow-up removes another 477 Python lines and 98 repeated fast cases.
+DotPlot and MatrixPlot now share builder tests for chains, totals, hidden trees,
+swapping and display, while keeping family-specific color/size, supplied-data
+and allocation regressions. The display contract covers its shared owner and
+representative single/multi-panel charts without a large per-plot data factory.
+All public calls still reject invalid display options before optional imports.
+Fifty-one repeated generic-option cases are removed; shared guards and distinct
+plot-specific errors remain. Sixteen plot-area captures across fourteen browser
+files share one helper with the same crop and pixel scale.
+
+Current collection: 1,641 fast Python cases, 321 live-reference cases, two
 workflows and 608 browser cases, including 56 smoke cases. The new collection
 still exercises the complete retained suite when markers are not filtered.
 PR jobs run fast checks on both Scanpy versions and browser smoke once. Main,
 full dispatch and release run the full selections; release sets `full_scanpy`.
 Base jobs test lightweight imports and missing extras without the scientific suite.
 
-Local validation covered all retained checks:
+Current follow-up validation:
 
-- Pinned Python suite: 2,058 passed, two existing expected failures. Both real-data
-  workflow notebooks also passed.
-- Scanpy 1.12.4: all 2,055 non-workflow Python cases verified, with five existing
-  expected failures. After correcting a new overstrict keyword-order assertion,
-  all 204 shared contract checks passed again on both versions.
-- Pinned browser suite: 602 retained cases verified, six existing expected
-  failures. The grid module was rerun after replacing a fixed zoom delay with
-  the existing stable-navigation helper; label/hover assertions are unchanged.
-- Base-only suite: 407 passed, nine optional skips and 327 docs/codegen checks
-  deselected. One build check needed the writable test cache; its rerun passed.
-- All 123 reference exports match previous pixels exactly; all eleven numerical
-  fixtures retain identical values/geometry. Lint, format, lock consistency and
-  collection passed. No production Python or public API changed.
+- Scanpy 1.11.5 non-workflow Python suite: 1,960 passed, two existing expected
+  failures. Scanpy 1.12.4: 1,957 passed, five existing expected failures.
+- Both builders and every changed screenshot-helper call: 27 browser checks
+  passed, including complete charts, totals, composition, zoom and HTML delivery.
+- Lint, format, collection and lock consistency passed. No production API,
+  numerical fixtures, image tolerances or regression expectations changed.
+- Previous revision CI passed all six configured jobs. Its full local browser
+  verification covered 602 passing cases and six expected failures; the current
+  follow-up reruns affected browser paths rather than every unchanged case.
+- Workflows, base-only tests and the remaining browser checks were not rerun in
+  this follow-up. Both workflows and 407 base checks passed in the preceding pass.
+  All 123 reference exports previously matched their old pixels exactly.
 
 The refreshed hosted run remains the clearance gate. Keep this maintenance slice
 open until its configured jobs pass. Generated images, reports, inventories, logs
@@ -288,8 +297,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 
 | Builder surface (all three classes) | Current state | Completion evidence required |
 | --- | --- | --- |
-| Constructor signatures/defaults and native result delivery | DotPlot and MatrixPlot implemented with pinned defaults, native keyword additions and detached to_chart snapshots | [DotPlot tests](../../tests/integrations/scanpy/test_dotplot_builder.py), [MatrixPlot tests](../../tests/integrations/scanpy/test_matrixplot_builder.py); StackedViolin remains M13 |
-| add_dendrogram/add_totals/swap_axes | DotPlot and MatrixPlot share aligned tree/count tracks, sorting/colors and orientation | [Actual upstream chains and native browser checks](../../tests/integrations/scanpy/browser/test_dotplot_builder.py); StackedViolin remains M13 |
+| Constructor signatures/defaults and native result delivery | DotPlot and MatrixPlot implemented with pinned defaults, native keyword additions and detached to_chart snapshots | [Grouped builder tests](../../tests/integrations/scanpy/test_grouped_builders.py); StackedViolin remains M13 |
+| add_dendrogram/add_totals/swap_axes | DotPlot and MatrixPlot share aligned tree/count tracks, sorting/colors and orientation | [Actual upstream chains and native browser checks](../../tests/integrations/scanpy/browser/test_grouped_builders.py); StackedViolin remains M13 |
 | style/legend and useful public defaults/constants | DotPlot dot styles, MatrixPlot scheme/edge styles and native guide controls implemented; square backgrounds and public constant customization remain open | Shared native renderers and chain tests; StackedViolin remains M13 |
 | get_axes/figure/artist access | Intentional renderer boundary; no Matplotlib objects are offered | Use builder.to_chart for native configuration/composition; StackedViolin remains M13 |
 | make_figure/show(return_axes)/savefig | DotPlot and MatrixPlot omit Matplotlib make_figure/savefig; show(return_axes=True) errors with the native alternative | Native to_chart, show and chart.save contract/tests; StackedViolin remains M13 |

@@ -162,8 +162,6 @@ def test_metadata_only_views_backed_and_no_analysis_fallback(monkeypatch, tmp_pa
 @pytest.mark.parametrize(
     "options,error",
     [
-        ({"ax": None}, TypeError),
-        ({"return_fig": False}, TypeError),
         ({"bins": 20}, TypeError),
         ({"scale_hist_obs": "symlog"}, NotImplementedError),
         ({"scale_hist_sim": "logit"}, NotImplementedError),
@@ -172,10 +170,8 @@ def test_metadata_only_views_backed_and_no_analysis_fallback(monkeypatch, tmp_pa
         ({"figsize": (1, 1)}, ValueError),
         ({"figsize": (8, float("nan"))}, ValueError),
         ({"figsize": (10, 4), "width": 200}, TypeError),
-        ({"hover": 1}, TypeError),
         ({"zoom": "xy"}, TypeError),
         ({"threshold_slider": 1}, TypeError),
-        ({"width": 0}, ValueError),
     ],
 )
 def test_unsupported_options_fail_before_dependencies(monkeypatch, options, error):

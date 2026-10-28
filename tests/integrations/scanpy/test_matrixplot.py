@@ -141,8 +141,6 @@ def test_no_plotting_analysis_mutation_or_fraction_computation(adata, monkeypatc
 @pytest.mark.parametrize(
     "options,error,match",
     [
-        ({"ax": None}, TypeError, "ax"),
-        ({"return_fig": False}, TypeError, "return_fig"),
         ({"norm": object()}, NotImplementedError, "norm"),
         ({"vcenter": 0}, NotImplementedError, "vcenter"),
         ({"shading": "auto"}, TypeError, "shading"),
@@ -150,7 +148,6 @@ def test_no_plotting_analysis_mutation_or_fraction_computation(adata, monkeypatc
         ({"linewidth": 1, "linewidths": 2}, TypeError, "linewidth"),
         ({"standard_scale": "obs"}, ValueError, "standard_scale"),
         ({"log": "yes"}, TypeError, "log"),
-        ({"hover": "yes"}, TypeError, "hover"),
         ({"swap_axes": None}, TypeError, "swap_axes"),
     ],
 )
@@ -170,8 +167,6 @@ def test_unsupported_options_fail_before_dependencies(
         ({"cmap": "coolwarm"}, NotImplementedError, "cmap"),
         ({"edgecolor": (1, 0, 0)}, NotImplementedError, "edgecolor"),
         ({"linewidth": -1}, ValueError, "linewidth"),
-        ({"width": 0}, ValueError, "width"),
-        ({"height": float("nan")}, ValueError, "height"),
         ({"figsize": (5, 4), "width": 200}, TypeError, "figsize"),
         ({"vmin": 2, "vmax": 1}, ValueError, "vmin"),
     ],

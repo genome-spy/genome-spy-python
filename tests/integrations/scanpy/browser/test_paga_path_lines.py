@@ -1,7 +1,5 @@
 """Observed native PAGA line geometry, guides, hover, navigation and HTML."""
 
-from io import BytesIO
-
 import numpy as np
 import pytest
 from PIL import Image
@@ -9,7 +7,7 @@ from scipy.ndimage import distance_transform_edt
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import hover_at, pointer, svg_root
-from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.paga_fixtures import make_path
 
 
@@ -106,19 +104,7 @@ def test_registered_lines_preserve_values_gaps_colors_and_native_legend(
         e for e in root.iter() if e.get("data-view-path", "").endswith("/legend_bottom")
     )
     assert any(e.get("data-mark-type") == "point" for e in legend.iter())
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     actual = actual.resize(target.size)
     if case == "default" and not options:
         # The later orange profile must cover the blue profile at their crossing.

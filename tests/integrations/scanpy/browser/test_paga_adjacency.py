@@ -1,7 +1,5 @@
 """Registered adjacency tiles/tree points and observed native matrix interactions."""
 
-from io import BytesIO
-
 import numpy as np
 import pytest
 from PIL import Image
@@ -13,7 +11,7 @@ from tests.integrations.scanpy.browser.interactions import (
     pointer,
     svg_root,
 )
-from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.paga_fixtures import make_adjacency
 
 
@@ -56,19 +54,7 @@ def test_registered_complete_chart_matches_scanpy(page, tmp_path, case):
     bounds = render(page, chart)
     assert bounds["width"] == pytest.approx(bbox.width, abs=0.5)
     assert bounds["height"] == pytest.approx(bbox.height, abs=0.5)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     assert abs(actual.width - expected.width) <= 2
     assert abs(actual.height - expected.height) <= 2
     pixels, target = np.asarray(actual).astype(int), np.asarray(expected).astype(int)
@@ -347,19 +333,7 @@ def test_complete_stripplot_matches_public_scanpy(page, tmp_path, case):
     )
     # SVG layout rounds fractional view edges to logical pixels.
     np.testing.assert_allclose(centers, expected_centers, atol=1)
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     assert (
         abs(actual.width - expected.width) <= 2
         and abs(actual.height - expected.height) <= 2

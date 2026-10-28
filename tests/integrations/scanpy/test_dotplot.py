@@ -245,8 +245,6 @@ def test_no_analysis_or_mutation_and_chart_is_a_snapshot(adata, monkeypatch):
 @pytest.mark.parametrize(
     "options,error,match",
     [
-        ({"ax": None}, TypeError, "ax"),
-        ({"return_fig": False}, TypeError, "return_fig"),
         ({"norm": object()}, NotImplementedError, "norm"),
         ({"vcenter": 0}, NotImplementedError, "vcenter"),
         ({"color_on": "square"}, TypeError, "color_on"),
@@ -255,12 +253,9 @@ def test_no_analysis_or_mutation_and_chart_is_a_snapshot(adata, monkeypatch):
         ({"dot_min": 0.8, "dot_max": 0.2}, ValueError, "dot_min"),
         ({"dot_max": 2}, ValueError, "dot_max"),
         ({"smallest_dot": 201}, ValueError, "smallest_dot"),
-        ({"width": 0}, ValueError, "width"),
-        ({"height": float("nan")}, ValueError, "height"),
         ({"figsize": (5, 4), "width": 200}, TypeError, "figsize"),
         ({"standard_scale": "obs"}, ValueError, "standard_scale"),
         ({"mean_only_expressed": "yes"}, TypeError, "mean_only_expressed"),
-        ({"hover": "yes"}, TypeError, "hover"),
     ],
 )
 def test_unsupported_or_invalid_options_are_named(adata, options, error, match):

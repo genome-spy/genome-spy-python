@@ -17,11 +17,6 @@ from tests.integrations.scanpy.helpers import leaf_marks
 pytest.importorskip("scanpy")
 
 
-def test_matplotlib_return_option_is_rejected():
-    with pytest.raises(TypeError, match="return_fig"):
-        gsc.pl.dpt_groups_pseudotime(object(), return_fig=True)
-
-
 @pytest.mark.parametrize("case", dpt_cases())
 def test_panels_match_public_scanpy_values_bounds_colors_ticks_and_order(
     case, monkeypatch
@@ -171,9 +166,7 @@ def test_invalid_stored_metadata_fails_clearly(field, value, error):
 @pytest.mark.parametrize(
     "options,error",
     [
-        ({"hover": 1}, TypeError),
         ({"zoom": "xy"}, TypeError),
-        ({"width": 0}, ValueError),
     ],
 )
 def test_invalid_options_precede_optional_imports(options, error, monkeypatch):

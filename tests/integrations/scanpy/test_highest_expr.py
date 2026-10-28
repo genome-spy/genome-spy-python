@@ -132,8 +132,6 @@ def test_percentages_use_all_genes_and_include_zero_cells(dtype):
 @pytest.mark.parametrize(
     "options,error",
     [
-        ({"ax": None}, TypeError),
-        ({"return_fig": False}, TypeError),
         ({"color": "red"}, TypeError),
         ({"whis": 2}, TypeError),
         ({"n_top": 0}, ValueError),
@@ -142,9 +140,7 @@ def test_percentages_use_all_genes_and_include_zero_cells(dtype):
         ({"layer": 1}, TypeError),
         ({"gene_symbols": []}, TypeError),
         ({"log": 1}, TypeError),
-        ({"hover": "yes"}, TypeError),
         ({"zoom": "xy"}, TypeError),
-        ({"width": 0}, ValueError),
     ],
 )
 def test_invalid_options_fail_before_optional_imports(monkeypatch, options, error):

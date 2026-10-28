@@ -1,7 +1,6 @@
 """Complete simulation guides, registered marks and observed native navigation."""
 
 import warnings
-from io import BytesIO
 
 import numpy as np
 import pytest
@@ -16,8 +15,11 @@ from tests.integrations.scanpy.browser.interactions import (
     svg_root,
     value_texts,
 )
+from tests.integrations.scanpy.browser.rendering import (
+    panel_image,
+    style_profile_reference,
+)
 from tests.integrations.scanpy.browser.rendering import render_heatmap as render
-from tests.integrations.scanpy.browser.rendering import style_profile_reference
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.profile_fixtures import make_sim, sim_cases
 
@@ -110,19 +112,7 @@ def test_complete_simulation_matches_scanpy_ticks_boundaries_and_paint(
                 bounds["x"] + (x - limits[0][0]) / np.ptp(limits[0]) * bounds["width"],
                 abs=1,
             )
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
+    actual = panel_image(page, bounds)
     a, b = np.asarray(actual).astype(int), np.asarray(expected).astype(int)
     if heatmap:
         for fx in np.linspace(0.07, 0.93, 12):

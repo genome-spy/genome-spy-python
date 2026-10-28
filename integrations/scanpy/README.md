@@ -234,6 +234,11 @@ calculations and frozen numeric fixtures protect data semantics. Reference
 renderers provide fresh pinned Scanpy figures for full browser comparisons;
 they are test inputs, not production data preparation.
 
+Shared guards and display behavior are checked at their owner, with public
+routing checks. DotPlot and MatrixPlot share builder tests; their distinct data
+and styling regressions stay separate. Browser comparisons share plot-area
+capture without changing registration or pixel scale.
+
 Public signatures are compared directly with installed Scanpy. Only the four
 legacy aliases whose signatures are hidden in Scanpy 1.12 retain pinned parameter
 lists. Numerical JSON files keep deliberate expectations for values and geometry;
