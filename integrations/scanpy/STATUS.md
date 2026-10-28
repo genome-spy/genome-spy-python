@@ -5021,3 +5021,12 @@ return-data check remains an expected failure. Browser checks cover complete
 charts, aligned bands, legends, hover and navigation. Ruff, formatting and full
 source mypy pass. The full suite and new resource benchmarks were not rerun.
 Generated evidence remains temporary. No plan is cleared.
+
+### Highest-expression chart setup
+
+The boxplot reuses one rule definition for whiskers, caps and medians, one gene
+order for positions and colors, and one coordinate-domain call for linear/log
+axes. No helpers or public options were added. All 17 complete chart specifications
+match exactly; 36 Python and three browser checks pass. Ruff, formatting and full
+source mypy pass. The full suite and resource benchmarks were not rerun. Generated
+evidence remains temporary; no plan is cleared.

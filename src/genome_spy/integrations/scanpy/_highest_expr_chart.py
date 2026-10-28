@@ -22,14 +22,13 @@ def build_highest_expression(
 ) -> gs.TopLevelSpec:
     """Return a count-percentage boxplot with native gene labels and optional x zoom."""
     low, high, positive = limits
-    if log:
-        if high <= 0:
-            raise ValueError(
-                "gsc.pl.highest_expr_genes: log=True needs positive percentages."
-            )
-        domain = list(coordinate_domain(np.array([positive, high]), 0.05, log=True))
-    else:
-        domain = list(coordinate_domain(np.array([low, high]), 0.05))
+    if log and high <= 0:
+        raise ValueError(
+            "gsc.pl.highest_expr_genes: log=True needs positive percentages."
+        )
+    domain = list(
+        coordinate_domain(np.array([positive if log else low, high]), 0.05, log=log)
+    )
     x = (
         gs.X("lower:Q")
         .scale(
@@ -42,11 +41,12 @@ def build_highest_expression(
         )
         .axis(title="% of total counts", domain=False)
     )
+    genes = boxes.gene.tolist()
     y = (
         gs.Y("gene:N")
         .scale(
             type="band",
-            domain=boxes.gene.tolist(),
+            domain=genes,
             reverse=True,
             paddingInner=0,
             paddingOuter=0,
@@ -55,9 +55,8 @@ def build_highest_expression(
     )
     base = gs.Chart(boxes).encode(x=x, y=y)
     stroke = "#3d3d3d"
-    line = base.mark_rule(color=stroke, size=PT, clip=True, tooltip=None).encode(
-        x2="upper:Q"
-    )
+    rule = base.mark_rule(color=stroke, size=PT, clip=True, tooltip=None)
+    line = rule.encode(x2="upper:Q")
     box = base.mark_rect(
         stroke=stroke,
         strokeWidth=PT,
@@ -67,9 +66,7 @@ def build_highest_expression(
         x="q1:Q",
         x2="q3:Q",
         y=gs.Y("gene:N", band=0.8),
-        fill=gs.Fill("gene:N")
-        .scale(domain=boxes.gene.tolist(), scheme="category10")
-        .legend(None),
+        fill=gs.Fill("gene:N").scale(domain=genes, scheme="category10").legend(None),
     )
     if hover:
         box = box.encode(
@@ -93,7 +90,7 @@ def build_highest_expression(
     for field in ("lower", "upper", "median"):
         band = 0.1 if field == "median" else 0.3
         marks.append(
-            base.mark_rule(color=stroke, size=PT, clip=True, tooltip=None).encode(
+            rule.encode(
                 x=f"{field}:Q",
                 y=gs.Y("gene:N", band=band),
                 y2=gs.Y2("gene:N", band=1 - band),
