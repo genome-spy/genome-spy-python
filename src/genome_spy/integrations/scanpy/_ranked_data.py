@@ -384,8 +384,11 @@ def attribute_rank_panels(
     if log:
         if (scores <= 0).any():
             raise ValueError(f"{context}: log scores must be positive.")
+
         # Scanpy logs the original dtype before converting plotting values.
         scores = numeric_values(np.log(values), context=context)
+
+    # Resolve labels before choosing the highest and lowest scores.
     if labels is None:
         labels = (
             adata.var_names
@@ -403,9 +406,8 @@ def attribute_rank_panels(
     for i, title in enumerate(panel_keys):
         score = scores[:, i]
         order = np.argsort(score)[::-1]
-        chosen = order[: count + 1]
-        positions = np.arange(len(chosen))
         gap = None
+
         # Keep the score extremes in order, leaving two positions for omitted ranks.
         if include_lowest:
             high_indices = order[: count // 2]
@@ -416,9 +418,11 @@ def attribute_rank_panels(
                 else None
             )
             chosen = np.concatenate([high_indices, low_indices])
-            positions = np.arange(len(chosen))
-            if gap is not None:
-                positions[len(high_indices) :] += 2
+        else:
+            chosen = order[: count + 1]
+        positions = np.arange(len(chosen))
+        if gap is not None:
+            positions[gap:] += 2
         selected = score[chosen]
         low, high = float(selected.min()), float(selected.max())
         table = pd.DataFrame(

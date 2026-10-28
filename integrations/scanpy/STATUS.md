@@ -5204,3 +5204,13 @@ tests pass, along with Ruff, formatting and full source mypy. Python tests retai
 five existing deprecation warnings. The full suite and resource benchmarks were
 not rerun. No plan is cleared; unrelated work stays unstaged and evidence stays
 temporary.
+
+### Attribute ranking selection
+
+Top-only and high/low rank choices now use separate branches, followed by one
+position calculation and optional omitted-rank gap. No helper or shared policy
+was added. All 32 sampled complete chart specs match exactly, including odd
+counts and oversized attribute-ranking requests. All 127 targeted Python and ten
+ranking browser checks pass, along with Ruff, formatting and full source mypy.
+The full suite and resource benchmarks were not rerun. No plan is cleared;
+unrelated work remains unstaged and generated evidence stays temporary.
