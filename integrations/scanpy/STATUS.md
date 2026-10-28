@@ -5183,3 +5183,13 @@ pass, along with Ruff, formatting and full source mypy. The Python tests retain
 four existing fixture warnings. The full suite and resource benchmarks were not
 rerun. No plan is cleared; unrelated work remains unstaged. Generated evidence
 stays in temporary directories.
+
+### Time-series palette preparation
+
+A small local helper now owns default series colors and palette validation.
+The preparation function still chooses categorical versus numeric color mode;
+numeric colors bypass palette handling. Two regression checks passed before and
+after extraction. All 79 sampled complete chart specs match exactly, and all
+166 targeted Python tests pass. Ruff, formatting and full source mypy pass.
+Browser tests, the full suite and resource benchmarks were not rerun. No plan is
+cleared; unrelated work stays unstaged and generated evidence stays temporary.

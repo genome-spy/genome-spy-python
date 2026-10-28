@@ -151,6 +151,15 @@ def test_subplot_errors_name_the_requested_entry():
             gsc.pl.timeseries_subplot([[1, 2], [3, 4]], show=False, **options)
 
 
+@pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
+def test_numeric_colors_do_not_read_a_series_palette(family):
+    plot = getattr(gsc.pl, family)
+    options = {"color": [0.2, 0.8], "show": False}
+    expected = plot([1, 2], palette=None, **options).to_dict()
+    actual = plot([1, 2], palette=object(), **options).to_dict()
+    assert actual == expected
+
+
 def test_numeric_tables_masks_missingness_and_ids_are_preserved():
     frame = pd.DataFrame(
         {"B": pd.array([1, None, 3], dtype="Int64"), "A": [True, False, True]}

@@ -132,6 +132,21 @@ def _vector(
     return pd.Series(values).reset_index(drop=True)
 
 
+def _series_palette(palette: Any, count: int, *, context: str) -> tuple[str, ...]:
+    """Return one CSS color per series, using Scanpy's defaults when none are supplied."""
+    if palette is None:
+        import scanpy as sc
+
+        palette = sc.pl.palettes.vega_10
+    if isinstance(palette, str) or not isinstance(palette, (Sequence, np.ndarray)):
+        raise NotImplementedError(
+            f"{context}: palette requires a sequence of CSS colors; cyclers are unsupported."
+        )
+    if len(palette) < count:
+        raise ValueError(f"{context}: palette needs at least {count} colors.")
+    return tuple(native_color(c, "palette", context=context) for c in palette[:count])
+
+
 def prepare_timeseries(
     X: Any,
     *,
@@ -210,21 +225,9 @@ def prepare_timeseries(
         )
 
     # Categorical colors use explicit palettes; numeric colors keep their values.
-    selected: tuple[str, ...] = ()
-    if colors is None:
-        if palette is None:
-            import scanpy as sc
-
-            palette = sc.pl.palettes.vega_10
-        if isinstance(palette, str) or not isinstance(palette, (Sequence, np.ndarray)):
-            raise NotImplementedError(
-                f"{context}: palette requires a sequence of CSS colors; cyclers are unsupported."
-            )
-        if len(palette) < count:
-            raise ValueError(f"{context}: palette needs at least {count} colors.")
-        selected = tuple(
-            native_color(c, "palette", context=context) for c in palette[:count]
-        )
+    selected = (
+        _series_palette(palette, count, context=context) if colors is None else ()
+    )
     table = pd.DataFrame(
         {
             "_sample": sample,
