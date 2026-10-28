@@ -1,7 +1,7 @@
 """Stored density semantics and reuse of Scanpy-compatible embedding preparation."""
 
-from copy import deepcopy
 import inspect
+from copy import deepcopy
 
 import anndata as ad
 import numpy as np
@@ -50,6 +50,7 @@ CASES = [
 ]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("options", CASES)
 def test_coords_sizes_colors_bounds_order_and_titles_match_public_scanpy(options):
     import matplotlib.pyplot as plt

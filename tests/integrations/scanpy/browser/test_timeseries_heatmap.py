@@ -1,22 +1,23 @@
 """Observed native time-series heatmaps, including cropped edges and highlights."""
 
-from io import BytesIO
 import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import (
+from tests.integrations.scanpy.browser.interactions import (
     pointer,
     position,
     svg_root,
     value_texts,
 )
+from tests.integrations.scanpy.browser.rendering import render
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("shape", [(5, 3), (1, 3), (5, 1), (1, 1)])
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_complete_chart_matches_scanpy_crop_orientation_and_highlights(

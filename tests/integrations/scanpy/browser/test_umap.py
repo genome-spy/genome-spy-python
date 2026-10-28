@@ -1,18 +1,18 @@
 """Observed Scanpy UMAP hover, navigation, offline delivery and render fidelity."""
 
-from io import BytesIO
 import json
+from io import BytesIO
 from pathlib import Path
-import warnings
 
 import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import name_embedding_scales
-from genome_spy._embed import bundled_module_url
-from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
-from tests.integrations.scanpy.helpers import points, units
+from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.fixture_data import reference_cases
+from tests.integrations.scanpy.fixture_support import umap_data as fixture
+from tests.integrations.scanpy.helpers import name_embedding_scales, points, units
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
@@ -21,74 +21,7 @@ REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "umap.json").read_text())
 
 
-def fixture():
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
-        return make_adata()
-
-
-def render(page, chart, *, renderer="webgl", scale_prefix=None):
-    """Render a chart or prepared spec; return its first panel's native bounds."""
-    spec = chart if isinstance(chart, dict) else chart.to_dict()
-    if scale_prefix is not None:
-        for axis in ("x", "y"):
-            spec["scales"][axis]["name"] = f"{scale_prefix}-{axis}"
-    for i, panel in enumerate(units(spec)):
-        panel["name"] = f"panel-{i}"
-    page.set_content(
-        '<style>body{margin:0;background:white}</style><div id="chart"></div>'
-    )
-    page.evaluate(
-        """async ({url,spec,renderer}) => {
-        const {embed} = await import(url);
-        window.api = await Promise.race([
-            embed(document.querySelector('#chart'),spec,{renderer}),
-            new Promise((_,reject)=>setTimeout(()=>reject(Error('Embed timeout')),20000)),
-        ]);
-        await new Promise(requestAnimationFrame);
-        await new Promise(requestAnimationFrame);
-    }""",
-        {"url": bundled_module_url("embed"), "spec": spec, "renderer": renderer},
-    )
-    page.locator("canvas").first.wait_for(state="visible")
-    page.wait_for_function("""() => Math.abs(
-        document.querySelector('canvas').getBoundingClientRect().width
-        - api.getLogicalCanvasSize().width) < 0.1""")
-    assert page.locator(".message-box").count() == 0, page.locator(
-        ".message-box"
-    ).all_text_contents()
-    return page.evaluate("api.views.getLayoutBounds({scope:[],view:'panel-0'})")
-
-
-def move_to(page, bounds, x, y, x_domain, y_domain, expected_id):
-    canvas = page.locator("canvas").first.bounding_box()
-    px = (
-        canvas["x"]
-        + bounds["x"]
-        + bounds["width"] * (x - x_domain[0]) / (x_domain[1] - x_domain[0])
-    )
-    py = (
-        canvas["y"]
-        + bounds["y"]
-        + bounds["height"] * (1 - (y - y_domain[0]) / (y_domain[1] - y_domain[0]))
-    )
-    page.mouse.move(px - 2, py - 2)
-    # Native tooltips suppress flashes for 70 ms on entry and 400 ms after a
-    # large jump. Model a pointer pause before the final short movement.
-    page.wait_for_timeout(450)
-    # Probe only the one-pixel picking neighborhood, as in the resource benchmark.
-    for dx, dy in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]:
-        page.mouse.move(px + dx, py + dy)
-        page.wait_for_timeout(80)
-        if (
-            page.locator("table.attributes")
-            .get_by_text(expected_id, exact=True)
-            .first.is_visible()
-        ):
-            break
-    return px, py
-
-
+@pytest.mark.smoke
 @pytest.mark.parametrize("color", ["cell_type", "score"])
 def test_hover_reports_known_zero_nonzero_and_missing_observations(page, color):
     a = fixture()
@@ -185,6 +118,7 @@ def test_complete_chart_has_original_guides_labels_and_unclipped_layout(
     assert geometry["rendered"]["height"] <= geometry["logical"]["height"] + 1
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize(
     "marker,token,linewidth",
@@ -272,6 +206,7 @@ def test_rendered_marker_footprint_matches_registered_scanpy_export(
     ).save(tmp_path / f"overlay-{token}.png")
 
 
+@pytest.mark.smoke
 def test_wheel_navigation_changes_coordinates_and_offline_html_needs_no_network(
     page, tmp_path
 ):
@@ -349,6 +284,7 @@ def test_overlapping_points_hover_the_last_visible_observation(page, color):
     assert not page.get_by_text("stable-2", exact=True).is_visible()
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", ["categorical", "continuous", "grid"])
 def test_registered_plot_areas_match_reference_positions_colors_and_footprints(

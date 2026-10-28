@@ -8,41 +8,13 @@ from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
+from tests.integrations.scanpy.fixture_support import FAMILIES, graph_adata
 from tests.integrations.scanpy.helpers import leaf_marks, points, units
-from tests.integrations.scanpy.test_embedding import FAMILIES
 
 sc = pytest.importorskip("scanpy")
 
 
-def graph_adata(storage="csr", key="neighbors"):
-    """Return an original stored graph with asymmetric, negative and sparse-zero entries."""
-    data = make_embedding_adata()
-    matrix = sparse.coo_matrix(
-        (
-            [1, 0.5, 0.8, 0.9, 0, -0.3, 0.2, 0.1],
-            ([0, 1, 2, 3, 3, 5, 0, 0], [1, 0, 3, 2, 7, 4, 6, 2]),
-        ),
-        shape=(8, 8),
-    )
-    if storage == "dense":
-        matrix = matrix.toarray()
-    else:
-        matrix = {
-            "csr": sparse.csr_matrix,
-            "csc": sparse.csc_matrix,
-            "csr_array": sparse.csr_array,
-            "csc_array": sparse.csc_array,
-            "legacy_lil": sparse.lil_matrix,
-        }[storage](matrix)
-    name = "connectivities" if key == "neighbors" else "saved_connectivities"
-    data.uns[key] = {"connectivities_key": name, "distances_key": "unused_distances"}
-    if storage == "legacy_lil":
-        data.uns[key][name] = matrix
-    else:
-        data.obsp[name] = matrix
-    return data
-
-
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "storage", ["csr", "csc", "csr_array", "csc_array", "dense", "legacy_lil"]
 )

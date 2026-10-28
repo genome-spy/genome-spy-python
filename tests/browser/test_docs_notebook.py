@@ -3,8 +3,8 @@
 import importlib
 import json
 import re
-from xml.etree import ElementTree as ET
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import numpy as np
 import pytest
@@ -172,12 +172,12 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
 
 def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
     pytest.importorskip("scanpy")
-    from tests.integrations.scanpy.browser.test_grid_interactions import (
+    from tests.integrations.scanpy.browser.interactions import (
+        point_coordinates,
         position,
         svg_root,
         value_texts,
     )
-    from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
 
     specs = _render_guide(page, monkeypatch, "paga.ipynb")
     assert len(specs) == 10
@@ -238,7 +238,7 @@ def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
 
 def test_profiles_guide_run_gene_focus_and_heatmap_zoom(monkeypatch, page):
     pytest.importorskip("scanpy")
-    from tests.integrations.scanpy.browser.test_grid_interactions import (
+    from tests.integrations.scanpy.browser.interactions import (
         svg_root,
         value_texts,
     )
@@ -442,7 +442,8 @@ def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
 def test_prepared_embedding_guide_hover_and_zoom(monkeypatch, page, index, labels):
     pytest.importorskip("scanpy")
     from scipy.spatial import cKDTree
-    from tests.integrations.scanpy.browser.test_heatmap import hover_at
+
+    from tests.integrations.scanpy.browser.interactions import hover_at
 
     specs = _render_guide(page, monkeypatch, "umap.ipynb")
     assert len(specs) == 13
@@ -567,7 +568,7 @@ def test_export_guide_buttons_download_native_images(monkeypatch, page):
 
 def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
     pytest.importorskip("scanpy")
-    from tests.integrations.scanpy.browser.test_grid_interactions import value_texts
+    from tests.integrations.scanpy.browser.interactions import value_texts
 
     specs = _render_guide(page, monkeypatch, "expression.ipynb")
     assert page.evaluate("""() => [
@@ -731,7 +732,7 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
 @pytest.mark.parametrize("index", [1, 2, 4, 5])
 def test_ranked_summary_guide_hover_without_zoom(monkeypatch, page, index):
     pytest.importorskip("scanpy")
-    from tests.integrations.scanpy.browser.test_heatmap import hover_at
+    from tests.integrations.scanpy.browser.interactions import hover_at
 
     specs = _render_guide(page, monkeypatch, "ranked.ipynb")
     page.evaluate("i => {window.api = guideApis[i];}", index)

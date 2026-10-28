@@ -6,12 +6,13 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_embedding import assert_complete_chart
-from tests.integrations.scanpy.browser.test_umap import render, move_to
+from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
 from tests.integrations.scanpy.helpers import units
 from tests.integrations.scanpy.hvg_fixture import make_hvg_result
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("flavor", ["seurat", "seurat_v3"])
 @pytest.mark.parametrize("log", [False, True])

@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.dpt_fixture import make_dpt, dpt_cases, dpt_reference
+from tests.integrations.scanpy.dpt_fixture import dpt_cases, dpt_reference, make_dpt
 from tests.integrations.scanpy.helpers import leaf_marks
 
 pytest.importorskip("scanpy")
@@ -38,8 +38,8 @@ def test_panels_match_public_scanpy_values_bounds_colors_ticks_and_order(
     case, monkeypatch
 ):
     import matplotlib.pyplot as plt
-    from matplotlib.colors import to_rgba
     import scanpy as sc
+    from matplotlib.colors import to_rgba
 
     adata, options = make_dpt(case), dpt_cases()[case]
     before = adata.obs.copy(deep=True)

@@ -1,9 +1,9 @@
 """Public Scanpy normalization, box statistics and native highest-expression contract."""
 
-from copy import deepcopy
 import inspect
 import subprocess
 import sys
+from copy import deepcopy
 
 import anndata as ad
 import numpy as np
@@ -47,6 +47,7 @@ def test_signature_retains_scanpy_defaults_and_native_keyword_only_controls():
     )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("storage", ["dense", "csr", "csc"])
 @pytest.mark.parametrize("log,symbols", [(False, None), (True, "symbol")])
 def test_normalization_ranks_quartiles_whiskers_fliers_and_limits_match_scanpy(
@@ -235,6 +236,7 @@ def test_all_zero_single_gene_large_n_top_and_snapshot():
         gsc.pl.highest_expr_genes(a, log=True, show=False)
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("counts", [[[1], [2], [3]], [[1, 1], [2, 2]]])
 @pytest.mark.parametrize("log", [False, True])
 def test_constant_percentage_domains_match_public_scanpy(counts, log):

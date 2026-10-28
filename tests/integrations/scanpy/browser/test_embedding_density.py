@@ -5,13 +5,13 @@ import xml.etree.ElementTree as ET
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import name_embedding_scales
-from tests.integrations.scanpy.browser.test_embedding import assert_complete_chart
-from tests.integrations.scanpy.browser.test_umap import render, move_to
+from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
 from tests.integrations.scanpy.embedding_density_fixture import make_density
-from tests.integrations.scanpy.helpers import points, units
+from tests.integrations.scanpy.helpers import name_embedding_scales, points, units
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("mode", ["groups", "global", "bounds", "center", "unused"])
 def test_density_panels_match_public_scanpy_background_foreground_and_guides(

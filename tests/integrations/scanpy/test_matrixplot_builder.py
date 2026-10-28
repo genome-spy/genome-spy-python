@@ -87,6 +87,7 @@ def test_chain_and_function_share_the_entire_native_spec(
     assert plot.to_chart().to_dict() == expected.to_dict()
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("swapped", [False, True])
 def test_actual_scanpy_chain_matches_values_labels_edges_and_bounds(adata, swapped):
     import matplotlib.pyplot as plt
@@ -210,6 +211,7 @@ def test_supplied_values_preserve_repeated_slots_and_skip_expression_reads(
     assert shapes == [(0, 2)]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("sort", [None, "ascending", "descending"])
 @pytest.mark.parametrize("swapped", [False, True])
 def test_totals_match_scanpy_and_replace_tree(adata, sort, swapped):

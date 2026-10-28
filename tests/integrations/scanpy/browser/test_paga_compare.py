@@ -5,11 +5,10 @@ import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render, move_to
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
+from tests.integrations.scanpy.browser.interactions import hover_at, move_to, svg_root
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import points
-from tests.integrations.scanpy.test_paga_compare import make_compare
+from tests.integrations.scanpy.paga_fixture import make_compare
 
 
 def point_coordinates(page, names=("panel-0", "panel-1")):
@@ -274,10 +273,7 @@ def test_composed_comparisons_keep_navigation_inside_their_own_pair(page, tmp_pa
 
 @pytest.mark.parametrize("node_labels", [False, True])
 def test_on_data_labels_displace_and_reflow_on_zoom(page, node_labels):
-    from tests.integrations.scanpy.browser.test_grid_interactions import (
-        pointer,
-        position,
-    )
+    from tests.integrations.scanpy.browser.interactions import pointer, position
     from tests.integrations.scanpy.helpers import name_embedding_scales
 
     a = make_compare()
@@ -345,7 +341,7 @@ def test_on_data_labels_displace_and_reflow_on_zoom(page, node_labels):
 
 
 def test_long_group_key_fits_below_a_notebook_sized_comparison(page):
-    from tests.integrations.scanpy.browser.test_grid_interactions import position
+    from tests.integrations.scanpy.browser.interactions import position
 
     a = make_compare()
     names = [

@@ -1,9 +1,9 @@
 """Tracked Scanpy contracts and image metadata; images are generated temporarily."""
 
-from hashlib import sha256
 import json
-from pathlib import Path
 import re
+from hashlib import sha256
+from pathlib import Path
 
 import pytest
 from packaging.version import Version

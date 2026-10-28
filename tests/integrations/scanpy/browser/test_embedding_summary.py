@@ -1,53 +1,29 @@
 """Observed native placement, missing values and scoped brush updates."""
 
-from io import BytesIO
 import re
+from io import BytesIO
 
 import numpy as np
-from PIL import Image, ImageColor
 import pytest
+from PIL import Image, ImageColor
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.test_embedding_summary import adata as adata
-from tests.integrations.scanpy.test_embedding_summary import (
-    metadata_adata as metadata_adata,
-)
-from tests.integrations.scanpy.helpers import units, leaf_marks
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import (
-    svg_root,
+from tests.integrations.scanpy.browser.interactions import (
     position,
+    render_summary,
+    rows,
+    set_brush,
+    svg_root,
     value_texts,
 )
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.fixture_support import adata as adata
+from tests.integrations.scanpy.fixture_support import metadata_adata as metadata_adata
+from tests.integrations.scanpy.helpers import units
 
 
-def render_summary(page, chart):
-    spec = chart.to_dict()
-    names = {view.get("name"): f"panel-{i}" for i, view in enumerate(units(spec))}
-    for view in units(spec):
-        for leaf in leaf_marks(view):
-            if leaf.get("name"):
-                names.setdefault(leaf["name"], leaf["name"])
-    render(page, spec)
-    return names
-
-
-def rows(page, name):
-    return page.evaluate(
-        "name => api.views.get({scope:[],view:name}).data.read({scope:'all',limit:100}).rows",
-        name,
-    )
-
-
-def set_brush(page, intervals):
-    page.evaluate(
-        "intervals => api.params.get('cells').setValue({type:'interval', intervals})",
-        intervals,
-    )
-    page.evaluate("() => new Promise(requestAnimationFrame)")
-
-
+@pytest.mark.smoke
 @pytest.mark.parametrize("cmap", ["seurat", "viridis"])
 def test_fitted_heatmap_values_follow_brush_means_contrast_and_clear(page, adata, cmap):
     adata.X[1, 0] = 1
@@ -109,6 +85,7 @@ def test_panel_titles_render_custom_text_or_hide_without_fallback(
     assert text.count("type") == 1  # The heatmap axis retains the grouping label.
 
 
+@pytest.mark.smoke
 def test_composition_and_numeric_metadata_match_source_and_keep_reference(
     page, metadata_adata
 ):
@@ -191,6 +168,7 @@ def test_composition_and_numeric_metadata_match_source_and_keep_reference(
     assert rows(page, "all-observation-histogram") == histogram
 
 
+@pytest.mark.smoke
 def test_count_is_visible_inside_brush_and_moves_during_drag(page, adata):
     chart = gsc.pl.EmbeddingSummary(adata, "HLA-DRA", "type").to_chart()
     names = render_summary(page, chart)

@@ -28,14 +28,15 @@ def table(chart):
     return pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("swapped", [False, True])
 @pytest.mark.parametrize("standard_scale", ["var", "group"])
 @pytest.mark.parametrize("supplied", [False, True])
 def test_displayed_color_values_match_installed_scanpy(
     adata, swapped, standard_scale, supplied
 ):
-    from matplotlib import colormaps
     import matplotlib.pyplot as plt
+    from matplotlib import colormaps
 
     options = {"standard_scale": standard_scale, "cmap": "viridis"}
     if supplied:
@@ -119,6 +120,7 @@ def test_chain_and_function_share_the_entire_native_spec(
     assert builder.to_chart().to_dict() == expected.to_dict()
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("swapped", [False, True])
 def test_actual_scanpy_chains_match_order_positions_sizes_and_padding(adata, swapped):
     import matplotlib.pyplot as plt
@@ -225,6 +227,7 @@ def test_authoritative_sizes_and_colors_are_copied_and_follow_slot_order(
     assert plot.to_chart().to_dict() == frozen
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("sort", [None, "ascending", "descending"])
 @pytest.mark.parametrize("swapped", [False, True])
 def test_totals_match_scanpy_counts_order_colors_and_replace_tree(adata, sort, swapped):

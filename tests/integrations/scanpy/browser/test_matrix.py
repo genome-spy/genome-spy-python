@@ -1,26 +1,26 @@
 """Registered matrix colors/labels, native hover and standalone HTML delivery."""
 
-from io import BytesIO
 import json
-from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
+from io import BytesIO
+from pathlib import Path
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
-import genome_spy.integrations.scanpy as gsc
 import genome_spy as gs
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import (
+import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
     pointer,
     position,
     svg_root,
 )
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.matrix_fixture import matrix_cases
 from tests.integrations.scanpy.paga_fixture import make_adjacency
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "matrix.json").read_text())["cases"]
@@ -213,6 +213,7 @@ def test_axis_titles_do_not_duplicate_outer_label_space(page, explicit_labels, t
         assert 0 < canvas_height - positions["Columns"][1] < 35
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", matrix_cases())
 def test_complete_matrix_tiles_and_labels(page, tmp_path, reference_images, case):

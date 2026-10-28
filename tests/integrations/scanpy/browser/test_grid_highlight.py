@@ -2,14 +2,14 @@
 
 import pytest
 
-from tests.integrations.scanpy.test_grid_highlight import FAMILIES, make_chart
-from tests.integrations.scanpy.browser.test_grid_interactions import (
+from tests.integrations.scanpy.browser.interactions import (
     pointer,
     ruler_lines,
     svg_root,
     value_texts,
 )
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.grid_fixture_support import FAMILIES, make_chart
 
 
 def mark_centers(root, bounds):
@@ -149,6 +149,7 @@ def test_hovered_tile_has_equal_visible_strokes_on_all_four_edges(page, show_val
 
     import numpy as np
     from PIL import Image
+
     import genome_spy.integrations.scanpy as gsc
 
     chart = gsc.pl.matrix(

@@ -1,7 +1,7 @@
 """Observed matrixplot tiles, color bounds, missing cells, hover and HTML delivery."""
 
-from io import BytesIO
 import json
+from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +10,7 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import index_position
 from tests.integrations.scanpy.matrixplot_fixture import matrixplot_cases
 
@@ -18,6 +18,7 @@ REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "matrixplot.json").read_text())
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", matrixplot_cases())
 def test_registered_matrixplot_tiles_paint_and_grid(

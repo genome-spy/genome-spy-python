@@ -3,14 +3,13 @@
 from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 from scipy.ndimage import distance_transform_edt
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_grid_interactions import pointer, svg_root
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.interactions import hover_at, pointer, svg_root
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.paga_path_fixture import make_path
 
 
@@ -20,6 +19,7 @@ def line_groups(root, panel="panel-0"):
     return [e for e in view.iter() if e.get("data-mark-type") == "rule"]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "options,case",
     [({}, "default"), ({"n_avg": 2, "xlim": (1, None)}, "default"), ({}, "missing")],
@@ -30,7 +30,6 @@ def test_registered_lines_preserve_values_gaps_colors_and_native_legend(
 ):
     import matplotlib as mpl
     import matplotlib.pyplot as plt
-
     import scanpy as sc
 
     a = make_path(case=case)

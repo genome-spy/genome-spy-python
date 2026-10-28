@@ -1,17 +1,17 @@
 """PAGA comparison reuses native parents and honors stored embedding coordinates."""
 
-from copy import deepcopy
 import inspect
+from copy import deepcopy
 
-from anndata import AnnData
 import numpy as np
 import pandas as pd
 import pytest
+from anndata import AnnData
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks, points
-from tests.integrations.scanpy.paga_fixture import make_paga, POSITIONS
+from tests.integrations.scanpy.paga_fixture import POSITIONS, make_compare
 
 sc = pytest.importorskip("scanpy")
 
@@ -21,15 +21,7 @@ def test_default_on_data_bold_labels_keep_the_existing_explicit_font_restriction
         gsc.pl.paga_compare(make_compare(), show=False)
 
 
-def make_compare():
-    """Return nonuniform groups and asymmetric coordinates with a distinct cached layout."""
-    a = make_paga("obs_score")
-    a.obsm["X_umap"] = np.column_stack(
-        [np.arange(a.n_obs) / 4, np.sin(np.arange(a.n_obs)), np.arange(a.n_obs) ** 2]
-    )
-    return a
-
-
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "palette",
     [
@@ -142,6 +134,7 @@ def test_paga_coordinate_ownership_is_native_inheritance(monkeypatch):
     assert comparison["hconcat"][1] == expected
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("components", [None, "2,3"])
 @pytest.mark.parametrize("position_mode", ["median", "supplied", "cached"])
 def test_positions_titles_and_limits_match_the_public_scanpy_call(

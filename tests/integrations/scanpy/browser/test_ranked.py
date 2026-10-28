@@ -1,20 +1,20 @@
 """Observe complete ranking panels and reuse of native expression interactions."""
 
-from io import BytesIO
 import json
-from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
+from io import BytesIO
+from pathlib import Path
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import pointer
+from tests.integrations.scanpy.browser.interactions import pointer
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.helpers import index_position, points
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
-from tests.integrations.scanpy.helpers import points, index_position
 
 REFERENCE = json.loads(
     (Path(__file__).parents[1] / "fixtures/ranked.json").read_text()
@@ -24,6 +24,7 @@ STATISTICS = json.loads(
 )["statistics"]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", ranked_cases())
 def test_complete_rank_panels_match_registered_labels_and_score_positions(
@@ -258,6 +259,7 @@ def test_ranked_expression_uses_existing_y_navigation_and_guides(page, family):
     assert all(text in svg for text in ("g1", "g2", "g3", "g4"))
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 def test_statistic_colors_labels_and_complete_guides_match_scanpy(

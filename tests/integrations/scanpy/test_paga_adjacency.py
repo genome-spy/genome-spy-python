@@ -7,7 +7,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._paga.data import adjacency_values, adjacency_points
+from genome_spy.integrations.scanpy._paga.data import adjacency_points, adjacency_values
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.paga_fixture import make_adjacency
 
@@ -32,11 +32,12 @@ def test_signature_preserves_upstream_parameters_and_defaults():
     }
 
 
-@pytest.mark.parametrize("storage", ["csr", "csc", "lil", "coo", "dok", "bsr"])
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "case", ["default", "empty_tree", "constant", "missing", "singleton"]
 )
-def test_values_and_tree_orientation_match_direct_public_scanpy(storage, case):
+def test_values_and_tree_orientation_match_direct_public_scanpy(case):
+    storage = "csr"
     import matplotlib.pyplot as plt
     import scanpy as sc
 
@@ -75,8 +76,8 @@ def test_values_and_tree_orientation_match_direct_public_scanpy(storage, case):
 def test_custom_keys_and_tree_nonzeros_preserve_sources_without_analysis(
     monkeypatch, as_heatmap
 ):
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     a = make_adjacency("lil")
     a.uns = {"weights": a.uns["connectivities"], "tree": a.uns["connectivities_tree"]}
@@ -178,7 +179,7 @@ def test_sparse_arrays_and_explicit_zeros_keep_the_same_point_orientation():
     assert tree.nnz == 3
 
 
-@pytest.mark.parametrize("storage", ["csr", "csc", "lil", "coo", "dok", "bsr"])
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "case",
     [
@@ -194,10 +195,11 @@ def test_sparse_arrays_and_explicit_zeros_keep_the_same_point_orientation():
         "negative",
     ],
 )
-def test_stripplot_order_colors_and_limits_match_public_scanpy(storage, case):
+def test_stripplot_order_colors_and_limits_match_public_scanpy(case):
+    storage = "csr"
     import matplotlib.pyplot as plt
-    from matplotlib.colors import to_rgba
     import scanpy as sc
+    from matplotlib.colors import to_rgba
 
     plt.close("all")
     sc.pl.paga_adjacency(make_adjacency("csr", case), as_heatmap=False, show=False)
@@ -328,3 +330,21 @@ def test_group_names_require_explicit_labels_and_only_name_axes_and_tooltips(
                 rows == [{"slot": i, "label": name} for i, name in enumerate(labels)]
                 for rows in ticks
             )
+
+
+@pytest.mark.parametrize("storage", ["csr", "csc", "lil", "coo", "dok", "bsr"])
+def test_sparse_formats_preserve_adjacency_and_both_point_orders(storage):
+    source = make_adjacency(storage, "default")
+    values, tree = adjacency_values(source, "connectivities", "connectivities_tree")
+    np.testing.assert_array_equal(values, [[0, 0.2, 0.6], [0.4, 0, 0.8], [0.7, 0.1, 0]])
+    assert tree.to_dict("records") == [{"_x": 0, "_y": 2}, {"_x": 1, "_y": 0}]
+    assert list(adjacency_points(values, tree).itertuples(index=False, name=None)) == [
+        (0, 0.2, 1, "Adjacency"),
+        (0, 0.6, 2, "Adjacency"),
+        (0, 0.6, 2, "Tree"),
+        (1, 0.4, 0, "Adjacency"),
+        (1, 0.8, 2, "Adjacency"),
+        (1, 0.4, 0, "Tree"),
+        (2, 0.7, 0, "Adjacency"),
+        (2, 0.1, 1, "Adjacency"),
+    ]

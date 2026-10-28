@@ -1,40 +1,16 @@
 """Headless native grouped-builder chains, totals, composition and export."""
 
-from io import BytesIO
 import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
-import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import pointer
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
+from tests.integrations.scanpy.browser.interactions import hover_at, pointer
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.grid_fixture_support import builder
 from tests.integrations.scanpy.helpers import index_position
-
-
-def builder(family="DotPlot"):
-    plot = getattr(gsc.pl, family)(
-        make_tree_adata(),
-        {"First": ["g2", "g1"], "Again": "g2"},
-        "group",
-        zoom="xy",
-        hover=True,
-        width=360,
-        height=260,
-    )
-    if family == "MatrixPlot":
-        return plot.style(cmap="viridis", edge_color="navy", edge_lw=0.7)
-    return plot.style(
-        cmap="viridis",
-        dot_edge_color="navy",
-        dot_edge_lw=0.7,
-        largest_dot=120,
-        size_exponent=2,
-        grid=True,
-    )
 
 
 @pytest.mark.parametrize("swapped", [False, True])

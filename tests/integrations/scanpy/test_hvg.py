@@ -1,8 +1,8 @@
 """Stored variable-gene data, Scanpy defaults and native chart semantics."""
 
-from copy import deepcopy
 import inspect
 import json
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -35,6 +35,7 @@ def test_signatures_preserve_scanpy_defaults_and_add_native_options(family):
     )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "storage,flavor",
     [
@@ -139,8 +140,6 @@ def test_duplicate_gene_labels_keep_distinct_shared_point_ids():
 
 
 def test_missing_values_are_filtered_per_panel_without_changing_stored_values():
-    import matplotlib.pyplot as plt
-
     result = make_hvg_result()
     result.loc["gene-0", "dispersions_norm"] = np.nan
     spec = gsc.pl.highly_variable_genes(result, show=False).to_dict()
@@ -157,6 +156,16 @@ def test_missing_values_are_filtered_per_panel_without_changing_stored_values():
         == "isValid(datum.means) && isValid(datum.dispersions)"
     )
 
+    assert spec["resolve"]["scale"]["x"] == "independent"
+
+
+@pytest.mark.reference
+def test_missing_value_panel_bounds_match_scanpy():
+    import matplotlib.pyplot as plt
+
+    result = make_hvg_result()
+    result.loc["gene-0", "dispersions_norm"] = np.nan
+    spec = gsc.pl.highly_variable_genes(result, show=False).to_dict()
     sc.pl.highly_variable_genes(result, show=False)
     for panel, ax in zip(units(spec), plt.gcf().axes, strict=True):
         np.testing.assert_allclose(

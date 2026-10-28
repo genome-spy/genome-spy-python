@@ -146,7 +146,11 @@ core-version = "1.2.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--strict-markers"
 markers = [
+    "reference: live upstream plotting and registered visual comparisons",
+    "workflow: complete notebooks and real-data preparation",
+    "smoke: representative observed browser interactions and layouts",
     "codegen: schema-generation tooling tests run by the dedicated codegen job",
     "docs: documentation and gallery tests excluded from package CI",
 ]

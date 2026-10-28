@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.test_embedding_summary import adata as adata, records
-from tests.integrations.scanpy.helpers import units, leaf_marks
+from tests.integrations.scanpy.fixture_support import adata as adata
+from tests.integrations.scanpy.fixture_support import records
+from tests.integrations.scanpy.helpers import leaf_marks, units
 
 
 @pytest.mark.parametrize("palette", [None, "set1"])
@@ -13,6 +14,7 @@ def test_tracks_reuse_values_ids_colors_and_order_without_rereading(
     adata, monkeypatch, palette
 ):
     import scanpy as sc
+
     from genome_spy.integrations.scanpy._expression import (
         tracksplot_chart as _tracksplot_chart,
     )

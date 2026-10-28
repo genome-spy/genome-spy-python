@@ -37,6 +37,7 @@ def test_signature_preserves_upstream_defaults_and_adds_only_native_options():
     }
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("shape", [(5, 3), (1, 3), (5, 1), (1, 1)])
 def test_values_limits_labels_and_highlights_match_scanpy_without_analysis(
     shape, monkeypatch

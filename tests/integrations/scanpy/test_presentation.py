@@ -9,8 +9,7 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks, points
 from tests.integrations.scanpy.hvg_fixture import make_hvg_result
-from tests.integrations.scanpy.paga_fixture import make_adjacency
-from tests.integrations.scanpy.test_paga_compare import make_compare
+from tests.integrations.scanpy.paga_fixture import make_adjacency, make_compare
 
 pytest.importorskip("scanpy")
 

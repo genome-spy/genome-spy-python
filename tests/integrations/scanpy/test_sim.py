@@ -35,6 +35,7 @@ def test_signature_preserves_scanpy_and_adds_native_options():
     }
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("case", sim_cases())
 def test_values_boundaries_ticks_and_limits_match_scanpy(case, monkeypatch):
     import matplotlib.pyplot as plt

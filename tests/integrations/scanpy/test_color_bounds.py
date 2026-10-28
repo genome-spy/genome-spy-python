@@ -5,12 +5,13 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
+from tests.integrations.scanpy.fixture_support import FAMILIES
 from tests.integrations.scanpy.helpers import points, units
-from tests.integrations.scanpy.test_embedding import FAMILIES
 
 sc = pytest.importorskip("scanpy")
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("sort_order", [False, True])
 @pytest.mark.parametrize("mask_obs", [None, "keep"])
 @pytest.mark.parametrize("use_raw,layer", [(True, None), (False, "counts")])
@@ -185,6 +186,7 @@ def test_callable_bounds_keep_existing_limit_order_validation():
         )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "center,bounds",
     [

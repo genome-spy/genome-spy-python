@@ -1,26 +1,28 @@
 """Observe registered native histograms, thresholds, hover, zoom and HTML delivery."""
 
-from io import BytesIO
 import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render, move_to
-from tests.integrations.scanpy.helpers import units, leaf_marks
+from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.helpers import leaf_marks, units
 from tests.integrations.scanpy.scrublet_fixture import make_scrublet
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("batched", [False, True])
 @pytest.mark.parametrize("scales", [("log", "linear"), ("linear", "log")])
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_complete_histograms_match_public_scanpy_bars_axes_and_thresholds(
     page, tmp_path, batched, scales
 ):
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     a = make_scrublet(batched)
     with plt.rc_context(plt.rcParamsDefault):
@@ -177,11 +179,12 @@ def test_native_bin_hover_independent_zoom_and_offline_html(page, tmp_path):
     assert not page.locator(".message-box").count()
 
 
+@pytest.mark.smoke
 def test_threshold_slider_updates_pair_colors_and_rule_with_independent_batches(
     page, tmp_path
 ):
-    from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
     from genome_spy.integrations.scanpy._qc.scrublet_data import prepare_scrublet
+    from tests.integrations.scanpy.browser.interactions import svg_root
 
     a = make_scrublet(True)
     table, _ = prepare_scrublet(a)

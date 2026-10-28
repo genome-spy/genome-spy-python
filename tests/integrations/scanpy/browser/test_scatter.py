@@ -6,10 +6,9 @@ from pathlib import Path
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import name_embedding_scales
-from tests.integrations.scanpy.browser.test_embedding import assert_complete_chart
-from tests.integrations.scanpy.browser.test_umap import render, move_to
-from tests.integrations.scanpy.helpers import points
+from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
+from tests.integrations.scanpy.helpers import name_embedding_scales, points
 from tests.integrations.scanpy.scatter_fixture import make_scatter_adata, scatter_cases
 
 REFERENCE = json.loads(
@@ -17,6 +16,7 @@ REFERENCE = json.loads(
 )["cases"]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("family", ["umap", "scatter"])
 @pytest.mark.parametrize(
     "marker,shape", [("o", "circle"), ("s", "rect"), ("D", "path")]
@@ -24,8 +24,8 @@ REFERENCE = json.loads(
 def test_category_legend_matches_panel_marker_and_expected_width(
     page, family, marker, shape
 ):
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
     from matplotlib.markers import MarkerStyle
 
     data = make_scatter_adata()
@@ -63,6 +63,7 @@ def test_category_legend_matches_panel_marker_and_expected_width(
     assert all(s["width"] == pytest.approx(expected_width, abs=0.1) for s in symbols)
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", scatter_cases())
 def test_complete_scatter_matches_registered_points_axes_labels_and_guides(

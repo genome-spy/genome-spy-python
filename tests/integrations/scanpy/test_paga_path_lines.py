@@ -30,9 +30,10 @@ LINE_CASES = {
 }
 
 
-@pytest.mark.parametrize("storage", ["dense", "csr", "csc"])
+@pytest.mark.reference
 @pytest.mark.parametrize("case", LINE_CASES)
-def test_line_values_domains_labels_and_order_match_public_scanpy(storage, case):
+def test_line_values_domains_labels_and_order_match_public_scanpy(case):
+    storage = "csr"
     import matplotlib.pyplot as plt
     import scanpy as sc
 
@@ -88,6 +89,7 @@ def test_line_values_domains_labels_and_order_match_public_scanpy(storage, case)
     assert "bottom" in root["surround"]
 
 
+@pytest.mark.reference
 def test_line_return_data_is_uncropped_and_matches_working_public_case(monkeypatch):
     import matplotlib.pyplot as plt
     import scanpy as sc

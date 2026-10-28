@@ -1,30 +1,28 @@
 """Observe shared embedding rendering, native navigation, hover and linked selection."""
 
-from io import BytesIO
 import json
 from pathlib import Path
-import xml.etree.ElementTree as ET
 
 import numpy as np
-from PIL import Image
 import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import name_embedding_scales
-from tests.integrations.scanpy.browser.test_umap import render, move_to
+from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
 from tests.integrations.scanpy.embedding_fixture import (
     embedding_cases,
     make_embedding_adata,
 )
-from tests.integrations.scanpy.helpers import points
-from tests.integrations.scanpy.test_embedding_edges import graph_adata
+from tests.integrations.scanpy.fixture_support import graph_adata
+from tests.integrations.scanpy.helpers import name_embedding_scales, points
 
 REFERENCE = json.loads(
     (Path(__file__).parents[1] / "fixtures/embedding.json").read_text()
 )["cases"]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", embedding_cases())
 def test_complete_embedding_matches_registered_points_guides_and_axis_labels(
@@ -48,70 +46,6 @@ def test_complete_embedding_matches_registered_points_guides_and_axis_labels(
         expected,
         reference_images("embedding") / f"{case}-panel.png",
         case,
-    )
-
-
-def assert_complete_chart(
-    page, tmp_path, chart, expected, reference_image, case, *, panel_index=0
-):
-    """Compare registered point footprints, paints and complete native labels to an oracle."""
-    bounds = render(page, chart)
-    if panel_index:
-        bounds = page.evaluate(
-            "i=>api.views.getLayoutBounds({scope:[],view:'panel-'+i})", panel_index
-        )
-    canvas = page.locator("canvas").first.bounding_box()
-    actual = Image.open(
-        BytesIO(
-            page.screenshot(
-                clip={
-                    "x": canvas["x"] + bounds["x"],
-                    "y": canvas["y"] + bounds["y"],
-                    "width": bounds["width"],
-                    "height": bounds["height"],
-                }
-            )
-        )
-    ).convert("RGB")
-    oracle = Image.open(reference_image).convert("RGB")
-    assert (
-        abs(actual.width - oracle.width) <= 2
-        and abs(actual.height - oracle.height) <= 2
-    )
-    # Equal coordinate registration and export DPI keep point locations and footprints comparable.
-    mask = np.min(np.asarray(actual), axis=2) < 245
-    target = np.min(np.asarray(oracle), axis=2) < 245
-    for x, y in expected["coordinates"]:
-        x0, x1 = expected["x_domain"]
-        y0, y1 = expected["y_domain"]
-        if expected.get("log", False):
-            x, x0, x1 = np.log10([x, x0, x1])
-            y, y0, y1 = np.log10([y, y0, y1])
-        px, py = (
-            round((x - x0) / (x1 - x0) * actual.width),
-            round((y1 - y) / (y1 - y0) * actual.height),
-        )
-        assert (
-            mask[py - 3 : py + 4, px - 3 : px + 4].any()
-            and target[py - 3 : py + 4, px - 3 : px + 4].any()
-        )
-        patch = np.asarray(actual)[py - 1 : py + 2, px - 1 : px + 2].astype(int)
-        paint = np.asarray(oracle)[py, px].astype(int)
-        assert np.abs(patch - paint).max(axis=2).min() <= 12
-
-    # Most raster differences should be confined to antialiased point boundaries.
-    extent = (0, 0, min(actual.width, oracle.width), min(actual.height, oracle.height))
-    pixels = np.asarray(actual.crop(extent)).astype(int)
-    reference = np.asarray(oracle.crop(extent)).astype(int)
-    assert (np.abs(pixels - reference).max(axis=2) > 32).mean() < 0.025
-    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
-    labels = [e.text for e in ET.fromstring(svg).iter() if e.tag.endswith("text")]
-    for label in expected["labels"] + [expected["title"]] + (expected["legend"] or []):
-        if label:
-            assert label in labels
-    page.screenshot(path=str(tmp_path / f"{case}-complete.png"), full_page=True)
-    Image.blend(actual.crop(extent), oracle.crop(extent), 0.5).save(
-        tmp_path / f"{case}-registered-overlay.png"
     )
 
 

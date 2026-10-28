@@ -4,12 +4,12 @@ import xml.etree.ElementTree as ET
 from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
-from tests.integrations.scanpy.browser.test_dotplot_builder import builder
-from tests.integrations.scanpy.browser.test_grid_interactions import pointer
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.interactions import pointer
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.grid_fixture_support import builder
 
 
 @pytest.mark.parametrize("swapped", [False, True])

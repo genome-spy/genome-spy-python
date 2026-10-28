@@ -10,8 +10,8 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.matrix_fixture import matrix_cases
 from tests.integrations.scanpy.helpers import leaf_marks
+from tests.integrations.scanpy.matrix_fixture import matrix_cases
 
 pytest.importorskip("scanpy")
 

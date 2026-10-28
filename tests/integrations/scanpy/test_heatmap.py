@@ -2,8 +2,8 @@
 
 import inspect
 import json
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -11,10 +11,10 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
 from genome_spy.integrations.scanpy import pl
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata, heatmap_cases
+from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
 from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
+from tests.integrations.scanpy.heatmap_fixture import heatmap_cases, make_heatmap_adata
 from tests.integrations.scanpy.helpers import leaf_marks, points
 
 sc = pytest.importorskip("scanpy")
@@ -289,6 +289,7 @@ def test_sparse_views_densify_only_selected_genes(adata, monkeypatch, storage):
 @pytest.mark.parametrize("family", ["heatmap", "tracksplot"])
 def test_large_cell_plots_read_only_requested_columns(monkeypatch, family):
     import anndata as ad
+
     import genome_spy as gs
     from genome_spy.integrations.scanpy._expression import (
         heatmap_chart,

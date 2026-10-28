@@ -3,9 +3,12 @@
 import xml.etree.ElementTree as ET
 
 import pytest
+
 import genome_spy as gs
 from genome_spy.schema import SCHEMA_VERSION
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.rendering import render
+
+pytestmark = pytest.mark.reference
 
 
 @pytest.mark.xfail(

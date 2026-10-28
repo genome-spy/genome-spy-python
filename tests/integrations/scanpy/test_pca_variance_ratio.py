@@ -65,6 +65,7 @@ def test_variance_is_the_existing_ranking_chart_without_analysis_or_expression(
     np.testing.assert_array_equal(source, [0.2, 0.4, 0.1, 0.2, 0.05])
 
 
+@pytest.mark.reference
 def test_tied_ratios_keep_original_pc_names_and_top_onlys_extra_label():
     spec = gsc.pl.pca_variance_ratio(make_ranked_adata(), 2, show=False).to_dict()
     actual = [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)]

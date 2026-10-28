@@ -2,18 +2,17 @@
 
 from io import BytesIO
 
-from anndata import AnnData
 import numpy as np
 import pandas as pd
-from PIL import Image
 import pytest
+from anndata import AnnData
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.interactions import hover_at, svg_root
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
-from tests.integrations.scanpy.paga_fixture import make_paga, POSITIONS
+from tests.integrations.scanpy.paga_fixture import POSITIONS, make_paga
 from tests.integrations.scanpy.paga_path_fixture import make_path
 
 

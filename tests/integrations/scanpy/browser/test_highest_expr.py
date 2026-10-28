@@ -1,17 +1,19 @@
 """Observe native box geometry, whole charts, hover, zoom and offline delivery."""
 
-from io import BytesIO
 import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render, move_to
+from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.highest_expr_fixture import make_counts
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("log", [False, True])
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_complete_boxes_match_scanpy_quartiles_whiskers_axes_and_pixels(

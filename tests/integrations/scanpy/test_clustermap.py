@@ -15,10 +15,10 @@ from genome_spy.integrations.scanpy._expression.clustermap_data import (
     prepare_clustermap,
 )
 from tests.integrations.scanpy.clustermap_fixture import (
-    make_cluster_adata,
     clustermap_cases,
+    make_cluster_adata,
 )
-from tests.integrations.scanpy.helpers import points, leaf_marks
+from tests.integrations.scanpy.helpers import leaf_marks, points
 
 pytest.importorskip("scanpy")
 
@@ -266,8 +266,9 @@ def test_backed_data_rejects_before_expression_reads(tmp_path, monkeypatch):
 
 
 def test_sparse_view_densifies_only_the_supplied_columns(monkeypatch):
-    from anndata import AnnData
     import tracemalloc
+
+    from anndata import AnnData
 
     adata = AnnData(sparse.csr_matrix((1000, 20_000), dtype=np.float32))
     selected = adata[:, [2, 100, 700]]

@@ -5,16 +5,22 @@ import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_grid_interactions import pointer, svg_root
-from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.hvg_fixture import make_hvg_result
-from tests.integrations.scanpy.paga_fixture import make_adjacency
-from tests.integrations.scanpy.paga_fixture import make_paga, POSITIONS
-from tests.integrations.scanpy.paga_path_fixture import make_path
-from tests.integrations.scanpy.test_paga_compare import make_compare
-from tests.integrations.scanpy.sim_fixture import make_sim
+from tests.integrations.scanpy.browser.interactions import (
+    point_coordinates,
+    pointer,
+    svg_root,
+)
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import leaf_marks
+from tests.integrations.scanpy.hvg_fixture import make_hvg_result
+from tests.integrations.scanpy.paga_fixture import (
+    POSITIONS,
+    make_adjacency,
+    make_compare,
+    make_paga,
+)
+from tests.integrations.scanpy.paga_path_fixture import make_path
+from tests.integrations.scanpy.sim_fixture import make_sim
 
 
 def plot_points(page):
@@ -27,6 +33,7 @@ def plot_points(page):
     ]
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("missing", [None, "dispersions_norm", "means"])
 def test_hvg_slider_changes_both_panels_and_count_and_keeps_saved_flags(page, missing):
     result = make_hvg_result()
@@ -62,6 +69,7 @@ def test_hvg_slider_changes_both_panels_and_count_and_keeps_saved_flags(page, mi
     np.testing.assert_array_equal(result.highly_variable, before.highly_variable)
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
 def test_profile_dropdown_dims_other_series_without_dropping_points(page, family):
     chart = getattr(gsc.pl, family)(

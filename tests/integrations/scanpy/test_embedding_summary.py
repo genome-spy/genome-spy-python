@@ -7,41 +7,12 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import units, leaf_marks
+from tests.integrations.scanpy.fixture_support import adata as adata
+from tests.integrations.scanpy.fixture_support import metadata_adata as metadata_adata
+from tests.integrations.scanpy.fixture_support import records
+from tests.integrations.scanpy.helpers import leaf_marks, units
 
 pytest.importorskip("scanpy")
-
-
-@pytest.fixture
-def adata():
-    from anndata import AnnData
-
-    a = AnnData(
-        np.array(
-            [
-                [-1, np.nan],
-                [0, np.nan],
-                [0.5, np.nan],
-                [1, np.nan],
-                [2, np.nan],
-                [np.nan, np.nan],
-            ]
-        ),
-        obs=pd.DataFrame(
-            {"type": pd.Categorical(["A", "A", "B", "B", "B", "A"])},
-            index=[f"cell-{i}" for i in range(6)],
-        ),
-        var=pd.DataFrame(index=["HLA-DRA", "missing.gene"]),
-    )
-    a.obsm["X_umap"] = np.array(
-        [[0, 0], [1, 0], [2, 1], [3, 1], [4, 2], [5, 2]], dtype=float
-    )
-    return a
-
-
-def records(chart):
-    spec = chart.to_dict()
-    return spec["datasets"][spec["data"]["name"]]
 
 
 def panel_titles(chart):
@@ -155,16 +126,6 @@ def test_invalid_titles_fail_before_expression_reads(adata, monkeypatch, panel):
             gsc.pl.EmbeddingSummary(adata, "HLA-DRA", "type", title=123)
         else:
             getattr(plot, panel)(title=123)
-
-
-@pytest.fixture
-def metadata_adata(adata):
-    adata.obs["sample.label"] = pd.Categorical(
-        ["D1", "D1", "D2", None, "D2", "D3"], categories=["D3", "D2", "D1", "Unused"]
-    )
-    adata.uns["sample.label_colors"] = ["purple", "orange", "teal", "pink"]
-    adata.obs["qc.score"] = [0.0, np.nan, -0.5, 0.5, 1.0, np.nan]
-    return adata
 
 
 def test_observation_snapshot_and_panel_replacement(metadata_adata):

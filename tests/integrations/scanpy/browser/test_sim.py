@@ -1,34 +1,28 @@
 """Complete simulation guides, registered marks and observed native navigation."""
 
-from io import BytesIO
 import warnings
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_heatmap import hover_at, render
-from tests.integrations.scanpy.browser.test_grid_interactions import (
-    svg_root,
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
+    point_coordinates,
+    point_spacing,
     position,
+    svg_root,
     value_texts,
 )
-from tests.integrations.scanpy.browser.test_timeseries import (
-    point_coordinates,
-    style_profile_reference,
-)
-from tests.integrations.scanpy.sim_fixture import make_sim, sim_cases
+from tests.integrations.scanpy.browser.rendering import render_heatmap as render
+from tests.integrations.scanpy.browser.rendering import style_profile_reference
 from tests.integrations.scanpy.helpers import leaf_marks
+from tests.integrations.scanpy.sim_fixture import make_sim, sim_cases
 
 
-def point_spacing(coordinates):
-    """Measure adjacent sample and paired-value spacing despite viewport culling."""
-    xs = np.unique(coordinates[:, 0])
-    paired = [np.ptp(coordinates[coordinates[:, 0] == x, 1]) for x in xs]
-    return np.median(np.diff(xs)), np.median([d for d in paired if d > 0])
-
-
+@pytest.mark.reference
 @pytest.mark.parametrize("case", sim_cases())
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_complete_simulation_matches_scanpy_ticks_boundaries_and_paint(
@@ -312,7 +306,7 @@ def test_hover_navigation_realization_labels_and_offline_delivery(page, tmp_path
 
 
 def test_point_simulation_legend_is_below_the_realization_axis(page):
-    from tests.integrations.scanpy.browser.test_grid_interactions import position
+    from tests.integrations.scanpy.browser.interactions import position
 
     render(page, gsc.pl.sim(make_sim(), show=False))
     root = svg_root(page)

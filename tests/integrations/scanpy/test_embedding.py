@@ -1,9 +1,9 @@
 """Shared stored-coordinate semantics and Scanpy-compatible embedding wrappers."""
 
-from copy import deepcopy
-from hashlib import sha256
 import inspect
 import json
+from copy import deepcopy
+from hashlib import sha256
 from pathlib import Path
 
 import numpy as np
@@ -16,10 +16,10 @@ from tests.integrations.scanpy.embedding_fixture import (
     embedding_cases,
     make_embedding_adata,
 )
+from tests.integrations.scanpy.fixture_support import FAMILIES
 from tests.integrations.scanpy.helpers import points, units
 
 sc = pytest.importorskip("scanpy")
-FAMILIES = ["embedding", "umap", "tsne", "diffmap", "draw_graph", "pca", "pca_scatter"]
 
 
 @pytest.mark.parametrize("family", FAMILIES)

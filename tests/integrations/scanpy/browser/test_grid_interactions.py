@@ -1,71 +1,26 @@
 """Observe shared grid navigation, fitted values and dot row/column highlighting."""
 
-import re
 import warnings
-import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
 import pandas as pd
-from PIL import Image
-from io import BytesIO
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.helpers import tree_segments
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
+    pointer,
+    position,
+    ruler_lines,
+    svg_root,
+    value_texts,
+)
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
-
-
-def svg_root(page):
-    """Read native exported geometry after the renderer finishes its frame."""
-    return ET.fromstring(
-        page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
-    )
-
-
-def value_texts(root):
-    """Find visible fitted values, excluding axis and legend text."""
-    return [
-        e
-        for e in root.iter()
-        if e.tag.endswith("text")
-        and e.get("fill") in ("white", "black")
-        and re.fullmatch(r"[−-]?\d+\.\d{2}", e.text or "")
-    ]
-
-
-def position(element):
-    """Read the native SVG text position in logical canvas pixels."""
-    return [
-        float(v)
-        for v in re.search(r"translate\(([^)]+)\)", element.get("transform"))
-        .group(1)
-        .split()
-    ]
-
-
-def ruler_lines(root):
-    """Read the visible native crosshair lines from an exported chart."""
-    return [
-        line
-        for group in root.iter()
-        if group.get("stroke") == "#4682b4"
-        for line in group
-        if line.tag.endswith("line")
-    ]
-
-
-def pointer(page, bounds, x=0.5, y=0.5):
-    """Move inside a plot using fractions of its logical extent."""
-    canvas = page.locator("canvas").first.bounding_box()
-    px, py = (
-        canvas["x"] + bounds["x"] + x * bounds["width"],
-        canvas["y"] + bounds["y"] + y * bounds["height"],
-    )
-    page.mouse.move(px, py)
-    return px, py
+from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.helpers import tree_segments
 
 
 @pytest.mark.parametrize("hover", [False, True])
@@ -121,6 +76,7 @@ def test_clustermap_strip_hover_before_and_after_navigation(page, hover):
             assert not page.locator("table.attributes").is_visible()
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize(
     "family", ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
 )
@@ -270,6 +226,7 @@ def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
     assert difference[~edges].max() <= 2
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("family", ["matrix", "matrixplot", "heatmap", "clustermap"])
 def test_dense_values_appear_after_zoom_and_do_not_block_hover(page, family, tmp_path):
     from anndata import AnnData
@@ -383,6 +340,7 @@ def test_text_contrast_follows_native_palette_bounds_and_opacity(
         assert {e.get("fill") for e in labels if e.text == text} == {color}
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 @pytest.mark.parametrize("swapped", [False, True])
 def test_summary_zoom_and_pan_keep_tree_leaves_and_labels_aligned(

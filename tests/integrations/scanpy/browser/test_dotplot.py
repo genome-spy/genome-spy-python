@@ -1,7 +1,7 @@
 """Observed native dotplot guides, brackets, complete layout and offline output."""
 
-from io import BytesIO
 import json
+from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +10,7 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.dotplot_fixture import dotplot_cases
 from tests.integrations.scanpy.helpers import index_position
 
@@ -18,6 +18,7 @@ REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "dotplot.json").read_text())
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("swapped", [False, True])
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot", "DotPlot", "MatrixPlot"])
 def test_native_grouped_legends_are_centered_below_labels(page, adata, swapped, family):
@@ -259,6 +260,7 @@ def test_pbmc_marker_brackets_paint_single_and_multiple_gene_spans(page):
         start += len(genes)
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", dotplot_cases())
 def test_registered_dotplot_positions_paints_and_footprints(

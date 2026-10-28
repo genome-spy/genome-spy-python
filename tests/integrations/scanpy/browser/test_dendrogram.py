@@ -1,33 +1,30 @@
 """Observed tree geometry, complete labels/guides, hover and offline delivery."""
 
-from io import BytesIO
 import json
-from pathlib import Path
 import xml.etree.ElementTree as ET
+from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 import pytest
 from PIL import Image
 
-import genome_spy.integrations.scanpy as gsc
 import genome_spy as gs
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import (
-    position,
-    value_texts,
-)
-from tests.integrations.scanpy.helpers import (
-    leaf_marks,
-    tree_paths,
-    tree_segments,
-    index_position,
-)
+import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.browser.interactions import position, value_texts
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
 from tests.integrations.scanpy.dendrogram_fixture import (
     make_tree_adata,
     tree_plot_cases,
 )
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
-from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
+from tests.integrations.scanpy.helpers import (
+    index_position,
+    leaf_marks,
+    tree_paths,
+    tree_segments,
+)
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "dendrogram.json").read_text())
@@ -112,6 +109,7 @@ def test_tree_height_fits_visible_branches_after_zoom(
     )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", tree_plot_cases())
 def test_registered_branches_and_complete_charts(

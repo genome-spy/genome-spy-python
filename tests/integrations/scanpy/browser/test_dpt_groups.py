@@ -1,20 +1,21 @@
 """Registered DPT panels and native hover/navigation without trajectory inference."""
 
-from io import BytesIO
 import warnings
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_heatmap import render, hover_at
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
-from tests.integrations.scanpy.browser.test_timeseries import (
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
     point_coordinates,
-    style_profile_reference,
+    svg_root,
 )
-from tests.integrations.scanpy.dpt_fixture import make_dpt, dpt_cases, dpt_reference
+from tests.integrations.scanpy.browser.rendering import render_heatmap as render
+from tests.integrations.scanpy.browser.rendering import style_profile_reference
+from tests.integrations.scanpy.dpt_fixture import dpt_cases, dpt_reference, make_dpt
 
 
 @pytest.mark.parametrize("case", dpt_cases())
@@ -195,7 +196,7 @@ def test_hover_and_navigation_stay_independent_and_export_offline(page, tmp_path
 
 
 def test_categorical_group_key_is_readable_and_matches_the_plotted_colors(page):
-    from tests.integrations.scanpy.browser.test_umap import render
+    from tests.integrations.scanpy.browser.rendering import render
 
     chart = gsc.pl.dpt_groups_pseudotime(make_dpt(), width=480, height=180, show=False)
     bounds = render(page, chart)

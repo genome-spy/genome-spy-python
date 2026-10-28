@@ -7,10 +7,9 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import name_embedding_scales
-from tests.integrations.scanpy.browser.test_umap import render, move_to
-from tests.integrations.scanpy.browser.test_grid_interactions import pointer
-from tests.integrations.scanpy.helpers import points, units
+from tests.integrations.scanpy.browser.interactions import move_to, pointer
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.helpers import name_embedding_scales, points, units
 from tests.integrations.scanpy.pca_fixture import make_pca_adata
 
 

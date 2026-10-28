@@ -1,8 +1,8 @@
 """Independent semantic and pinned-reference tests for UMAP."""
 
+import json
 from copy import deepcopy
 from io import BytesIO
-import json
 from pathlib import Path
 
 import numpy as np
@@ -13,7 +13,7 @@ from scipy import sparse
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
-from tests.integrations.scanpy.helpers import points, units, leaf_marks
+from tests.integrations.scanpy.helpers import leaf_marks, points, units
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")

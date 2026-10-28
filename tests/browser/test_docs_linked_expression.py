@@ -3,18 +3,19 @@
 import importlib
 import io
 import json
-from itertools import count
 import mimetypes
-from pathlib import Path
 import re
 import shutil
+from itertools import count
+from pathlib import Path
 from urllib.parse import urlsplit
 
 import numpy as np
 import pytest
 
-from tests.browser.test_docs_notebook import ROOT, page as page
-from tests.integrations.scanpy.browser.test_grid_interactions import (
+from tests.browser.test_docs_notebook import ROOT
+from tests.browser.test_docs_notebook import page as page
+from tests.integrations.scanpy.browser.interactions import (
     position,
     svg_root,
     value_texts,
@@ -381,7 +382,7 @@ def test_additional_layouts_keep_summaries_correct_and_brushes_independent(
 def test_pbmc3k_tracks_follow_the_brush_without_moving_cells(
     monkeypatch, page, tmp_path
 ):
-    import scanpy as sc
+    sc = pytest.importorskip("scanpy")
     from anndata import read_h5ad
 
     _render_furo_guide(page, monkeypatch, tmp_path)

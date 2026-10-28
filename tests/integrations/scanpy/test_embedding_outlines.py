@@ -7,14 +7,15 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
+from tests.integrations.scanpy.fixture_support import FAMILIES
 from tests.integrations.scanpy.helpers import leaf_marks, points, units
-from tests.integrations.scanpy.test_embedding import FAMILIES
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
 mpl.use("Agg")
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "options",
     [

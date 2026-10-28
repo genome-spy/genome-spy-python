@@ -1,16 +1,19 @@
 """Retain C14's native triangle comparison without approximating Scanpy markers."""
 
-from io import BytesIO
 import json
 import re
 import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
 import pytest
 from PIL import Image
 
 import genome_spy as gs
-from tests.integrations.scanpy.browser.test_umap import fixture, render
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.fixture_support import umap_data as fixture
+
+pytestmark = pytest.mark.reference
 
 
 @pytest.fixture(

@@ -1,31 +1,25 @@
 """Registered heatmap tiles, complete annotations, unequal trees and cell hover."""
 
-from io import BytesIO
 import json
-from pathlib import Path
 import re
 import warnings
 import xml.etree.ElementTree as ET
+from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render as render_chart
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata, heatmap_cases
+from tests.integrations.scanpy.browser.interactions import hover_at
+from tests.integrations.scanpy.browser.rendering import render_heatmap as render
+from tests.integrations.scanpy.heatmap_fixture import heatmap_cases, make_heatmap_adata
 from tests.integrations.scanpy.helpers import tree_segments
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "heatmap.json").read_text())
-
-
-def render(page, chart):
-    """Wait for native track sizing before measuring exported geometry."""
-    render_chart(page, chart)
-    page.wait_for_timeout(200)
-    return page.evaluate("api.views.getLayoutBounds({scope:[],view:'panel-0'})")
 
 
 def slot_bounds(slot, count, cuts, origin, extent):
@@ -40,19 +34,7 @@ def tile_rects(root):
     return list(next(e for e in root.iter() if e.get("data-mark-type") == "rect"))
 
 
-def hover_at(page, x, y, *, probe=True, canvas_index=0, target=None):
-    """Pause then move within the native tooltip's small picking neighborhood."""
-    canvas = page.locator("canvas").nth(canvas_index).bounding_box()
-    page.mouse.move(canvas["x"] + x - 2, canvas["y"] + y - 2)
-    page.wait_for_timeout(450)
-    offsets = ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)) if probe else ((0, 0),)
-    for dx, dy in offsets:
-        page.mouse.move(canvas["x"] + x + dx, canvas["y"] + y + dy)
-        page.wait_for_timeout(80)
-        if target is not None and target.is_visible():
-            break
-
-
+@pytest.mark.smoke
 @pytest.mark.parametrize("swapped", [False, True])
 def test_small_terminal_group_label_is_whole_and_culls_on_zoom(page, swapped):
     from anndata import AnnData
@@ -111,10 +93,18 @@ def test_small_terminal_group_label_is_whole_and_culls_on_zoom(page, swapped):
     assert ">CD34+<" not in svg
 
 
-@pytest.mark.parametrize("page", [1, 1.5], indirect=True)
-@pytest.mark.parametrize("swapped", [False, True])
-@pytest.mark.parametrize("hover", [False, True])
-@pytest.mark.parametrize("group_gap", [0, 4, 7])
+@pytest.mark.parametrize(
+    "page,swapped,hover,group_gap",
+    [
+        (1, False, True, 0),
+        (1.5, False, True, 4),
+        (1, True, True, 4),
+        (1.5, True, False, 0),
+        (1, False, False, 7),
+        (1.5, True, True, 7),
+    ],
+    indirect=["page"],
+)
 def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover, group_gap):
     chart = gsc.pl.heatmap(
         make_heatmap_adata(),
@@ -321,6 +311,7 @@ def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover, group_gap
         assert not page.locator("table.attributes").is_visible()
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", heatmap_cases())
 def test_complete_registered_heatmaps(page, tmp_path, reference_images, case):

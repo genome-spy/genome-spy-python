@@ -1,18 +1,18 @@
 """Registered outline footprints and draw order in native WebGL rendering."""
 
-from io import BytesIO
 import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
 import pandas as pd
 import pytest
-from PIL import Image
 from anndata import AnnData
+from PIL import Image
 from scipy.ndimage import maximum_filter, minimum_filter
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import name_embedding_scales
-from tests.integrations.scanpy.browser.test_umap import render
 
 
 def _pixel_error(pixels, target, radius):
@@ -31,6 +31,7 @@ def _pixel_error(pixels, target, radius):
     return error
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("marker", [".", "o", "s", "D"])
 @pytest.mark.parametrize("overlap", [False, True])
@@ -149,7 +150,7 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(
     page, tmp_path, marker
 ):
     import genome_spy as gs
-    from tests.integrations.scanpy.browser.test_umap import move_to
+    from tests.integrations.scanpy.browser.interactions import move_to
 
     data = AnnData(
         obs=pd.DataFrame(

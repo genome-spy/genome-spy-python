@@ -7,12 +7,13 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.interactions import hover_at
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
 from tests.integrations.scanpy.helpers import tree_segments, units
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("log", [False, True])
 @pytest.mark.parametrize("group_gap", [0, 5])
 @pytest.mark.parametrize("page", [1, 1.5], indirect=True)

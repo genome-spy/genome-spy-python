@@ -3,32 +3,8 @@
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.rendering import guide_geometry, render
 from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
-
-
-def guide_geometry(page):
-    """Measure exported guides in canvas coordinates without changing the chart."""
-    svg = page.evaluate("async()=> (await api.imageExport.svg()).blob.text()")
-    return page.evaluate(
-        """svg => {
-        const root = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement;
-        root.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
-        document.body.append(root);
-        const box = node => {
-            const r = node.getBoundingClientRect();
-            return {x:r.x,y:r.y,width:r.width,height:r.height};
-        };
-        const result = {
-            text: [...root.querySelectorAll('text')].map(n=>({label:n.textContent,...box(n)})),
-            gradients: [...root.querySelectorAll('rect')]
-                .filter(n=>(n.getAttribute('fill')||'').startsWith('url(')).map(box),
-        };
-        root.remove();
-        return result;
-        }""",
-        svg,
-    )
 
 
 @pytest.mark.parametrize("location", [None, "right", "left", "top", "bottom"])

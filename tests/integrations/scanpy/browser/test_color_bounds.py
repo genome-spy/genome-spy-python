@@ -7,11 +7,14 @@ import pytest
 from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_colorbar import guide_geometry
-from tests.integrations.scanpy.browser.test_embedding import assert_complete_chart
+from tests.integrations.scanpy.browser.rendering import (
+    assert_complete_chart,
+    guide_geometry,
+)
 from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize(
     "options,constant",

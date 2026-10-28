@@ -1,7 +1,7 @@
 """Stored histogram semantics, upstream defaults and native Scrublet charts."""
 
-from copy import deepcopy
 import inspect
+from copy import deepcopy
 
 import anndata as ad
 import numpy as np
@@ -10,7 +10,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._qc.scrublet_data import prepare_scrublet
-from tests.integrations.scanpy.helpers import units, leaf_marks
+from tests.integrations.scanpy.helpers import leaf_marks, units
 from tests.integrations.scanpy.scrublet_fixture import make_scrublet
 
 sc = pytest.importorskip("scanpy")
@@ -38,6 +38,7 @@ def test_signature_preserves_scanpy_defaults_and_omits_matplotlib_return():
     )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("batched", [False, True])
 @pytest.mark.parametrize(
     "observed_scale,simulated_scale",
@@ -113,6 +114,7 @@ def test_denominator_ignores_missing_and_out_of_range_and_includes_right_edge():
     assert rows.density.max() == pytest.approx(3 * 49 / 10)
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("threshold", [-0.2, 0, 1, 1.4, None])
 @pytest.mark.parametrize("threshold_slider", [False, True])
 def test_thresholds_preserve_expanded_x_limits_and_density_limits(
@@ -140,6 +142,7 @@ def test_thresholds_preserve_expanded_x_limits_and_density_limits(
     plt.close(axes[0].figure)
 
 
+@pytest.mark.reference
 def test_constant_log_histogram_uses_shared_domain_helper():
     import matplotlib.pyplot as plt
 

@@ -1,8 +1,8 @@
 """Independent grouped-data semantics plus explicitly frozen upstream results."""
 
+import json
 from dataclasses import asdict
 from hashlib import sha256
-import json
 from pathlib import Path
 
 import numpy as np
@@ -12,8 +12,8 @@ from scipy import sparse
 
 from genome_spy.integrations.scanpy._expression.grouped_data import (
     expression_fractions,
-    grouped_expression,
     group_means,
+    grouped_expression,
     scale_values,
 )
 from tests.integrations.scanpy.grouped_fixture import grouped_cases, make_grouped_adata
@@ -254,7 +254,7 @@ def test_view_reads_are_snapshots_without_analysis_or_cache_writes(adata, monkey
 
 
 def test_backed_expression_fails_without_reading_wide_x(adata, tmp_path, monkeypatch):
-    from anndata import read_h5ad, AnnData
+    from anndata import AnnData, read_h5ad
 
     path = tmp_path / "backed.h5ad"
     adata.write_h5ad(path)
@@ -360,8 +360,9 @@ def test_nonfinite_values_and_undefined_logs_fail_clearly(adata):
 
 
 def test_large_sparse_preparation_has_bounded_selected_column_memory(monkeypatch):
-    from anndata import AnnData
     import tracemalloc
+
+    from anndata import AnnData
 
     rng = np.random.default_rng(0)
     n_obs, n_vars = 100_000, 20_000

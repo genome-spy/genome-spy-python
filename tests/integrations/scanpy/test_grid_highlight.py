@@ -1,35 +1,13 @@
 """Optional grid feedback preserves data and validates before preparation."""
 
 from importlib import import_module
-import warnings
 
-import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
-from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
+from tests.integrations.scanpy.grid_fixture_support import FAMILIES, make_chart
 
 pytest.importorskip("scanpy")
-
-FAMILIES = ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
-
-
-def make_chart(family, **options):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", UserWarning)
-        common = dict(width=320, height=260, **options)
-        if family == "matrix":
-            return gsc.pl.matrix(np.arange(1, 13).reshape(4, 3), show=False, **common)
-        if family == "clustermap":
-            return gsc.pl.clustermap(make_cluster_adata(), show=False, **common)
-        if family in ("DotPlot", "MatrixPlot"):
-            return getattr(gsc.pl, family)(
-                make_heatmap_adata(), ["g1", "g2", "g1"], "group", **common
-            ).to_chart()
-        return getattr(gsc.pl, family)(
-            make_heatmap_adata(), ["g1", "g2", "g1"], "group", show=False, **common
-        )
 
 
 def parameters(spec):

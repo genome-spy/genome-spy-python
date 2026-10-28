@@ -2,8 +2,8 @@
 
 import inspect
 import json
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -123,11 +123,12 @@ def test_figsize_reserves_room_for_track_spacing(adata):
     assert spaced["vconcat"][1]["height"] < plain["vconcat"][1]["height"]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("log", [False, True])
 @pytest.mark.parametrize("tree", [False, True])
 def test_values_and_color_order_match_upstream_calls(adata, monkeypatch, log, tree):
-    from matplotlib.axes import Axes
     import matplotlib.pyplot as plt
+    from matplotlib.axes import Axes
 
     sc.tl.dendrogram(adata, "group")
     calls = []

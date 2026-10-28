@@ -1,11 +1,11 @@
 """Stored ranking semantics, native panel bounds and expression-plot delegation."""
 
-from copy import deepcopy
-from hashlib import sha256
 import inspect
 import json
-from pathlib import Path
 import warnings
+from copy import deepcopy
+from hashlib import sha256
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -320,6 +320,7 @@ def test_invalid_metric_colors_fail_instead_of_falling_back_to_expression(family
         )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("case", ranked_cases())
 def test_rank_data_and_guides_match_scanpy_with_documented_pca_label_space(case):
     manifest = json.loads(

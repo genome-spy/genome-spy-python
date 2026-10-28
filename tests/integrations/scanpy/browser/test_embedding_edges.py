@@ -9,11 +9,11 @@ from scipy import sparse
 from scipy.ndimage import distance_transform_cdt
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_colorbar import guide_geometry
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.test_embedding_edges import graph_adata
+from tests.integrations.scanpy.browser.rendering import guide_geometry, render
+from tests.integrations.scanpy.fixture_support import graph_adata
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("outlined", [False, True])
 @pytest.mark.parametrize("width,color", [(0, "navy"), (0.1, "grey"), (1.2, "navy")])
@@ -24,8 +24,8 @@ def test_registered_edges_and_point_order_match_scanpy(
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from matplotlib.collections import LineCollection
     import scanpy as sc
+    from matplotlib.collections import LineCollection
 
     data = graph_adata()
     data.obsm["X_umap"] = np.array(

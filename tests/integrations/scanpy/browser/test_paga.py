@@ -1,27 +1,30 @@
 """Registered native PAGA graph paint, labels, hover, navigation and HTML delivery."""
 
-from io import BytesIO
 import warnings
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
-from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
+    point_coordinates,
+    svg_root,
+)
+from tests.integrations.scanpy.browser.rendering import render
+from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.paga_fixture import (
     POSITIONS,
     make_paga,
     paga_cases,
     paga_reference,
 )
-from tests.integrations.scanpy.helpers import leaf_marks
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "case",
     [
@@ -53,8 +56,8 @@ from tests.integrations.scanpy.helpers import leaf_marks
 def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, case):
     import matplotlib as mpl
     import matplotlib.pyplot as plt
-    from matplotlib.collections import PathCollection, LineCollection
     import scanpy as sc
+    from matplotlib.collections import LineCollection, PathCollection
 
     adata, reference_options = paga_reference(case)
     options = paga_cases()[case]
@@ -183,6 +186,7 @@ def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, c
     page.screenshot(path=str(tmp_path / "complete.png"), full_page=True)
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("color", [None, "score", "g1", "degree_solid"])
 @pytest.mark.parametrize("component", [False, True])
 def test_group_and_edge_hover_navigation_and_offline_html(
@@ -276,7 +280,7 @@ def test_disabled_hover_does_not_show_node_tooltips(page):
 def test_native_node_guide_names_and_colors_are_visible_without_node_labels(
     page, color
 ):
-    from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
+    from tests.integrations.scanpy.browser.interactions import svg_root
 
     a = make_paga("obs_score")
     chart = gsc.pl.paga(
@@ -304,10 +308,7 @@ def test_native_node_guide_names_and_colors_are_visible_without_node_labels(
 @pytest.mark.parametrize("color", ["score", "g1", "degree_solid"])
 @pytest.mark.parametrize("height", [120, 360])
 def test_numeric_colorbar_fits_plot_height_with_title_beside_it(page, color, height):
-    from tests.integrations.scanpy.browser.test_grid_interactions import (
-        position,
-        svg_root,
-    )
+    from tests.integrations.scanpy.browser.interactions import position, svg_root
 
     chart = gsc.pl.paga(
         make_paga("obs_score"),
@@ -338,7 +339,7 @@ def test_numeric_colorbar_fits_plot_height_with_title_beside_it(page, color, hei
 
 
 def test_displaced_label_avoids_its_actual_node_size_and_works_offline(page, tmp_path):
-    from tests.integrations.scanpy.browser.test_grid_interactions import position
+    from tests.integrations.scanpy.browser.interactions import position
 
     chart = gsc.pl.paga(
         make_paga("component_empty"),

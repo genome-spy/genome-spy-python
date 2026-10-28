@@ -1,26 +1,26 @@
 """Registered DPT expression charts and observed shared native interactions."""
 
-from io import BytesIO
 import warnings
+from io import BytesIO
 
 import numpy as np
 import pytest
 from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_heatmap import hover_at, render
-from tests.integrations.scanpy.browser.test_grid_interactions import (
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
+    point_coordinates,
+    point_spacing,
     svg_root,
     value_texts,
 )
-from tests.integrations.scanpy.browser.test_timeseries import (
-    point_coordinates,
-    style_profile_reference,
-)
-from tests.integrations.scanpy.browser.test_sim import point_spacing
-from tests.integrations.scanpy.dpt_fixture import make_dpt_profiles, dpt_profile_cases
+from tests.integrations.scanpy.browser.rendering import render_heatmap as render
+from tests.integrations.scanpy.browser.rendering import style_profile_reference
+from tests.integrations.scanpy.dpt_fixture import dpt_profile_cases, make_dpt_profiles
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("case", dpt_profile_cases())
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_complete_dpt_expression_matches_scanpy_paint_labels_and_boundaries(

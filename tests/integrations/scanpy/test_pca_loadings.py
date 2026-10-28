@@ -1,7 +1,7 @@
 """Stored PCA loadings reuse rank preparation and rendering without analysis."""
 
-from copy import deepcopy
 import inspect
+from copy import deepcopy
 
 import anndata as ad
 import numpy as np
@@ -83,6 +83,7 @@ def test_loadings_is_the_existing_ranking_chart_without_analysis_or_expression(
     assert not a.uns
 
 
+@pytest.mark.reference
 def test_signed_tied_extremes_keep_numpy_order_odd_split_and_omitted_rank_gap():
     spec = gsc.pl.pca_loadings(loadings_data(), "1", n_points=3, show=False).to_dict()
     actual = [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)]
@@ -102,6 +103,7 @@ def test_signed_tied_extremes_keep_numpy_order_odd_split_and_omitted_rank_gap():
     assert spec["encoding"]["x"]["axis"]["labels"] is False
 
 
+@pytest.mark.reference
 def test_top_only_includes_scanpys_extra_label():
     spec = gsc.pl.pca_loadings(
         loadings_data(), "1", include_lowest=False, n_points=2, show=False

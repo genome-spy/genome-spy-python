@@ -1,10 +1,10 @@
 """Scanpy delegation, stored tree, ordering, storage and public-contract checks."""
 
-from copy import deepcopy
 import inspect
 import json
-from pathlib import Path
 import pickle
+from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -12,7 +12,6 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import points
 from genome_spy.integrations.scanpy import pl
 from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
 from tests.integrations.scanpy.dendrogram_fixture import (
@@ -20,6 +19,7 @@ from tests.integrations.scanpy.dendrogram_fixture import (
     tree_cases,
     tree_plot_cases,
 )
+from tests.integrations.scanpy.helpers import points
 
 sc = pytest.importorskip("scanpy")
 REFERENCE = Path(__file__).with_name("fixtures") / "dendrogram.json"
@@ -462,8 +462,8 @@ def test_correlation_tracks_keep_cached_order_and_numeric_records(
 
 
 def test_native_edges_preserve_parents_and_unequal_leaf_positions():
-    from genome_spy.integrations.scanpy._dendrogram_data import TreeData
     from genome_spy.integrations.scanpy._dendrogram_chart import tree_records
+    from genome_spy.integrations.scanpy._dendrogram_data import TreeData
 
     tree = TreeData(
         ("A", "B", "C"),

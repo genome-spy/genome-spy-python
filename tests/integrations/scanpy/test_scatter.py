@@ -1,9 +1,9 @@
 """Scatter semantics independently exercise the existing native point pipeline."""
 
-from copy import deepcopy
-from hashlib import sha256
 import inspect
 import json
+from copy import deepcopy
+from hashlib import sha256
 from pathlib import Path
 
 import numpy as np
@@ -103,6 +103,7 @@ def test_marker_shapes_reuse_embedding_data_and_units(family, marker, shapes, fa
         )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("family", ["umap", "scatter"])
 @pytest.mark.parametrize("marker", ["o", "s", "D"])
 def test_category_legends_follow_panel_markers_in_native_units(family, marker):
@@ -160,6 +161,7 @@ def test_signature_preserves_scatter_defaults_and_adds_only_native_controls():
     )
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("case", scatter_cases())
 def test_complete_chart_matches_frozen_upstream_points_labels_palettes_and_limits(case):
     from matplotlib.colors import to_hex
@@ -239,6 +241,7 @@ def test_complete_chart_matches_frozen_upstream_points_labels_palettes_and_limit
 
 def test_native_color_names_match_css_and_reject_invalid_names_and_hex():
     from matplotlib.colors import CSS4_COLORS
+
     from genome_spy.integrations.scanpy._style import _CSS_NAMES, native_color
 
     assert _CSS_NAMES == CSS4_COLORS.keys()

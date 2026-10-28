@@ -1,8 +1,8 @@
 """Shared native renderer and original grouped-data fixtures."""
 
+import warnings
 from functools import cache
 from importlib import import_module
-import warnings
 
 import pytest
 
@@ -31,20 +31,31 @@ def reference_images(tmp_path_factory):
     return render
 
 
-@pytest.fixture
-def page(request):
+@pytest.fixture(scope="session")
+def browser():
+    """Reuse Chromium while keeping every test in its own browser context."""
     with playwright.sync_playwright() as runtime:
         browser = runtime.chromium.launch()
-        context = browser.new_context(
-            viewport={"width": 1800, "height": 1400},
-            device_scale_factor=getattr(request, "param", 1),
-        )
-        page = context.new_page()
-        errors = []
-        page.on("pageerror", lambda e: errors.append(str(e)))
+        try:
+            yield browser
+        finally:
+            browser.close()
+
+
+@pytest.fixture
+def page(request, browser):
+    context = browser.new_context(
+        viewport={"width": 1800, "height": 1400},
+        device_scale_factor=getattr(request, "param", 1),
+    )
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    try:
         yield page
         assert not errors, errors
-        browser.close()
+    finally:
+        context.close()
 
 
 @pytest.fixture

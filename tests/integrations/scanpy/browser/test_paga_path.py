@@ -3,13 +3,12 @@
 from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root, pointer
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
+from tests.integrations.scanpy.browser.interactions import hover_at, pointer, svg_root
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.paga_path_fixture import make_path
 
 
@@ -18,6 +17,7 @@ def bounds_for(page, name):
     return page.evaluate("name=>api.views.getLayoutBounds({scope:[],view:name})", name)
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "options",
     [
@@ -30,9 +30,9 @@ def bounds_for(page, name):
 )
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_registered_complete_heatmap_and_tracks(page, tmp_path, options):
-    import scanpy as sc
     import matplotlib as mpl
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     a = make_path()
     plt.close("all")
@@ -248,12 +248,13 @@ def test_native_hover_zoom_values_composition_and_offline_html(
     assert not page.locator(".message-box").count()
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("guide", [True, False])
 def test_constant_values_keep_public_palette_position_with_or_without_guide(
     page, guide
 ):
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     a = make_path()
     a.raw.X[:] = 7

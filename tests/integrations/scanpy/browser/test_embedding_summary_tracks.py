@@ -3,20 +3,21 @@
 from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.test_embedding_summary import adata as adata
-from tests.integrations.scanpy.browser.test_embedding_summary import (
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
     render_summary,
     rows,
     set_brush,
+    svg_root,
 )
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
+from tests.integrations.scanpy.fixture_support import adata as adata
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("page", [1, 1.5], indirect=True)
 def test_brush_dims_tracks_by_cell_identity_and_survives_zoom_and_clear(page, adata):
     adata.X[:, 1] = [1, 2, 3, 4, 5, 6]

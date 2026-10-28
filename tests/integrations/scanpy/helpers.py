@@ -1,7 +1,7 @@
 """Chart traversal and reference paths shared by integration tests and generators."""
 
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Any
 
 

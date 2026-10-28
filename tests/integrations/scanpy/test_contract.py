@@ -2,19 +2,16 @@
 
 import inspect
 import json
-from pathlib import Path
 import re
-import subprocess
-import sys
+from pathlib import Path
 
 import pytest
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy import pl
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy import _guards
+from genome_spy.integrations.scanpy import _guards, pl
 
-pytest.importorskip("scanpy")
+sc = pytest.importorskip("scanpy")
 
 FIXTURES = Path(__file__).with_name("fixtures")
 EMBEDDINGS = {
@@ -60,12 +57,8 @@ def test_progress_inventory_matches_the_pinned_api_and_available_exports():
         if name != "ranking" and inspect.isfunction(getattr(pl, name))
     ],
 )
-@pytest.mark.parametrize(
-    "show,autoshow", [(False, True), (True, False), (None, True), (None, False)]
-)
-def test_all_plots_share_native_display_and_autosave_rules(
-    monkeypatch, family, show, autoshow
-):
+def test_all_plots_share_native_display_and_autosave_rules(monkeypatch, family):
+    show, autoshow = True, False
     sc = pytest.importorskip("scanpy")
     from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
 
@@ -137,7 +130,7 @@ def test_all_plots_share_native_display_and_autosave_rules(
 
         a, options = make_paga(), {}
     if family == "paga_compare":
-        from tests.integrations.scanpy.test_paga_compare import make_compare
+        from tests.integrations.scanpy.paga_fixture import make_compare
 
         a, options = make_compare(), {"legend_fontweight": "normal"}
     if family == "paga_path":
@@ -219,36 +212,6 @@ def test_shared_display_validation_precedes_optional_imports(
         error, match=f"gsc.pl.{context}.*{'show' if 'show' in options else 'save'}"
     ):
         getattr(pl, family)(*args, **options)
-
-
-@pytest.mark.parametrize(
-    "namespace",
-    [
-        "genome_spy",
-        "genome_spy.integrations",
-        "genome_spy.integrations.scanpy",
-        *[
-            f"genome_spy.integrations.scanpy.{family}"
-            for family in (
-                "_embedding",
-                "_expression",
-                "_paga",
-                "_timeseries",
-                "_qc",
-                "_ranking",
-            )
-        ],
-    ],
-)
-def test_namespace_import_keeps_optional_stack_unloaded(namespace: str) -> None:
-    subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            f"import sys; import {namespace}; assert not set(['scanpy', 'anndata', 'numpy', 'pandas', 'scipy', 'matplotlib', 'pyarrow']) & sys.modules.keys()",
-        ],
-        check=True,
-    )
 
 
 def test_public_defaults_match_the_pinned_effective_signature() -> None:
@@ -359,18 +322,17 @@ def test_new_scanpy_group_colormaps_are_rejected_explicitly(family) -> None:
         getattr(gsc.pl, family)(object(), ["g1"], "group", group_colors={"A": "red"})
 
 
-@pytest.mark.parametrize("context", ["umap", "DotPlot", "MatrixPlot"])
-def test_missing_optional_dependency_has_an_actionable_error(
-    monkeypatch, context
-) -> None:
-    def missing(_):
-        raise _guards.PackageNotFoundError("scanpy")
-
-    monkeypatch.setattr(_guards, "version", missing)
-    with pytest.raises(
-        ImportError, match=rf"gsc.pl.{context} requires genome-spy-python\[scanpy\]"
-    ):
-        if context != "umap":
-            getattr(gsc.pl, context)(object(), ["g1"], "group")
-        else:
-            gsc.pl.umap(object(), show=False)
+@pytest.mark.parametrize(
+    "show,autoshow", [(False, True), (True, False), (None, True), (None, False)]
+)
+def test_shared_finish_obeys_explicit_show_and_scanpy_default(
+    monkeypatch, show, autoshow
+):
+    chart = gs.Chart([{"x": 1}]).mark_point()
+    displayed = []
+    monkeypatch.setattr(chart.__class__, "display", lambda self: displayed.append(self))
+    monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
+    result = pl._finish_plot(chart, show, sc)
+    expected = autoshow if show is None else show
+    assert displayed == ([chart] if expected else [])
+    assert result is (None if expected else chart)

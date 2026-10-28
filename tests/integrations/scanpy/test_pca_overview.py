@@ -1,7 +1,7 @@
 """PCA overview composes its existing parent charts without repeating analysis."""
 
-from copy import deepcopy
 import inspect
+from copy import deepcopy
 
 import anndata as ad
 import numpy as np

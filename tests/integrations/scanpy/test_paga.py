@@ -42,12 +42,13 @@ def test_signature_retains_scanpy_defaults_except_omitted_matplotlib_axes():
     }
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("case", paga_cases())
 def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypatch):
     import matplotlib.pyplot as plt
-    from matplotlib.colors import to_rgba
-    from matplotlib.collections import LineCollection, PathCollection
     import scanpy as sc
+    from matplotlib.collections import LineCollection, PathCollection
+    from matplotlib.colors import to_rgba
 
     a = make_paga(case)
     options = paga_cases()[case]
@@ -140,9 +141,9 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
 def test_layout_never_reads_expression_or_creates_a_figure(
     plot, add_pos, format, monkeypatch
 ):
-    from anndata import AnnData
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
+    from anndata import AnnData
 
     a = make_paga()
     a.uns["paga"]["connectivities"] = a.uns["paga"]["connectivities"].asformat(format)
@@ -374,8 +375,8 @@ def test_layout_errors_do_not_fall_back_or_mask_unrelated_errors(monkeypatch, la
 def test_gene_colors_read_one_sparse_column_without_changing_sources(
     storage, use_raw, monkeypatch
 ):
-    from scipy import sparse
     import scanpy as sc
+    from scipy import sparse
 
     a = make_paga("gene_raw")
     a.X = getattr(sparse, f"{storage}_matrix")(a.X)
@@ -455,9 +456,9 @@ def test_invalid_color_inputs_never_write_positions(color, options, match):
 def test_numeric_metadata_and_degrees_do_not_read_expression_or_draw_figures(
     color, monkeypatch
 ):
-    from anndata import AnnData
     import matplotlib.pyplot as plt
     import scanpy as sc
+    from anndata import AnnData
 
     a = make_paga("obs_score")
     original = inspect.getattr_static(AnnData, "X")
@@ -485,14 +486,15 @@ def test_unsupported_color_collisions_and_categorical_mixtures_fail_clearly(colo
         gsc.pl.paga(a, color=color, pos=POSITIONS, show=False)
 
 
+@pytest.mark.reference
 @pytest.mark.xfail(
     strict=True,
     raises=ValueError,
     reason="Scanpy 1.11.5 trims component colors but keeps full coordinates; recheck on an upstream fix.",
 )
 def test_direct_scanpy_component_entry_detects_an_upstream_fix():
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
     from matplotlib.collections import PathCollection
 
     a = make_paga("component")
@@ -518,8 +520,8 @@ def test_direct_scanpy_component_entry_detects_an_upstream_fix():
 def test_component_preserves_ids_sources_and_full_coordinate_cache(
     storage, supplied, monkeypatch
 ):
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     a = make_paga("component_score")
     matrix = a.uns["paga"]["connectivities"].asformat(storage)

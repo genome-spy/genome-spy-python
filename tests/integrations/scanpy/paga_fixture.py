@@ -218,3 +218,12 @@ def paga_reference(case):
     if case == "component_degree":
         options.update(color=[1, 5 / 7, 2 / 7], colorbar=False)
     return subset, options
+
+
+def make_compare():
+    """Return nonuniform groups and asymmetric coordinates with a distinct cached layout."""
+    a = make_paga("obs_score")
+    a.obsm["X_umap"] = np.column_stack(
+        [np.arange(a.n_obs) / 4, np.sin(np.arange(a.n_obs)), np.arange(a.n_obs) ** 2]
+    )
+    return a

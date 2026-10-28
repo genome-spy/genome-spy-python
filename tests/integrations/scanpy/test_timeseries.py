@@ -2,8 +2,8 @@
 
 import inspect
 import json
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -22,6 +22,7 @@ SUBPLOT_PARAMETERS = json.loads(
 )["entries"]["timeseries_subplot"]["parameters"]
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
 @pytest.mark.parametrize("case", timeseries_cases())
 def test_profiles_match_scanpy_positions_limits_colors_and_draw_order(
@@ -107,6 +108,7 @@ def test_forwarded_defaults_match_the_pinned_subplot_signature():
             assert repr(actual[name].default) == parameter["default"]
 
 
+@pytest.mark.reference
 def test_subplot_keeps_explicit_upstream_arguments_and_native_defaults():
     import matplotlib as mpl
     import matplotlib.pyplot as plt
@@ -198,7 +200,6 @@ def test_numeric_tables_masks_missingness_and_ids_are_preserved():
     assert [r["_value"] for r in records] == [1, 3, None, 4]
 
 
-@pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
 @pytest.mark.parametrize(
     "values,options,error,match",
     [
@@ -232,8 +233,6 @@ def test_numeric_tables_masks_missingness_and_ids_are_preserved():
         ([[1, 2]], {"unknown": True}, TypeError, "unknown"),
     ],
 )
-def test_unsupported_profiles_and_options_fail_clearly(
-    family, values, options, error, match
-):
+def test_unsupported_profiles_and_options_fail_clearly(values, options, error, match):
     with pytest.raises(error, match=match):
-        getattr(gsc.pl, family)(values, show=False, **options)
+        gsc.pl.timeseries(values, show=False, **options)

@@ -3,17 +3,21 @@
 from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root, pointer
-from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
+    point_coordinates,
+    pointer,
+    svg_root,
+)
+from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.paga_fixture import make_adjacency
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "case", ["default", "empty_tree", "missing", "constant", "singleton"]
 )
@@ -205,7 +209,7 @@ def test_tree_points_follow_matrix_zoom_pan_with_hover_and_values(page, tmp_path
 
 @pytest.mark.parametrize("zoom", [True, "xy"])
 def test_named_strips_keep_index_labels_aligned_and_legend_below_axis(page, zoom):
-    from tests.integrations.scanpy.browser.test_grid_interactions import position
+    from tests.integrations.scanpy.browser.interactions import position
 
     labels = ["Repeated long group", "Middle group", "Repeated long group"]
     chart = gsc.pl.paga_adjacency(
@@ -276,6 +280,7 @@ def test_hover_false_disables_matrix_and_tree_tooltips(page):
         assert not page.locator("table.attributes").is_visible()
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "case",
     ["default", "constant", "missing", "diagonal", "negative", "singleton_empty"],

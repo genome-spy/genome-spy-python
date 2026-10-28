@@ -17,14 +17,11 @@ DPI in these fixtures make comparisons reproducible. Native palette bins, text
 metrics and rasterization differences are checked with explicit test tolerances;
 registered overlays must not resize or fit images to hide discrepancies.
 
-Generated reference images, screenshots, overlays, HTML/PDF exports, recordings,
-benchmark observations and logs must stay in temporary directories or ignored
-local caches. Browser tests write through pytest's temporary paths. Benchmark
-scripts require an explicit `--output`; use a path outside the repository, e.g.:
-
-```sh
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --browser --output /private/tmp/dotplot.json
-```
+Generated reference images, screenshots, overlays, HTML/PDF exports, recordings
+and logs must stay in temporary directories or ignored local caches. Browser
+tests write through pytest's temporary paths. Allocation behavior is covered by
+small deterministic regression tests; the former manual benchmark scripts have
+been removed.
 
 The fixtures use original small synthetic inputs under this project's MIT license.
 Keep applicable source/data attribution when adding references. No downloaded

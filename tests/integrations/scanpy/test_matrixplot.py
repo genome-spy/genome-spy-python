@@ -2,18 +2,18 @@
 
 import inspect
 import json
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import points
-from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
 from genome_spy.integrations.scanpy import pl
+from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
 from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
+from tests.integrations.scanpy.helpers import points
 from tests.integrations.scanpy.matrixplot_fixture import matrixplot_cases
 
 sc = pytest.importorskip("scanpy")

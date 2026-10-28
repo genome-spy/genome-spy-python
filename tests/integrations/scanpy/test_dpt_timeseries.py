@@ -9,7 +9,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.dpt_fixture import make_dpt_profiles, dpt_profile_cases
+from tests.integrations.scanpy.dpt_fixture import dpt_profile_cases, make_dpt_profiles
 from tests.integrations.scanpy.helpers import leaf_marks
 
 pytest.importorskip("scanpy")
@@ -32,6 +32,7 @@ def test_signature_preserves_scanpy_and_adds_only_native_options():
     }
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("case", dpt_profile_cases())
 def test_profiles_order_limits_labels_and_boundaries_match_public_scanpy(
     case, monkeypatch

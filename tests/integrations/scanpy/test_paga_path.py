@@ -8,8 +8,8 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._paga.path_data import prepare_paga_path
-from tests.integrations.scanpy.paga_path_fixture import make_path, path_cases
 from tests.integrations.scanpy.helpers import leaf_marks
+from tests.integrations.scanpy.paga_path_fixture import make_path, path_cases
 
 pytest.importorskip("scanpy")
 
@@ -36,13 +36,12 @@ def test_signature_preserves_scanpy_defaults_without_matplotlib_axes():
     }
 
 
-@pytest.mark.parametrize("storage", ["dense", "csr", "csc"])
+@pytest.mark.reference
 @pytest.mark.parametrize("case", path_cases())
-def test_values_tracks_labels_and_return_data_match_public_scanpy(
-    storage, case, monkeypatch
-):
-    import scanpy as sc
+def test_values_tracks_labels_and_return_data_match_public_scanpy(case, monkeypatch):
+    storage = "csr"
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     options = path_cases()[case].copy()
     nodes, keys = (
@@ -149,10 +148,11 @@ def test_unsupported_and_invalid_cases_fail_clearly(options, error, match):
         gsc.pl.paga_path(make_path(), show=False, **options)
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize("options", [{"n_avg": 2}, {"annotations": ()}])
 def test_returned_table_matches_working_public_return_data_cases(options):
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     a = make_path()
     try:
@@ -167,14 +167,15 @@ def test_returned_table_matches_working_public_return_data_cases(options):
         plt.close("all")
 
 
+@pytest.mark.reference
 @pytest.mark.xfail(
     strict=True,
     raises=AttributeError,
     reason="Scanpy 1.11.5 calls .T on its unsmoothed pseudotime list; C16",
 )
 def test_c16_public_unsmoothed_return_data_detects_an_upstream_fix():
-    import scanpy as sc
     import matplotlib.pyplot as plt
+    import scanpy as sc
 
     try:
         try:
@@ -372,3 +373,23 @@ def test_backed_expression_rejects_before_reading_x(tmp_path, monkeypatch):
             gsc.pl.paga_path(backed, ["beta", "alpha"], ["g1", "g2"], show=False)
     finally:
         backed.file.close()
+
+
+@pytest.mark.parametrize("storage", ["dense", "csr", "csc"])
+@pytest.mark.parametrize("use_raw", [False, True])
+def test_path_storage_preserves_profiles_and_requested_source(storage, use_raw):
+    _, frame = gsc.pl.paga_path(
+        make_path(storage),
+        ["beta", "alpha"],
+        ["g2", "g1"],
+        n_avg=2,
+        normalize_to_zero_one=False,
+        use_raw=use_raw,
+        return_data=True,
+        show=False,
+    )
+    # Path order is cells 3, 0, 4, 1; each output averages two neighbors.
+    expected = np.array([[5.5, 5], [8.5, 2.5], [4.5, 4.5]])
+    np.testing.assert_allclose(frame[["g2", "g1"]], expected * (1 if use_raw else 3))
+    np.testing.assert_allclose(frame["groups"], [2, 2.5, 3])
+    np.testing.assert_allclose(frame["distance"], [0.4, 0.45, 0.3])

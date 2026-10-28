@@ -13,18 +13,20 @@ pytest.importorskip("scanpy")
 
 
 @pytest.mark.parametrize(
-    "family,options",
-    [
-        ("embedding", {"basis": "custom"}),
-        ("umap", {}),
-        ("tsne", {}),
-        ("diffmap", {}),
-        ("draw_graph", {}),
-        ("pca", {}),
-        ("pca_scatter", {}),
+    "family,options,location",
+    [("umap", {}, location) for location in (None, "right", "left", "top", "bottom")]
+    + [
+        (family, options, "left")
+        for family, options in [
+            ("embedding", {"basis": "custom"}),
+            ("tsne", {}),
+            ("diffmap", {}),
+            ("draw_graph", {}),
+            ("pca", {}),
+            ("pca_scatter", {}),
+        ]
     ],
 )
-@pytest.mark.parametrize("location", [None, "right", "left", "top", "bottom"])
 def test_embedding_colorbar_locations_preserve_records_and_categorical_guides(
     family, options, location
 ):

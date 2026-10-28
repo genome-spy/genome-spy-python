@@ -1,38 +1,26 @@
 """Native time-series point footprints, guides, hover, zoom and offline delivery."""
 
-from io import BytesIO
 import warnings
 import xml.etree.ElementTree as ET
+from io import BytesIO
 
 import numpy as np
-from PIL import Image
 import pytest
+from PIL import Image
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.browser.test_heatmap import hover_at
-from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
+    point_coordinates,
+    svg_root,
+)
+from tests.integrations.scanpy.browser.rendering import render, style_profile_reference
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
 
 
-def point_coordinates(page):
-    """Read exported circle centers to observe navigation without naming scales."""
-    return [
-        np.array([[float(p.get("cx")), float(p.get("cy"))] for p in group])
-        for group in svg_root(page).iter()
-        if group.get("data-mark-type") == "point" and group.get("clip-path")
-    ]
-
-
-def style_profile_reference(ax):
-    """Register stored positions using the reviewed native edge width and opacity."""
-    for artist in ax.collections:
-        artist.set_linewidths([0])
-        artist.set_alpha(0.8)
-
-
+@pytest.mark.reference
 @pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
 @pytest.mark.parametrize("case", timeseries_cases())
 @pytest.mark.parametrize("page", [1.5], indirect=True)
