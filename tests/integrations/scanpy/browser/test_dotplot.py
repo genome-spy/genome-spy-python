@@ -11,7 +11,7 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.dotplot_fixture import dotplot_cases
+from tests.integrations.scanpy.expression_fixtures import dotplot_cases
 from tests.integrations.scanpy.helpers import index_position
 
 REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"

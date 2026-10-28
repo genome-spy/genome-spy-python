@@ -1,6 +1,5 @@
 """Stored density semantics and reuse of Scanpy-compatible embedding preparation."""
 
-import inspect
 from copy import deepcopy
 
 import anndata as ad
@@ -8,25 +7,10 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.embedding_density_fixture import make_density
+from tests.integrations.scanpy.embedding_fixtures import make_density
 from tests.integrations.scanpy.helpers import points, units
 
 sc = pytest.importorskip("scanpy")
-
-
-def test_signature_preserves_scanpy_defaults_and_adds_native_controls():
-    actual = inspect.signature(gsc.pl.embedding_density).parameters
-    expected = inspect.signature(sc.pl.embedding_density).parameters
-    for name, p in expected.items():
-        if name in ("ax", "return_fig"):
-            assert name not in actual
-        else:
-            assert actual[name].kind == p.kind and actual[name].default == p.default
-    assert set(actual) - set(expected) == {"hover", "zoom", "obs_id", "width", "height"}
-    assert all(
-        actual[n].kind == inspect.Parameter.KEYWORD_ONLY
-        for n in set(actual) - set(expected)
-    )
 
 
 CASES = [

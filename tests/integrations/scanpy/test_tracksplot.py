@@ -1,9 +1,6 @@
 """Tracks retain Scanpy values and ordering while using native per-cell rects."""
 
-import inspect
-import json
 import warnings
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -12,8 +9,8 @@ from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy import pl
-from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.expression_fixtures import make_grouped_adata
+from tests.integrations.scanpy.expression_fixtures import make_heatmap_adata
 from tests.integrations.scanpy.helpers import units
 
 sc = pytest.importorskip("scanpy")
@@ -53,32 +50,6 @@ def records(chart):
             )
         )
     return pd.concat(tracks, ignore_index=True)
-
-
-def test_signature_preserves_upstream_and_keyword_only_controls():
-    pinned = json.loads(
-        Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
-    )
-    actual = inspect.signature(pl.tracksplot).parameters
-    parameters = pinned["entries"]["tracksplot"]["parameters"]
-    for parameter in parameters:
-        value = actual[parameter["name"]]
-        assert value.kind.name == parameter["kind"]
-        assert (
-            None if value.default is inspect.Parameter.empty else repr(value.default)
-        ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in parameters} == {
-        "hover",
-        "zoom",
-        "group_gap",
-        "spacing",
-        "width",
-        "height",
-    }
-    assert all(
-        actual[name].kind is inspect.Parameter.KEYWORD_ONLY
-        for name in ("hover", "zoom", "group_gap", "spacing", "width", "height")
-    )
 
 
 @pytest.mark.parametrize("group_gap,spacing", [(0, 0), (3, 6), (7.5, 2.5)])

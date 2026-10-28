@@ -18,8 +18,10 @@ from tests.integrations.scanpy.browser.interactions import (
     value_texts,
 )
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.fixture_support import adata as adata
-from tests.integrations.scanpy.fixture_support import metadata_adata as metadata_adata
+from tests.integrations.scanpy.embedding_fixtures import adata as adata
+from tests.integrations.scanpy.embedding_fixtures import (
+    metadata_adata as metadata_adata,
+)
 from tests.integrations.scanpy.helpers import units
 
 

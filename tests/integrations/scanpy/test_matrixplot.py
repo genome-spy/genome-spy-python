@@ -1,6 +1,5 @@
 """Matrixplot statistics, authoritative tables, contract and detached native tiles."""
 
-import inspect
 import json
 import warnings
 from pathlib import Path
@@ -12,9 +11,9 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy import pl
 from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
-from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
+from tests.integrations.scanpy.expression_fixtures import make_grouped_adata
 from tests.integrations.scanpy.helpers import points
-from tests.integrations.scanpy.matrixplot_fixture import matrixplot_cases
+from tests.integrations.scanpy.expression_fixtures import matrixplot_cases
 
 sc = pytest.importorskip("scanpy")
 
@@ -40,31 +39,6 @@ def chart(adata, **options):
 def table(chart):
     spec = chart.to_dict()
     return pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
-
-
-def test_signature_preserves_pinned_defaults_and_native_boundary():
-    reference = json.loads(
-        Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
-    )["entries"]["matrixplot"]["parameters"]
-    native = inspect.signature(gsc.pl.matrixplot).parameters
-    for parameter in reference:
-        name = parameter["name"]
-        if name in {"ax", "return_fig"}:
-            assert name not in native
-            continue
-        actual = native[name]
-        assert actual.kind.name == parameter["kind"]
-        assert (
-            None if actual.default is inspect.Parameter.empty else repr(actual.default)
-        ) == parameter["default"]
-    assert set(native) - {p["name"] for p in reference} == {
-        "hover",
-        "width",
-        "height",
-        "zoom",
-        "show_values",
-        "highlight",
-    }
 
 
 @pytest.mark.parametrize("case", matrixplot_cases())
@@ -171,7 +145,6 @@ def test_no_plotting_analysis_mutation_or_fraction_computation(adata, monkeypatc
         ({"return_fig": False}, TypeError, "return_fig"),
         ({"norm": object()}, NotImplementedError, "norm"),
         ({"vcenter": 0}, NotImplementedError, "vcenter"),
-        ({"save": "tiles.png"}, NotImplementedError, "save"),
         ({"shading": "auto"}, TypeError, "shading"),
         ({"edgecolor": "red", "edgecolors": "blue"}, TypeError, "edgecolor"),
         ({"linewidth": 1, "linewidths": 2}, TypeError, "linewidth"),
@@ -179,7 +152,6 @@ def test_no_plotting_analysis_mutation_or_fraction_computation(adata, monkeypatc
         ({"log": "yes"}, TypeError, "log"),
         ({"hover": "yes"}, TypeError, "hover"),
         ({"swap_axes": None}, TypeError, "swap_axes"),
-        ({"show": 1}, TypeError, "show"),
     ],
 )
 def test_unsupported_options_fail_before_dependencies(

@@ -1,28 +1,19 @@
 # Scanpy reference fixtures
 
-These JSON files are test inputs and expected results, not run reports. Python
-and browser tests read their numeric values, API contracts, labels, domains,
-geometry and provenance. Keep them when cleaning generated artifacts.
+These JSON files contain deliberate numerical and geometry expectations. They
+are not generated run reports. Tests never overwrite them. Review changes against
+upstream behavior before accepting new expectations.
 
-Tracked fixtures: `api.json`, `clustermap.json`, `dendrogram.json`, `dotplot.json`, `embedding.json`, `grouped.json`, `heatmap.json`, `matrix.json`, `matrixplot.json`, `ranked.json`, `scatter.json`, `umap.json`.
+`api.json` keeps the public callable inventory and four legacy signatures that
+Scanpy 1.12 hides behind forwarding wrappers. Other signatures are checked directly
+against installed Scanpy.
 
-Reference generation uses the pinned Scanpy/scientific stack in `pyproject.toml`
-and `uv.lock`. The original inputs and explicit `generate_*_references.py` scripts
-live in the parent directory. Run generators deliberately; tests never refresh
-tracked references. Inspect changes against upstream behavior before accepting them.
+Family input modules live in the parent directory. The browser image helper uses
+the pinned Scanpy/scientific stack in `pyproject.toml` and `uv.lock`, with 100 DPI
+display and 150 DPI export. Registered comparisons retain their original crops;
+tests must not resize or fit images to hide differences.
 
-Generators may inspect Matplotlib artists for the independent Scanpy reference.
-Production preparation does not. Source hashes, version metadata and display/export
-DPI in these fixtures make comparisons reproducible. Native palette bins, text
-metrics and rasterization differences are checked with explicit test tolerances;
-registered overlays must not resize or fit images to hide discrepancies.
-
-Generated reference images, screenshots, overlays, HTML/PDF exports, recordings
-and logs must stay in temporary directories or ignored local caches. Browser
-tests write through pytest's temporary paths. Allocation behavior is covered by
-small deterministic regression tests; the former manual benchmark scripts have
-been removed.
-
-The fixtures use original small synthetic inputs under this project's MIT license.
-Keep applicable source/data attribution when adding references. No downloaded
-analysis dataset or upstream tutorial image belongs in this directory.
+Images, overlays, chart exports, recordings and logs stay in temporary directories.
+There are no report writers, automatic fixture regenerators or manual benchmarks.
+The small synthetic inputs use this project's MIT license. No downloaded dataset
+or upstream tutorial image belongs here.

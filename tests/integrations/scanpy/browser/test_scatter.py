@@ -9,7 +9,10 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
 from tests.integrations.scanpy.helpers import name_embedding_scales, points
-from tests.integrations.scanpy.scatter_fixture import make_scatter_adata, scatter_cases
+from tests.integrations.scanpy.embedding_fixtures import (
+    make_scatter_adata,
+    scatter_cases,
+)
 
 REFERENCE = json.loads(
     (Path(__file__).parents[1] / "fixtures/scatter.json").read_text()

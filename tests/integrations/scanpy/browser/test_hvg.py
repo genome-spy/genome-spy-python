@@ -9,7 +9,7 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
 from tests.integrations.scanpy.helpers import units
-from tests.integrations.scanpy.hvg_fixture import make_hvg_result
+from tests.integrations.scanpy.qc_fixtures import make_hvg_result
 
 
 @pytest.mark.reference

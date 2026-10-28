@@ -1,18 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "numpy": "2.4.6",
-    "pandas": "2.3.3",
-    "matplotlib": "3.11.2"
-  },
-  "display_dpi": 100,
-  "export_dpi": 150,
-  "font": "DejaVu Sans",
-  "native_font": "Lato Regular",
-  "input_sha256": {
-    "grouped_fixture.py": "7ff4c0599409cf7b2b80510fb76b12005c1ac296d8f9b829ac63729c290e7ef4",
-    "dotplot_fixture.py": "2c0830debd282b4ae4d96511b2cede17413e16b9e97c277f6b0319f8d07940eb"
-  },
   "cases": {
     "default": {
       "plot_size": [
@@ -116,8 +102,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "7d72d84a58864b78ce4818a2ab1196c7d959935cbda63d3f4b191ed0eb091508"
+      "dot_max": 1.0
     },
     "reordered": {
       "plot_size": [
@@ -221,8 +206,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "7a881acdd348c9447c0843c8156f3026fc7e87e40bce202c402929668dd82fc3"
+      "dot_max": 1.0
     },
     "log": {
       "plot_size": [
@@ -326,8 +310,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "58c02a8b9cd235127adcdd27236e8aee7299006e8c61639340019852f0226a60"
+      "dot_max": 1.0
     },
     "expressed": {
       "plot_size": [
@@ -431,8 +414,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "cdb72872c0bfd3e1e51665335677a89317c1b97fe1be2c8fef95e49cf594eb7c"
+      "dot_max": 1.0
     },
     "scaled": {
       "plot_size": [
@@ -536,8 +518,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "182c339c57e4e6d594d48d6cac25a373711bcb743c9e515f907e92588b2492e5"
+      "dot_max": 1.0
     },
     "swapped_scaled": {
       "plot_size": [
@@ -641,8 +622,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "52554150e6f83a65de76fe61db4ffc509346c2df56b9b63834b25a221ad7a8d9"
+      "dot_max": 1.0
     },
     "supplied": {
       "plot_size": [
@@ -746,8 +726,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "17a08e8e52f49785cf7f70ae3e23564bd50a6dc8fcad7c5bac8efaa08e97540b"
+      "dot_max": 1.0
     },
     "supplied_scaled": {
       "plot_size": [
@@ -851,8 +830,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "59d688569d941775bbbe22ef279d22b736bbc454579653ce6c3c2c9369fff798"
+      "dot_max": 1.0
     },
     "clipped": {
       "plot_size": [
@@ -955,8 +933,7 @@
         "80"
       ],
       "dot_min": 0.4,
-      "dot_max": 0.8,
-      "full_sha256": "2f706bbe15589a095023b2425727cebede8b795cdd14ac58af54e88f8b3c7de5"
+      "dot_max": 0.8
     },
     "repeated": {
       "plot_size": [
@@ -1059,8 +1036,7 @@
         "70"
       ],
       "dot_min": 0,
-      "dot_max": 0.7,
-      "full_sha256": "c1409c2f29fa7ff9fc8e265a446460b98c22a5ed3d214486dbb54224de46cefb"
+      "dot_max": 0.7
     },
     "constant_colors": {
       "plot_size": [
@@ -1164,8 +1140,7 @@
         "100"
       ],
       "dot_min": 0,
-      "dot_max": 1.0,
-      "full_sha256": "6f366339411c32e7430d652bcccb0f328a93c42c2fcf82c4aecfb55b08d3b896"
+      "dot_max": 1.0
     }
   }
 }

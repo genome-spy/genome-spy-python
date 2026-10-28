@@ -13,12 +13,12 @@ import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import position, value_texts
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
-from tests.integrations.scanpy.dendrogram_fixture import (
+from tests.integrations.scanpy.expression_fixtures import make_cluster_adata
+from tests.integrations.scanpy.expression_fixtures import (
     make_tree_adata,
     tree_plot_cases,
 )
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.expression_fixtures import make_heatmap_adata
 from tests.integrations.scanpy.helpers import (
     index_position,
     leaf_marks,

@@ -14,7 +14,7 @@ from tests.integrations.scanpy.browser.interactions import (
     svg_root,
 )
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.paga_fixture import make_adjacency
+from tests.integrations.scanpy.paga_fixtures import make_adjacency
 
 
 @pytest.mark.reference

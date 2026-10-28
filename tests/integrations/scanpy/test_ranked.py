@@ -1,10 +1,8 @@
 """Stored ranking semantics, native panel bounds and expression-plot delegation."""
 
-import inspect
 import json
 import warnings
 from copy import deepcopy
-from hashlib import sha256
 from pathlib import Path
 
 import numpy as np
@@ -292,26 +290,6 @@ def test_ranking_indices_and_extreme_gap_match_scanpy():
     assert panels[0]["encoding"]["x"]["axis"]["labels"] is False
 
 
-@pytest.mark.parametrize(
-    "family",
-    ["ranking", "rank_genes_groups", *[f"rank_genes_groups_{f}" for f in FAMILIES]],
-)
-def test_signatures_match_scanpy_except_renderer_objects_and_native_controls(family):
-    upstream = inspect.signature(getattr(sc.pl, family)).parameters
-    native = inspect.signature(getattr(gsc.pl, family)).parameters
-    for name, parameter in upstream.items():
-        if name in {"ax", "return_fig"}:
-            assert name not in native
-        else:
-            assert native[name].kind == parameter.kind
-            assert native[name].default == parameter.default
-    assert all(
-        p.kind is inspect.Parameter.KEYWORD_ONLY
-        for name, p in native.items()
-        if name not in upstream
-    )
-
-
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 def test_invalid_metric_colors_fail_instead_of_falling_back_to_expression(family):
     with pytest.raises(ValueError, match="values_to_plot"):
@@ -325,12 +303,6 @@ def test_invalid_metric_colors_fail_instead_of_falling_back_to_expression(family
 def test_rank_data_and_guides_match_scanpy_with_documented_pca_label_space(case):
     manifest = json.loads(
         (Path(__file__).with_name("fixtures") / "ranked.json").read_text()
-    )
-    assert (
-        manifest["input_sha256"]
-        == sha256(
-            Path(__file__).with_name("ranked_fixture.py").read_bytes()
-        ).hexdigest()
     )
     reference = manifest["cases"][case]["panels"]
     family, args, options = ranked_cases()[case]

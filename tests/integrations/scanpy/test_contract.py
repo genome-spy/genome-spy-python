@@ -3,9 +3,11 @@
 import inspect
 import json
 import re
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest
+from packaging.version import Version
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
@@ -60,7 +62,7 @@ def test_progress_inventory_matches_the_pinned_api_and_available_exports():
 def test_all_plots_share_native_display_and_autosave_rules(monkeypatch, family):
     show, autoshow = True, False
     sc = pytest.importorskip("scanpy")
-    from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
+    from tests.integrations.scanpy.expression_fixtures import make_tree_adata
 
     a = make_tree_adata()
     a.obsm["X_umap"] = a.X[:, :2].copy()
@@ -94,51 +96,51 @@ def test_all_plots_share_native_display_and_autosave_rules(monkeypatch, family):
 
         a, options = make_ranked_adata(), {}
     if family == "pca_overview":
-        from tests.integrations.scanpy.pca_fixture import make_pca_adata
+        from tests.integrations.scanpy.embedding_fixtures import make_pca_adata
 
         a, options = make_pca_adata(), {}
     if family in {"highly_variable_genes", "filter_genes_dispersion"}:
-        from tests.integrations.scanpy.hvg_fixture import make_hvg_result
+        from tests.integrations.scanpy.qc_fixtures import make_hvg_result
 
         a, options = make_hvg_result("records"), {}
     if family == "highest_expr_genes":
-        from tests.integrations.scanpy.highest_expr_fixture import make_counts
+        from tests.integrations.scanpy.qc_fixtures import make_counts
 
         a, options = make_counts(), {}
     if family == "scrublet_score_distribution":
-        from tests.integrations.scanpy.scrublet_fixture import make_scrublet
+        from tests.integrations.scanpy.qc_fixtures import make_scrublet
 
         a, options = make_scrublet(), {}
     if family == "embedding_density":
-        from tests.integrations.scanpy.embedding_density_fixture import make_density
+        from tests.integrations.scanpy.embedding_fixtures import make_density
 
         a, options = make_density(), {}
     if family == "sim":
-        from tests.integrations.scanpy.sim_fixture import make_sim
+        from tests.integrations.scanpy.profile_fixtures import make_sim
 
         a, options = make_sim(), {}
     if family == "dpt_groups_pseudotime":
-        from tests.integrations.scanpy.dpt_fixture import make_dpt
+        from tests.integrations.scanpy.profile_fixtures import make_dpt
 
         a, options = make_dpt(), {}
     if family == "dpt_timeseries":
-        from tests.integrations.scanpy.dpt_fixture import make_dpt_profiles
+        from tests.integrations.scanpy.profile_fixtures import make_dpt_profiles
 
         a, options = make_dpt_profiles(), {}
     if family == "paga":
-        from tests.integrations.scanpy.paga_fixture import make_paga
+        from tests.integrations.scanpy.paga_fixtures import make_paga
 
         a, options = make_paga(), {}
     if family == "paga_compare":
-        from tests.integrations.scanpy.paga_fixture import make_compare
+        from tests.integrations.scanpy.paga_fixtures import make_compare
 
         a, options = make_compare(), {"legend_fontweight": "normal"}
     if family == "paga_path":
-        from tests.integrations.scanpy.paga_path_fixture import make_path
+        from tests.integrations.scanpy.paga_fixtures import make_path
 
         a, options = make_path(), {"nodes": ["beta", "alpha"], "keys": ["g1", "g2"]}
     if family == "paga_adjacency":
-        from tests.integrations.scanpy.paga_fixture import make_adjacency
+        from tests.integrations.scanpy.paga_fixtures import make_adjacency
 
         a, options = make_adjacency(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
@@ -212,34 +214,6 @@ def test_shared_display_validation_precedes_optional_imports(
         error, match=f"gsc.pl.{context}.*{'show' if 'show' in options else 'save'}"
     ):
         getattr(pl, family)(*args, **options)
-
-
-def test_public_defaults_match_the_pinned_effective_signature() -> None:
-    reference = json.loads((FIXTURES / "api.json").read_text())["entries"]["umap"][
-        "parameters"
-    ]
-    native = inspect.signature(gsc.pl.umap).parameters
-    for p in reference:
-        name = p["name"]
-        if name in {"ax", "return_fig"}:
-            assert name not in native
-        else:
-            actual = native[name]
-            assert actual.kind.name == p["kind"]
-            default = (
-                None
-                if actual.default is inspect.Parameter.empty
-                else repr(actual.default)
-            )
-            assert default == p["default"]
-    assert set(native) - {p["name"] for p in reference} == {
-        "hover",
-        "zoom",
-        "selection",
-        "obs_id",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.parametrize(
@@ -336,3 +310,81 @@ def test_shared_finish_obeys_explicit_show_and_scanpy_default(
     expected = autoshow if show is None else show
     assert displayed == ([chart] if expected else [])
     assert result is (None if expected else chart)
+
+
+def test_reference_inventory_matches_the_installed_public_api():
+    reference = json.loads((FIXTURES / "api.json").read_text())["entries"]
+    current = {
+        name: {"kind": "class" if inspect.isclass(value) else "function"}
+        for name, value in vars(sc.pl).items()
+        if not name.startswith("_")
+        and callable(value)
+        and getattr(value, "__module__", "").startswith("scanpy")
+    }
+    additions = {"dogplot"} if Version(version("scanpy")) >= Version("1.12") else set()
+    assert current.keys() == reference.keys() | additions
+    assert {name: current[name] for name in reference} == reference
+
+
+@pytest.mark.parametrize(
+    "family", [name for name in pl.__all__ if name != "EmbeddingSummary"]
+)
+def test_public_signatures_preserve_scanpy_contract(family):
+    upstream = inspect.signature(getattr(sc.pl, family)).parameters
+    if "args" in upstream:
+        # Scanpy 1.12 hides these deprecated signatures behind forwarding wrappers.
+        reference = json.loads((FIXTURES / "api.json").read_text())
+        assert list(upstream) == [
+            "args",
+            "params" if family == "pca_scatter" else "kwargs",
+        ]
+        parameters = reference["legacy_parameters"][family]
+    else:
+        parameters = [
+            {
+                "name": p.name,
+                "kind": p.kind.name,
+                "default": None
+                if p.default is inspect.Parameter.empty
+                else repr(p.default),
+            }
+            for p in upstream.values()
+        ]
+    native = inspect.signature(getattr(pl, family)).parameters
+    presentation = (
+        {
+            "colorbar_title": repr("Mean expression"),
+            "size_title": repr("Cells expressing (%)"),
+        }
+        if family == "dotplot"
+        else {}
+    )
+    for parameter in parameters:
+        name = parameter["name"]
+        if name in {"ax", "cax", "return_fig"}:
+            assert name not in native
+            continue
+        if name == "group_colors" and family in {"dotplot", "DotPlot"}:
+            assert (
+                parameter["kind"] == "KEYWORD_ONLY" and parameter["default"] == "None"
+            )
+            continue  # Rejection is tested separately; no native group colormap support.
+        actual = native[name]
+        assert actual.kind.name == parameter["kind"]
+        default = (
+            None if actual.default is inspect.Parameter.empty else repr(actual.default)
+        )
+        assert default == presentation.get(name, parameter["default"]), (family, name)
+    # Only positional order changes how an existing call is interpreted.
+    positional = {"POSITIONAL_ONLY", "POSITIONAL_OR_KEYWORD"}
+    expected_order = [p["name"] for p in parameters if p["kind"] in positional]
+    assert [
+        p.name for p in native.values() if p.kind.name in positional
+    ] == expected_order
+    upstream_names = {p["name"] for p in parameters}
+    for name, parameter in native.items():
+        if name not in upstream_names:
+            assert parameter.kind in (
+                inspect.Parameter.KEYWORD_ONLY,
+                inspect.Parameter.VAR_KEYWORD,
+            ), (family, name)

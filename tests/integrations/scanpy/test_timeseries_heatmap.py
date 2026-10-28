@@ -1,9 +1,5 @@
 """Supplied profile order, cropped limits and the pinned heatmap contract."""
 
-import inspect
-import json
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -13,28 +9,6 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks, points
 
 pytest.importorskip("scanpy")
-
-
-def test_signature_preserves_upstream_defaults_and_adds_only_native_options():
-    upstream = json.loads(
-        Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
-    )["entries"]["timeseries_as_heatmap"]["parameters"]
-    actual = inspect.signature(gsc.pl.timeseries_as_heatmap).parameters
-    for parameter in upstream:
-        value = actual[parameter["name"]]
-        assert value.kind.name == parameter["kind"]
-        assert (
-            None if value.default is inspect.Parameter.empty else repr(value.default)
-        ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in upstream} == {
-        "show",
-        "save",
-        "hover",
-        "zoom",
-        "show_values",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.reference

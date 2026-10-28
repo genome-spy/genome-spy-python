@@ -9,7 +9,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.paga_fixture import (
+from tests.integrations.scanpy.paga_fixtures import (
     POSITIONS,
     make_paga,
     paga_cases,
@@ -17,29 +17,6 @@ from tests.integrations.scanpy.paga_fixture import (
 )
 
 pytest.importorskip("scanpy")
-
-
-def test_signature_retains_scanpy_defaults_except_omitted_matplotlib_axes():
-    import scanpy as sc
-
-    actual = inspect.signature(gsc.pl.paga).parameters
-    expected = inspect.signature(sc.pl.paga).parameters
-    for key, param in expected.items():
-        if key in {"ax", "cax"}:
-            assert key not in actual
-        else:
-            assert actual[key].kind == param.kind
-            assert actual[key].default == param.default
-    assert actual.keys() - expected.keys() == {
-        "hover",
-        "zoom",
-        "width",
-        "height",
-        "palette",
-        "edge_slider",
-        "show_node_labels",
-        "kwargs",
-    }
 
 
 @pytest.mark.reference

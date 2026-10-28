@@ -12,15 +12,15 @@ from tests.integrations.scanpy.browser.interactions import (
 )
 from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.hvg_fixture import make_hvg_result
-from tests.integrations.scanpy.paga_fixture import (
+from tests.integrations.scanpy.qc_fixtures import make_hvg_result
+from tests.integrations.scanpy.paga_fixtures import (
     POSITIONS,
     make_adjacency,
     make_compare,
     make_paga,
 )
-from tests.integrations.scanpy.paga_path_fixture import make_path
-from tests.integrations.scanpy.sim_fixture import make_sim
+from tests.integrations.scanpy.paga_fixtures import make_path
+from tests.integrations.scanpy.profile_fixtures import make_sim
 
 
 def plot_points(page):

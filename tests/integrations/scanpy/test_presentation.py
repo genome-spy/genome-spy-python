@@ -8,8 +8,8 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks, points
-from tests.integrations.scanpy.hvg_fixture import make_hvg_result
-from tests.integrations.scanpy.paga_fixture import make_adjacency, make_compare
+from tests.integrations.scanpy.qc_fixtures import make_hvg_result
+from tests.integrations.scanpy.paga_fixtures import make_adjacency, make_compare
 
 pytest.importorskip("scanpy")
 
@@ -94,7 +94,7 @@ def test_compare_uses_small_default_cells_and_respects_explicit_sizes():
     ],
 )
 def test_simulation_controls_reject_modes_without_ordered_run_coordinates(options):
-    from tests.integrations.scanpy.sim_fixture import make_sim
+    from tests.integrations.scanpy.profile_fixtures import make_sim
 
     with pytest.raises(NotImplementedError, match="gsc.pl.sim"):
         gsc.pl.sim(make_sim(), show=False, **options)
@@ -102,7 +102,7 @@ def test_simulation_controls_reject_modes_without_ordered_run_coordinates(option
 
 @pytest.mark.parametrize("alias", ["color", "colors"])
 def test_edge_slider_rejects_degree_colors_instead_of_showing_stale_statistics(alias):
-    from tests.integrations.scanpy.paga_fixture import make_paga
+    from tests.integrations.scanpy.paga_fixtures import make_paga
 
     with pytest.raises(NotImplementedError, match="graph-degree"):
         gsc.pl.paga(

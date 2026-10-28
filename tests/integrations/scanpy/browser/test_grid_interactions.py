@@ -19,8 +19,8 @@ from tests.integrations.scanpy.browser.interactions import (
     value_texts,
 )
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.expression_fixtures import make_cluster_adata
+from tests.integrations.scanpy.expression_fixtures import make_heatmap_adata
 from tests.integrations.scanpy.helpers import tree_segments
 
 
@@ -251,18 +251,18 @@ def test_dense_values_appear_after_zoom_and_do_not_block_hover(page, family, tmp
             chart = getattr(gsc.pl, family)(
                 a, list(a.var_names), "group", standard_scale="var", **common
             )
-    bounds = render(page, chart)
+    bounds = render(page, chart, scale_prefix=family)
     assert not value_texts(svg_root(page))
     pointer(page, bounds)
     page.mouse.wheel(0, -800)
-    page.wait_for_timeout(180)
+    wait_for_navigation(page, family)
     if family == "heatmap":
         # Fixed group gaps leave less room for the thirty single-cell rows.
         for _ in range(5):
             if value_texts(svg_root(page)):
                 break
             page.mouse.wheel(0, -800)
-            page.wait_for_timeout(700)
+            wait_for_navigation(page, family)
     labels = value_texts(svg_root(page))
     assert labels
     label = min(

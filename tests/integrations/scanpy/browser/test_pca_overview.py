@@ -10,7 +10,7 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to, pointer
 from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import name_embedding_scales, points, units
-from tests.integrations.scanpy.pca_fixture import make_pca_adata
+from tests.integrations.scanpy.embedding_fixtures import make_pca_adata
 
 
 def rank_texts(svg):

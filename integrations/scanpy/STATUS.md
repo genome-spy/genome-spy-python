@@ -17,7 +17,7 @@ Shared helpers stay at the root and namespace imports remain lightweight.
 The runtime and optional dependency accept Scanpy >=1.11.5,<1.13, excluding
 prereleases. Compatibility covers the pinned 1.11.5 environment and Scanpy 1.12.4
 on Python 3.12 with current scientific dependencies. The reference environment,
-generators and frozen manifests stay pinned to 1.11.5. A separate CI job checks
+image comparisons and legacy reference signatures stay pinned to 1.11.5. A separate CI job checks
 1.12.4 without changing those references.
 
 Swapped dotplot scaling follows the installed Scanpy version through the shared
@@ -34,8 +34,8 @@ states below describe coverage; they do not require a preview release label.
 ### Current work queue
 
 1. Complete the [test cleanup and CI selection](PLAN.md#test-cleanup-and-ci-selection)
-   before publication. Test cleanup is implemented and locally verified in
-   `87ce75d`; fast/full CI selections and release gating are configured below.
+   before publication. The initial CI-selection cleanup is followed by a deeper file, fixture and
+   duplicate-coverage cleanup; current verification is recorded below.
    [PR #20](https://github.com/genome-spy/genome-spy-python/pull/20) remains open.
    Verify the updated hosted selections before closing this maintenance slice.
    Merge and publication still require approval.
@@ -63,90 +63,63 @@ Scanpy versions: 782 passed and one existing expected failure each.
 
 ## Test cleanup audit
 
-At audit start the suite had 130 Python files and 29,419 lines: 526 Python test
-functions expanded to 2,385 cases, and 164 browser functions expanded to 634. The 21 small data
-fixtures and 11 reference generators are reproduction inputs. Seven manual
-benchmark scripts contain 1,237 lines and do not run in CI. Reference images are
-rendered on demand for ten families; grouped expectations have a separate numeric
-generator. The planned cleanup distinguishes these uses rather than deleting
-all data-generation code.
+The initial pass removed seven manual benchmarks, reduced repeated parameter
+grids and notebook assertions, and introduced fast/reference/workflow selections.
+The deeper pass also reduces the maintained file and reference footprint:
 
-The audit found large repeated option grids, two workflow tests containing 900
-lines, and 111 test-module imports across 41 non-benchmark files. The cleanup
-removes all seven benchmark programs and test-module helper imports; shared
-rendering, gestures and fixture inputs have explicit support modules. Display,
-colorbar, sparse adjacency/path, timeseries rejection and heatmap navigation
-matrices now test independent axes separately. The CSC/LIL, filtered-view,
-dense/raw allocation, tie-order and observed interaction regressions remain.
-
-The benchmark invariants retain these owners: embedding access in `test_umap` and
-`test_scatter`; grouped preparation in `test_grouped_data` and `test_heatmap`;
-clustering access in `test_clustermap`; metadata-only rankings/PCA in `test_ranked`,
-`test_pca_loadings` and `test_pca_variance_ratio`; one-column normalization access
-in `test_highest_expr`; metadata-only HVG/Scrublet in `test_hvg` and `test_scrublet`.
-Corresponding browser tests retain paint, hover, navigation and slider checks.
-Timing/heap reports are retired as acceptance inputs, with no replacement timing
-thresholds. Detailed collection data remains temporary, outside Git.
-
-`reference`, `workflow` and `smoke` are strict pytest markers. PR jobs select fast
-checks on both Scanpy versions and browser smoke once. Main, full dispatch and
-release include the complete retained checks; release explicitly sets
-`full_scanpy: true`. Browser checks reuse Chromium with isolated contexts.
-Local verification is complete; hosted CI selection verification remains open.
-
-| Measure | Before | After |
+| Measure | Before deeper cleanup | After |
 | --- | ---: | ---: |
-| Integration Python files / lines | 130 / 29,419 | 127 / 27,586 |
-| Integration collected cases | 3,019 | 2,703 |
-| Dependency-free cases moved into base CI | — | 12 |
-| Net case combinations removed, excluding relocation | — | 304 |
-| Workflow test lines | 900 | 136 |
-| Manual benchmark programs | 7 | 0 |
-| Imports from other integration test modules | 111 | 0 |
-| Normal PR Scanpy case executions | 11,504 | 3,584 |
+| Integration test/support/fixture files | 140 | 108 |
+| Python files | 127 | 95 |
+| Python lines | 27,586 | 25,846 |
+| JSON fixture lines | 18,504 | 13,574 |
+| Separate reference generators | 11 | 0 |
+| Image-only reference helpers | 0 | 1 |
+| Total PR files | 252 | 220 |
 
-Current selections contain 1,764 fast Python cases, 321 reference cases, two
-workflows, 56 browser smoke cases and 616 full browser cases. The 12 relocated
-import/extra checks are retained, not counted as deleted coverage. The normal PR
-reduction is about 69%; full releases retain version and reference checks.
+Twenty-three tiny data/fixture modules are consolidated into five family modules;
+ranked inputs remain separate. PCA diagnostics and shared grid options each have
+one test module. Every public entry still has a signature contract check, now
+against installed Scanpy. Only four legacy aliases retain frozen parameters.
+Unused image checksums, source hashes, version/style metadata, generator reports
+and bookkeeping-only tests are removed. The eleven numerical fixtures retain
+identical values and geometry. All 123 temporary reference images were verified
+pixel-identical to the previous exports, with unchanged registration/tolerances.
 
-Validation covered every retained case across selections and focused reruns:
+Repeated display checks and invalid feedback cross-products now have shared
+owners plus public routing checks. Unsupported triangle-shape experiments are
+retired; explicit rejection remains. Actual legend clipping and C13/C18 renderer
+regressions remain, including strict expected failures that detect upstream fixes.
+The CSC/LIL, sparse orientation, filtered-view, dense/raw allocation, source
+precedence, mutation, stable selection, tie-order and observed interaction tests
+remain. Small allocation regressions replace the removed timing/heap reports.
 
-- Scanpy 1.11.5 Python: 2,085 passed, two existing expected failures.
-- Scanpy 1.12.4 Python: 2,082 passed, five existing expected failures, including
-  the three upstream automatic-tree-layout checks retained in the fast suite.
-- Scanpy 1.11.5 browser: 602 passed, 14 existing expected failures. The full
-  reference/non-smoke selection took 27m24s; smoke took 4m02s.
-- Scanpy 1.12.4 interaction selection: 59 passed, three existing expected failures.
-- Affected docs browser checks: 42 passed. Base-only suite: 407 passed, nine
-  optional skips and 327 deselected docs/codegen checks; final collection passed.
-- Initial fast selections (1,736 cases, before final storage/source additions)
-  took 4m52s and 4m27s respectively. The final additional and strengthened
-  regressions passed on both versions. These are local observations, not CI limits.
-- Ruff lint/format, lock consistency, CI/release YAML checks and actionlint passed.
-  Frozen input sources and numerical/API JSON were not regenerated or changed.
+Current collection: 1,739 fast Python cases, 321 live-reference cases, two
+workflows and 608 browser cases, including 56 smoke cases. The new collection
+still exercises the complete retained suite when markers are not filtered.
+PR jobs run fast checks on both Scanpy versions and browser smoke once. Main,
+full dispatch and release run the full selections; release sets `full_scanpy`.
+Base jobs test lightweight imports and missing extras without the scientific suite.
 
-Reusing Playwright exposed a nested-event-loop conflict in the async widget
-brushing test under the current stack. It now uses the same synchronous API and
-isolated page fixture as the other checks; drag/count/trait/offline assertions
-are unchanged. No loop patch, new dependency or production change was introduced.
-The 42 affected docs checks use the detached helpers too, with an explicit
-missing-Scanpy guard where a test previously relied on an import side effect.
+Local validation covered all retained checks:
 
-The preceding hosted full run exposed five remaining browser assertions tied to
-Mac PCA tie order and two ruler assertions that measured an unfinished zoom.
-Browser ranking checks now reuse the local Scanpy label oracle; hover expectations
-follow that same order. Grid checks share the existing scale-stability wait and
-compare rulers with the actual probed pointer. No geometric tolerance changed.
-All 88 checks across ranked, grid interaction and heatmap browser modules passed
-after this follow-up. The recorded hosted failures remain a full-run verification
-gate; moving references out of PR checks does not count as resolving that gate.
+- Pinned Python suite: 2,058 passed, two existing expected failures. Both real-data
+  workflow notebooks also passed.
+- Scanpy 1.12.4: all 2,055 non-workflow Python cases verified, with five existing
+  expected failures. After correcting a new overstrict keyword-order assertion,
+  all 204 shared contract checks passed again on both versions.
+- Pinned browser suite: 602 retained cases verified, six existing expected
+  failures. The grid module was rerun after replacing a fixed zoom delay with
+  the existing stable-navigation helper; label/hover assertions are unchanged.
+- Base-only suite: 407 passed, nine optional skips and 327 docs/codegen checks
+  deselected. One build check needed the writable test cache; its rerun passed.
+- All 123 reference exports match previous pixels exactly; all eleven numerical
+  fixtures retain identical values/geometry. Lint, format, lock consistency and
+  collection passed. No production Python or public API changed.
 
-Both notebook workflows ran on both Scanpy versions. The long JupyterLab render
-commands remain in full CI; they were not repeated locally because their notebook,
-widget and rendering sources did not change. Generated images, reports and logs
-remain temporary. Keep this maintenance slice open until the hosted configuration
-passes; then retain commands in README and shorten the completed working plan.
+The refreshed hosted run remains the clearance gate. Keep this maintenance slice
+open until its configured jobs pass. Generated images, reports, inventories, logs
+and notebook outputs stay outside Git.
 
 ## Milestones
 
@@ -341,10 +314,10 @@ affected slice.
 | C08 | Native index slots plus label views retain repeated names; Core 1.2 axes lack arbitrary index-to-name mapping | Grouped grids, ranked plots and named PAGA connectivity strips | Shared slots and views align on zoom; named PAGA strips collect their key after the full axis. Recheck native axis name mapping before removing label views. |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |
 | C10 | Heatmap/clustermap bands and native gap navigation verified in their own viewports. | Closed for M05.f native WebGL/notebook/HTML scope | Native clipped rects use the released Core; no patched bundle or custom listeners. C12 remains independent. |
-| C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | [Minimal native regression](../../tests/integrations/scanpy/browser/test_native_legend_extent.py) strictly xfails on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
+| C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | The native column-clipping regression is retained with the other [guide checks](../../tests/integrations/scanpy/browser/test_colorbar.py), strictly xfailed on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
 | C12 | Core 1.2 SVG export bends `linkShape="line"` control points. | Upstream straight-link export; adapter trees now use verified orthogonal links. | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) still strictly xfails. No local bundle patch; recheck on a released fix. The [orthogonal renderer](#verification) passes complete-path SVG checks independently. |
 | C13 | A viewport containing only zero-height merges gives a degenerate `[0, 0]` height domain, centering zero in the track. | Native fitting of tied subtrees within larger trees | Minimal native regression in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) strictly xfails on Core 1.2.0. Whole zero-height trees retain their previous nonzero range. Recheck a released native solution; no custom browser logic or patched bundle. |
-| C14 | Native equilateral triangles differ from Scanpy's equal-width/height triangles; uniform sizing cannot match both dimensions. | Triangular markers in M07.d | [Native SVG/WebGL comparison](../../tests/integrations/scanpy/browser/test_native_triangles.py) strictly xfails for four orientations, with/without strokes. Recheck a released matching shape or native aspect control, including guides and outlines, before enabling support; no custom geometry. |
+| C14 | Native equilateral triangles differ from Scanpy's equal-width/height triangles; uniform sizing cannot match both dimensions. | Triangular markers in M07.d | The native SVG/WebGL investigation found mismatched bounds in all four orientations, with/without strokes. Its experimental probes were retired; unsupported triangles remain explicitly rejected. Recheck a released matching shape or native aspect control, including guides and outlines, before enabling support; no custom geometry. |
 | C15 | Scanpy 1.11.5's disconnected single_component=True call subsets colors but retains full coordinates and raises a shape error. | M11.c direct parent-reference gate | [Strict expected-failure check](../../tests/integrations/scanpy/test_paga.py) detects a fixed upstream entry. Intended native filtering is independently checked against explicitly subsetted public Scanpy inputs; recheck a compatible release before closing this gate. |
 | C16 | Scanpy 1.11.5 paga_path return_data calls .T on an unsmoothed annotation list | Default return_data parent-reference gate; heatmap/other return_data cases verified independently | Strict expected-failure check verifies the exact exception and asserts returned values if fixed; native chart/table return contract is explicit. |
 | C17 | Core 1.2 rule/link marks have one paint and no independent edge border. Audited 2026-10-25 against the installed schema/API and official [rule](https://genomespy.app/docs/grammar/mark/rule/) and [link](https://genomespy.app/docs/grammar/mark/link/) channels. Both Python mark methods reject stroke/strokeWidth. | White borders separating overlapping PAGA edges, M11.c/M14 styling | Recheck a released native outline capability with crossing, width, zoom, hover and export cases. No extra edge layers or custom geometry. PAGA charts and the expression notebook remain unchanged; notebook rerun was conditional on native support. |

@@ -1,6 +1,5 @@
 """Dotplot contract, displayed statistics, sizing and detached native output."""
 
-import inspect
 import json
 import warnings
 from pathlib import Path
@@ -10,8 +9,8 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.dotplot_fixture import dotplot_cases
-from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
+from tests.integrations.scanpy.expression_fixtures import dotplot_cases
+from tests.integrations.scanpy.expression_fixtures import make_grouped_adata
 from tests.integrations.scanpy.helpers import points
 
 sc = pytest.importorskip("scanpy")
@@ -38,34 +37,6 @@ def chart(a, **options):
 def table(result):
     spec = result.to_dict()
     return pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
-
-
-def test_signature_preserves_statistical_defaults_and_native_title_defaults():
-    reference = json.loads(
-        Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
-    )["entries"]["dotplot"]["parameters"]
-    native = inspect.signature(gsc.pl.dotplot).parameters
-    titles = {"colorbar_title": "Mean expression", "size_title": "Cells expressing (%)"}
-    for parameter in reference:
-        name = parameter["name"]
-        if name in {"ax", "return_fig"}:
-            assert name not in native
-            continue
-        actual = native[name]
-        assert actual.kind.name == parameter["kind"]
-        assert (
-            None if actual.default is inspect.Parameter.empty else repr(actual.default)
-        ) == (repr(titles[name]) if name in titles else parameter["default"])
-    assert set(native) - {p["name"] for p in reference} == {
-        "width",
-        "height",
-        "hover",
-        "zoom",
-        "highlight",
-        "group_gap",
-    }
-    assert native["hover"].default is True
-    assert native["group_gap"].default == 0
 
 
 @pytest.mark.parametrize("swapped", [False, True])
@@ -278,7 +249,6 @@ def test_no_analysis_or_mutation_and_chart_is_a_snapshot(adata, monkeypatch):
         ({"return_fig": False}, TypeError, "return_fig"),
         ({"norm": object()}, NotImplementedError, "norm"),
         ({"vcenter": 0}, NotImplementedError, "vcenter"),
-        ({"save": "dots.png"}, NotImplementedError, "save"),
         ({"color_on": "square"}, TypeError, "color_on"),
         ({"dot_size_df": object()}, TypeError, "dot_size_df"),
         ({"cmap": "coolwarm"}, NotImplementedError, "cmap"),

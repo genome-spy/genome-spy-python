@@ -1,6 +1,5 @@
 """Public Scanpy normalization, box statistics and native highest-expression contract."""
 
-import inspect
 import subprocess
 import sys
 from copy import deepcopy
@@ -15,7 +14,7 @@ from genome_spy.integrations.scanpy._qc.highest_expr_data import (
     prepare_highest_expression,
 )
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.highest_expr_fixture import make_counts
+from tests.integrations.scanpy.qc_fixtures import make_counts
 
 sc = pytest.importorskip("scanpy")
 
@@ -28,22 +27,6 @@ def test_data_module_defers_the_optional_scanpy_import():
             "import sys; import genome_spy.integrations.scanpy._qc.highest_expr_data; assert 'scanpy' not in sys.modules",
         ],
         check=True,
-    )
-
-
-def test_signature_retains_scanpy_defaults_and_native_keyword_only_controls():
-    actual = inspect.signature(gsc.pl.highest_expr_genes).parameters
-    expected = inspect.signature(sc.pl.highest_expr_genes).parameters
-    for name, parameter in expected.items():
-        if name == "ax":
-            assert name not in actual
-        else:
-            assert actual[name].kind == parameter.kind
-            assert actual[name].default == parameter.default
-    assert set(actual) - set(expected) == {"hover", "zoom", "width", "height"}
-    assert all(
-        actual[n].kind == inspect.Parameter.KEYWORD_ONLY
-        for n in set(actual) - set(expected)
     )
 
 

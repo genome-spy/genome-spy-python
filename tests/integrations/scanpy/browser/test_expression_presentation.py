@@ -11,9 +11,9 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import hover_at, svg_root
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
-from tests.integrations.scanpy.paga_fixture import POSITIONS, make_paga
-from tests.integrations.scanpy.paga_path_fixture import make_path
+from tests.integrations.scanpy.expression_fixtures import make_heatmap_adata
+from tests.integrations.scanpy.paga_fixtures import POSITIONS, make_paga
+from tests.integrations.scanpy.paga_fixtures import make_path
 
 
 @pytest.mark.parametrize(

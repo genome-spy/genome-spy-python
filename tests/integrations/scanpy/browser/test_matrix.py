@@ -19,8 +19,8 @@ from tests.integrations.scanpy.browser.interactions import (
     svg_root,
 )
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.matrix_fixture import matrix_cases
-from tests.integrations.scanpy.paga_fixture import make_adjacency
+from tests.integrations.scanpy.expression_fixtures import matrix_cases
+from tests.integrations.scanpy.paga_fixtures import make_adjacency
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "matrix.json").read_text())["cases"]

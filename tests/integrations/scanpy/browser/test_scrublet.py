@@ -11,7 +11,7 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import leaf_marks, units
-from tests.integrations.scanpy.scrublet_fixture import make_scrublet
+from tests.integrations.scanpy.qc_fixtures import make_scrublet
 
 
 @pytest.mark.reference

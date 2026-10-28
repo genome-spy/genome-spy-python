@@ -1,6 +1,5 @@
 """Supplied matrix values, native API defaults and explicit unsupported forms."""
 
-import inspect
 import json
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.matrix_fixture import matrix_cases
+from tests.integrations.scanpy.expression_fixtures import matrix_cases
 
 pytest.importorskip("scanpy")
 
@@ -47,30 +46,6 @@ def test_matrix_tracks_share_contiguous_scales_without_copying_values():
         {"slot": 1, "label": "same"},
         {"slot": 2, "label": "last"},
     ]
-
-
-def test_matrix_keeps_scanpy_defaults_without_matplotlib_axes():
-    upstream = json.loads((FIXTURES / "api.json").read_text())["entries"]["matrix"][
-        "parameters"
-    ]
-    actual = inspect.signature(gsc.pl.matrix).parameters
-    for parameter in upstream:
-        if parameter["name"] == "ax":
-            assert "ax" not in actual
-            continue
-        value = actual[parameter["name"]]
-        assert value.kind.name == parameter["kind"]
-        assert (
-            None if value.default is inspect.Parameter.empty else repr(value.default)
-        ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in upstream} == {
-        "hover",
-        "width",
-        "height",
-        "zoom",
-        "show_values",
-        "highlight",
-    }
 
 
 @pytest.mark.parametrize("case", matrix_cases())

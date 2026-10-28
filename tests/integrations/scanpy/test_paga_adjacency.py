@@ -1,7 +1,5 @@
 """Pinned legacy adjacency semantics and reuse of the native matrix renderer."""
 
-import inspect
-
 import numpy as np
 import pytest
 from scipy import sparse
@@ -9,27 +7,9 @@ from scipy import sparse
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._paga.data import adjacency_points, adjacency_values
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.paga_fixture import make_adjacency
+from tests.integrations.scanpy.paga_fixtures import make_adjacency
 
 pytest.importorskip("scanpy")
-
-
-def test_signature_preserves_upstream_parameters_and_defaults():
-    import scanpy as sc
-
-    actual = inspect.signature(gsc.pl.paga_adjacency).parameters
-    expected = inspect.signature(sc.pl.paga_adjacency).parameters
-    for name, parameter in expected.items():
-        assert actual[name].kind == parameter.kind
-        assert actual[name].default == parameter.default
-    assert actual.keys() - expected.keys() == {
-        "hover",
-        "zoom",
-        "show_values",
-        "labels",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.reference

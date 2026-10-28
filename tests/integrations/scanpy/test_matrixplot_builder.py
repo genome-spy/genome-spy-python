@@ -2,7 +2,6 @@
 
 import inspect
 import json
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -14,7 +13,7 @@ from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_
 from genome_spy.integrations.scanpy._expression import (
     matrixplot_builder as _matrixplot_builder,
 )
-from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
+from tests.integrations.scanpy.expression_fixtures import make_tree_adata
 from tests.integrations.scanpy.helpers import points
 
 sc = pytest.importorskip("scanpy")
@@ -30,32 +29,6 @@ def adata():
 def table(chart):
     spec = chart.to_dict()
     return pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
-
-
-def test_constructor_preserves_pinned_signature():
-    reference = json.loads(
-        Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
-    )["entries"]["MatrixPlot"]["parameters"]
-    actual = inspect.signature(gsc.pl.MatrixPlot).parameters
-    for parameter in reference:
-        name = parameter["name"]
-        if name == "ax":
-            assert name not in actual
-            continue
-        assert actual[name].kind.name == parameter["kind"]
-        assert (
-            None
-            if actual[name].default is inspect.Parameter.empty
-            else repr(actual[name].default)
-        ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in reference} == {
-        "hover",
-        "zoom",
-        "show_values",
-        "highlight",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.parametrize("swapped", [False, True])

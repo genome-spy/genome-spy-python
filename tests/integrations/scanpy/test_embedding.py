@@ -1,9 +1,7 @@
 """Shared stored-coordinate semantics and Scanpy-compatible embedding wrappers."""
 
-import inspect
 import json
 from copy import deepcopy
-from hashlib import sha256
 from pathlib import Path
 
 import numpy as np
@@ -12,11 +10,11 @@ import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.embedding_fixture import (
+from tests.integrations.scanpy.embedding_fixtures import (
     embedding_cases,
     make_embedding_adata,
 )
-from tests.integrations.scanpy.fixture_support import FAMILIES
+from tests.integrations.scanpy.embedding_fixtures import FAMILIES
 from tests.integrations.scanpy.helpers import points, units
 
 sc = pytest.importorskip("scanpy")
@@ -38,12 +36,6 @@ def test_complete_embedding_specs_match_pinned_reference_coordinates_and_labels(
 
     manifest = json.loads(
         (Path(__file__).with_name("fixtures") / "embedding.json").read_text()
-    )
-    assert (
-        manifest["input_sha256"]
-        == sha256(
-            Path(__file__).with_name("embedding_fixture.py").read_bytes()
-        ).hexdigest()
     )
     expected = manifest["cases"][case]
     family, options = embedding_cases()[case]
@@ -80,32 +72,6 @@ def test_complete_embedding_specs_match_pinned_reference_coordinates_and_labels(
         ] == expected["colors"]
     else:
         assert color["scale"]["domain"] == expected["color_domain"]
-
-
-@pytest.mark.parametrize("family", FAMILIES)
-def test_effective_signatures_match_pinned_scanpy_with_only_native_additions(family):
-    native = inspect.signature(getattr(gsc.pl, family)).parameters
-    upstream = inspect.signature(
-        getattr(sc.pl, "pca" if family == "pca_scatter" else family)
-    ).parameters
-    for name, p in upstream.items():
-        if name in {"ax", "return_fig"}:
-            assert name not in native
-        else:
-            assert native[name].kind == p.kind and native[name].default == p.default
-    assert set(native) - set(upstream) == {
-        "hover",
-        "zoom",
-        "selection",
-        "obs_id",
-        "width",
-        "height",
-    }
-    assert all(
-        native[name].kind == inspect.Parameter.KEYWORD_ONLY
-        for name in set(native) - set(upstream)
-    )
-    assert gsc.pl.pca_scatter is gsc.pl.pca
 
 
 @pytest.mark.parametrize(

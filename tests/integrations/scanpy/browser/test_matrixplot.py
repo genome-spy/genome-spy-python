@@ -12,7 +12,7 @@ import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
 from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import index_position
-from tests.integrations.scanpy.matrixplot_fixture import matrixplot_cases
+from tests.integrations.scanpy.expression_fixtures import matrixplot_cases
 
 REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "matrixplot.json").read_text())

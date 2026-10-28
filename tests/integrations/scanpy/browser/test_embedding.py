@@ -10,11 +10,11 @@ import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
-from tests.integrations.scanpy.embedding_fixture import (
+from tests.integrations.scanpy.embedding_fixtures import (
     embedding_cases,
     make_embedding_adata,
 )
-from tests.integrations.scanpy.fixture_support import graph_adata
+from tests.integrations.scanpy.embedding_fixtures import graph_adata
 from tests.integrations.scanpy.helpers import name_embedding_scales, points
 
 REFERENCE = json.loads(

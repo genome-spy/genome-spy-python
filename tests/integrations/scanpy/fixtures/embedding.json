@@ -1,12 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "numpy": "2.4.6",
-    "matplotlib": "3.11.2"
-  },
-  "input_sha256": "9af92e3bf20cc749989a3f908c1d479a74e48baff02bd1c2b7d4a6798c0b6a38",
-  "display_dpi": 100,
-  "export_dpi": 150,
   "cases": {
     "custom": {
       "coordinates": [
@@ -84,8 +76,7 @@
       "plot_size": [
         211.57500000000002,
         231.0
-      ],
-      "full_sha256": "bc9dc42d5876c6420a69c7e98740d67348f9a5848496c78f721b4cffc2e87715"
+      ]
     },
     "tsne": {
       "coordinates": [
@@ -166,8 +157,7 @@
       "plot_size": [
         232.5,
         231.0
-      ],
-      "full_sha256": "af44fb32cbc90f6e22766a870f8dd5b853760456b881147be272ab60a7317238"
+      ]
     },
     "diffmap_default": {
       "coordinates": [
@@ -245,8 +235,7 @@
       "plot_size": [
         211.57500000000002,
         231.0
-      ],
-      "full_sha256": "bfc4929d59ccff19922a183f3bf6c3c797117c53bd28670aebb81830f26335fd"
+      ]
     },
     "diffmap_components": {
       "coordinates": [
@@ -324,8 +313,7 @@
       "plot_size": [
         211.57500000000002,
         231.0
-      ],
-      "full_sha256": "446589717f111f2bd0c66845a0a7109df8bd67982680bac12351d9ccb5eb1db8"
+      ]
     },
     "draw_graph_default": {
       "coordinates": [
@@ -406,8 +394,7 @@
       "plot_size": [
         232.5,
         231.0
-      ],
-      "full_sha256": "cb8d571ec7e45356f0253487a2938e694cd29ca5f701c2ac4d7a8545e000f2ce"
+      ]
     },
     "draw_graph_fr": {
       "coordinates": [
@@ -485,8 +472,7 @@
       "plot_size": [
         211.57500000000002,
         231.0
-      ],
-      "full_sha256": "f2a59e6e9754ea1286547dc29d701255ce2ec784aec0141e95f0bd4fc983c226"
+      ]
     },
     "pca_variance": {
       "coordinates": [
@@ -564,8 +550,7 @@
       "plot_size": [
         211.57500000000002,
         231.0
-      ],
-      "full_sha256": "1578fa491b01e5924ad4705ede0d68e0aacaf83477a2ce92d33eb132fd02fd80"
+      ]
     },
     "pca_alias": {
       "coordinates": [
@@ -643,8 +628,7 @@
       "plot_size": [
         211.57500000000002,
         231.0
-      ],
-      "full_sha256": "e366765da5f3c222b9a57b00394e50e7653b64c89c324bc58ffd5825504fa14d"
+      ]
     }
   }
 }

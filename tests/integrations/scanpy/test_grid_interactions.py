@@ -1,14 +1,19 @@
-"""Shared expression-grid options preserve prepared values and native styling."""
+"""Shared grid navigation, fitted values and pointer feedback preserve source data."""
 
 import inspect
 import warnings
+from importlib import import_module
 
 import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from genome_spy.integrations.scanpy._guards import _check_grid_highlight
+from tests.integrations.scanpy.expression_fixtures import (
+    make_cluster_adata,
+    make_heatmap_adata,
+)
+from tests.integrations.scanpy.grid_fixture_support import FAMILIES, make_chart
 from tests.integrations.scanpy.helpers import leaf_marks
 
 pytest.importorskip("scanpy")
@@ -65,17 +70,19 @@ def test_grid_options_are_keyword_only_and_off_by_default(family):
     active = grid_chart(
         family,
         zoom=True,
-        **({"highlight": True} if family == "dotplot" else {"show_values": True}),
+        **{"highlight": True} if family == "dotplot" else {"show_values": True},
     ).to_dict()
     field = "_mean" if family in ("dotplot", "matrixplot") else "_value"
 
     def records(s):
-        return next(rows for rows in s["datasets"].values() if field in rows[0])
+        return next((rows for rows in s["datasets"].values() if field in rows[0]))
 
     assert records(plain) == records(active)
-    plain_mark = next(m for m in leaf_marks(plain) if "color" in m.get("encoding", {}))
+    plain_mark = next(
+        (m for m in leaf_marks(plain) if "color" in m.get("encoding", {}))
+    )
     active_mark = next(
-        m for m in leaf_marks(active) if "color" in m.get("encoding", {})
+        (m for m in leaf_marks(active) if "color" in m.get("encoding", {}))
     )
     for axis in ("x", "y"):
         assert (
@@ -163,11 +170,7 @@ def test_highlight_uses_native_ruler_without_extra_marks_or_data():
                 "encodings": ["x", "y"],
                 "display": "center",
                 "extent": "view",
-                "mark": {
-                    "stroke": "#4682b4",
-                    "opacity": 0.9,
-                    "strokeWidth": 1.5,
-                },
+                "mark": {"stroke": "#4682b4", "opacity": 0.9, "strokeWidth": 1.5},
             },
         }
     ]
@@ -181,7 +184,7 @@ def test_highlight_uses_native_ruler_without_extra_marks_or_data():
 )
 def test_grid_can_explicitly_enable_both_axes(family):
     spec = grid_chart(family, zoom="xy").to_dict()
-    mark = next(m for m in leaf_marks(spec) if "color" in m.get("encoding", {}))
+    mark = next((m for m in leaf_marks(spec) if "color" in m.get("encoding", {})))
     for axis in ("x", "y"):
         assert (
             spec["scales"][axis]
@@ -203,9 +206,11 @@ def test_category_strip_uses_native_tooltip_and_respects_hover(family, field, ho
         ).to_dict()
     )
     strip = next(
-        mark
-        for mark in leaf_marks(spec)
-        if mark.get("encoding", {}).get("color", {}).get("field") == field
+        (
+            mark
+            for mark in leaf_marks(spec)
+            if mark.get("encoding", {}).get("color", {}).get("field") == field
+        )
     )
     assert strip["mark"]["clip"] is True
     assert "xOffset" not in strip["mark"] and "x2Offset" not in strip["mark"]
@@ -246,8 +251,10 @@ def test_summary_tracks_share_positions_without_copying_measurements(family, swa
     )
     assert spec["scales"]["x" if swapped else "y"]["gapPositions"] == []
     assert all(
-        spec["scales"][axis]["gapWidth"] == (0 if family == "dotplot" else 4)
-        for axis in ("x", "y")
+        (
+            spec["scales"][axis]["gapWidth"] == (0 if family == "dotplot" else 4)
+            for axis in ("x", "y")
+        )
     )
     assert set(spec["surround"]) == {"top", "bottom", "left", "right"}
     assert "padding" not in spec and spec["spacing"] == 0
@@ -261,3 +268,60 @@ def test_summary_tracks_share_positions_without_copying_measurements(family, swa
                 assert "scale" not in encoding
         if mark.get("mark", {}).get("type") == "link":
             assert mark["mark"]["clip"] is True
+
+
+def parameters(spec):
+    if isinstance(spec, dict):
+        yield from spec.get("params", [])
+        for value in spec.values():
+            yield from parameters(value)
+    elif isinstance(spec, list):
+        for value in spec:
+            yield from parameters(value)
+
+
+@pytest.mark.parametrize("family", [*FAMILIES, "DotPlot", "MatrixPlot"])
+def test_feedback_modes_preserve_values_and_are_disabled_by_default(family):
+    baseline = make_chart(family).to_dict()
+    assert not {p["name"] for p in parameters(baseline)} & {"grid_cursor", "grid_hover"}
+    for mode, name in [(True, "grid_cursor"), ("outline", "grid_hover")]:
+        spec = make_chart(family, highlight=mode, hover=False).to_dict()
+        assert spec["datasets"] == baseline["datasets"]
+        feedback = [
+            p for p in parameters(spec) if p["name"] in ("grid_cursor", "grid_hover")
+        ]
+        assert len(feedback) == 1
+        assert feedback[0]["name"] == name
+        if mode == "outline":
+            assert feedback[0]["select"] == {
+                "type": "point",
+                "on": "mousemove",
+                "clear": "mouseleave",
+                "toggle": False,
+            }
+            assert feedback[0]["persist"] is False
+
+
+@pytest.mark.parametrize("family", [*FAMILIES, "DotPlot", "MatrixPlot"])
+def test_invalid_feedback_fails_before_optional_dependencies(monkeypatch, family):
+    value = "ruler"
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Invalid highlight must fail before optional imports or data reads")
+
+    for name in ["pl", "_expression.dotplot_builder", "_expression.matrixplot_builder"]:
+        monkeypatch.setattr(
+            import_module(f"genome_spy.integrations.scanpy.{name}"),
+            "_require_scanpy",
+            forbidden,
+        )
+    function = getattr(gsc.pl, family)
+    args = (None,) if family in ("matrix", "clustermap") else (None, ["g1"], "group")
+    with pytest.raises(TypeError, match="highlight"):
+        function(*args, highlight=value)
+
+
+@pytest.mark.parametrize("value", [None, 1, "ruler", []])
+def test_shared_feedback_guard_rejects_invalid_modes(value):
+    with pytest.raises(TypeError, match="grid: highlight must be"):
+        _check_grid_highlight(value, context="grid")

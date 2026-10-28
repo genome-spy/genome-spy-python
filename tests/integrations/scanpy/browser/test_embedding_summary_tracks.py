@@ -14,7 +14,7 @@ from tests.integrations.scanpy.browser.interactions import (
     set_brush,
     svg_root,
 )
-from tests.integrations.scanpy.fixture_support import adata as adata
+from tests.integrations.scanpy.embedding_fixtures import adata as adata
 
 
 @pytest.mark.smoke

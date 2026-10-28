@@ -10,7 +10,7 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.highest_expr_fixture import make_counts
+from tests.integrations.scanpy.qc_fixtures import make_counts
 
 
 @pytest.mark.reference

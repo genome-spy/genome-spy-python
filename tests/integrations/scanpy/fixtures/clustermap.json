@@ -1,14 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "seaborn": "0.13.2",
-    "numpy": "2.4.6",
-    "scipy": "1.17.1",
-    "matplotlib": "3.11.2"
-  },
-  "display_dpi": 100,
-  "export_dpi": 150,
-  "input_sha256": "e939fdce645a7796babf4709aab154a40c7f5bdead65890325bf6a81cfdf1143",
   "cases": {
     "default": {
       "row_order": [
@@ -230,8 +220,7 @@
         "cell-2",
         "cell-1",
         "cell-3"
-      ],
-      "full_sha256": "5a05017044e7881f0b4a066f058b5aa2fdf9133d4ecfad00748768bd4d7ca701"
+      ]
     },
     "row_annotation": {
       "row_order": [
@@ -453,8 +442,7 @@
         "cell-2",
         "cell-1",
         "cell-3"
-      ],
-      "full_sha256": "cbaa0e60a481c7af535556cfbf027bc9f65727021bd6306d243c03b3cc60a06c"
+      ]
     },
     "zscore_columns": {
       "row_order": [
@@ -676,8 +664,7 @@
         "cell-5",
         "cell-1",
         "cell-3"
-      ],
-      "full_sha256": "bb55da79c6a367084653df6a979e5f608bebd10af8f3629fa216300a006eefe8"
+      ]
     },
     "scale_rows": {
       "row_order": [
@@ -899,8 +886,7 @@
         "cell-5",
         "cell-1",
         "cell-3"
-      ],
-      "full_sha256": "66335e6765e920ea69630166c2d84f56fbc2657ce9d72ac6f70b1a9f864ae4b5"
+      ]
     },
     "columns_only": {
       "row_order": [
@@ -1057,8 +1043,7 @@
         "cell-3",
         "cell-4",
         "cell-5"
-      ],
-      "full_sha256": "d928c3945deefddba211c7cee66a49cffbc2afa18bf0c53ebb58cc53042c7b6d"
+      ]
     },
     "no_clustering": {
       "row_order": [
@@ -1174,8 +1159,7 @@
         "cell-3",
         "cell-4",
         "cell-5"
-      ],
-      "full_sha256": "ce9d052431ddc9781a531f4bec4483fa5b5bfaf56a0f54d899c9d8de3d0a9617"
+      ]
     },
     "masked": {
       "row_order": [
@@ -1397,8 +1381,7 @@
         "cell-2",
         "cell-1",
         "cell-3"
-      ],
-      "full_sha256": "4d5f5f57987f022b542cb75ed21c871ac8763ff5a97c4b993b6c27f10b38466a"
+      ]
     }
   }
 }

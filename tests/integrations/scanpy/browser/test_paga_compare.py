@@ -8,7 +8,7 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import hover_at, move_to, svg_root
 from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import points
-from tests.integrations.scanpy.paga_fixture import make_compare
+from tests.integrations.scanpy.paga_fixtures import make_compare
 
 
 def point_coordinates(page, names=("panel-0", "panel-1")):

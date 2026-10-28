@@ -1987,22 +1987,21 @@ No benchmark scripts or real datasets were promoted. Upstream source describes
 the contract; the adapter does not vendor Scanpy plotting implementations or
 read rendered artists.
 
-Developers can reproduce the pinned API metadata and full reference figures:
+Developers can run the pinned numerical and full-chart comparisons:
 
 ```sh
 uv sync --dev --extra scanpy --group scanpy-test
-uv run --no-sync python -m tests.integrations.scanpy.generate_references
 uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
 uv run --no-sync python -m playwright install chromium
 uv run --no-sync pytest tests/integrations/scanpy/browser
 ```
 
-Refreshing the frozen numerical/API metadata is explicit and separate from tests
-and runtime. Browser tests use the pinned generators to render reference images
-in pytest's temporary directory without changing that metadata. Generated PNGs,
-screenshots and overlays are never committed or pushed. Explicit refresh commands
-write images to ignored `tmp/scanpy-references/<family>/`; checksums, dimensions,
-DPI and version metadata remain under `tests/integrations/scanpy/fixtures`.
+Numerical expectations are deliberate test inputs, reviewed against upstream
+when the contract changes. Public signatures are checked against installed Scanpy;
+four deprecated aliases retain pinned signatures where upstream hides them.
+Browser tests use one image-only helper to render pinned reference figures in
+pytest's temporary directories. Tests never refresh tracked expectations or
+write reports. PNGs, screenshots and overlays are never committed or pushed.
 Independent tests check hand-calculated values, source identities, sparse
 allocation and mutation behavior. Browser checks measure actual marker footprints,
 retain temporary registered overlays and complete-chart captures, and exercise

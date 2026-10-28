@@ -234,17 +234,17 @@ calculations and frozen numeric fixtures protect data semantics. Reference
 renderers provide fresh pinned Scanpy figures for full browser comparisons;
 they are test inputs, not production data preparation.
 
-Reference regeneration is an explicit compatibility update. For example:
+Public signatures are compared directly with installed Scanpy. Only the four
+legacy aliases whose signatures are hidden in Scanpy 1.12 retain pinned parameter
+lists. Numerical JSON files keep deliberate expectations for values and geometry;
+compatibility changes require reviewing those expectations against upstream.
 
-```sh
-uv run --no-sync python -m tests.integrations.scanpy.generate_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_grouped_references
-```
-
-The other `generate_*_references.py` modules refresh their named family. Inspect
-changes against upstream behavior before accepting them. Tests generate images
-only in temporary directories and never refresh tracked JSON. Renderers may
-inspect Matplotlib artists; production plotting does not.
+One [image helper](../../tests/integrations/scanpy/browser/references.py) renders
+pinned Scanpy comparisons on demand in pytest's temporary directories. It does
+not regenerate tracked JSON or write reports. Family data fixtures share five
+small modules for embeddings, expression grids, profiles, QC and PAGA; ranked
+inputs remain separate. Reference rendering may inspect Matplotlib axes;
+production plotting does not.
 
 The seven manual timing/report programs have been removed. Their useful source
 and allocation checks remain in deterministic regressions for embeddings, grouped

@@ -11,7 +11,7 @@ from tests.integrations.scanpy.browser.rendering import (
     assert_complete_chart,
     guide_geometry,
 )
-from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
+from tests.integrations.scanpy.embedding_fixtures import make_embedding_adata
 
 
 @pytest.mark.reference

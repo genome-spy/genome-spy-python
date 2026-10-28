@@ -1,6 +1,5 @@
 """Stored histogram semantics, upstream defaults and native Scrublet charts."""
 
-import inspect
 from copy import deepcopy
 
 import anndata as ad
@@ -11,31 +10,9 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._qc.scrublet_data import prepare_scrublet
 from tests.integrations.scanpy.helpers import leaf_marks, units
-from tests.integrations.scanpy.scrublet_fixture import make_scrublet
+from tests.integrations.scanpy.qc_fixtures import make_scrublet
 
 sc = pytest.importorskip("scanpy")
-
-
-def test_signature_preserves_scanpy_defaults_and_omits_matplotlib_return():
-    actual = inspect.signature(gsc.pl.scrublet_score_distribution).parameters
-    expected = inspect.signature(sc.pl.scrublet_score_distribution).parameters
-    for name, p in expected.items():
-        if name == "return_fig":
-            assert name not in actual
-        else:
-            assert actual[name].kind == p.kind and actual[name].default == p.default
-    assert set(actual) - set(expected) == {
-        "hover",
-        "zoom",
-        "threshold_slider",
-        "width",
-        "height",
-        "kwargs",
-    }
-    assert all(
-        actual[name].kind == inspect.Parameter.KEYWORD_ONLY
-        for name in ("hover", "zoom", "threshold_slider", "width", "height")
-    )
 
 
 @pytest.mark.reference

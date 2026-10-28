@@ -10,7 +10,7 @@ from scipy.ndimage import distance_transform_cdt
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.rendering import guide_geometry, render
-from tests.integrations.scanpy.fixture_support import graph_adata
+from tests.integrations.scanpy.embedding_fixtures import graph_adata
 
 
 @pytest.mark.reference

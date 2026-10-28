@@ -1,6 +1,5 @@
 """Stored DPT group/pseudotime semantics and metadata-only access."""
 
-import inspect
 import warnings
 
 import numpy as np
@@ -8,24 +7,14 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.dpt_fixture import dpt_cases, dpt_reference, make_dpt
+from tests.integrations.scanpy.profile_fixtures import (
+    dpt_cases,
+    dpt_reference,
+    make_dpt,
+)
 from tests.integrations.scanpy.helpers import leaf_marks
 
 pytest.importorskip("scanpy")
-
-
-def test_signature_matches_scanpy_and_adds_only_native_options():
-    import scanpy as sc
-
-    actual = inspect.signature(gsc.pl.dpt_groups_pseudotime).parameters
-    upstream = inspect.signature(sc.pl.dpt_groups_pseudotime).parameters
-    for name, value in upstream.items():
-        if name == "return_fig":
-            assert name not in actual
-            continue
-        assert actual[name].kind == value.kind
-        assert actual[name].default == value.default
-    assert actual.keys() - upstream.keys() == {"hover", "zoom", "width", "height"}
 
 
 def test_matplotlib_return_option_is_rejected():
@@ -185,7 +174,6 @@ def test_invalid_stored_metadata_fails_clearly(field, value, error):
         ({"hover": 1}, TypeError),
         ({"zoom": "xy"}, TypeError),
         ({"width": 0}, ValueError),
-        ({"save": True}, NotImplementedError),
     ],
 )
 def test_invalid_options_precede_optional_imports(options, error, monkeypatch):

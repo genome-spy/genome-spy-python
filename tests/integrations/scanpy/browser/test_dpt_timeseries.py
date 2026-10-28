@@ -17,7 +17,10 @@ from tests.integrations.scanpy.browser.interactions import (
 )
 from tests.integrations.scanpy.browser.rendering import render_heatmap as render
 from tests.integrations.scanpy.browser.rendering import style_profile_reference
-from tests.integrations.scanpy.dpt_fixture import dpt_profile_cases, make_dpt_profiles
+from tests.integrations.scanpy.profile_fixtures import (
+    dpt_profile_cases,
+    make_dpt_profiles,
+)
 
 
 @pytest.mark.reference

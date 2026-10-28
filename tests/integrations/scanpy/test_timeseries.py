@@ -1,9 +1,6 @@
 """Time-series data semantics compared with the pinned public Scanpy helper."""
 
-import inspect
-import json
 import warnings
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -13,13 +10,9 @@ from scipy import sparse
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._timeseries.data import prepare_timeseries
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
+from tests.integrations.scanpy.profile_fixtures import timeseries_cases
 
 pytest.importorskip("scanpy")
-
-SUBPLOT_PARAMETERS = json.loads(
-    Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
-)["entries"]["timeseries_subplot"]["parameters"]
 
 
 @pytest.mark.reference
@@ -90,22 +83,14 @@ def test_profiles_match_scanpy_positions_limits_colors_and_draw_order(
     np.testing.assert_array_equal(X, original)
 
 
-def test_forwarded_defaults_match_the_pinned_subplot_signature():
-    from genome_spy.integrations.scanpy._timeseries.chart import build_timeseries
-
-    native = inspect.signature(gsc.pl.timeseries).parameters
-    assert native["X"].kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
-    assert native["kwargs"].kind == inspect.Parameter.VAR_KEYWORD
-    assert all(
-        p.kind == inspect.Parameter.KEYWORD_ONLY
-        for name, p in native.items()
-        if name not in {"X", "kwargs"}
+def test_wrapper_and_subplot_share_plotting_defaults_at_the_same_size():
+    values = [[1, 2], [3, 4]]
+    # Scanpy gives the wrapper and subplot different physical default sizes.
+    options = {"width": 240, "height": 180, "show": False}
+    assert (
+        gsc.pl.timeseries(values, **options).to_dict()
+        == gsc.pl.timeseries_subplot(values, **options).to_dict()
     )
-    actual = inspect.signature(build_timeseries).parameters
-    for parameter in SUBPLOT_PARAMETERS:
-        name = parameter["name"]
-        if name not in {"X", "ax"}:
-            assert repr(actual[name].default) == parameter["default"]
 
 
 @pytest.mark.reference
@@ -114,28 +99,6 @@ def test_subplot_keeps_explicit_upstream_arguments_and_native_defaults():
     import matplotlib.pyplot as plt
     import scanpy as sc
 
-    native = inspect.signature(gsc.pl.timeseries_subplot).parameters
-    upstream = {p["name"]: p for p in SUBPLOT_PARAMETERS}
-    for name, parameter in upstream.items():
-        if name == "ax":
-            assert name not in native
-        else:
-            assert native[name].kind.name == parameter["kind"]
-            default = native[name].default
-            assert (
-                None if default is inspect.Parameter.empty else repr(default)
-            ) == parameter["default"]
-    assert set(native) - set(upstream) == {
-        "show",
-        "save",
-        "hover",
-        "zoom",
-        "series_select",
-        "ruler",
-        "width",
-        "height",
-        "kwargs",
-    }
     plt.close("all")
     with (
         mpl.rc_context({"figure.figsize": (6.4, 4.8), "figure.dpi": 100}),

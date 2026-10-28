@@ -17,7 +17,10 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import hover_at
 from tests.integrations.scanpy.browser.rendering import render_heatmap as render
-from tests.integrations.scanpy.heatmap_fixture import heatmap_cases, make_heatmap_adata
+from tests.integrations.scanpy.expression_fixtures import (
+    heatmap_cases,
+    make_heatmap_adata,
+)
 from tests.integrations.scanpy.helpers import tree_segments
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"

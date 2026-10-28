@@ -199,8 +199,9 @@ This cleanup covers the whole Scanpy suite, not just its slowest tests. Reduce
 repeated work and maintenance while retaining distinct supported behavior and
 regressions. The collection below is an audit baseline, not a target test count.
 Implementation and current verification belong in
-[STATUS](STATUS.md#test-cleanup-audit). The cleanup is implemented and locally
-verified; updated hosted CI remains the clearance gate.
+[STATUS](STATUS.md#test-cleanup-audit). The initial CI-selection cleanup passed
+locally. A second pass removes unused reference machinery and duplicate coverage;
+updated hosted CI remains a clearance gate.
 
 ### Audit baseline (2026-10-28)
 
@@ -239,7 +240,7 @@ observations from those runs, not portable timing limits.
 | Selection, EmbeddingSummary and linked tracks | Keep brush boundaries, stable membership, clearing/counts, snapshots, group means, histograms and source reuse. Verify linked views in a browser; plain spec assertions cannot establish interaction behavior. |
 | Shared grid/presentation/colorbar checks | Test shared options centrally. Keep family wiring and real layout regressions; reduce unrelated option cross-products. |
 | Workflows and docs | Keep each workflow runnable, clean notebook checks and representative outputs. Remove repeated per-plot specifications and statistical assertions from the 900-line workflow tests. Keep guide execution with prepared inputs and browser layout checks in deeper validation. |
-| Core capability reproducers | Move pure native capability probes out of integration acceptance into an explicitly selected Core-upgrade check. Unsupported triangle geometry is not a release requirement for supported marker shapes. Retain a passing/failing reproducer where it guards a documented limitation. |
+| Core capability reproducers | Remove pure native experiments for unsupported options from integration acceptance; retain known limitations and supported adapter regressions. Unsupported triangle geometry is not a release requirement for supported marker shapes. Retain a passing/failing reproducer where it guards a documented limitation. |
 | Benchmarks | Remove all seven `benchmark*.py` scripts after accounting for their assertions below. They are manual tools, not CI jobs, and contain no calibrated performance pass/fail limits. Do not replace them with a benchmark framework. |
 | Reference generators and JSON | Retain independent expected values and the renderers needed to reproduce visual comparisons. Ten families are called by `reference_images`; grouped generation supplies numeric expectations. Remove unused metadata/exports and identical export boilerplate after tracing consumers. Keep family-specific artist extraction separate. |
 

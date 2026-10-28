@@ -1,6 +1,5 @@
 """Scanpy delegation, stored tree, ordering, storage and public-contract checks."""
 
-import inspect
 import json
 import pickle
 from copy import deepcopy
@@ -14,7 +13,7 @@ from scipy import sparse
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy import pl
 from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
-from tests.integrations.scanpy.dendrogram_fixture import (
+from tests.integrations.scanpy.expression_fixtures import (
     make_tree_adata,
     tree_cases,
     tree_plot_cases,
@@ -320,23 +319,6 @@ def test_two_group_attachment_matches_scanpy_skip_and_standalone_tree_works():
             )
         assert set(c.to_dict()["surround"]) == {"left", "bottom"}
     assert len(gsc.pl.dendrogram(a, "group", show=False).to_dict()["datasets"])
-
-
-@pytest.mark.parametrize("family", ["dendrogram", "correlation_matrix"])
-def test_new_signatures_preserve_defaults_and_optional_imports(family):
-    reference = json.loads(REFERENCE.with_name("api.json").read_text())["entries"][
-        family
-    ]["parameters"]
-    native = inspect.signature(getattr(gsc.pl, family)).parameters
-    for parameter in reference:
-        if parameter["name"] == "ax":
-            assert "ax" not in native
-            continue
-        actual = native[parameter["name"]]
-        assert actual.kind.name == parameter["kind"]
-        assert (
-            None if actual.default is inspect.Parameter.empty else repr(actual.default)
-        ) == parameter["default"]
 
 
 @pytest.mark.parametrize(

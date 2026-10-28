@@ -1,6 +1,5 @@
 """Simulation metadata, fixed shuffle and shared renderers against public Scanpy."""
 
-import inspect
 import warnings
 
 import numpy as np
@@ -10,29 +9,9 @@ from scipy import sparse
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._timeseries.data import prepare_sim
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.sim_fixture import make_sim, sim_cases
+from tests.integrations.scanpy.profile_fixtures import make_sim, sim_cases
 
 pytest.importorskip("scanpy")
-
-
-def test_signature_preserves_scanpy_and_adds_native_options():
-    import scanpy as sc
-
-    native = inspect.signature(gsc.pl.sim).parameters
-    for name, parameter in inspect.signature(sc.pl.sim).parameters.items():
-        assert native[name].kind == parameter.kind
-        assert native[name].default == parameter.default
-    assert set(native) - set(inspect.signature(sc.pl.sim).parameters) == {
-        "hover",
-        "zoom",
-        "show_values",
-        "series_select",
-        "ruler",
-        "run_select",
-        "connect",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.reference

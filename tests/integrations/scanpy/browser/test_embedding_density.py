@@ -7,7 +7,7 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import assert_complete_chart, render
-from tests.integrations.scanpy.embedding_density_fixture import make_density
+from tests.integrations.scanpy.embedding_fixtures import make_density
 from tests.integrations.scanpy.helpers import name_embedding_scales, points, units
 
 

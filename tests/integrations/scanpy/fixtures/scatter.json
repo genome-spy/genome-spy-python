@@ -1,12 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "numpy": "2.4.6",
-    "matplotlib": "3.11.2"
-  },
-  "input_sha256": "7ae00ee62c776ff623a1e516a57d3fed9a449965eb3821e834b46d2809932883",
-  "display_dpi": 100,
-  "export_dpi": 150,
   "cases": {
     "observations": {
       "coordinates": [
@@ -77,8 +69,7 @@
       "plot_size": [
         168.0,
         219.0
-      ],
-      "full_sha256": "55533c57ffca469b53daab772c13eeaef12f500f80cfb77b37215726af6c5ea6"
+      ]
     },
     "continuous": {
       "coordinates": [
@@ -142,8 +133,7 @@
       "plot_size": [
         168.0,
         219.0
-      ],
-      "full_sha256": "a25d2c7a9d1915f0bfe7623397b851180dbe920dcc5edd186e5d9b4ad11d3689"
+      ]
     },
     "raw": {
       "coordinates": [
@@ -212,8 +202,7 @@
       "plot_size": [
         168.0,
         219.0
-      ],
-      "full_sha256": "62abb416d1e4506a54fb1d7edbfd5bcb110da1e8384f258b94bea50ce6b3cf12"
+      ]
     },
     "layers": {
       "coordinates": [
@@ -282,8 +271,7 @@
       "plot_size": [
         168.0,
         219.0
-      ],
-      "full_sha256": "1e47086fe0b15f3f56c8dbc5cd92fa834ccc3430c421ebae35f04360abe91c81"
+      ]
     },
     "variables": {
       "coordinates": [
@@ -327,8 +315,7 @@
       "plot_size": [
         168.0,
         219.0
-      ],
-      "full_sha256": "670066250f1819d703f7d9321e062fbf114c9e96e7bbdc922b3debd9c3646cff"
+      ]
     },
     "variable_expression": {
       "coordinates": [
@@ -372,8 +359,7 @@
       "plot_size": [
         168.0,
         219.0
-      ],
-      "full_sha256": "34c7f43bd69e9ba3b5c64d9407bbe9b1b5b9d9369ee1755dec2c94f40a565001"
+      ]
     },
     "diffmap": {
       "coordinates": [
@@ -442,8 +428,7 @@
       "plot_size": [
         208.00000000000003,
         240.0
-      ],
-      "full_sha256": "a9aa6ee464e7676b5f012d397e7240f0df7305b93cdc318cd33621d72cc654c7"
+      ]
     },
     "literal": {
       "coordinates": [
@@ -509,8 +494,7 @@
       "plot_size": [
         208.0,
         240.0
-      ],
-      "full_sha256": "f39f0a7f7a057627515412a130a9036933f0aa1e41a3eb7350e3b17b678076e4"
+      ]
     }
   }
 }

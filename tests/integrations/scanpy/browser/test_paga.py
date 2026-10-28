@@ -16,7 +16,7 @@ from tests.integrations.scanpy.browser.interactions import (
 )
 from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.paga_fixture import (
+from tests.integrations.scanpy.paga_fixtures import (
     POSITIONS,
     make_paga,
     paga_cases,

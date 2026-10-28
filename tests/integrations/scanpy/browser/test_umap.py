@@ -10,8 +10,8 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.fixture_data import reference_cases
-from tests.integrations.scanpy.fixture_support import umap_data as fixture
+from tests.integrations.scanpy.embedding_fixtures import reference_cases
+from tests.integrations.scanpy.embedding_fixtures import umap_data as fixture
 from tests.integrations.scanpy.helpers import name_embedding_scales, points, units
 
 sc = pytest.importorskip("scanpy")

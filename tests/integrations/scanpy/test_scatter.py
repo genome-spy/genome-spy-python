@@ -1,9 +1,7 @@
 """Scatter semantics independently exercise the existing native point pipeline."""
 
-import inspect
 import json
 from copy import deepcopy
-from hashlib import sha256
 from pathlib import Path
 
 import numpy as np
@@ -13,7 +11,10 @@ from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import points, units
-from tests.integrations.scanpy.scatter_fixture import make_scatter_adata, scatter_cases
+from tests.integrations.scanpy.embedding_fixtures import (
+    make_scatter_adata,
+    scatter_cases,
+)
 
 sc = pytest.importorskip("scanpy")
 
@@ -145,22 +146,6 @@ def test_category_legends_follow_panel_markers_in_native_units(family, marker):
     )
 
 
-def test_signature_preserves_scatter_defaults_and_adds_only_native_controls():
-    actual = inspect.signature(gsc.pl.scatter).parameters
-    upstream = inspect.signature(sc.pl.scatter).parameters
-    for name, parameter in upstream.items():
-        if name == "ax":
-            assert name not in actual
-        else:
-            assert actual[name].default == parameter.default
-            assert actual[name].kind == parameter.kind
-    assert set(actual) - set(upstream) == {"hover", "zoom", "width", "height"}
-    assert all(
-        actual[name].kind == inspect.Parameter.KEYWORD_ONLY
-        for name in set(actual) - set(upstream)
-    )
-
-
 @pytest.mark.reference
 @pytest.mark.parametrize("case", scatter_cases())
 def test_complete_chart_matches_frozen_upstream_points_labels_palettes_and_limits(case):
@@ -168,12 +153,6 @@ def test_complete_chart_matches_frozen_upstream_points_labels_palettes_and_limit
 
     manifest = json.loads(
         (Path(__file__).with_name("fixtures") / "scatter.json").read_text()
-    )
-    assert (
-        manifest["input_sha256"]
-        == sha256(
-            Path(__file__).with_name("scatter_fixture.py").read_bytes()
-        ).hexdigest()
     )
     expected = manifest["cases"][case]
     spec = gsc.pl.scatter(

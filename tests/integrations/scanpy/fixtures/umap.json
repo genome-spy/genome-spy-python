@@ -1,12 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "anndata": "0.12.19",
-    "numpy": "2.4.6",
-    "pandas": "2.3.3",
-    "scipy": "1.17.1",
-    "matplotlib": "3.11.2"
-  },
   "cases": {
     "categorical": {
       "options": {
@@ -107,8 +99,7 @@
           "color_domain": null
         }
       ],
-      "figure_dpi": 100,
-      "export_dpi": 150
+      "figure_dpi": 100
     },
     "continuous": {
       "options": {
@@ -208,8 +199,7 @@
           ]
         }
       ],
-      "figure_dpi": 100,
-      "export_dpi": 150
+      "figure_dpi": 100
     },
     "raw": {
       "options": {
@@ -307,8 +297,7 @@
           ]
         }
       ],
-      "figure_dpi": 100,
-      "export_dpi": 150
+      "figure_dpi": 100
     },
     "grid": {
       "options": {
@@ -1042,8 +1031,7 @@
           ]
         }
       ],
-      "figure_dpi": 100,
-      "export_dpi": 150
+      "figure_dpi": 100
     }
   },
   "footprint_dot": {
@@ -1055,9 +1043,7 @@
     "plot_size_at_display": [
       232.5,
       231.0
-    ],
-    "export_dpi": 150,
-    "display_dpi": 100
+    ]
   },
   "footprint_circle": {
     "marker": "o",
@@ -1068,9 +1054,7 @@
     "plot_size_at_display": [
       232.5,
       231.0
-    ],
-    "export_dpi": 150,
-    "display_dpi": 100
+    ]
   },
   "footprint_dot-stroke": {
     "marker": ".",
@@ -1081,9 +1065,7 @@
     "plot_size_at_display": [
       232.5,
       231.0
-    ],
-    "export_dpi": 150,
-    "display_dpi": 100
+    ]
   },
   "footprint_square": {
     "marker": "s",
@@ -1094,9 +1076,7 @@
     "plot_size_at_display": [
       232.5,
       231.0
-    ],
-    "export_dpi": 150,
-    "display_dpi": 100
+    ]
   },
   "footprint_square-stroke": {
     "marker": "s",
@@ -1107,9 +1087,7 @@
     "plot_size_at_display": [
       232.5,
       231.0
-    ],
-    "export_dpi": 150,
-    "display_dpi": 100
+    ]
   },
   "footprint_diamond": {
     "marker": "D",
@@ -1120,9 +1098,7 @@
     "plot_size_at_display": [
       232.5,
       231.0
-    ],
-    "export_dpi": 150,
-    "display_dpi": 100
+    ]
   },
   "footprint_diamond-stroke": {
     "marker": "D",
@@ -1133,33 +1109,6 @@
     "plot_size_at_display": [
       232.5,
       231.0
-    ],
-    "export_dpi": 150,
-    "display_dpi": 100
-  },
-  "assets": {
-    "categorical-panel-0.png": "a920e6cb40980b1e0b9dae36fc8b348c803f8c40852684c9bcfbe3298aa10c0f",
-    "categorical.png": "b3c69b73f99f4c4364ff7d918ba67ffdbfeafabc3e35695aeef41db5f989d2ba",
-    "continuous-panel-0.png": "da60ab91f0b06532f91c336a222875a50e58076f2ae49cc3579170a510c0571d",
-    "continuous.png": "6288660c5e60bc78db9b570dd5e234096db0096439fbc1d7e1b79a931a83bf32",
-    "footprint-circle.png": "fdb3cfeacea945706f2cbcc46f8ee24058dc9a135ade3023048310c1dfa27652",
-    "footprint-diamond-stroke.png": "6858c32beafb87b6ab6955b28972ad50fe892216d600bf264dd3c7e8a3af0e34",
-    "footprint-diamond.png": "7c1e57fa9905ff7b15b646caa4518f7ebf57e190a976e15c957a41fba329844c",
-    "footprint-dot-stroke.png": "8dc8fe48a059a24e90ec2847980d05155e9c127fa87adbde6e912d1784265af9",
-    "footprint-dot.png": "6e4fa0e667c1c39dee6a0a811e6d09793b04c5e616a3af48741e9986ea77893e",
-    "footprint-square-stroke.png": "abb46d99bac90cd1f81bef9bfb28ca2bc601d25ff5dcb36dd8c534b80180df25",
-    "footprint-square.png": "e68388bf4283fcbf2de29cefde173cf91cb2dd2efdf177a0a6570e608192db0a",
-    "grid-panel-0.png": "8050e1ac12e5dcdc8b3c5f043785b4c6de372de737bcb733bea4601113fd2e8f",
-    "grid-panel-1.png": "145bb06a2ff0eed28ed452897c36d10e32ae4f7e56d2f96a97cce0b960417c87",
-    "grid-panel-2.png": "145bb06a2ff0eed28ed452897c36d10e32ae4f7e56d2f96a97cce0b960417c87",
-    "grid-panel-3.png": "e98f9f5143137f41a2eacf260b0d4149406c7872ac056583edd813e179e654f3",
-    "grid-panel-4.png": "9c901b78df7cd187c7f0bd0f407ad97a0d6f0fc6c22025f5d44b22bd2b3d1e5a",
-    "grid-panel-5.png": "afa455e6fde43a4b97710596322883dea78dbe4cf1af0b1cafe7b25bb07b306c",
-    "grid-panel-6.png": "1b31fe936b2e166bfba3b5e1c3c838a503660ec49cd68701e856b67738cd01d1",
-    "grid-panel-7.png": "1b79097a311e2532bcb2fe4ad683d186971c50b875ada025c56436aeafab0a04",
-    "grid.png": "38e7a198eb28a87bd6412188de216649bffa617615027b5028b034d836b54741",
-    "raw-panel-0.png": "4621027f67a7eaf0b5a46e082b33a93e24b17fb304360d80e33df22d4adbd9c6",
-    "raw.png": "5a38112594f1b581ecfdba69ee60566d259d8c1c8f7007c79155eeb19161f71d"
-  },
-  "fixture_sha256": "5c5f503943f0ac53c5258594f273fa7c771700c39a6f9753a1a3247cd7d15be5"
+    ]
+  }
 }

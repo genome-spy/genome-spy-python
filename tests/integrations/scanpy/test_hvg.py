@@ -1,6 +1,5 @@
 """Stored variable-gene data, Scanpy defaults and native chart semantics."""
 
-import inspect
 import json
 from copy import deepcopy
 
@@ -10,29 +9,9 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import units
-from tests.integrations.scanpy.hvg_fixture import make_hvg_result
+from tests.integrations.scanpy.qc_fixtures import make_hvg_result
 
 sc = pytest.importorskip("scanpy")
-
-
-@pytest.mark.parametrize("family", ["highly_variable_genes", "filter_genes_dispersion"])
-def test_signatures_preserve_scanpy_defaults_and_add_native_options(family):
-    actual = inspect.signature(getattr(gsc.pl, family)).parameters
-    expected = inspect.signature(getattr(sc.pl, family)).parameters
-    for name, parameter in expected.items():
-        assert actual[name].kind == parameter.kind
-        assert actual[name].default == parameter.default
-    assert set(actual) - set(expected) == {
-        "hover",
-        "zoom",
-        "threshold_slider",
-        "width",
-        "height",
-    }
-    assert all(
-        actual[name].kind == inspect.Parameter.KEYWORD_ONLY
-        for name in set(actual) - set(expected)
-    )
 
 
 @pytest.mark.reference

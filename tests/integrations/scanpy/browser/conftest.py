@@ -2,11 +2,12 @@
 
 import warnings
 from functools import cache
-from importlib import import_module
+from importlib.metadata import version
 
 import pytest
 
-from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
+from tests.integrations.scanpy.browser.references import render_images
+from tests.integrations.scanpy.expression_fixtures import make_grouped_adata
 
 playwright = pytest.importorskip("playwright.sync_api")
 
@@ -19,13 +20,11 @@ def reference_images(tmp_path_factory):
     @cache
     def render(family):
         """Return this family's temporary exports without refreshing tracked JSON."""
-        module = (
-            "generate_references"
-            if family == "umap"
-            else f"generate_{family}_references"
+        assert version("scanpy") == "1.11.5", (
+            "Visual references use the pinned Scanpy environment"
         )
         output = root / family
-        import_module(f"tests.integrations.scanpy.{module}").main(output)
+        render_images(family, output)
         return output
 
     return render

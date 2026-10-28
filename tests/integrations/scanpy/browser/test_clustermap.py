@@ -18,7 +18,7 @@ from tests.integrations.scanpy.browser.interactions import (
     value_texts,
 )
 from tests.integrations.scanpy.browser.rendering import render_heatmap as render
-from tests.integrations.scanpy.clustermap_fixture import (
+from tests.integrations.scanpy.expression_fixtures import (
     clustermap_cases,
     make_cluster_adata,
 )

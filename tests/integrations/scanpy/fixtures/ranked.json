@@ -1,12 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "numpy": "2.4.6",
-    "matplotlib": "3.11.2"
-  },
-  "display_dpi": 100,
-  "export_dpi": 150,
-  "input_sha256": "8ce4cbdbb6ba829e8c054a2cb3665073fe2292a751e3b83687d45473d0407b16",
   "cases": {
     "genes_shared": {
       "panels": [
@@ -102,8 +94,7 @@
           "ylabel": "",
           "title": "C vs. rest"
         }
-      ],
-      "full_sha256": "3b0deab2870345607e45de6bd4977847d9ed70b68af9c40ae13549b2f7b93464"
+      ]
     },
     "genes_independent": {
       "panels": [
@@ -199,8 +190,7 @@
           "ylabel": "",
           "title": "C vs. rest"
         }
-      ],
-      "full_sha256": "7205babb516a7b4fd69d5cf4deb7c06edddb740c1d05bb7feb82871a00779178"
+      ]
     },
     "attribute_top": {
       "panels": [
@@ -250,8 +240,7 @@
           "ylabel": "",
           "title": "score name"
         }
-      ],
-      "full_sha256": "f82dbc70bad167a97ab1125401274470c4dbaf5997bea453616f6aad212bcccd"
+      ]
     },
     "attribute_extremes": {
       "panels": [
@@ -267,7 +256,7 @@
               "rotation": 90.0
             },
             {
-              "text": "\u22ee",
+              "text": "⋮",
               "position": [
                 1.0,
                 2.5
@@ -313,7 +302,7 @@
               "rotation": 90.0
             },
             {
-              "text": "\u22ee",
+              "text": "⋮",
               "position": [
                 1.0,
                 5.0
@@ -347,8 +336,7 @@
           "ylabel": "",
           "title": "PC1"
         }
-      ],
-      "full_sha256": "d8f24e2c1131eb5205225076978647691e92ac7b8eb2d236415c58a0c3091587"
+      ]
     },
     "pca_extremes": {
       "panels": [
@@ -364,7 +352,7 @@
               "rotation": 90.0
             },
             {
-              "text": "\u22ee",
+              "text": "⋮",
               "position": [
                 1.0,
                 2.5
@@ -410,7 +398,7 @@
               "rotation": 90.0
             },
             {
-              "text": "\u22ee",
+              "text": "⋮",
               "position": [
                 1.0,
                 5.0
@@ -444,8 +432,7 @@
           "ylabel": "",
           "title": "PC1"
         }
-      ],
-      "full_sha256": "d8f24e2c1131eb5205225076978647691e92ac7b8eb2d236415c58a0c3091587"
+      ]
     },
     "pca_top": {
       "panels": [
@@ -541,8 +528,7 @@
           "ylabel": "",
           "title": "PC1"
         }
-      ],
-      "full_sha256": "af90c5aba9b46cc3aae80af5057bf79fe296ac3179de9448bf24b325a1b68516"
+      ]
     },
     "pca_all": {
       "panels": [
@@ -656,8 +642,7 @@
           "ylabel": "",
           "title": "PC2"
         }
-      ],
-      "full_sha256": "384af960d239f886ca5ca185b719f64036bee0a4230b71248d8ca38a14c0ae9a"
+      ]
     },
     "variance_linear": {
       "panels": [
@@ -707,8 +692,7 @@
           "ylabel": "",
           "title": "variance ratio"
         }
-      ],
-      "full_sha256": "295f7d48ad8089658cb41e6218c8d3bd07a99adafa8c9de01be4dc3172e5aa19"
+      ]
     },
     "variance_log": {
       "panels": [
@@ -767,8 +751,7 @@
           "ylabel": "",
           "title": "variance ratio"
         }
-      ],
-      "full_sha256": "c5d54725c53fc327e3ef8ffbc247c14db309feab42ec74bda5802e3df05acc33"
+      ]
     },
     "variance_short": {
       "panels": [
@@ -836,8 +819,7 @@
           "ylabel": "",
           "title": "variance ratio"
         }
-      ],
-      "full_sha256": "856523377d71f806a2f0ef018da44355a0c4b2eabde66e20f20fe3d1dfab8ce5"
+      ]
     }
   },
   "statistics": {
@@ -871,8 +853,7 @@
         -4.0,
         8.0
       ],
-      "legend_title": "scores",
-      "full_sha256": "1816066d58fa237aabd99b8ddf87f10d0c192d9edd264a4caa562d62f1ab8fca"
+      "legend_title": "scores"
     },
     "matrixplot": {
       "metric": "log10_pvals_adj",
@@ -904,8 +885,7 @@
         0.045757490560675115,
         2.3979400086720375
       ],
-      "legend_title": "log10 p-value adj",
-      "full_sha256": "3d8983a81ae4a2cfbf0f3fec5cdc9e85ef99c9ac2feb2a31c66b9137348d0aee"
+      "legend_title": "log10 p-value adj"
     }
   }
 }

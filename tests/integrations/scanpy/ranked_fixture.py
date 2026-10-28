@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
+from tests.integrations.scanpy.expression_fixtures import make_tree_adata
 
 
 def make_ranked_adata():

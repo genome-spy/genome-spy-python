@@ -1,6 +1,5 @@
 """Cell heatmap semantics, reuse, identity, resource policy and pinned references."""
 
-import inspect
 import json
 import warnings
 from pathlib import Path
@@ -13,8 +12,11 @@ from scipy import sparse
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy import pl
 from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
-from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
-from tests.integrations.scanpy.heatmap_fixture import heatmap_cases, make_heatmap_adata
+from tests.integrations.scanpy.expression_fixtures import make_grouped_adata
+from tests.integrations.scanpy.expression_fixtures import (
+    heatmap_cases,
+    make_heatmap_adata,
+)
 from tests.integrations.scanpy.helpers import leaf_marks, points
 
 sc = pytest.importorskip("scanpy")
@@ -43,28 +45,6 @@ def records(chart):
     return pd.DataFrame(
         next(rows for rows in spec["datasets"].values() if "_value" in rows[0])
     )
-
-
-def test_signature_retains_upstream_defaults_and_native_additions():
-    upstream = json.loads((FIXTURES / "api.json").read_text())["entries"]["heatmap"][
-        "parameters"
-    ]
-    actual = inspect.signature(pl.heatmap).parameters
-    for parameter in upstream:
-        p = actual[parameter["name"]]
-        assert p.kind.name == parameter["kind"]
-        assert (
-            None if p.default is inspect.Parameter.empty else repr(p.default)
-        ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in upstream} == {
-        "hover",
-        "zoom",
-        "show_values",
-        "highlight",
-        "group_gap",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.parametrize("case", heatmap_cases())

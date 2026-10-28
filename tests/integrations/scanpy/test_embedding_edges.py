@@ -7,8 +7,8 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
-from tests.integrations.scanpy.fixture_support import FAMILIES, graph_adata
+from tests.integrations.scanpy.embedding_fixtures import make_embedding_adata
+from tests.integrations.scanpy.embedding_fixtures import FAMILIES, graph_adata
 from tests.integrations.scanpy.helpers import leaf_marks, points, units
 
 sc = pytest.importorskip("scanpy")

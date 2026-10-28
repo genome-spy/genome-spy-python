@@ -17,7 +17,7 @@ from tests.integrations.scanpy.browser.interactions import (
 )
 from tests.integrations.scanpy.browser.rendering import render, style_profile_reference
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
+from tests.integrations.scanpy.profile_fixtures import timeseries_cases
 
 
 @pytest.mark.reference

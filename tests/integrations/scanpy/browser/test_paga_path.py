@@ -9,7 +9,7 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import hover_at, pointer, svg_root
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.paga_path_fixture import make_path
+from tests.integrations.scanpy.paga_fixtures import make_path
 
 
 def bounds_for(page, name):

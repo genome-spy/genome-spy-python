@@ -12,8 +12,8 @@ from genome_spy.integrations.scanpy._expression.grouped_data import (
     group_means,
     scale_values,
 )
-from tests.integrations.scanpy.fixture_data import make_adata
-from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
+from tests.integrations.scanpy.embedding_fixtures import make_adata
+from tests.integrations.scanpy.expression_fixtures import make_grouped_adata
 
 sc = pytest.importorskip("scanpy")
 

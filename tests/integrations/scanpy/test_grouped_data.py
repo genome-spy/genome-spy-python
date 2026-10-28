@@ -2,7 +2,6 @@
 
 import json
 from dataclasses import asdict
-from hashlib import sha256
 from pathlib import Path
 
 import numpy as np
@@ -16,7 +15,10 @@ from genome_spy.integrations.scanpy._expression.grouped_data import (
     grouped_expression,
     scale_values,
 )
-from tests.integrations.scanpy.grouped_fixture import grouped_cases, make_grouped_adata
+from tests.integrations.scanpy.expression_fixtures import (
+    grouped_cases,
+    make_grouped_adata,
+)
 
 sc = pytest.importorskip("scanpy")
 FIXTURE = Path(__file__).with_name("fixtures") / "grouped.json"
@@ -29,13 +31,6 @@ def adata():
         a = make_grouped_adata()
     a.obs.index.name = "barcode"
     return a
-
-
-def test_grouped_fixture_matches_its_frozen_provenance():
-    source = Path(__file__).with_name("grouped_fixture.py")
-    assert sha256(source.read_bytes()).hexdigest() == REFERENCE["fixture_sha256"]
-    assert REFERENCE["versions"]["scanpy"] == "1.11.5"
-    assert set(REFERENCE["cases"]) == set(grouped_cases())
 
 
 def test_means_fractions_and_scaling_have_independent_denominators(adata):

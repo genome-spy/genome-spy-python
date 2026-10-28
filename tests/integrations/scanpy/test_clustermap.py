@@ -1,6 +1,5 @@
 """Clustermap source selection, independent calculations, stored trees and limits."""
 
-import inspect
 import json
 from pathlib import Path
 
@@ -14,34 +13,13 @@ import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._expression.clustermap_data import (
     prepare_clustermap,
 )
-from tests.integrations.scanpy.clustermap_fixture import (
+from tests.integrations.scanpy.expression_fixtures import (
     clustermap_cases,
     make_cluster_adata,
 )
 from tests.integrations.scanpy.helpers import leaf_marks, points
 
 pytest.importorskip("scanpy")
-
-
-def test_clustermap_signature_preserves_scanpy_contract():
-    upstream = json.loads(
-        (Path(__file__).with_name("fixtures") / "api.json").read_text()
-    )["entries"]["clustermap"]["parameters"]
-    actual = inspect.signature(gsc.pl.clustermap).parameters
-    for parameter in upstream:
-        native = actual[parameter["name"]]
-        assert native.kind.name == parameter["kind"]
-        assert (
-            None if native.default is inspect.Parameter.empty else repr(native.default)
-        ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in upstream} == {
-        "hover",
-        "zoom",
-        "show_values",
-        "highlight",
-        "width",
-        "height",
-    }
 
 
 def test_native_tracks_and_contiguous_scales_have_one_owner():

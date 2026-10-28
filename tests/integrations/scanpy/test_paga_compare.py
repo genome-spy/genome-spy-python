@@ -1,6 +1,5 @@
 """PAGA comparison reuses native parents and honors stored embedding coordinates."""
 
-import inspect
 from copy import deepcopy
 
 import numpy as np
@@ -11,7 +10,7 @@ from anndata import AnnData
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks, points
-from tests.integrations.scanpy.paga_fixture import POSITIONS, make_compare
+from tests.integrations.scanpy.paga_fixtures import POSITIONS, make_compare
 
 sc = pytest.importorskip("scanpy")
 
@@ -58,19 +57,6 @@ def test_custom_palette_matches_scanpy_in_both_panels_without_changing_saved_col
         [to_rgba(c) for c in graph_colors], [to_rgba(c) for c in expected]
     )
     assert a.uns["cluster_colors"] == before
-
-
-def test_signature_preserves_every_upstream_parameter_and_default():
-    upstream = inspect.signature(sc.pl.paga_compare).parameters
-    native = inspect.signature(gsc.pl.paga_compare).parameters
-    for name, parameter in upstream.items():
-        assert native[name].kind == parameter.kind
-        assert native[name].default == parameter.default
-    assert set(native) - set(upstream) == {"hover", "zoom", "width", "height"}
-    assert all(
-        native[name].kind is inspect.Parameter.KEYWORD_ONLY
-        for name in set(native) - set(upstream)
-    )
 
 
 @pytest.mark.parametrize("component", [False, True])

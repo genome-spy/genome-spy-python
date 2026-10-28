@@ -1,16 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "scipy": "1.17.1",
-    "pandas": "2.3.3",
-    "numpy": "2.4.6",
-    "matplotlib": "3.11.2"
-  },
-  "display_dpi": 100,
-  "export_dpi": 150,
-  "font": "DejaVu Sans",
-  "native_font": "Lato Regular",
-  "fixture_sha256": "4109c9d71cd439deadfe95e0787b69d366487e9b08281edaeaf8751475415a0e",
   "computations": {
     "default": {
       "linkage": [
@@ -1299,8 +1287,7 @@
       "tree_y_domain": [
         -0.09714285714285714,
         2.04
-      ],
-      "full_sha256": "0feb8270c528a79f79f7a7e63a7f3d85c88e29efc960df0d331686cd33e93d0d"
+      ]
     },
     "standalone_bottom": {
       "family": "dendrogram",
@@ -1386,8 +1373,7 @@
       "tree_y_domain": [
         2.04,
         -0.09714285714285714
-      ],
-      "full_sha256": "ddb959a4ba932308c4f27fb12f5c6d10796a2173c5087e7cd5a67b3fe92bb04e"
+      ]
     },
     "standalone_left": {
       "family": "dendrogram",
@@ -1473,8 +1459,7 @@
       "tree_y_domain": [
         3.5,
         36.5
-      ],
-      "full_sha256": "cbb32c3c816c0056c02cebedd80796d7ad9fba8021dc07fb2509f3354dffcc76"
+      ]
     },
     "standalone_right": {
       "family": "dendrogram",
@@ -1560,8 +1545,7 @@
       "tree_y_domain": [
         3.5,
         36.5
-      ],
-      "full_sha256": "fbd26e0d39215cda0a50aeb1298bedb40a4b4f6ae97dc183a830a4e67fc3d2e3"
+      ]
     },
     "dotplot": {
       "family": "dotplot",
@@ -1652,8 +1636,7 @@
       "tree_y_domain": [
         4.5,
         -0.5
-      ],
-      "full_sha256": "434bdcc94e8371c3b8ce735cbbdcbe586ddea100d2ea702bf38fe0d9ce114bdf"
+      ]
     },
     "dotplot_swapped": {
       "family": "dotplot",
@@ -1744,8 +1727,7 @@
       "tree_y_domain": [
         -0.09714285714285714,
         2.04
-      ],
-      "full_sha256": "4553a4f88a868ceadef472409154e452751fe84fbc3e3e997df122a7d4e6fba4"
+      ]
     },
     "matrixplot": {
       "family": "matrixplot",
@@ -1837,7 +1819,6 @@
         4.0,
         0.0
       ],
-      "full_sha256": "c02ae48b555c0aee9f2c2a47d0c45649abbbee6ee88c601b0075988fb3735d69",
       "values": [
         [
           1.0,
@@ -1955,7 +1936,6 @@
         -0.09714285714285714,
         2.04
       ],
-      "full_sha256": "2668b47156a2cdfaaff9098aaa2821398651f720040ff275fb746ff09090a2e8",
       "values": [
         [
           1.0,
@@ -2075,7 +2055,6 @@
         4.0,
         0.0
       ],
-      "full_sha256": "f643580bb6c1a2c66efc2588c1acbe6d1ee088d196e0ca38579539be029840eb",
       "values": [
         [
           0.0,
@@ -2201,7 +2180,6 @@
         0.0,
         4.0
       ],
-      "full_sha256": "13a53c1cd647b03aa53712585a21c138325071e0485849e538e8b2118fe92ea7",
       "values": [
         [
           1.0,
@@ -2258,7 +2236,6 @@
       "tree_paths": [],
       "tree_x_domain": null,
       "tree_y_domain": null,
-      "full_sha256": "c815d1a899833a19dd986bd82ffccaba3d74e030406934b5cdf012c15ad4c5f5",
       "values": [
         [
           1.0,
@@ -2376,7 +2353,6 @@
         0.0,
         4.0
       ],
-      "full_sha256": "3471c6f4b429fbdb383b07f096619b90a56790e7ef9743ba5b422e5c0a732bf8",
       "values": [
         [
           1.0,

@@ -12,7 +12,7 @@ from scipy import sparse
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
+from tests.integrations.scanpy.embedding_fixtures import make_adata, reference_cases
 from tests.integrations.scanpy.helpers import leaf_marks, points, units
 
 sc = pytest.importorskip("scanpy")

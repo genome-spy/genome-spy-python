@@ -1,7 +1,5 @@
 """PAGA path data and defaults against Scanpy's public plotting entry."""
 
-import inspect
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -9,31 +7,9 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._paga.path_data import prepare_paga_path
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.paga_path_fixture import make_path, path_cases
+from tests.integrations.scanpy.paga_fixtures import make_path, path_cases
 
 pytest.importorskip("scanpy")
-
-
-def test_signature_preserves_scanpy_defaults_without_matplotlib_axes():
-    import scanpy as sc
-
-    expected = inspect.signature(sc.pl.paga_path).parameters
-    actual = inspect.signature(gsc.pl.paga_path).parameters
-    for name, parameter in expected.items():
-        if name == "ax":
-            assert name not in actual
-        else:
-            assert actual[name].kind == parameter.kind
-            assert actual[name].default == parameter.default
-    assert actual.keys() - expected.keys() == {
-        "hover",
-        "zoom",
-        "show_values",
-        "series_select",
-        "ruler",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.reference

@@ -9,7 +9,7 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import hover_at
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.expression_fixtures import make_heatmap_adata
 from tests.integrations.scanpy.helpers import tree_segments, units
 
 

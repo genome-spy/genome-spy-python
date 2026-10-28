@@ -1,18 +1,4 @@
 {
-  "versions": {
-    "scanpy": "1.11.5",
-    "numpy": "2.4.6",
-    "pandas": "2.3.3",
-    "matplotlib": "3.11.2"
-  },
-  "display_dpi": 100,
-  "export_dpi": 150,
-  "font": "DejaVu Sans",
-  "native_font": "Lato Regular",
-  "input_sha256": {
-    "heatmap_fixture.py": "7718a72a0b8cf14031d50fd22e131ee53202cdfbd364b08cca691c337f33d09e",
-    "dendrogram_fixture.py": "4109c9d71cd439deadfe95e0787b69d366487e9b08281edaeaf8751475415a0e"
-  },
   "cases": {
     "default": {
       "plot_size": [
@@ -88,8 +74,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "2b75e36ccfd979cebbc736dae6040554951779201ffb374952225ef45bf81fa2"
+      "tree_paths": []
     },
     "log": {
       "plot_size": [
@@ -165,8 +150,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "20c9de5d5305d37cd23dcfd5ded7ea084b741700a413cc5bc9d7e5788373eb00"
+      "tree_paths": []
     },
     "scaled_var": {
       "plot_size": [
@@ -242,8 +226,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "c92f1fe5479df58dd7ff856af75310bb2045bdb212951849064cbe054c05886c"
+      "tree_paths": []
     },
     "scaled_obs": {
       "plot_size": [
@@ -319,8 +302,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "42d91149010efab0065966cb12ab49d12bd78bde3c614cb80b206ef468260d00"
+      "tree_paths": []
     },
     "swapped": {
       "plot_size": [
@@ -384,8 +366,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "343a773bfb49fd2d4a890ef55e44b68f6520fa83d03f01e324ec7a3a1a87632b"
+      "tree_paths": []
     },
     "markers": {
       "plot_size": [
@@ -461,8 +442,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "e1a594175e924d273607d2e5574be208cd4c6df3d8d91c707edb6aca86caa8ee"
+      "tree_paths": []
     },
     "swapped_markers": {
       "plot_size": [
@@ -526,8 +506,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "537ccde1fc6b160785b19853950d1f5ca8bd1e2578c5201c8596d8e3f2ddbbdd"
+      "tree_paths": []
     },
     "tree": {
       "plot_size": [
@@ -658,8 +637,7 @@
             6.75
           ]
         ]
-      ],
-      "full_sha256": "f13b955263f63332025e34f94180bec346e985a4507b34130abbad3bb73fd939"
+      ]
     },
     "swapped_tree": {
       "plot_size": [
@@ -778,8 +756,7 @@
             0.521839235444006
           ]
         ]
-      ],
-      "full_sha256": "d8f8a57a6893f761b0d89abec8a90ff77a157de152f5c4d50d4472c977c0e059"
+      ]
     },
     "matched_blocks": {
       "plot_size": [
@@ -930,8 +907,7 @@
             6.75
           ]
         ]
-      ],
-      "full_sha256": "4630945a4434b1590af5f1f2f0788950a26ad00ddd47e1c7ee23f6583f93944d"
+      ]
     },
     "missing": {
       "plot_size": [
@@ -1007,8 +983,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "235053b41ad74f3d46d7a4992f11eaa83af7305b3a906b618537cf0f5ea7d991"
+      "tree_paths": []
     },
     "constant": {
       "plot_size": [
@@ -1084,8 +1059,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "146529e9ebd5c4b913f5bef762f6037eb63565b251c9559788995ead991c0aa3"
+      "tree_paths": []
     },
     "one_group": {
       "plot_size": [
@@ -1151,8 +1125,7 @@
       "y_labels": [],
       "group_ticks": [],
       "group_labels": [],
-      "tree_paths": [],
-      "full_sha256": "47c5e919f794d005deef4ddc9be8baa1fe4cd429a334f896ed674cfe20b625bf"
+      "tree_paths": []
     },
     "hidden_labels": {
       "plot_size": [
@@ -1224,8 +1197,7 @@
         "D",
         "B"
       ],
-      "tree_paths": [],
-      "full_sha256": "76cb5a4bc007c0d98aeabb46f444b12c9c47ffbdc86c1d57b6a673274d4fbf4e"
+      "tree_paths": []
     },
     "numeric_bins": {
       "plot_size": [
@@ -1299,8 +1271,7 @@
         "(2.667, 5.333]",
         "(5.333, 8.0]"
       ],
-      "tree_paths": [],
-      "full_sha256": "21ce2f96fb876e5eee3027706b608a349a82c8372bc9e6e3e80ef99f16f00891"
+      "tree_paths": []
     },
     "multi_key": {
       "plot_size": [
@@ -1376,8 +1347,7 @@
         "D_z",
         "B_z"
       ],
-      "tree_paths": [],
-      "full_sha256": "9f65d8319384db8ba1260a75f9774557c06692f9e2cea1fcf486479da652466a"
+      "tree_paths": []
     }
   }
 }

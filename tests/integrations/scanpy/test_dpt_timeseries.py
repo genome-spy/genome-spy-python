@@ -1,6 +1,5 @@
 """Stored DPT expression ordering against public Scanpy, without analysis or mutation."""
 
-import inspect
 import warnings
 
 import numpy as np
@@ -9,27 +8,13 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.dpt_fixture import dpt_profile_cases, make_dpt_profiles
+from tests.integrations.scanpy.profile_fixtures import (
+    dpt_profile_cases,
+    make_dpt_profiles,
+)
 from tests.integrations.scanpy.helpers import leaf_marks
 
 pytest.importorskip("scanpy")
-
-
-def test_signature_preserves_scanpy_and_adds_only_native_options():
-    import scanpy as sc
-
-    actual = inspect.signature(gsc.pl.dpt_timeseries).parameters
-    expected = inspect.signature(sc.pl.dpt_timeseries).parameters
-    for name, parameter in expected.items():
-        assert actual[name].kind == parameter.kind
-        assert actual[name].default == parameter.default
-    assert actual.keys() - expected.keys() == {
-        "hover",
-        "zoom",
-        "show_values",
-        "width",
-        "height",
-    }
 
 
 @pytest.mark.reference
@@ -183,8 +168,6 @@ def test_backed_and_sparse_sources_fail_without_loading_or_densifying(
         ({"hover": 1}, TypeError),
         ({"show_values": 1}, TypeError),
         ({"zoom": "x"}, TypeError),
-        ({"show": 1}, TypeError),
-        ({"save": True}, NotImplementedError),
         ({"as_heatmap": False, "show_values": True}, NotImplementedError),
     ],
 )

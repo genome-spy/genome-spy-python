@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.fixture_support import adata as adata
-from tests.integrations.scanpy.fixture_support import records
+from tests.integrations.scanpy.embedding_fixtures import adata as adata
+from tests.integrations.scanpy.helpers import records
 from tests.integrations.scanpy.helpers import leaf_marks, units
 
 
