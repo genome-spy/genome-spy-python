@@ -205,6 +205,7 @@ Tests live under `tests/integrations/scanpy/`. Ordinary PRs run fast Python chec
 against Scanpy 1.11.5 and 1.12.4, plus observed browser smoke checks once. Main,
 full manual runs and releases also run upstream comparisons, every browser check
 and both workflow notebooks. Release CI explicitly enables `full_scanpy`.
+New PR updates cancel superseded PR runs; main and release checks are retained.
 
 ```sh
 uv sync --dev --extra scanpy --group scanpy-test

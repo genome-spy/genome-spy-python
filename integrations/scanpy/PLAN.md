@@ -337,7 +337,8 @@ full mode. Regular PRs use the shorter selection. Label/input handling must not
 prevent a contributor from running all tests locally. Do not duplicate browser
 rendering across Python versions when the JavaScript bundle and pinned reference
 stack are identical. Proposed performance goals are under five minutes each for
-the warm fast and smoke jobs; measure before treating those goals as achieved.
+the warm fast and smoke jobs; measure before treating those goals as achieved. Use GitHub's native concurrency group
+for superseded PR runs; main and release runs must not be cancelled by that rule.
 
 ### Implementation and clearance
 
