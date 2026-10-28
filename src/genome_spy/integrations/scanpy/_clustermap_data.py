@@ -168,7 +168,9 @@ def prepare_clustermap(
         if z_score is not None:
             frame = (frame - frame.mean()) / frame.std()
         else:
-            frame = (frame - frame.min()) / (frame.max() - frame.min())
+            # Constant profiles stay missing here, matching Seaborn.
+            minimum = frame.min()
+            frame = (frame - minimum) / (frame.max() - minimum)
         values = frame if axis == 1 else frame.T
 
     # Display masks never change the values used for linkage.

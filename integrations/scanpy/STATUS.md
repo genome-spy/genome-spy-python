@@ -5152,3 +5152,13 @@ exactly, including matched, unmatched, excess and subset marker blocks. All 119
 Python and 44 browser checks pass. Ruff, formatting and full source mypy pass.
 The full suite and resource benchmarks were not rerun. Evidence stays temporary;
 no plan is cleared. Other pending heatmap changes remain outside this commit.
+
+### Clustermap scaling stays separate
+
+Clustermap standard scaling now names and reuses its minimum. It stays local:
+constant profiles remain missing, whereas summary-plot scaling fills them with
+zero. Regression tests cover row and column scaling, display masks and unchanged
+source values; both tests passed before the cleanup. All 49 sampled complete
+chart specs match exactly, and all 38 clustermap Python tests pass. Ruff,
+formatting and full source mypy pass. Browser tests, the full suite and resource
+benchmarks were not rerun. No plan is cleared; unrelated work stays unstaged.

@@ -121,6 +121,26 @@ def test_scaling_precedes_distances_and_display_masks_do_not_change_trees():
     np.testing.assert_array_equal(data.row_tree.dcoord, masked.row_tree.dcoord)
 
 
+@pytest.mark.parametrize("axis", [0, 1])
+def test_standard_scaling_preserves_missing_constant_profiles(axis):
+    from anndata import AnnData
+
+    profiles = np.array([[4.0, 4, 4], [2, 3, 6]])
+    original = profiles if axis == 0 else profiles.T
+    adata = AnnData(original.copy())
+
+    data = prepare_clustermap(
+        adata, None, False, standard_scale=axis, row_cluster=False, col_cluster=False
+    )
+
+    expected = np.array([[np.nan, np.nan, np.nan], [0, 0.25, 1]])
+    if axis == 1:
+        expected = expected.T
+    np.testing.assert_allclose(data.values, expected, equal_nan=True)
+    np.testing.assert_array_equal(data.mask, np.isnan(expected))
+    np.testing.assert_array_equal(adata.X, original)
+
+
 def test_observation_strip_owns_category_legend_with_saved_order_and_colors():
     adata = make_cluster_adata()
     adata.obs["group"] = adata.obs["group"].cat.add_categories(["unused"])
