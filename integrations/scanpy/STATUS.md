@@ -33,10 +33,9 @@ states below describe coverage; they do not require a preview release label.
 
 ### Current work queue
 
-1. Finish clean-checkout verification and review the candidate PR scope with the
-   user. Runtime, tests and docs are collected into thematic commits; preserve
-   clean notebooks and inspect outgoing history/distributions for artifacts.
-   PR creation, merge and publication require user approval.
+1. Review the prepared PR scope with the user, then push/open the PR if approved
+   and run hosted CI. Runtime, tests and docs are committed and clean-checkout
+   verification is complete. PR creation, merge and publication require approval.
 2. Keep future version expansions behind compatibility checks; maintain the
    parameter contracts and recheck the upstream PAGA tree-layout issue.
 3. Classify known limitations below. Fix, reject or document user-visible cases
@@ -326,6 +325,33 @@ documented once as a range. The CI jobs have been updated; a hosted CI run and
 the final release-candidate review remain outstanding. No PR or push was made.
 
 ## Plan clearance ledger
+
+### Release candidate handoff
+
+The candidate includes the current main branch (`c055653`). Readability, shared
+interactions, linked summaries, Scanpy compatibility and release docs are in
+separate commits. `FUTURE.md` retains the missing families/options and the planned
+legend-selection/rule-outline follow-ups; no full-family gate was closed merely
+to prepare this release.
+
+Clean-checkout verification covered 3,073 existing non-browser checks, two existing
+expected failures and 30 codegen checks left to their dedicated CI job. One
+workflow initially hit a PBMC3k download timeout; it passed after populating the
+standard Scanpy cache with the same previously downloaded file, without changing
+the notebook or assertions. The new real-archive packaging regression also passed.
+Forty selected browser checks, all 32 JavaScript tests, the strict docs build,
+lint, formatting and typing passed. Installed-wheel checks used Scanpy 1.12.4.
+
+The clean build exposed a source-archive leak when Hatch did not apply Git ignores
+under a temporary checkout path. Explicit build exclusions now protect research,
+downloads and generated docs without Git metadata. The regression rejects the
+old configuration. Fresh wheel/source-archive checks verify modules, licenses,
+clean notebooks and absence of those caches; the source archive is 20 MB.
+Outgoing history has no generated test media/reports, and 119 historical notebook
+versions contain no outputs or widget state. Evidence and the draft PR body stay
+outside Git. Hosted CI, the complete browser matrix and codegen remain release
+gates; no PR, push, merge to main or publication has occurred. The unrelated
+`notebooks/select_genes.ipynb` metadata edit remains unstaged.
 
 The active PLAN, concise STATUS, source map and detailed compatibility contract
 remain maintained. Runtime/tests/notebooks and required reference fixtures remain
