@@ -107,6 +107,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 exclude = [
     "/tmp",
+    "/data",
     "/plans",
     "/material",
     "/docs/_build",

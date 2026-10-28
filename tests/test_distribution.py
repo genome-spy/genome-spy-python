@@ -27,6 +27,7 @@ def test_distributions_exclude_local_outputs_without_git(tmp_path):
         "skills/create-genomespy-visualization/SKILL.md": "# Test skill\n",
         "tests/fixtures/expected.json": "{}",
         "tmp/scanpy-guide-data/cache.h5ad": "local data",
+        "data/pbmc3k_raw.h5ad": "downloaded data",
         "plans/report.md": "local report",
         "material/reference.pdf": "local reference",
         "docs/_build/chart.html": "generated page",
