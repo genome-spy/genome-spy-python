@@ -15,6 +15,8 @@ from genome_spy.integrations.scanpy._timeseries.data import prepare_timeseries
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
 
+pytest.importorskip("scanpy")
+
 SUBPLOT_PARAMETERS = json.loads(
     Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
 )["entries"]["timeseries_subplot"]["parameters"]

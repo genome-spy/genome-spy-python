@@ -20,6 +20,8 @@ from tests.integrations.scanpy.clustermap_fixture import (
 )
 from tests.integrations.scanpy.helpers import points, leaf_marks
 
+pytest.importorskip("scanpy")
+
 
 def test_clustermap_signature_preserves_scanpy_contract():
     upstream = json.loads(

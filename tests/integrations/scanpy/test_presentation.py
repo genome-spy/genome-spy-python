@@ -12,6 +12,8 @@ from tests.integrations.scanpy.hvg_fixture import make_hvg_result
 from tests.integrations.scanpy.paga_fixture import make_adjacency
 from tests.integrations.scanpy.test_paga_compare import make_compare
 
+pytest.importorskip("scanpy")
+
 
 def test_hvg_preview_reuses_stored_scores_and_keeps_saved_selection():
     frame = make_hvg_result()

@@ -11,6 +11,8 @@ from genome_spy.integrations.scanpy._paga.path_data import prepare_paga_path
 from tests.integrations.scanpy.paga_path_fixture import make_path, path_cases
 from tests.integrations.scanpy.helpers import leaf_marks
 
+pytest.importorskip("scanpy")
+
 
 def test_signature_preserves_scanpy_defaults_without_matplotlib_axes():
     import scanpy as sc

@@ -8,6 +8,8 @@ import re
 import pytest
 from packaging.version import Version
 
+pytest.importorskip("scanpy")
+
 FIXTURES = Path(__file__).with_name("fixtures")
 
 

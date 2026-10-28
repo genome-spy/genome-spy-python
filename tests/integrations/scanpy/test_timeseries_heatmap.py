@@ -12,6 +12,8 @@ from scipy import sparse
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks, points
 
+pytest.importorskip("scanpy")
+
 
 def test_signature_preserves_upstream_defaults_and_adds_only_native_options():
     upstream = json.loads(

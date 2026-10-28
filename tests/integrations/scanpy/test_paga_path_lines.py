@@ -8,6 +8,8 @@ import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.paga_path_fixture import make_path
 
+pytest.importorskip("scanpy")
+
 
 LINE_CASES = {
     "default": {},

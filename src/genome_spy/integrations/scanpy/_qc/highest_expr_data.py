@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from scipy import sparse
-import scanpy as sc
 
 from genome_spy.integrations.scanpy._data import require_resident_expression
 from genome_spy.integrations.scanpy._embedding.data import point_ids
@@ -14,6 +13,8 @@ def prepare_highest_expression(
     adata: AnnData, n_top: int, layer: str | None, gene_symbols: str | None
 ) -> tuple[pd.DataFrame, pd.DataFrame, tuple[float, float, float]]:
     """Return ranked boxes, outliers and limits from counts without changing AnnData."""
+    import scanpy as sc
+
     context = "gsc.pl.highest_expr_genes"
     if not isinstance(adata, AnnData):
         raise TypeError(f"{context}: adata must be AnnData.")

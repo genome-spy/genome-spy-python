@@ -11,6 +11,8 @@ from genome_spy.integrations.scanpy._paga.data import adjacency_values, adjacenc
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.paga_fixture import make_adjacency
 
+pytest.importorskip("scanpy")
+
 
 def test_signature_preserves_upstream_parameters_and_defaults():
     import scanpy as sc

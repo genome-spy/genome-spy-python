@@ -11,6 +11,8 @@ from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
 from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
 
+pytest.importorskip("scanpy")
+
 
 @pytest.mark.parametrize(
     "family",

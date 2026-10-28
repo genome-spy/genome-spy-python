@@ -2,6 +2,8 @@
 
 from copy import deepcopy
 import inspect
+import subprocess
+import sys
 
 import anndata as ad
 import numpy as np
@@ -16,6 +18,17 @@ from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.highest_expr_fixture import make_counts
 
 sc = pytest.importorskip("scanpy")
+
+
+def test_data_module_defers_the_optional_scanpy_import():
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; import genome_spy.integrations.scanpy._qc.highest_expr_data; assert 'scanpy' not in sys.modules",
+        ],
+        check=True,
+    )
 
 
 def test_signature_retains_scanpy_defaults_and_native_keyword_only_controls():

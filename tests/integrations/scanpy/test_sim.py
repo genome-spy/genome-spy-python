@@ -12,6 +12,8 @@ from genome_spy.integrations.scanpy._timeseries.data import prepare_sim
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.sim_fixture import make_sim, sim_cases
 
+pytest.importorskip("scanpy")
+
 
 def test_signature_preserves_scanpy_and_adds_native_options():
     import scanpy as sc

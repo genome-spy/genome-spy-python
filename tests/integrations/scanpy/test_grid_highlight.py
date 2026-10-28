@@ -10,6 +10,8 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
 from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
 
+pytest.importorskip("scanpy")
+
 FAMILIES = ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
 
 

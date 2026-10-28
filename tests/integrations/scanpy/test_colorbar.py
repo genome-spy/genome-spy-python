@@ -9,6 +9,8 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.embedding_fixture import make_embedding_adata
 from tests.integrations.scanpy.helpers import points, units
 
+pytest.importorskip("scanpy")
+
 
 @pytest.mark.parametrize(
     "family,options",

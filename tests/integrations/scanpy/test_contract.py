@@ -14,6 +14,8 @@ from genome_spy.integrations.scanpy import pl
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy import _guards
 
+pytest.importorskip("scanpy")
+
 FIXTURES = Path(__file__).with_name("fixtures")
 EMBEDDINGS = {
     "umap",

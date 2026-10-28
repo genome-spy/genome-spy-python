@@ -11,6 +11,8 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.dpt_fixture import make_dpt, dpt_cases, dpt_reference
 from tests.integrations.scanpy.helpers import leaf_marks
 
+pytest.importorskip("scanpy")
+
 
 def test_signature_matches_scanpy_and_adds_only_native_options():
     import scanpy as sc

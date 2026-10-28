@@ -16,6 +16,8 @@ from tests.integrations.scanpy.paga_fixture import (
     paga_reference,
 )
 
+pytest.importorskip("scanpy")
+
 
 def test_signature_retains_scanpy_defaults_except_omitted_matplotlib_axes():
     import scanpy as sc

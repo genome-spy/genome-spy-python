@@ -13,6 +13,8 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.matrix_fixture import matrix_cases
 from tests.integrations.scanpy.helpers import leaf_marks
 
+pytest.importorskip("scanpy")
+
 FIXTURES = Path(__file__).with_name("fixtures")
 
 
