@@ -5030,3 +5030,14 @@ axes. No helpers or public options were added. All 17 complete chart specificati
 match exactly; 36 Python and three browser checks pass. Ruff, formatting and full
 source mypy pass. The full suite and resource benchmarks were not rerun. Generated
 evidence remains temporary; no plan is cleared.
+
+### PAGA network axis preparation
+
+Network bounds now live in a small local helper using the existing domain and
+zoom helpers. The main builder proceeds from validation to axes, edges, nodes
+and labels without the endpoint-padding calculation in the middle. Initial
+margins and native scale definitions are unchanged. All 68 complete chart specs
+match exactly; 155 Python and 53 browser checks pass, with one existing upstream
+component expected failure. Ruff, formatting and full source mypy pass. The full
+suite and resource benchmarks were not rerun. Evidence stays temporary; no plan
+is cleared. Other pending PAGA edits are outside this focused commit.

@@ -193,6 +193,43 @@ def build_paga_adjacency(
     )
 
 
+def _network_axes(
+    nodes: pd.DataFrame,
+    solid: pd.DataFrame,
+    dashed: pd.DataFrame,
+    *,
+    zoom: bool,
+) -> tuple[gs.X, gs.Y]:
+    """Return axes from node and edge coordinates, retaining Scanpy's initial margins."""
+    # Include connected edge endpoints when choosing the initial frame.
+    extent = nodes[["_x", "_y"]].to_numpy()
+    for edges in (solid, dashed):
+        if not edges.empty:
+            points = edges[["_x", "_y", "_x2", "_y2"]].to_numpy().reshape(-1, 2)
+
+            # NetworkX adds five percent around edge endpoints before the axes apply their margin.
+            padding = np.ptp(points, axis=0) * 0.05
+            extent = np.vstack(
+                [extent, points.min(axis=0) - padding, points.max(axis=0) + padding]
+            )
+    x = (
+        gs.X("_x:Q")
+        .scale(
+            domain=list(coordinate_domain(extent[:, 0], 0.05)), zero=False, nice=False
+        )
+        .axis(None)
+    )
+    y = (
+        gs.Y("_y:Q")
+        .scale(
+            domain=list(coordinate_domain(extent[:, 1], 0.05)), zero=False, nice=False
+        )
+        .axis(None)
+    )
+    x, y = zoom_axes(x, y, enabled="xy" if zoom else False, name=None)
+    return x, y
+
+
 def build_paga(
     nodes: pd.DataFrame,
     solid: pd.DataFrame,
@@ -225,30 +262,7 @@ def build_paga(
         raise NotImplementedError(f"{CONTEXT}: fontweight supports 'normal' or 'bold'.")
     if title is not None and not isinstance(title, str):
         raise TypeError(f"{CONTEXT}: title must be a string or None.")
-    extent = nodes[["_x", "_y"]].to_numpy()
-    for edges in (solid, dashed):
-        if not edges.empty:
-            points = edges[["_x", "_y", "_x2", "_y2"]].to_numpy().reshape(-1, 2)
-            # NetworkX adds five percent around edge endpoints before the axes apply their margin.
-            padding = np.ptp(points, axis=0) * 0.05
-            extent = np.vstack(
-                [extent, points.min(axis=0) - padding, points.max(axis=0) + padding]
-            )
-    x = (
-        gs.X("_x:Q")
-        .scale(
-            domain=list(coordinate_domain(extent[:, 0], 0.05)), zero=False, nice=False
-        )
-        .axis(None)
-    )
-    y = (
-        gs.Y("_y:Q")
-        .scale(
-            domain=list(coordinate_domain(extent[:, 1], 0.05)), zero=False, nice=False
-        )
-        .axis(None)
-    )
-    x, y = zoom_axes(x, y, enabled="xy" if zoom else False, name=None)
+    x, y = _network_axes(nodes, solid, dashed, zoom=zoom)
     charts = []
     cutoff = None
     if edge_slider:
