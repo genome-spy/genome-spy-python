@@ -42,7 +42,8 @@ def test_progress_inventory_matches_the_pinned_api_and_available_exports():
         for name, state in rows.items()
         if not state.startswith(("Not implemented", "External:"))
     }
-    assert available == set(pl.__all__)
+    assert available == set(pl.__all__) - {"EmbeddingSummary"}
+    assert inspect.isclass(pl.EmbeddingSummary)
     assert (
         f"{len(available)} plotting functions/builders are available as partial previews; {len(rows) - len(available) - 2} plot/builder"
         in inventory

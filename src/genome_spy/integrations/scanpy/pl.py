@@ -8,6 +8,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 from genome_spy.integrations.scanpy._expression.dotplot_builder import DotPlot
+from genome_spy.integrations.scanpy._embedding.summary_builder import EmbeddingSummary
 from genome_spy.integrations.scanpy._expression.matrixplot_builder import MatrixPlot
 from genome_spy.integrations.scanpy._guards import (
     _check_grid_highlight,
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "DotPlot",
+    "EmbeddingSummary",
     "MatrixPlot",
     "clustermap",
     "correlation_matrix",
