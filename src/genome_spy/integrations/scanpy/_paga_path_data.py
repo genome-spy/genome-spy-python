@@ -51,6 +51,24 @@ def path_line_values(
     return values.iloc[slice(*xlim)]
 
 
+def _node_indices(nodes: Sequence[str | int], categories: pd.Index) -> np.ndarray:
+    """Resolve path node names or integer positions, retaining their order and repeats."""
+    indices: np.ndarray
+    if all(isinstance(node, str) for node in nodes):
+        indices = categories.get_indexer(nodes)
+    elif all(
+        isinstance(node, Integral) and not isinstance(node, bool) for node in nodes
+    ):
+        indices = np.asarray(nodes, dtype=int)
+    else:
+        raise TypeError(
+            f"{CONTEXT}: nodes must be all group names or all integer indices."
+        )
+    if np.any((indices < 0) | (indices >= len(categories))):
+        raise ValueError(f"{CONTEXT}: each node must identify an existing group.")
+    return indices
+
+
 def prepare_paga_path(
     adata: Any,
     nodes: Sequence[str | int],
@@ -95,18 +113,7 @@ def prepare_paga_path(
         )
     pseudotime = numeric_values(adata.obs[["dpt_pseudotime"]], context=CONTEXT).ravel()
     categories = groups.cat.categories
-    if all(isinstance(node, str) for node in nodes):
-        indices = categories.get_indexer(nodes)
-    elif all(
-        isinstance(node, Integral) and not isinstance(node, bool) for node in nodes
-    ):
-        indices = np.asarray(nodes, dtype=int)
-    else:
-        raise TypeError(
-            f"{CONTEXT}: nodes must be all group names or all integer indices."
-        )
-    if np.any((indices < 0) | (indices >= len(categories))):
-        raise ValueError(f"{CONTEXT}: each node must identify an existing group.")
+    indices = _node_indices(nodes, categories)
 
     # Each occurrence of a node retains its cells, ordered only within that group.
     ordered = []

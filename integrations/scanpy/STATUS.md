@@ -5214,3 +5214,14 @@ counts and oversized attribute-ranking requests. All 127 targeted Python and ten
 ranking browser checks pass, along with Ruff, formatting and full source mypy.
 The full suite and resource benchmarks were not rerun. No plan is cleared;
 unrelated work remains unstaged and generated evidence stays temporary.
+
+### PAGA path node lookup
+
+Node name/index lookup now has a small local function, separate from cell
+ordering and smoothing. Mixed names/indices, booleans and invalid bounds retain
+their errors; four added regression cases passed before and after extraction.
+All 62 sampled heatmap and line-chart specs match exactly. Targeted Python tests
+report 129 passed and one existing upstream expected failure. Ruff, formatting
+and full source mypy pass. Browser tests, the full suite and resource benchmarks
+were not rerun. No plan is cleared; unrelated work stays unstaged and generated
+evidence stays temporary.

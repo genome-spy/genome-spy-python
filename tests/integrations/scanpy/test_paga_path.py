@@ -124,6 +124,10 @@ def test_values_tracks_labels_and_return_data_match_public_scanpy(
         ({"n_avg": 0}, ValueError, "n_avg"),
         ({"n_avg": 5}, ValueError, "n_avg"),
         ({"nodes": ["unknown"]}, ValueError, "existing group"),
+        ({"nodes": [-1, 3]}, ValueError, "existing group"),
+        ({"nodes": [4, 2]}, ValueError, "existing group"),
+        ({"nodes": [True, 3]}, TypeError, "all group names"),
+        ({"nodes": [2, "alpha"]}, TypeError, "all group names"),
         ({"nodes": ["unused"]}, ValueError, "no cells"),
         ({"keys": ["g1"]}, NotImplementedError, "two keys"),
         (
