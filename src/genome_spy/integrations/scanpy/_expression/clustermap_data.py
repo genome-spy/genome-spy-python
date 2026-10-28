@@ -92,6 +92,40 @@ def _annotation_colors(colors: Any, index: pd.Index, name: str) -> pd.DataFrame:
     return frame.map(lambda color: native_color(color, name, context=CONTEXT))
 
 
+def _observation_colors(
+    adata: Any, key: str | None, supplied: Any
+) -> tuple[pd.DataFrame, pd.Series | None, tuple[str, ...]]:
+    """Return row colors, category labels and a palette from observation metadata.
+
+    Keep category labels for the native legend; supplied colors need no categories.
+    """
+    if key is None:
+        return _annotation_colors(supplied, adata.obs_names, "row_colors"), None, ()
+    if supplied is not None:
+        raise TypeError(f"{CONTEXT}: obs_keys and row_colors cannot be combined.")
+    if key not in adata.obs:
+        raise ValueError(f"{CONTEXT}: obs_keys {key!r} is missing.")
+    categories = _categorical(adata.obs[key], context=CONTEXT)
+    if categories is None:
+        raise TypeError(f"{CONTEXT}: obs_keys must name categorical metadata.")
+    palette, _ = _palette(adata, key, categories.categories, None, context=CONTEXT)
+    labels = (
+        pd.Series(categories, index=adata.obs_names, name=key)
+        if len(categories.categories)
+        else None
+    )
+    colors = pd.Series(
+        ["white" if code < 0 else palette[code] for code in categories.codes],
+        index=adata.obs_names,
+        name=key,
+    )
+    return (
+        _annotation_colors(colors, adata.obs_names, "row_colors"),
+        labels,
+        palette if labels is not None else (),
+    )
+
+
 def prepare_clustermap(
     adata: Any,
     obs_keys: str | None,
@@ -134,8 +168,11 @@ def prepare_clustermap(
             )
     if z_score is not None and standard_scale is not None:
         raise ValueError(f"{CONTEXT}: z_score and standard_scale cannot be combined.")
+
+    # Choose storage before checking matrix and clustering size limits.
     raw = resolve_use_raw(adata, use_raw, None, context=CONTEXT)
     shape = (adata.n_obs, adata.raw.n_vars if raw else adata.n_vars)
+
     # Bound both tile transport and quadratic clustering before reading expression.
     if not all(shape) or shape[0] * shape[1] > MAX_VALUES:
         raise ValueError(
@@ -154,6 +191,7 @@ def prepare_clustermap(
                 f"{CONTEXT}: automatic clustering exceeds {MAX_DISTANCES:,} pairwise distances; subset explicitly or supply linkage."
             )
     matrix = require_resident_expression(adata, raw, None, context=CONTEXT)
+
     # Clustermap requests the whole supplied matrix; only that bounded subset densifies.
     values = pd.DataFrame(
         matrix.toarray() if sparse.issparse(matrix) else matrix,
@@ -161,6 +199,7 @@ def prepare_clustermap(
         columns=adata.var_names,
     ).copy()
     numeric_values(values, context=CONTEXT)
+
     # Scale the detached table before either tree is computed.
     if z_score is not None or standard_scale is not None:
         axis = z_score if z_score is not None else standard_scale
@@ -186,30 +225,9 @@ def prepare_clustermap(
     hidden = hidden | values.isna().to_numpy()
 
     # Resolve colors against original labels, then apply the same tree permutation.
-    obs_labels = None
-    obs_palette: tuple[str, ...] = ()
-    if obs_keys is not None:
-        if row_colors is not None:
-            raise TypeError(f"{CONTEXT}: obs_keys and row_colors cannot be combined.")
-        if obs_keys not in adata.obs:
-            raise ValueError(f"{CONTEXT}: obs_keys {obs_keys!r} is missing.")
-        categories = _categorical(adata.obs[obs_keys], context=CONTEXT)
-        if categories is None:
-            raise TypeError(f"{CONTEXT}: obs_keys must name categorical metadata.")
-        palette, _ = _palette(
-            adata, obs_keys, categories.categories, None, context=CONTEXT
-        )
-        # Keep categories as well as colors so the strip can own a native legend.
-        if len(categories.categories):
-            obs_labels = pd.Series(categories, index=adata.obs_names, name=obs_keys)
-            obs_palette = palette
-        row_colors = pd.Series(
-            ["white" if code < 0 else palette[code] for code in categories.codes],
-            index=adata.obs_names,
-            name=obs_keys,
-        )
-    rows = _annotation_colors(row_colors, values.index, "row_colors")
+    rows, obs_labels, obs_palette = _observation_colors(adata, obs_keys, row_colors)
     columns = _annotation_colors(col_colors, values.columns, "col_colors")
+
     # Linkage sees scaled values, including cells hidden by a display mask.
     try:
         row_tree = (

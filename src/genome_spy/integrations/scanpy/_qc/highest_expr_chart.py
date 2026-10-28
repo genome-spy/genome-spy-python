@@ -5,7 +5,10 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._data import coordinate_domain
-from genome_spy.integrations.scanpy._style import AXIS_TEXT, POINTS_TO_PIXELS as PT
+from genome_spy.integrations.scanpy._style import (
+    AXIS_TEXT,
+    POINTS_TO_PIXELS as PT,
+)
 
 
 def build_highest_expression(

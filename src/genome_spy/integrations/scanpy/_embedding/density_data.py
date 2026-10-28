@@ -22,68 +22,16 @@ from genome_spy.integrations.scanpy._embedding.data import (
 from genome_spy.integrations.scanpy._style import continuous_colors, draw_order
 
 
-def prepare_density(
+def _density_groups(
     adata: AnnData,
-    basis: str,
-    *,
-    key: str | None,
-    groupby: str | None,
+    covariate: Any,
     group: str | Sequence[str] | None,
-    color_map: Any,
-    bg_dotsize: float,
-    fg_dotsize: float,
-    vmin: Any,
-    vmax: Any,
-    vcenter: Any,
-    title: str | None,
-    marker: Any,
-    sort_order: bool,
-    obs_id: str | None,
-    colorbar_loc: str | None,
-) -> PreparedEmbedding:
-    """Return stored density panels with gray background cells; never run KDE or modify AnnData."""
+) -> tuple[pd.Series | None, list[str | None]]:
+    """Return saved category labels and requested groups from density metadata.
+
+    Reject groups that the stored density result cannot describe.
+    """
     context = "gsc.pl.embedding_density"
-    if not isinstance(adata, AnnData):
-        raise TypeError(f"{context}: adata must be AnnData.")
-    if not adata.n_obs or not adata.obs.columns.is_unique:
-        raise ValueError(f"{context}: require cells and unique obs column names.")
-    coordinate_key = f"X_{basis}"
-    if coordinate_key not in adata.obsm:
-        raise ValueError(
-            f"{context}: missing obsm[{coordinate_key!r}]; compute the embedding explicitly first."
-        )
-    coordinate_key = embedding_key(adata, basis, context=context)
-    # The pinned plotting function always starts its default key with umap_density.
-    key = ("umap_density" if key is None else key) + (
-        f"_{groupby}" if groupby is not None else ""
-    )
-    params = adata.uns.get(f"{key}_params")
-    if key not in adata.obs or not isinstance(params, Mapping):
-        raise ValueError(
-            f"{context}: stored obs[{key!r}] and uns[{key + '_params'!r}] are required; run sc.tl.embedding_density explicitly first."
-        )
-    if "covariate" not in params or "components" not in params:
-        raise ValueError(
-            f"{context}: stored density params require covariate and components."
-        )
-    components = params["components"]
-    if (
-        not isinstance(components, (list, tuple, np.ndarray))
-        or np.shape(components) != (2,)
-        or any(isinstance(c, bool) or not isinstance(c, Integral) for c in components)
-    ):
-        raise ValueError(
-            f"{context}: stored components must contain two one-based integers."
-        )
-    pair = tuple(int(c) - 1 for c in components)
-    # Check coordinate/marker choices through the same helper as ordinary embeddings.
-    inputs = _panel_inputs(adata.obsm[coordinate_key].shape[1], key, None, pair, marker)
-    if len(inputs) != 1:
-        raise NotImplementedError(
-            f"{context}: provide one marker shared by all groups."
-        )
-    _, pair, marker = inputs[0]
-    covariate = params["covariate"]
     labels = None
     if covariate is not None:
         if (
@@ -118,6 +66,78 @@ def prepare_density(
         raise ValueError(
             f"{context}: select nonempty string groups from the stored covariate categories."
         )
+
+    return labels, groups
+
+
+def prepare_density(
+    adata: AnnData,
+    basis: str,
+    *,
+    key: str | None,
+    groupby: str | None,
+    group: str | Sequence[str] | None,
+    color_map: Any,
+    bg_dotsize: float,
+    fg_dotsize: float,
+    vmin: Any,
+    vmax: Any,
+    vcenter: Any,
+    title: str | None,
+    marker: Any,
+    sort_order: bool,
+    obs_id: str | None,
+    colorbar_loc: str | None,
+) -> PreparedEmbedding:
+    """Return stored density panels with gray background cells; never run KDE or modify AnnData."""
+    context = "gsc.pl.embedding_density"
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: adata must be AnnData.")
+    if not adata.n_obs or not adata.obs.columns.is_unique:
+        raise ValueError(f"{context}: require cells and unique obs column names.")
+    coordinate_key = f"X_{basis}"
+    if coordinate_key not in adata.obsm:
+        raise ValueError(
+            f"{context}: missing obsm[{coordinate_key!r}]; compute the embedding explicitly first."
+        )
+    coordinate_key = embedding_key(adata, basis, context=context)
+
+    # The pinned plotting function always starts its default key with umap_density.
+    key = ("umap_density" if key is None else key) + (
+        f"_{groupby}" if groupby is not None else ""
+    )
+    params = adata.uns.get(f"{key}_params")
+    if key not in adata.obs or not isinstance(params, Mapping):
+        raise ValueError(
+            f"{context}: stored obs[{key!r}] and uns[{key + '_params'!r}] are required; run sc.tl.embedding_density explicitly first."
+        )
+    if "covariate" not in params or "components" not in params:
+        raise ValueError(
+            f"{context}: stored density params require covariate and components."
+        )
+    components = params["components"]
+    if (
+        not isinstance(components, (list, tuple, np.ndarray))
+        or np.shape(components) != (2,)
+        or any(isinstance(c, bool) or not isinstance(c, Integral) for c in components)
+    ):
+        raise ValueError(
+            f"{context}: stored components must contain two one-based integers."
+        )
+    pair = tuple(int(c) - 1 for c in components)
+
+    # Check coordinate/marker choices through the same helper as ordinary embeddings.
+    inputs = _panel_inputs(adata.obsm[coordinate_key].shape[1], key, None, pair, marker)
+    if len(inputs) != 1:
+        raise NotImplementedError(
+            f"{context}: provide one marker shared by all groups."
+        )
+    _, pair, marker = inputs[0]
+
+    # Choose groups only from the saved density result.
+    labels, groups = _density_groups(adata, params["covariate"], group)
+
+    # Check every stored density before creating foreground and background layers.
     density = numeric_values(adata.obs[[key]], context=context).ravel()
     if not np.isfinite(density).all() or ((density < 0) | (density > 1)).any():
         raise ValueError(
@@ -144,22 +164,19 @@ def prepare_density(
             colorbar=colorbar_loc is not None,
             sort_order=sort_order,
         )
+
         # Native color layers preserve overlap order only when their ranges are sorted.
         low, high = colors.domain[0], colors.domain[-1]
-        if (
-            not sort_order
-            and sum(
-                (
-                    (plotted < low).any(),
-                    ((low <= plotted) & (plotted <= high)).any(),
-                    (plotted > high).any(),
+        if not sort_order:
+            occupied_ranges = (
+                (plotted < low).any(),
+                ((low <= plotted) & (plotted <= high)).any(),
+                (plotted > high).any(),
+            )
+            if sum(occupied_ranges) > 1:
+                raise NotImplementedError(
+                    f"{context}: sort_order=False with under/over colors cannot preserve point overlap order in native layers."
                 )
-            )
-            > 1
-        ):
-            raise NotImplementedError(
-                f"{context}: sort_order=False with under/over colors cannot preserve point overlap order in native layers."
-            )
         sizes = _sizes(np.where(foreground, fg_dotsize, bg_dotsize), adata.n_obs)
         panel_values(
             table,
@@ -168,6 +185,7 @@ def prepare_density(
             draw_order(plotted, categorical=False, sort=sort_order),
             sizes,
         )
+
         # Hover reports the stored density, while color retains Scanpy's background sentinel.
         table[f"_value_{index}"] = density
         panels.append(

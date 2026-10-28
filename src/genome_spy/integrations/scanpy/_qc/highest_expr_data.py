@@ -89,6 +89,7 @@ def prepare_highest_expression(
                 }
             )
         low, high = min(low, column.min()), max(high, column.max())
+
         # Log limits depend on drawn coordinates, not hidden observations inside whiskers.
         drawn = np.concatenate(([q1, median, q3, lower, upper], column[flier]))
         if (drawn > 0).any():

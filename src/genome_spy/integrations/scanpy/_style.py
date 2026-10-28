@@ -107,6 +107,7 @@ teal thistle tomato turquoise violet wheat white whitesmoke yellow yellowgreen
 
 def native_color(value: Any, name: str, *, context: str = "Scanpy embedding") -> str:
     """Return an opaque CSS color unchanged, or reject forms needing conversion."""
+
     # Validate names without converting colors or importing a rendering library.
     if isinstance(value, str):
         named = value.lower() in _CSS_NAMES
@@ -151,6 +152,7 @@ def color_bounds(
     if low > high:
         raise ValueError(f"{context}: vmin cannot exceed vmax.")
     constant = low == high
+
     # A constant color range still needs visible space on the colorbar.
     if constant and expand_constant:
         delta = abs(low) * 0.1 or 0.1
@@ -177,6 +179,7 @@ def draw_order(values: np.ndarray, *, categorical: bool, sort: bool) -> np.ndarr
         return np.arange(len(values))
     if categorical:
         return np.argsort(~pd.isna(values), kind="stable")
+
     # Reversing a stable descending sort also reverses equal-value ties.
     return np.argsort(-values, kind="stable")[::-1]
 
@@ -195,6 +198,7 @@ def _bound(
 
     Callables receive copied colors in painting order; unset bounds use default.
     """
+
     # A single bound applies to every panel; a list may set one per panel.
     if isinstance(bound, Sequence) and not isinstance(bound, str):
         if len(bound) not in (1, count):
@@ -233,6 +237,7 @@ def _categorical(
 
     Preserve saved order; otherwise use Scanpy's string and boolean ordering.
     """
+
     # Keep a saved category order instead of sorting it again.
     if isinstance(getattr(values, "dtype", None), pd.CategoricalDtype):
         return pd.Categorical(values).copy()
@@ -323,6 +328,7 @@ def categorical_colors(
 
     Apply groups and masks without changing the remaining groups' assigned colors.
     """
+
     # Resolve colors before hiding groups so the remaining groups keep their colors.
     categories = values.categories
     original, scheme = (
@@ -349,6 +355,7 @@ def categorical_colors(
     )
     legend_values = names
     missing = pd.isna(values)
+
     # Missing cells get their own color without becoming an ordinary category.
     if missing.any() or key is None:
         if "NA" in names:
@@ -400,6 +407,7 @@ def continuous_colors(
 
     Apply masks and panel-specific limits without changing the source values.
     """
+
     # Use a copy so masking colors never changes the source expression values.
     if isinstance(values, pd.Series):
         # Nullable columns need an NA replacement; ordinary integer arrays do not.
@@ -419,6 +427,7 @@ def continuous_colors(
         raise ValueError(
             "Scanpy embedding: continuous colors require finite values and at least one nonmissing value."
         )
+
     # Resolve Python bounds before choosing the native color scale.
     low = _bound(
         vmin,
@@ -496,6 +505,7 @@ class EmbeddingStyle:
 
 def _number(value: Any, name: str, *, minimum: float = 0) -> float:
     """Return a checked embedding number, retaining its existing True/False handling."""
+
     # Keep embedding plots' existing treatment of True and False as 1 and 0.
     return number(
         float(value) if isinstance(value, bool) else value,

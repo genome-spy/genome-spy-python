@@ -123,6 +123,7 @@ def prepare_dendrogram(
     keys, groups = _grouping(adata, groupby)
     if key is not None and (not isinstance(key, str) or not key):
         raise TypeError("Dendrogram: dendrogram_key must be a nonempty string or None.")
+
     # A stored tree is a snapshot; do not recompute it to check whether it is fresh.
     key = key or f"dendrogram_{'_'.join(keys)}"
     result = adata.uns[key] if key in adata.uns else _compute_dendrogram(adata, keys)
@@ -130,6 +131,7 @@ def prepare_dendrogram(
     try:
         if not isinstance(result, Mapping) or list(result["groupby"]) != keys:
             raise ValueError(message)
+
         # Match by label so changing category order does not attach the wrong leaves.
         labels = list(map(str, result["categories_ordered"]))
         indices = np.asarray(result["categories_idx_ordered"])
@@ -142,6 +144,7 @@ def prepare_dendrogram(
         categories = [None] * n
         for i, label in zip(indices, labels, strict=True):
             categories[i] = current[label]
+
         # Check stored arrays without rebuilding the tree or reading expression.
         linkage = np.array(result["linkage"], dtype=float, copy=True)
         if linkage.shape != (n - 1, 4) or not hierarchy.is_valid_linkage(linkage):
@@ -170,6 +173,7 @@ def prepare_dendrogram(
             raise ValueError(message)
     except (KeyError, TypeError, ValueError, IndexError) as error:
         raise ValueError(message) from error
+
     # Correlation rows and columns must follow the current category order.
     positions = [categories.index(value) for value in groups.categories]
     return DendrogramData(
@@ -218,6 +222,7 @@ def reorder_grouped(
 
     Return both plus gene positions so dot sizes can follow the same ordering.
     """
+
     # Put groups on rows temporarily so both plot orientations use the same order.
     table = colors.T if swapped else colors
     table = table.loc[list(tree.order)]
@@ -234,6 +239,7 @@ def reorder_features(
     Share the same feature ordering across summary plots and cell heatmaps.
     """
     slots = list(range(count))
+
     # Reorder marker blocks only when their labels match the cell groups.
     if groups and set(g.label for g in groups) == set(tree.order):
         slots, ordered = [], []

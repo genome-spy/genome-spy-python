@@ -70,6 +70,7 @@ def stored_ranking(
     for name in ("groupby", "method", "reference"):
         if not isinstance(params.get(name), str) or not params[name]:
             raise ValueError(f"{context}: ranking params need a nonempty {name!r}.")
+
     # Packaged Scanpy data also stores this flag as a one-element boolean array.
     source = np.asarray(params.get("use_raw"))
     if source.size != 1 or source.dtype.kind != "b":
@@ -147,6 +148,7 @@ def _ranking_table(
         gene_symbols=gene_symbols,
         log2fc_min=min_logfoldchange,
     )
+
     # Scanpy omits the group column when returning a single rank list.
     if len(chosen) == 1:
         table["group"] = chosen[0]
@@ -212,6 +214,7 @@ def ranked_features(
             raise ValueError(
                 f"{context}: ranked gene labels must be strings or missing."
             )
+
         # Scanpy selects the tail in its stored order, without reversing it.
         selected = labels[:count] if count > 0 else labels[count:]
         if selected:
@@ -250,6 +253,7 @@ def ranked_statistic(
         raise ValueError(
             f"{context}: stored ranking has no {field}; compute it explicitly first."
         )
+
     # Scanpy requires complete rankings, even when plotting a short marker list.
     if len(result["names"]) < adata.n_vars:
         raise ValueError(
@@ -274,6 +278,7 @@ def ranked_statistic(
             f"{context}: statistic colors need unambiguous gene labels within each group."
         )
     colors = selected.pivot(index="group", columns=label, values=field)
+
     # Scanpy's pivot sorts groups; the parent dotplot restores category order.
     colors = colors.reindex(index=sorted(groups), columns=names)
     values = numeric_values(colors, context=context)

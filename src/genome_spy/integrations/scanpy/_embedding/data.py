@@ -169,6 +169,7 @@ def _expression(
             )
         return adata.obs[key].copy(), f"obs[{key!r}]"
     resolved = key
+
     # Match symbols against var before looking up the gene in the chosen source.
     if symbols is not None and key not in adata.var_names:
         if symbols not in adata.var or list(adata.var.columns).count(symbols) != 1:
@@ -188,6 +189,7 @@ def _expression(
             f"Scanpy embedding: gene {key!r} is missing or ambiguous in the selected representation."
         )
     require_resident_expression(adata, use_raw, layer, context="Scanpy embedding")
+
     # Use the same public vector access as Scanpy's embedding plots.
     if use_raw:
         values = adata.raw.obs_vector(resolved)
@@ -220,6 +222,7 @@ def _panel_inputs(
         pairs = [pair for _, pair in combinations]
     markers = marker
     markers = [markers] if isinstance(markers, str) else list(markers)
+
     # One value can serve every panel, but longer lists must agree in length.
     count = max(len(keys), len(pairs), len(markers))
     if any(len(values) not in (1, count) for values in (keys, pairs, markers)):
@@ -248,6 +251,7 @@ def _observations(
     Read no expression and keep duplicate cell names distinct for linked panels.
     """
     needed = sorted({dimension for pair in pairs for dimension in pair})
+
     # Read coordinates without rejecting unrelated duplicate gene names.
     coordinates = from_anndata(
         adata, obs=[], obsm_keys=[(basis, dimension) for dimension in needed]
@@ -319,6 +323,7 @@ def _mask(adata: Any, mask: Any) -> np.ndarray | None:
                 f"Scanpy embedding: mask_obs field {mask!r} is missing or ambiguous."
             )
         mask = adata.obs[mask]
+
     # A labeled mask must already follow the same cells in the same order.
     if isinstance(mask, pd.Series) and not mask.index.equals(adata.obs_names):
         raise ValueError(
@@ -390,6 +395,7 @@ def _neighbor_edges(
         raise ValueError(
             "Scanpy embedding: connectivities must be a finite real square matrix matching the cells."
         )
+
     # NetworkX also preserves asymmetric entries and explicitly stored sparse zeros.
     pairs = np.asarray(list(nx.Graph(matrix).edges()), dtype=np.int64).reshape(-1, 2)
     if np.any(pairs[:, 0] == pairs[:, 1]):
@@ -456,6 +462,7 @@ def prepare_embedding(
         raise TypeError("Scanpy embedding: expected AnnData.")
     if adata.n_obs == 0:
         raise ValueError("Scanpy embedding: at least one observation is required.")
+
     # All panels share the original coordinates and observation IDs.
     use_raw = resolve_use_raw(adata, use_raw, layer, context="Scanpy embedding")
     key = embedding_key(adata, basis, context="Scanpy embedding")
@@ -517,6 +524,7 @@ def prepare_embedding(
             colors.values, categorical=colors.categorical, sort=sort_order
         )
         panel_values(table, index, colors, order, size)
+
         # Scanpy 1.11.5 carries the reordered size vector into the next panel.
         if size.ndim == 1:
             size = size[order]
