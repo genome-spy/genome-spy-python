@@ -5005,3 +5005,19 @@ checks pass, with one existing upstream path expected failure and two existing
 native dendrogram expected failures. Ruff, formatting and full source mypy pass.
 The full suite and new resource benchmarks were not rerun. Generated evidence
 remains temporary. No plan is cleared.
+
+### PAGA path annotation-track construction
+
+The PAGA path heatmap builder now delegates annotation-track construction to a
+small local helper. It reuses the existing path track and color helpers, with
+native legends. Annotation numbering uses column order directly; track titles
+use the prepared column names instead of maintaining another list in the loop.
+Main layout, dimensions, color limits, group bands and navigation are unchanged.
+No public options or dependencies were added.
+
+All 61 complete before/after chart specifications match exactly. All 125 targeted
+Python checks and 19 browser checks pass; the existing upstream unsmoothed path
+return-data check remains an expected failure. Browser checks cover complete
+charts, aligned bands, legends, hover and navigation. Ruff, formatting and full
+source mypy pass. The full suite and new resource benchmarks were not rerun.
+Generated evidence remains temporary. No plan is cleared.

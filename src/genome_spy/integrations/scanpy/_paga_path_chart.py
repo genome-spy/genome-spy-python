@@ -130,6 +130,37 @@ def _group_track(
     return groups
 
 
+def _annotation_tracks(
+    annotations: pd.DataFrame,
+    color_maps: Mapping[str, Any],
+    *,
+    samples: int,
+    height: float,
+    hover: bool,
+) -> list[gs.Chart]:
+    """Return aligned tracks and native legends from prepared annotation columns."""
+    tracks = []
+    for index, (name, series) in enumerate(annotations.items()):
+        scheme = native_scheme(
+            color_maps.get(name, "Greys"), f"annotation {name!r}", context=CONTEXT
+        )
+        color = _path_color(series.to_numpy(), scheme, colorbar=False).legend(
+            gs.Legend(
+                title=name,
+                orient="bottom",
+                direction="horizontal",
+                gradientLength=150,
+                gradientThickness=15,
+            )
+        )
+        tracks.append(
+            _path_track(series, name, color, samples, height, hover).properties(
+                name=f"paga-path-annotation-{index}"
+            )
+        )
+    return tracks
+
+
 def build_paga_path(
     data: PagaPathData,
     *,
@@ -232,33 +263,15 @@ def build_paga_path(
         show_node_names=show_node_names,
     )
     tracks = [groups.properties(name="paga-path-groups")]
-    names = [data.group_key]
-    for name in data.annotations:
-        series = data.annotations[name]
-        scheme = native_scheme(
-            color_maps_annotations.get(name, "Greys"),
-            f"annotation {name!r}",
-            context=CONTEXT,
+    tracks.extend(
+        _annotation_tracks(
+            data.annotations,
+            color_maps_annotations,
+            samples=samples,
+            height=height / genes,
+            hover=hover,
         )
-        tracks.append(
-            _path_track(
-                series,
-                name,
-                _path_color(series.to_numpy(), scheme, colorbar=False).legend(
-                    gs.Legend(
-                        title=name,
-                        orient="bottom",
-                        direction="horizontal",
-                        gradientLength=150,
-                        gradientThickness=15,
-                    )
-                ),
-                samples,
-                height / genes,
-                hover,
-            ).properties(name=f"paga-path-annotation-{len(names) - 1}")
-        )
-        names.append(name)
+    )
     if show_yticks:
         tracks = [
             track.properties(
@@ -275,7 +288,9 @@ def build_paga_path(
                     offset=8,
                 )
             )
-            for track, name in zip(tracks, names, strict=True)
+            for track, name in zip(
+                tracks, [data.group_key, *data.annotations], strict=True
+            )
         ]
     sides: dict[str, Any] = {"bottom": gs.SurroundSideSpec(views=tracks, spacing=0)}
     if show_yticks:
@@ -354,6 +369,7 @@ def build_paga_path_lines(
         }
     )
     visible = table.loc[np.isfinite(table["_value"])]
+
     # Empty or all-missing crops retain the usual empty-axis limits.
     x_values = visible["_sample"].to_numpy() if len(visible) else np.zeros(1)
     y_values = visible["_value"].to_numpy() if len(visible) else np.zeros(1)
