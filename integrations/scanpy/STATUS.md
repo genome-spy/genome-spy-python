@@ -96,7 +96,7 @@ Local verification is complete; hosted CI selection verification remains open.
 
 | Measure | Before | After |
 | --- | ---: | ---: |
-| Integration Python files / lines | 130 / 29,419 | 127 / 27,575 |
+| Integration Python files / lines | 130 / 29,419 | 127 / 27,586 |
 | Integration collected cases | 3,019 | 2,703 |
 | Dependency-free cases moved into base CI | — | 12 |
 | Net case combinations removed, excluding relocation | — | 304 |
@@ -132,6 +132,15 @@ isolated page fixture as the other checks; drag/count/trait/offline assertions
 are unchanged. No loop patch, new dependency or production change was introduced.
 The 42 affected docs checks use the detached helpers too, with an explicit
 missing-Scanpy guard where a test previously relied on an import side effect.
+
+The preceding hosted full run exposed five remaining browser assertions tied to
+Mac PCA tie order and two ruler assertions that measured an unfinished zoom.
+Browser ranking checks now reuse the local Scanpy label oracle; hover expectations
+follow that same order. Grid checks share the existing scale-stability wait and
+compare rulers with the actual probed pointer. No geometric tolerance changed.
+All 88 checks across ranked, grid interaction and heatmap browser modules passed
+after this follow-up. The recorded hosted failures remain a full-run verification
+gate; moving references out of PR checks does not count as resolving that gate.
 
 Both notebook workflows ran on both Scanpy versions. The long JupyterLab render
 commands remain in full CI; they were not repeated locally because their notebook,

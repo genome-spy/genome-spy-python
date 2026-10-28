@@ -10,6 +10,7 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import (
+    wait_for_navigation,
     hover_at,
     pointer,
     position,
@@ -467,7 +468,7 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
     )
     pointer(page, bounds)
     page.mouse.wheel(0, -200)
-    page.wait_for_timeout(150)
+    wait_for_navigation(page, "dotplot")
     after = sorted(
         float(e.get("r")) for e in svg_root(page).iter() if e.tag.endswith("circle")
     )
@@ -487,6 +488,7 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
         if selected == [column, row]:
             break
     assert selected == [column, row]
+    px += dx
     canvas = page.locator("canvas").first.bounding_box()
     vertical, horizontal = ruler_lines(svg_root(page))
     assert float(vertical.get("x1")) == pytest.approx(px - canvas["x"], abs=1)
@@ -542,25 +544,7 @@ def test_summary_feature_spacing_survives_navigation(page, family, swapped):
             page.mouse.move(px + 8, py + 8, steps=5)
             page.mouse.up()
         # Wait for the live scale transition before targeting a narrow gap.
-        page.evaluate(
-            """async family=>{
-            const sample=()=>['x','y'].flatMap(axis=>{
-                const s=api.getScaleResolutionByName(`${family}-${axis}`).getScale();
-                return [...s.domain(),s(0),s(2)];
-            });
-            let previous=sample(), stable=0;
-            const deadline=performance.now()+3000;
-            while(performance.now()<deadline){
-                await new Promise(requestAnimationFrame);
-                const current=sample();
-                stable=current.every((v,i)=>Math.abs(v-previous[i])<1e-7)?stable+1:0;
-                if(stable>=3)return;
-                previous=current;
-            }
-            throw Error('Navigation did not settle');
-        }""",
-            family,
-        )
+        wait_for_navigation(page, family, probe=2)
         live = page.evaluate(
             """({family,axis,extent})=>{
             const s=api.getScaleResolutionByName(`${family}-${axis}`).getScale();

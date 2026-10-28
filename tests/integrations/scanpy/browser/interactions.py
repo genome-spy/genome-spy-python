@@ -144,3 +144,26 @@ def move_to(page, bounds, x, y, x_domain, y_domain, expected_id):
         ):
             break
     return px, py
+
+
+def wait_for_navigation(page, family, probe=2):
+    """Wait for stable scale positions before measuring a completed zoom or pan."""
+    page.evaluate(
+        """async ({family,probe})=>{
+        const sample=()=>['x','y'].flatMap(axis=>{
+            const s=api.getScaleResolutionByName(`${family}-${axis}`).getScale();
+            return [...s.domain(),s(0),s(probe)];
+        });
+        let previous=sample(), stable=0;
+        const deadline=performance.now()+3000;
+        while(performance.now()<deadline){
+            await new Promise(requestAnimationFrame);
+            const current=sample();
+            stable=current.every((v,i)=>Math.abs(v-previous[i])<1e-7)?stable+1:0;
+            if(stable>=3)return;
+            previous=current;
+        }
+        throw Error('Navigation did not settle');
+    }""",
+        {"family": family, "probe": probe},
+    )

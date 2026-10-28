@@ -13,7 +13,7 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import pointer
 from tests.integrations.scanpy.browser.rendering import render
-from tests.integrations.scanpy.helpers import index_position, points
+from tests.integrations.scanpy.helpers import index_position, points, scanpy_rank_labels
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
 
 REFERENCE = json.loads(
@@ -31,7 +31,20 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
     page, tmp_path, reference_images, case
 ):
     family, args, options = ranked_cases()[case]
-    reference = REFERENCE[case]["panels"]
+    # Compare ties with local Scanpy; NumPy's tie order varies across processors.
+    upstream = scanpy_rank_labels(family, make_ranked_adata(), *args, **options)
+    reference = [
+        {
+            **panel,
+            "labels": [
+                {**label, "text": text, "position": [rank, score]}
+                for label, (rank, text, score) in zip(
+                    panel["labels"], labels, strict=True
+                )
+            ],
+        }
+        for panel, labels in zip(REFERENCE[case]["panels"], upstream, strict=True)
+    ]
     width, height = reference[0]["plot_size"]
     chart = getattr(gsc.pl, family)(
         make_ranked_adata(), *args, width=width, height=height, show=False, **options
@@ -109,6 +122,7 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
         Image.blend(*layers, 0.5).save(tmp_path / f"ranked-{case}-overlay-{i}.png")
 
 
+@pytest.mark.reference
 @pytest.mark.parametrize(
     "family,options,expected",
     [
@@ -125,6 +139,9 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
 def test_rank_label_native_hover_and_offline_html(
     page, tmp_path, family, options, expected
 ):
+    if family == "pca_variance_ratio":
+        labels = scanpy_rank_labels(family, make_ranked_adata(), **options)[0]
+        expected = [labels[1][1], *expected[1:]]
     chart = getattr(gsc.pl, family)(make_ranked_adata(), show=False, **options)
     spec = chart.to_dict()
     x0, x1 = spec["encoding"]["x"]["scale"]["domain"]

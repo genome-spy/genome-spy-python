@@ -10,6 +10,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
+
+from tests.integrations.scanpy.browser.interactions import wait_for_navigation
 from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
@@ -140,22 +142,7 @@ def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover, group_gap
                 steps=5,
             )
             page.mouse.up()
-            page.evaluate("""async()=>{
-                const sample=()=>['x','y'].flatMap(axis=>{
-                    const s=api.getScaleResolutionByName(`heatmap-${axis}`).getScale();
-                    return [...s.domain(),s(0),s(4)];
-                });
-                let previous=sample(), stable=0;
-                const deadline=performance.now()+3000;
-                while(performance.now()<deadline){
-                    await new Promise(requestAnimationFrame);
-                    const current=sample();
-                    stable=current.every((v,i)=>Math.abs(v-previous[i])<1e-7) ? stable+1 : 0;
-                    if(stable>=3) return;
-                    previous=current;
-                }
-                throw Error('Navigation did not settle');
-            }""")
+            wait_for_navigation(page, "heatmap", probe=4)
             assert (
                 page.evaluate("api.getScaleResolutionByName('heatmap-y').getDomain()")
                 != before
