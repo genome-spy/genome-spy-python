@@ -5118,3 +5118,15 @@ their behavior. All 79 complete chart specs match exactly; 164 Python and 45
 browser checks pass. Ruff, formatting and full source mypy pass. The full suite
 and resource benchmarks were not rerun. Evidence stays temporary; no plan is
 cleared. Other pending time-series refactors remain outside this focused commit.
+
+### Flat PAGA drawing flow
+
+PAGA layout-only calls now return before chart appearance handling, leaving the
+drawing path at one indentation level. Each path caches successful positions
+only when add_pos requests it; chart errors still leave the cache unchanged.
+The drawing path also reuses the already-resolved legacy color alias. No helper
+or public option was added. New layout-only regressions pass before and after
+the refactor. All 68 complete chart specs match exactly; 157 Python and 53 browser
+checks pass, with the existing upstream component expected failure. Ruff,
+formatting and full source mypy pass. The full suite and resource benchmarks
+were not rerun. Evidence stays temporary; no plan is cleared.

@@ -2708,6 +2708,8 @@ def paga(
     }.items():
         if not isinstance(flag, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
+
+    # Reject interactions that cannot keep node colors consistent with the graph.
     node_color = colors if colors is not None else color
     if (
         edge_slider
@@ -2750,6 +2752,8 @@ def paga(
         raise NotImplementedError(
             f"{context}: unsupported option(s): {', '.join(k for k, v in unsupported.items() if v)}."
         )
+
+    # Finish option checks before reading graphs or choosing a layout.
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._paga_data import (
         prepare_paga,
@@ -2770,87 +2774,94 @@ def paga(
         root=root,
         random_state=random_state,
     )
-    chart = None
-    if plot:
-        from genome_spy.integrations.scanpy._paga_chart import build_paga
-        from genome_spy.integrations.scanpy._style import native_scheme
-        import pandas as pd
 
-        cmap = native_scheme(
-            "viridis" if cmap is None else cmap, "cmap", context=context
-        )
-        if groups is not None:
-            labels = groups
-            sc.logging.warning(
-                "`groups` is deprecated in `pl.paga`: use `labels` instead"
-            )
-        indices = None
-        if single_component:
-            kept = largest_component(solid)
-            if len(kept) < len(positions):
-                if dashed is not None:
-                    raise ValueError(
-                        f"{context}: single_component requires dashed_edges=None on disconnected graphs."
-                    )
-                indices = kept
-        nodes, color_data = paga_nodes(
-            adata,
-            key,
-            positions,
-            color=colors if colors is not None else color,
-            labels=labels,
-            node_size_scale=node_size_scale,
-            node_size_power=node_size_power,
-            solid=solid,
-            dashed=dashed,
-            use_raw=use_raw,
-            indices=indices,
-            palette=palette,
-        )
-        if indices is not None:
-            solid = solid.subgraph(indices)
-        solid_table = paga_edges(
-            solid,
+    # Layout-only calls stop before checking chart appearance.
+    if not plot:
+        if add_pos:
+            adata.uns["paga"]["pos"] = positions.copy()
+        return None
+
+    from genome_spy.integrations.scanpy._paga_chart import build_paga
+    from genome_spy.integrations.scanpy._style import native_scheme
+    import pandas as pd
+
+    cmap = native_scheme("viridis" if cmap is None else cmap, "cmap", context=context)
+
+    if groups is not None:
+        labels = groups
+        sc.logging.warning("`groups` is deprecated in `pl.paga`: use `labels` instead")
+
+    indices = None
+    if single_component:
+        kept = largest_component(solid)
+        if len(kept) < len(positions):
+            if dashed is not None:
+                raise ValueError(
+                    f"{context}: single_component requires dashed_edges=None on disconnected graphs."
+                )
+            indices = kept
+
+    # Degree colors use the original graph when only one component is shown.
+    nodes, color_data = paga_nodes(
+        adata,
+        key,
+        positions,
+        color=node_color,
+        labels=labels,
+        node_size_scale=node_size_scale,
+        node_size_power=node_size_power,
+        solid=solid,
+        dashed=dashed,
+        use_raw=use_raw,
+        indices=indices,
+        palette=palette,
+    )
+    if indices is not None:
+        solid = solid.subgraph(indices)
+    solid_table = paga_edges(
+        solid,
+        positions,
+        edge_width_scale=edge_width_scale,
+        min_edge_width=min_edge_width,
+        max_edge_width=max_edge_width,
+    )
+    dashed_table = (
+        paga_edges(
+            dashed,
             positions,
             edge_width_scale=edge_width_scale,
-            min_edge_width=min_edge_width,
+            min_edge_width=None,
             max_edge_width=max_edge_width,
         )
-        dashed_table = (
-            paga_edges(
-                dashed,
-                positions,
-                edge_width_scale=edge_width_scale,
-                min_edge_width=None,
-                max_edge_width=max_edge_width,
-            )
-            if dashed is not None
-            else pd.DataFrame()
-        )
-        chart = build_paga(
-            nodes,
-            solid_table,
-            dashed_table,
-            fontsize=fontsize,
-            fontweight=fontweight,
-            frameon=sc.settings._frameon if frameon is None else frameon,
-            title=title,
-            hover=hover,
-            zoom=zoom,
-            width=width,
-            height=height,
-            cmap=cmap,
-            colorbar=colorbar is not False,
-            group_key=key,
-            group_labels=list(map(str, adata.obs[key].cat.categories)),
-            color_title=node_color if isinstance(node_color, str) else key,
-            color_data=color_data,
-            edge_slider=edge_slider,
-            show_node_labels=show_node_labels,
-        )
+        if dashed is not None
+        else pd.DataFrame()
+    )
+    chart = build_paga(
+        nodes,
+        solid_table,
+        dashed_table,
+        fontsize=fontsize,
+        fontweight=fontweight,
+        frameon=sc.settings._frameon if frameon is None else frameon,
+        title=title,
+        hover=hover,
+        zoom=zoom,
+        width=width,
+        height=height,
+        cmap=cmap,
+        colorbar=colorbar is not False,
+        group_key=key,
+        group_labels=list(map(str, adata.obs[key].cat.categories)),
+        color_title=node_color if isinstance(node_color, str) else key,
+        color_data=color_data,
+        edge_slider=edge_slider,
+        show_node_labels=show_node_labels,
+    )
+
+    # Cache positions only after the chart has been built successfully.
     if add_pos:
         adata.uns["paga"]["pos"] = positions.copy()
-    return _finish_plot(chart, show, sc) if chart is not None else None
+    return _finish_plot(chart, show, sc)
 
 
 def dpt_timeseries(

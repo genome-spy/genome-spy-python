@@ -165,6 +165,36 @@ def test_layout_never_reads_expression_or_creates_a_figure(
     assert np.array_equal(a.uns["paga"]["pos"], old) is not add_pos
 
 
+@pytest.mark.parametrize("add_pos", [False, True])
+def test_layout_only_skips_chart_options_and_respects_position_cache(
+    monkeypatch, add_pos
+):
+    from genome_spy.integrations.scanpy import _paga_chart
+
+    a = make_paga()
+    previous = a.uns["paga"]["pos"].copy()
+    monkeypatch.setattr(
+        _paga_chart,
+        "build_paga",
+        lambda *args, **kwargs: pytest.fail("Built a layout-only chart"),
+    )
+    result = gsc.pl.paga(
+        a,
+        pos=POSITIONS,
+        plot=False,
+        add_pos=add_pos,
+        cmap="unsupported-scheme",
+        labels=["short"],
+        fontsize=-1,
+        node_size_scale=-1,
+        show=True,
+    )
+    assert result is None
+    np.testing.assert_array_equal(
+        a.uns["paga"]["pos"], POSITIONS if add_pos else previous
+    )
+
+
 def test_supplied_positions_skip_layout_and_failures_leave_caches_unchanged(
     monkeypatch,
 ):
