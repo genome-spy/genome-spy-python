@@ -5,7 +5,7 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._data import coordinate_domain
-from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS as PT
+from genome_spy.integrations.scanpy._style import AXIS_TEXT, POINTS_TO_PIXELS as PT
 
 
 def build_highest_expression(
@@ -127,10 +127,7 @@ def build_highest_expression(
             height=(n_top * 0.2 + 1.5) * 77 if height is None else height,
         )
         .configure_axis(
-            labelFont=FONT,
-            titleFont=FONT,
-            labelFontSize=10 * PT,
-            titleFontSize=10 * PT,
+            AXIS_TEXT,
             titleFontWeight="normal",
             labelPadding=4,
         )

@@ -11,6 +11,7 @@ from genome_spy.integrations.scanpy._labels import displaced_labels
 from genome_spy.integrations.scanpy._data import coordinate_domain, number
 from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
 from genome_spy.integrations.scanpy._style import (
+    AXIS_TEXT,
     FONT,
     POINTS_TO_PIXELS as PT,
     ColorData,
@@ -146,10 +147,7 @@ def build_paga_adjacency(
                 view={"stroke": "transparent", "strokeWidth": 0},
             )
             .configure_axis(
-                labelFont=FONT,
-                titleFont=FONT,
-                labelFontSize=10 * PT,
-                titleFontSize=10 * PT,
+                AXIS_TEXT,
                 titleFontWeight="normal",
             )
         )

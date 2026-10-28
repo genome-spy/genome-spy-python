@@ -23,6 +23,7 @@ from genome_spy.integrations.scanpy._paga_path_data import (
     path_line_values,
 )
 from genome_spy.integrations.scanpy._style import (
+    AXIS_TEXT,
     FONT,
     POINTS_TO_PIXELS as PT,
     color_bounds,
@@ -465,9 +466,6 @@ def build_paga_path_lines(
     return chart.configure_legend(
         labelFont=FONT, labelFontSize=legend_size
     ).configure_axis(
-        labelFont=FONT,
-        titleFont=FONT,
-        labelFontSize=10 * PT,
-        titleFontSize=10 * PT,
+        AXIS_TEXT,
         titleFontWeight="normal",
     )

@@ -5,7 +5,11 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._data import coordinate_domain
-from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS as PT
+from genome_spy.integrations.scanpy._style import (
+    AXIS_TEXT,
+    FONT,
+    POINTS_TO_PIXELS as PT,
+)
 
 
 def build_scrublet(
@@ -172,10 +176,7 @@ def build_scrublet(
         gs.vconcat(*pairs, spacing=60)
         .resolve_scale(x="independent", y="independent")
         .configure_axis(
-            labelFont=FONT,
-            titleFont=FONT,
-            labelFontSize=10 * PT,
-            titleFontSize=10 * PT,
+            AXIS_TEXT,
             titleFontWeight="normal",
             labelPadding=4,
         )

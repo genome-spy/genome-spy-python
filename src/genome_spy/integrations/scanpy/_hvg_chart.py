@@ -6,6 +6,7 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._data import coordinate_domain
 from genome_spy.integrations.scanpy._style import (
+    AXIS_TEXT,
     FONT,
     POINTS_TO_PIXELS,
     zoom_point_size,
@@ -201,10 +202,7 @@ def build_variable_genes(
         )
         .resolve_legend(default="collected")
         .configure_axis(
-            labelFont=FONT,
-            titleFont=FONT,
-            labelFontSize=10 * POINTS_TO_PIXELS,
-            titleFontSize=10 * POINTS_TO_PIXELS,
+            AXIS_TEXT,
         )
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(

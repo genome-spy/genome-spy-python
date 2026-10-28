@@ -5074,3 +5074,13 @@ cutoff equality. All 16 default chart specs match exactly; 61 Python and nine
 browser checks pass. Ruff, formatting and full source mypy pass. The full suite
 and resource benchmarks were not rerun. Evidence stays temporary; no plan is
 cleared. Other pending work remains outside this focused commit.
+
+### Shared native axis text settings
+
+Six chart builders now reuse one native AxisConfig for their identical label
+and title fonts and sizes. Font-weight, padding, legend and layout choices stay
+local. No wrapper or public option was added. All 184 complete chart specs match
+exactly; 541 Python and 15 browser checks pass, with the existing upstream path
+return-data expected failure. Ruff, formatting and full source mypy pass. The
+full suite and resource benchmarks were not rerun. Evidence stays temporary;
+no plan is cleared. Other pending changes remain outside this focused commit.

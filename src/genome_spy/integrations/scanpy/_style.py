@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.schema.core import AxisConfig
 
 from genome_spy.integrations.scanpy._data import number
 
@@ -20,6 +21,12 @@ from genome_spy.integrations.scanpy._data import number
 FONT = "Lato"
 POINTS_TO_PIXELS = 100 / 72
 GROUPED_FONT_SIZE = 10 * 0.833 * POINTS_TO_PIXELS
+AXIS_TEXT = AxisConfig(
+    labelFont=FONT,
+    titleFont=FONT,
+    labelFontSize=10 * POINTS_TO_PIXELS,
+    titleFontSize=10 * POINTS_TO_PIXELS,
+)
 
 
 def zoom_point_size(

@@ -18,6 +18,7 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     series_focus,
 )
 from genome_spy.integrations.scanpy._style import (
+    AXIS_TEXT,
     EMBEDDING_MARKERS,
     FONT,
     POINTS_TO_PIXELS as PT,
@@ -292,9 +293,6 @@ def build_timeseries(
     if run is not None:
         result = result.add_params(run)
     return result.configure_axis(
-        labelFont=FONT,
-        titleFont=FONT,
-        labelFontSize=10 * PT,
-        titleFontSize=10 * PT,
+        AXIS_TEXT,
         titleFontWeight="normal",
     ).configure_legend(disable=True, labelFont=FONT, labelFontSize=10 * PT)
