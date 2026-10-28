@@ -268,16 +268,17 @@ def summary_records(
     groups = xlabels if swap_axes else ylabels
     if len(set(groups)) != len(groups):
         raise ValueError(f"{context}: group labels collide when serialized as strings.")
+
     # Use positions so repeated gene names remain distinct chart entries.
-    yy, xx = np.indices(colors.shape)
+    yy, xx = np.indices(colors.shape).reshape(2, -1)
     return pd.DataFrame(
         {
-            "_x": xx.ravel(),
-            "_y": yy.ravel(),
+            "_x": xx,
+            "_y": yy,
             "_gene": np.asarray(ylabels if swap_axes else xlabels)[
-                (yy if swap_axes else xx).ravel()
+                yy if swap_axes else xx
             ],
-            "_group": np.asarray(groups)[(xx if swap_axes else yy).ravel()],
+            "_group": np.asarray(groups)[xx if swap_axes else yy],
             "_mean": colors.to_numpy(dtype=float, na_value=np.nan).ravel(),
         }
     )

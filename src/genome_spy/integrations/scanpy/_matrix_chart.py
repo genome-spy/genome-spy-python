@@ -348,14 +348,14 @@ def matrix_tiles(
 
     Keep labels separate from positions so duplicate names retain distinct cells.
     """
-    yy, xx = np.indices(values.shape)
+    yy, xx = np.indices(values.shape).reshape(2, -1)
     table = pd.DataFrame(
         {
-            "_x": xx.ravel(),
-            "_y": yy.ravel(),
+            "_x": xx,
+            "_y": yy,
             "_value": values.ravel(),
-            "_column": np.asarray(xlabels)[xx.ravel()],
-            "_row": np.asarray(ylabels)[yy.ravel()],
+            "_column": np.asarray(xlabels)[xx],
+            "_row": np.asarray(ylabels)[yy],
         }
     )
     tiles = (

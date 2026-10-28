@@ -5236,3 +5236,14 @@ coordinate dimensions. Targeted checks report 315 Python passes and two
 browser passes. Ruff, formatting and full source mypy pass. The full suite and
 resource benchmarks were not rerun. No plan is cleared; unrelated work stays
 unstaged and generated evidence stays temporary.
+
+### Matrix and grouped table coordinates
+
+Matrix tiles and grouped summaries now flatten row/column coordinates once and
+reuse those positions when attaching labels. Their different data fields and
+label rules stay separate; no shared utility was added. All 92 sampled complete
+chart specs match exactly. Targeted Python checks report 414 passes and
+one existing upstream expected failure. Ruff, formatting and full source mypy
+pass. Browser tests, the full suite and resource benchmarks were not rerun. No
+plan is cleared; unrelated work stays unstaged and generated evidence stays
+temporary.
