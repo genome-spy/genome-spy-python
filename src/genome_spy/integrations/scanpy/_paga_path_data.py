@@ -79,6 +79,8 @@ def prepare_paga_path(
             raise TypeError(f"{CONTEXT}: {name} must be a sequence.")
     if not len(nodes) or not len(keys) or not all(isinstance(key, str) for key in keys):
         raise ValueError(f"{CONTEXT}: provide nonempty nodes and string keys.")
+
+    # Use the saved group definition unless the caller supplies one.
     if groups_key is None:
         stored = adata.uns.get("paga", {})
         groups_key = stored.get("groups") if isinstance(stored, Mapping) else None
@@ -108,8 +110,9 @@ def prepare_paga_path(
 
     # Each occurrence of a node retains its cells, ordered only within that group.
     ordered = []
+    codes = groups.cat.codes.to_numpy()
     for index in indices:
-        positions = np.flatnonzero(groups.cat.codes.to_numpy() == index)
+        positions = np.flatnonzero(codes == index)
         if not len(positions):
             raise ValueError(
                 f"{CONTEXT}: node {categories[index]!r} contains no cells."
@@ -175,7 +178,7 @@ def prepare_paga_path(
         values = values / maximum
     return PagaPathData(
         pd.DataFrame(values, columns=list(keys)),
-        groups.cat.codes.to_numpy()[order],
+        codes[order],
         pd.DataFrame(annotation_values, columns=list(annotations)),
         np.r_[0, np.cumsum([len(part) for part in ordered])],
         tuple(str(categories[index]) for index in indices),

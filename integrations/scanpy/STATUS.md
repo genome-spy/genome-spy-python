@@ -4989,3 +4989,19 @@ its old namespace/color proposals are not current policy.
 When a slice closes, record its verified scope, source/test or commit links,
 remaining debt, next ready slice, and whether any working document is eligible.
 Clearance never means silently dropping an unimplemented plot or required check.
+
+### Group construction in one existing helper
+
+The shared category helper now handles numeric binning as well as categorical
+and multi-column groups. Grouped expression preparation delegates that step,
+keeping expression access separate from group construction. Dendrogram callers
+retain their categorical validation. No new helper or public option was added.
+
+This cleanup also commits the earlier time-series color-mode simplification and
+cached PAGA path category codes. The staged commit excludes other pending chart,
+documentation and notebook changes. All 60 complete grouped-chart specifications
+match their pre-cleanup versions. All 640 targeted Python checks and 97 browser
+checks pass, with one existing upstream path expected failure and two existing
+native dendrogram expected failures. Ruff, formatting and full source mypy pass.
+The full suite and new resource benchmarks were not rerun. Generated evidence
+remains temporary. No plan is cleared.

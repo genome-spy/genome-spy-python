@@ -64,6 +64,7 @@ def prepare_dpt_groups(adata: Any) -> tuple[pd.Series, pd.Series, pd.Series, Any
     if groups.isna().any():
         raise ValueError(f"{context}: missing dpt_groups are unsupported.")
     order = adata.obs["dpt_order"]
+
     # Scanpy's scatter masks disconnected infinite pseudotimes, without changing the stored result.
     pseudotime = adata.obs["dpt_pseudotime"].replace([np.inf, -np.inf], np.nan)
     return groups, order, pseudotime, adata.uns["dpt_changepoints"]
@@ -92,6 +93,7 @@ def prepare_sim(
     if length == 0:
         raise ValueError(f"{context}: tmax_realization/tmax_write must be positive.")
     starts = np.arange(0, adata.n_obs, length).tolist()
+
     # RandomState preserves Scanpy's seed-1 permutation without touching global state.
     if shuffle:
         values = values[
@@ -154,7 +156,7 @@ def prepare_timeseries(
             _vector(time, "time", rows, context=context).to_frame(), context=context
         ).ravel()
     )
-    continuous = False
+
     # Multiple variables retain column order; categories sort only in the single-variable case.
     if columns > 1:
         sample = np.tile(np.arange(rows), columns)
@@ -163,16 +165,16 @@ def prepare_timeseries(
         count = columns
         fallback = [str(i) for i in range(count)]
         colors = None
+    elif color is None:
+        raise ValueError(
+            f"{context}: one variable requires color, as in Scanpy's helper."
+        )
     else:
-        if color is None:
-            raise ValueError(
-                f"{context}: one variable requires color, as in Scanpy's helper."
-            )
         source = _vector(color, "color", rows, context=context)
+
         # Check the supplied type before pandas promotes mixed integer/float lists.
         first_color = color.iloc[0] if isinstance(color, pd.Series) else color[0]
-        continuous = isinstance(first_color, (float, np.floating))
-        if continuous:
+        if isinstance(first_color, (float, np.floating)):
             colors = numeric_values(source.to_frame(), context=context).ravel()
             sample, subset = np.arange(rows), np.zeros(rows, dtype=int)
             count, fallback = 1, ["0"]
@@ -187,12 +189,15 @@ def prepare_timeseries(
                 raise TypeError(
                     f"{context}: categorical color values must have a common sortable type."
                 ) from error
+
             # Scanpy draws sorted categories, retaining sample order inside each one.
             sample = np.argsort(inverse, kind="stable")
             subset = inverse[sample]
             count, fallback = len(levels), [str(level) for level in levels]
             colors = None
         plotted = values[sample, 0]
+
+    # Resolve series names only after the color mode determines their count.
     if isinstance(var_names, (str, bytes)) or not isinstance(var_names, Collection):
         raise TypeError(f"{context}: var_names must be a collection of labels.")
     names = list(var_names)
@@ -203,8 +208,10 @@ def prepare_timeseries(
         raise NotImplementedError(
             f"{context}: repeated series labels are unsupported; use distinct var_names."
         )
+
+    # Categorical colors use explicit palettes; numeric colors keep their values.
     selected: tuple[str, ...] = ()
-    if not continuous:
+    if colors is None:
         if palette is None:
             import scanpy as sc
 
@@ -258,6 +265,7 @@ def prepare_timeseries(
         )
     y_domain = coordinate_domain(table.loc[valid, "_value"].to_numpy(), 0.05)
     highlight_y = y_domain
+
     # Explicit y ticks expand the view after Scanpy places highlight endpoints.
     ticks = (
         None

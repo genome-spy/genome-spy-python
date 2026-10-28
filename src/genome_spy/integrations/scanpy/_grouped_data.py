@@ -111,13 +111,27 @@ def _feature_slots(
     return names, tuple(groups)
 
 
-def _categories(frame: pd.DataFrame, keys: list[str]) -> pd.Categorical:
+def _categories(
+    frame: pd.DataFrame, keys: list[str], num_categories: int = 7
+) -> pd.Categorical:
     """Return ordered groups from the table's groupby columns.
 
-    Combine multiple labels without creating groups that have no cells.
+    Bin numeric values; combine multiple labels only when cells have those labels.
     """
     if len(keys) == 1:
         values = frame[keys[0]]
+        if pd.api.types.is_numeric_dtype(values):
+            if (
+                isinstance(num_categories, bool)
+                or not isinstance(num_categories, Integral)
+                or num_categories < 1
+            ):
+                raise ValueError(
+                    "Grouped plotting: num_categories must be a positive integer."
+                )
+
+            # Scanpy uses equal-width bins for numeric group labels.
+            return pd.Categorical(pd.cut(values, num_categories))
         return pd.Categorical(values)
     if any(not isinstance(frame[key].dtype, pd.CategoricalDtype) for key in keys):
         raise TypeError(
@@ -237,19 +251,7 @@ def grouped_expression(
     if adata.obs.index.name in keys:
         frame = frame.reset_index()
 
-    # Scanpy groups numeric annotations into bins rather than one group per value.
-    if len(keys) == 1 and pd.api.types.is_numeric_dtype(frame[keys[0]]):
-        if (
-            isinstance(num_categories, bool)
-            or not isinstance(num_categories, Integral)
-            or num_categories < 1
-        ):
-            raise ValueError(
-                "Grouped plotting: num_categories must be a positive integer."
-            )
-        groups = pd.Categorical(pd.cut(frame[keys[0]], num_categories))
-    else:
-        groups = _categories(frame, keys)
+    groups = _categories(frame, keys, num_categories)
     if categories_order is not None:
         groups = groups.reorder_categories(list(categories_order))
 
