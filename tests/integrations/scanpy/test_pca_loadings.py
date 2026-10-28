@@ -10,7 +10,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.helpers import units
+from tests.integrations.scanpy.helpers import scanpy_rank_labels, units
 
 sc = pytest.importorskip("scanpy")
 
@@ -85,11 +85,17 @@ def test_loadings_is_the_existing_ranking_chart_without_analysis_or_expression(
 
 def test_signed_tied_extremes_keep_numpy_order_odd_split_and_omitted_rank_gap():
     spec = gsc.pl.pca_loadings(loadings_data(), "1", n_points=3, show=False).to_dict()
-    assert [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)] == [
-        (0, "c", 3),
-        (1, "⋮", 0.5),
-        (3, "f", -2),
-        (4, "b", -4),
+    actual = [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)]
+    # Two upstream panels avoid Scanpy's single-component shape bug.
+    assert (
+        actual
+        == scanpy_rank_labels("pca_loadings", loadings_data(), "1,2", n_points=3)[0]
+    )
+    assert [(rank, score) for rank, _, score in actual] == [
+        (0, 3),
+        (1, 0.5),
+        (3, -2),
+        (4, -4),
     ]
     assert spec["encoding"]["x"]["scale"]["domain"] == [-0.9, 4.9]
     np.testing.assert_allclose(spec["encoding"]["y"]["scale"]["domain"], [-4.2, 5.355])
@@ -100,11 +106,15 @@ def test_top_only_includes_scanpys_extra_label():
     spec = gsc.pl.pca_loadings(
         loadings_data(), "1", include_lowest=False, n_points=2, show=False
     ).to_dict()
-    assert [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)] == [
-        (0, "c", 3),
-        (1, "a", 3),
-        (2, "e", 1),
-    ]
+    actual = [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)]
+    # Two upstream panels avoid Scanpy's single-component shape bug.
+    assert (
+        actual
+        == scanpy_rank_labels(
+            "pca_loadings", loadings_data(), "1,2", include_lowest=False, n_points=2
+        )[0]
+    )
+    assert [(rank, score) for rank, _, score in actual] == [(0, 3), (1, 3), (2, 1)]
     assert spec["encoding"]["x"]["axis"]["labels"] is True
 
 

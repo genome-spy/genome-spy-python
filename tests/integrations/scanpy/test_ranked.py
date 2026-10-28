@@ -12,7 +12,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._ranking.data import ranked_features
-from tests.integrations.scanpy.helpers import units
+from tests.integrations.scanpy.helpers import scanpy_rank_labels, units
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
 
 sc = pytest.importorskip("scanpy")
@@ -338,10 +338,16 @@ def test_rank_data_and_guides_match_scanpy_with_documented_pca_label_space(case)
     ).to_dict()
     panels = units(spec)
     assert len(panels) == len(reference)
-    for panel, expected in zip(panels, reference, strict=True):
+    upstream = scanpy_rank_labels(family, make_ranked_adata(), *args, **options)
+    for panel, expected, labels in zip(panels, reference, upstream, strict=True):
         rows = spec["datasets"][panel["data"]["name"]]
-        assert [(r["_label"], [r["_rank"], r["_score"]]) for r in rows] == [
-            (label["text"], label["position"]) for label in expected["labels"]
+        assert [(r["_rank"], r["_label"], r["_score"]) for r in rows] == labels
+        # Frozen fixtures retain every label and score, allowing only tied reordering.
+        assert sorted((r["_label"], r["_score"]) for r in rows) == sorted(
+            (label["text"], label["position"][1]) for label in expected["labels"]
+        )
+        assert [[r["_rank"], r["_score"]] for r in rows] == [
+            label["position"] for label in expected["labels"]
         ]
         for axis in ("x", "y"):
             domain = list(expected[f"{axis}_domain"])

@@ -33,9 +33,10 @@ states below describe coverage; they do not require a preview release label.
 
 ### Current work queue
 
-1. Review the prepared PR scope with the user, then push/open the PR if approved
-   and run hosted CI. Runtime, tests and docs are committed and clean-checkout
-   verification is complete. PR creation, merge and publication require approval.
+1. Complete hosted CI for [PR #20](https://github.com/genome-spy/genome-spy-python/pull/20).
+   The approved branch is pushed and the PR is open. The first run passed codegen
+   and notebook rendering; dependency guards and platform-dependent tie assertions
+   are corrected below. Merge and publication still require approval.
 2. Keep future version expansions behind compatibility checks; maintain the
    parameter contracts and recheck the upstream PAGA tree-layout issue.
 3. Classify known limitations below. Fix, reject or document user-visible cases
@@ -295,7 +296,8 @@ paths from the unpublished branch under the user's earlier history-cleanup
 approval. Required numeric fixtures remain. The outgoing history contains no test
 media; all 108 historical notebook blobs and current notebooks have no stored
 outputs or widget state. Wheel and source-distribution inspections found no
-generated reports, test media or build caches. No PR or push was performed.
+generated reports, test media or build caches. No PR or push was performed at
+that cleanup checkpoint.
 The cleanup passed 415 targeted reference, contract, grouped-data, ranked-data,
 workflow and repository-documentation checks. Scanpy compatibility verification
 is recorded below.
@@ -328,8 +330,23 @@ emit deprecation warnings; no new runtime failures were suppressed.
 The user docs, guide notebooks and workflow notebooks use the PyPI install/upgrade
 command with the scanpy extra. Developer reference setup stays pinned. They have no
 temporary unreleased notices, and no stored execution outputs. Compatibility is
-documented once as a range. The CI jobs have been updated; a hosted CI run and
-the final release-candidate review remain outstanding. No PR or push was made.
+documented once as a range. The CI jobs were updated before the approved PR was
+opened. Current hosted verification is tracked in the work queue above.
+
+### Initial hosted CI corrections
+
+The base-package jobs omit Scanpy deliberately. Highest-expression preparation
+now imports Scanpy only when called, and the remaining Scanpy-only test modules
+use the existing optional-dependency guard. The base-only environment passed
+412 tests with 55 skips and 327 deselected checks.
+
+All four hosted Scanpy jobs exposed the same eight platform-dependent assertions.
+Scanpy and the adapter both use NumPy's default sort; equal scores/colors can
+change order across processor architectures. Rank and scatter checks now compare
+exact local Scanpy order while preserving the frozen labels, scores, coordinates
+and layout assertions. No reference files or plotting sort behavior changed.
+The five affected test modules passed all 222 checks on each Scanpy version;
+repository lint, formatting and typing passed.
 
 ## Plan clearance ledger
 
@@ -356,8 +373,9 @@ old configuration. Fresh wheel/source-archive checks verify modules, licenses,
 clean notebooks and absence of those caches; the source archive is 20 MB.
 Outgoing history has no generated test media/reports, and 119 historical notebook
 versions contain no outputs or widget state. Evidence and the draft PR body stay
-outside Git. Hosted CI, the complete browser matrix and codegen remain release
-gates; no PR, push, merge to main or publication has occurred. The unrelated
+outside Git. PR #20 is now open; hosted codegen and notebook-rendering checks
+passed. The remaining CI jobs and complete browser matrix remain release gates;
+no merge to main or publication has occurred. The unrelated
 `notebooks/select_genes.ipynb` metadata edit remains unstaged.
 
 The active PLAN, concise STATUS, source map and detailed compatibility contract

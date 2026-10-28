@@ -8,6 +8,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import scanpy_rank_labels
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
 
 sc = pytest.importorskip("scanpy")
@@ -66,10 +67,12 @@ def test_variance_is_the_existing_ranking_chart_without_analysis_or_expression(
 
 def test_tied_ratios_keep_original_pc_names_and_top_onlys_extra_label():
     spec = gsc.pl.pca_variance_ratio(make_ranked_adata(), 2, show=False).to_dict()
-    assert [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)] == [
-        (0, "PC2", 0.4),
-        (1, "PC4", 0.2),
-        (2, "PC1", 0.2),
+    actual = [(r["_rank"], r["_label"], r["_score"]) for r in rows(spec)]
+    assert actual == scanpy_rank_labels("pca_variance_ratio", make_ranked_adata(), 2)[0]
+    assert [(rank, score) for rank, _, score in actual] == [
+        (0, 0.4),
+        (1, 0.2),
+        (2, 0.2),
     ]
     assert spec["title"] == "variance ratio"
     assert spec["encoding"]["x"]["scale"]["domain"] == [-0.9, 2.9]

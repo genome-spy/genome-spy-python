@@ -181,12 +181,39 @@ def test_complete_chart_matches_frozen_upstream_points_labels_palettes_and_limit
     rows = sorted(records(spec), key=lambda r: r["_order_0"])
     if not expected["categorical"]:
         rows = [r for r in rows if r["_value_0"] is not None]
-    np.testing.assert_allclose(
-        [[r["_coord_0"], r["_coord_1"]] for r in rows],
-        expected["coordinates"],
-        rtol=0,
-        atol=0,
-    )
+    coordinates = [[r["_coord_0"], r["_coord_1"]] for r in rows]
+    if expected["categorical"]:
+        np.testing.assert_array_equal(coordinates, expected["coordinates"])
+    else:
+        import matplotlib.pyplot as plt
+
+        # Scanpy's draw order for tied colors depends on the local NumPy sort.
+        options = scatter_cases()[case].copy()
+        if "layers" in options:
+            # New AnnData uses None for X instead of the legacy "X" layer alias.
+            options["layers"] = tuple(
+                None if v == "X" else v for v in options["layers"]
+            )
+        axis = sc.pl.scatter(
+            make_scatter_adata(),
+            **options,
+            size=80,
+            frameon=True,
+            show=False,
+        )
+        try:
+            artist = axis.collections[-1]
+            offsets = artist.get_offsets()
+            valid = ~np.ma.getmaskarray(offsets).any(axis=1)
+            np.testing.assert_array_equal(coordinates, np.asarray(offsets)[valid])
+            np.testing.assert_array_equal(
+                [r["_value_0"] for r in rows], np.asarray(artist.get_array())[valid]
+            )
+        finally:
+            plt.close(axis.figure)
+        np.testing.assert_array_equal(
+            sorted(coordinates), sorted(expected["coordinates"])
+        )
     assert all(r["_size_0"] == 80 for r in rows)
     assert [mark["encoding"][axis]["axis"]["title"] for axis in ("x", "y")] == expected[
         "labels"

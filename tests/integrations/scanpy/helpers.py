@@ -110,3 +110,22 @@ def tree_segments(root):
         for start, stop in zip(path, path[1:])
         if start != stop
     ]
+
+
+def scanpy_rank_labels(family, adata, *args, **options):
+    """Read upstream rank labels locally because NumPy tie order varies by platform."""
+    import matplotlib.pyplot as plt
+    import scanpy as sc
+
+    getattr(sc.pl, family)(adata, *args, show=False, **options)
+    figure = plt.gcf()
+    try:
+        return [
+            [
+                (text.get_position()[0], text.get_text(), text.get_position()[1])
+                for text in axis.texts
+            ]
+            for axis in figure.axes
+        ]
+    finally:
+        plt.close(figure)
