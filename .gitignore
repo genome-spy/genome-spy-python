@@ -256,3 +256,6 @@ scripts/_fetch_reference.py
 
 # Local recording demos and working files
 /demos/
+
+# Generated Scanpy benchmark observations are not reference fixtures.
+tests/integrations/scanpy/fixtures/*performance*.json

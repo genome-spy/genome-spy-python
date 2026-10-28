@@ -1,11 +1,11 @@
 repos:
   - repo: local
     hooks:
-      - id: no-test-pngs
-        name: keep test PNGs out of Git
+      - id: no-test-artifacts
+        name: keep generated test artifacts out of Git
         language: fail
-        entry: Generated test PNGs belong in temporary directories, not Git.
-        files: '(?i)^tests/.*\.png$'
+        entry: Generated test media and benchmark reports belong in temporary directories, not Git.
+        files: '(?i)^tests/.*(?:\.(?:png|jpe?g|gif|webp|svg|pdf|mp4|webm|mov|avi|bmp|tiff?|avif|html|h5ad|h5|parquet|arrow|feather|npz|npy|pkl|pickle)|performance[^/]*\.json)$'
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.12.0
     hooks:
