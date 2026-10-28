@@ -22,6 +22,19 @@ def run_notebook(path, namespace):
     return notebook
 
 
+def _assert_pca_ranking(actual, ranking):
+    """Check full ranking reuse, allowing only the documented PCA label space."""
+    actual, expected = actual.to_dict(), ranking.to_dict()
+    for panel, reference in zip(units(actual), units(expected), strict=True):
+        low, high = reference["encoding"]["y"]["scale"]["domain"]
+        domain = [low, high + 0.3 * (high - low)]
+        np.testing.assert_allclose(panel["encoding"]["y"]["scale"]["domain"], domain)
+        assert 0 <= panel["padding"]["top"] <= reference["padding"]["top"]
+        reference["encoding"]["y"]["scale"]["domain"] = domain
+        reference["padding"] = panel["padding"]
+    assert actual == expected
+
+
 def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypatch):
     charts = []
     monkeypatch.setattr(
@@ -124,9 +137,9 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert loadings in charts
         variance = namespace["variance_chart"]
         assert variance in charts
-        assert (
-            variance.to_dict()
-            == gsc.pl.ranking(
+        _assert_pca_ranking(
+            variance,
+            gsc.pl.ranking(
                 pbmc,
                 "uns",
                 "variance_ratio",
@@ -137,7 +150,7 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
                 width=360,
                 height=240,
                 show=False,
-            ).to_dict()
+            ),
         )
         assert (
             sum(len(table) for table in variance.to_dict()["datasets"].values()) == 11
@@ -146,8 +159,16 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert overview in charts
         overview_spec = overview.to_dict()
         assert len(overview_spec["vconcat"]) == 3
-        assert len(units(overview_spec["vconcat"][1])) == 3
-        assert overview_spec["vconcat"][2]["hconcat"][0]["encoding"]["x"]["scale"][
+        assert [len(units(row)) for row in overview_spec["vconcat"]] == [1, 2, 2]
+        assert [p["title"] for p in units(overview_spec["vconcat"][1])] == [
+            "PC1",
+            "PC2",
+        ]
+        assert [p["title"] for p in units(overview_spec["vconcat"][2])] == [
+            "PC3",
+            "variance ratio",
+        ]
+        assert overview_spec["vconcat"][2]["hconcat"][1]["encoding"]["x"]["scale"][
             "domain"
         ] == [
             -0.9,
@@ -159,9 +180,9 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
                 for axis in ("x", "y")
             )
         assert namespace["pca_genes"].shape == (700, 309)
-        assert (
-            loadings.to_dict()
-            == gsc.pl.ranking(
+        _assert_pca_ranking(
+            loadings,
+            gsc.pl.ranking(
                 namespace["pca_genes"],
                 "varm",
                 "PCs",
@@ -171,7 +192,7 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
                 width=280,
                 height=280,
                 show=False,
-            ).to_dict()
+            ),
         )
         assert namespace["scatter_chart"] in charts
         scatter = namespace["scatter_chart"].to_dict()
@@ -786,26 +807,32 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(rulers) == 1
     assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
     assert rulers[0]["ruler"]["display"] == "center"
-    for chart in (
-        namespace[name] for name in ("matrixplot", "heatmap", "matrix", "clustermap")
+    # Each example chooses navigation and value labels explicitly.
+    for name, zoom, show_values in (
+        ("matrixplot", False, False),
+        ("heatmap", True, False),
+        ("matrix", False, True),
+        ("clustermap", "xy", True),
     ):
-        spec = chart.to_dict()
-        grid = spec["spec"] if "surround" in spec else spec["layer"][0]
-        assert all(mark["mark"]["type"] != "text" for mark in leaf_marks(grid))
+        spec = namespace[name].to_dict()
+        assert "surround" in spec
+        labels = [
+            mark for mark in leaf_marks(spec["spec"]) if mark["mark"]["type"] == "text"
+        ]
+        assert bool(labels) is show_values
         assert all(
-            (
-                spec["scales"][axis]
-                if "surround" in spec
-                else grid["layer"][0]["encoding"][axis]["scale"]
-            )["zoom"]
-            is (axis == "y")
-            for axis in ("x", "y")
+            mark["mark"]["fitToBand"] and mark["encoding"]["text"]["field"] == "_value"
+            for mark in labels
         )
+        assert spec["scales"]["x"]["zoom"] is (zoom == "xy")
+        assert spec["scales"]["y"]["zoom"] is bool(zoom)
     customized = namespace["matrix_builder_tree_chart"].to_dict()
     assert any(mark["mark"].get("fitToBand") for mark in leaf_marks(customized))
     clustered = namespace["clustermap"].to_dict()
     tiles = points(clustered)
-    cells = clustered["datasets"][tiles["data"]["name"]]
+    # Tiles and fitted values inherit one source from the matrix's parent layer.
+    assert "data" not in tiles
+    cells = clustered["datasets"][clustered["spec"]["data"]["name"]]
     assert len(cells) == 700 * 10
     assert {row["_row"] for row in cells} == set(namespace["pbmc"].obs_names)
     assert {row["_column"] for row in cells} == set(namespace["marker_names"])

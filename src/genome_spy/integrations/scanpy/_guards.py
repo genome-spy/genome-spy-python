@@ -55,6 +55,18 @@ def _check_grid_zoom(zoom: bool | Literal["xy"], *, context: str) -> None:
         raise TypeError(f"{context}: zoom must be False, True (y only), or 'xy'.")
 
 
+def _check_grid_highlight(
+    highlight: bool | Literal["outline"], *, context: str
+) -> None:
+    """Reject unsupported pointer feedback before reading plot data."""
+    if not isinstance(highlight, bool) and not (
+        isinstance(highlight, str) and highlight == "outline"
+    ):
+        raise TypeError(
+            f"{context}: highlight must be False, True (ruler), or 'outline'."
+        )
+
+
 def _check_point_options(
     *,
     context: str,

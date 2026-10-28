@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from genome_spy.integrations.scanpy._expression.dotplot_builder import DotPlot
 from genome_spy.integrations.scanpy._expression.matrixplot_builder import MatrixPlot
 from genome_spy.integrations.scanpy._guards import (
+    _check_grid_highlight,
     _check_grid_zoom,
     _check_kwargs,
     _check_point_options,
@@ -163,6 +164,7 @@ def _embedding(
     """Validate shared embedding options, then prepare and render stored coordinates."""
     if not isinstance(annotate_var_explained, bool):
         raise TypeError(f"{context}: annotate_var_explained must be boolean.")
+
     # Accept Scanpy defaults, but reject options we cannot render faithfully.
     unsupported = {
         "arrows": arrows is not False,
@@ -426,6 +428,7 @@ def scatter(
         title=title,
     )
     show_frame = sc.settings._frameon if frameon is None else frameon
+
     # Scanpy retains the frame and numeric ticks for direct x/y plots.
     if basis is None or x is not None or y is not None:
         show_frame = True
@@ -1206,7 +1209,7 @@ def dotplot(
     smallest_dot: float = 0.0,
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
-    highlight: bool = False,
+    highlight: bool | Literal["outline"] = False,
     group_gap: float = 0,
     width: float | None = None,
     height: float | None = None,
@@ -1257,7 +1260,7 @@ def dotplot(
         smallest_dot: Minimum dot area in points squared; maximum is 200.
         hover: Show gene, group, displayed color value and expressing percentage.
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
-        highlight: Mark the row and column under the pointer with a native ruler.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered dot.
         group_gap: Space between marker blocks in pixels; 0 keeps slots contiguous.
         width: Native plot-area width in logical pixels, default 37 per column.
         height: Native plot-area height in logical pixels, default 35 per row.
@@ -1291,9 +1294,9 @@ def dotplot(
         log=log,
         mean_only_expressed=mean_only_expressed,
         hover=hover,
-        highlight=highlight,
     )
     _check_grid_zoom(zoom, context="gsc.pl.dotplot")
+    _check_grid_highlight(highlight, context="gsc.pl.dotplot")
     sc = _prepare_plot(show, save, context="gsc.pl.dotplot")
     plot = DotPlot(
         adata,
@@ -1368,6 +1371,7 @@ def matrixplot(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    highlight: bool | Literal["outline"] = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1414,6 +1418,7 @@ def matrixplot(
         hover: Show gene, group and displayed mean or supplied value.
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered tile.
         width: Plot-area logical pixels, default 37 per feature column.
         height: Plot-area logical pixels, default 35 per group row.
         **kwds: Scalar edgecolor and linewidth. Defaults are gray edges at 0.1
@@ -1437,6 +1442,7 @@ def matrixplot(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.matrixplot"
+
     # Reject unsupported options before reading AnnData.
     _check_kwargs(kwds, {"edgecolor", "linewidth"}, context="gsc.pl.matrixplot")
     if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
@@ -1460,6 +1466,7 @@ def matrixplot(
     if standard_scale not in (None, "var", "group"):
         raise ValueError(f"{context}: standard_scale must be 'var', 'group', or None.")
     _check_grid_zoom(zoom, context=context)
+    _check_grid_highlight(highlight, context=context)
     sc = _prepare_plot(show, save, context=context)
     plot = MatrixPlot(
         adata,
@@ -1485,6 +1492,7 @@ def matrixplot(
         hover=hover,
         zoom=zoom,
         show_values=show_values,
+        highlight=highlight,
         width=width,
         height=height,
         cmap=cmap,
@@ -1670,6 +1678,7 @@ def heatmap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    highlight: bool | Literal["outline"] = False,
     group_gap: float = 0,
     width: float | None = None,
     height: float | None = None,
@@ -1714,6 +1723,7 @@ def heatmap(
         show_values: Show plotted values to two decimals when cells have enough room.
         group_gap: Space between cell groups and marker blocks in CSS pixels;
             defaults to 0. Set a positive width to separate groups.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered tile.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
         **kwds: Native cmap scheme, scalar alpha and interpolation="nearest".
@@ -1734,6 +1744,7 @@ def heatmap(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.heatmap"
+
     # Validate options before loading data or the optional scientific stack.
     _check_kwargs(kwds, {"cmap", "alpha", "interpolation"}, context=context)
     for name, value in {"vcenter": vcenter, "norm": norm}.items():
@@ -1756,6 +1767,7 @@ def heatmap(
     if standard_scale not in (None, "var", "obs"):
         raise ValueError(f"{context}: standard_scale must be 'var', 'obs' or None.")
     _check_grid_zoom(zoom, context=context)
+    _check_grid_highlight(highlight, context=context)
     from genome_spy.integrations.scanpy._data import number
 
     group_gap = number(group_gap, "group_gap", context=context)
@@ -1831,6 +1843,7 @@ def heatmap(
         alpha=kwds.get("alpha", 1),
         hover=hover,
         show_values=show_values,
+        highlight=highlight,
         group_gap=group_gap,
         zoom=zoom,
         scaled=standard_scale is not None,
@@ -1851,6 +1864,7 @@ def clustermap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    highlight: bool | Literal["outline"] = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1874,6 +1888,7 @@ def clustermap(
         hover: Show native tile and observation-strip tooltips.
         zoom: Enable y-only zoom and pan with True, or both axes with "xy".
         show_values: Show plotted values when enough space is available in each tile.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered tile.
         width: Matrix width in logical pixels, excluding trees and labels.
         height: Matrix height in logical pixels, excluding trees and labels.
         **kwds: Supported Seaborn options: method, metric, z_score,
@@ -1930,6 +1945,7 @@ def clustermap(
     }
     _check_kwargs(kwds, data_options | chart_options, context=context)
     _check_grid_zoom(zoom, context=context)
+    _check_grid_highlight(highlight, context=context)
     for name, option in (("hover", hover), ("show_values", show_values)):
         if not isinstance(option, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
@@ -1952,6 +1968,7 @@ def clustermap(
         hover=hover,
         zoom=zoom,
         show_values=show_values,
+        highlight=highlight,
         width=width,
         height=height,
         **{key: value for key, value in kwds.items() if key in chart_options},
@@ -1974,6 +1991,7 @@ def matrix(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    highlight: bool | Literal["outline"] = False,
     width: float | None = None,
     height: float | None = None,
 ) -> TopLevelSpec | None:
@@ -1999,6 +2017,7 @@ def matrix(
         hover: Include row, column and numeric value tooltips.
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered tile.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
 
@@ -2025,6 +2044,7 @@ def matrix(
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     _check_grid_zoom(zoom, context=context)
+    _check_grid_highlight(highlight, context=context)
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._expression.matrix_chart import build_matrix
 
@@ -2040,6 +2060,7 @@ def matrix(
         hover=hover,
         zoom=zoom,
         show_values=show_values,
+        highlight=highlight,
         width=width,
         height=height,
     )
@@ -2179,7 +2200,6 @@ def paga_compare(
         raise NotImplementedError(
             f"{context}: color must be a single observation key or gene."
         )
-    uses_group_colors = color == key
     if basis is None:
         basis = next(
             (
@@ -2195,12 +2215,7 @@ def paga_compare(
         raise NotImplementedError(
             f"{context}: components must select one coordinate pair."
         )
-    # A graph title gives each panel its own title; otherwise share one heading.
-    common_title = None
-    embedding_title, graph_title = title, title_graph
-    if title_graph is None:
-        common_title = color if title is None else title
-        embedding_title = graph_title = ""
+    common_title = (color if title is None else title) if title_graph is None else None
     embedding_chart = _embedding(
         adata,
         basis,
@@ -2220,7 +2235,7 @@ def paga_compare(
         palette=palette,
         frameon=frameon,
         size=9 if size is None else size,
-        title=embedding_title,
+        title="" if title_graph is None else title,
         hover=hover,
         zoom=zoom,
         width=width,
@@ -2228,26 +2243,25 @@ def paga_compare(
         show=False,
         save=False,
     )
-
-    # Only group-colored comparisons place nodes at their embedding medians.
-    if pos is None and uses_group_colors:
-        coordinates = pd.DataFrame(
-            adata.obsm[coordinate_key][:, list(dimensions[0])],
-            columns=["x", "y"],
-            index=adata.obs_names,
-        )
-        pos = (
-            coordinates.groupby(adata.obs[key], observed=True)
-            .median()
-            .sort_index()
-            .to_numpy()
-        )
-    elif pos is None:
-        pos = stored.get("pos")
-        if pos is None:
-            raise ValueError(
-                f"{context}: non-group colors require supplied or cached PAGA positions."
+    if pos is None:
+        if color == key:
+            coordinates = pd.DataFrame(
+                adata.obsm[coordinate_key][:, list(dimensions[0])],
+                columns=["x", "y"],
+                index=adata.obs_names,
             )
+            pos = (
+                coordinates.groupby(adata.obs[key], observed=True)
+                .median()
+                .sort_index()
+                .to_numpy()
+            )
+        else:
+            pos = stored.get("pos")
+            if pos is None:
+                raise ValueError(
+                    f"{context}: non-group colors require supplied or cached PAGA positions."
+                )
     labels = paga_graph_params.pop("labels", groups_graph)
     if legend_fontsize is not None:
         paga_graph_params["fontsize"] = _font_size(legend_fontsize) / POINTS_TO_PIXELS
@@ -2261,11 +2275,11 @@ def paga_compare(
     graph = paga(
         adata,
         colors=color,
-        palette=palette if uses_group_colors else None,
+        palette=palette if color == key else None,
         labels=labels,
         pos=pos,
         frameon=frameon,
-        title=graph_title,
+        title="" if title_graph is None else title_graph,
         hover=hover,
         zoom=False,
         width=300 if width is None else width,
@@ -2792,94 +2806,89 @@ def paga(
         root=root,
         random_state=random_state,
     )
+    chart = None
+    if plot:
+        from genome_spy.integrations.scanpy._paga.chart import build_paga
+        from genome_spy.integrations.scanpy._style import native_scheme
+        import pandas as pd
 
-    # Layout-only calls stop before checking chart appearance.
-    if not plot:
-        if add_pos:
-            adata.uns["paga"]["pos"] = positions.copy()
-        return None
-
-    from genome_spy.integrations.scanpy._paga.chart import build_paga
-    from genome_spy.integrations.scanpy._style import native_scheme
-    import pandas as pd
-
-    cmap = native_scheme("viridis" if cmap is None else cmap, "cmap", context=context)
-
-    if groups is not None:
-        labels = groups
-        sc.logging.warning("`groups` is deprecated in `pl.paga`: use `labels` instead")
-
-    indices = None
-    if single_component:
-        kept = largest_component(solid)
-        if len(kept) < len(positions):
-            if dashed is not None:
-                raise ValueError(
-                    f"{context}: single_component requires dashed_edges=None on disconnected graphs."
-                )
-            indices = kept
-
-    # Degree colors use the original graph when only one component is shown.
-    nodes, color_data = paga_nodes(
-        adata,
-        key,
-        positions,
-        color=node_color,
-        labels=labels,
-        node_size_scale=node_size_scale,
-        node_size_power=node_size_power,
-        solid=solid,
-        dashed=dashed,
-        use_raw=use_raw,
-        indices=indices,
-        palette=palette,
-    )
-    if indices is not None:
-        solid = solid.subgraph(indices)
-    solid_table = paga_edges(
-        solid,
-        positions,
-        edge_width_scale=edge_width_scale,
-        min_edge_width=min_edge_width,
-        max_edge_width=max_edge_width,
-    )
-    dashed_table = (
-        paga_edges(
-            dashed,
+        cmap = native_scheme(
+            "viridis" if cmap is None else cmap, "cmap", context=context
+        )
+        if groups is not None:
+            labels = groups
+            sc.logging.warning(
+                "`groups` is deprecated in `pl.paga`: use `labels` instead"
+            )
+        indices = None
+        if single_component:
+            kept = largest_component(solid)
+            if len(kept) < len(positions):
+                if dashed is not None:
+                    raise ValueError(
+                        f"{context}: single_component requires dashed_edges=None on disconnected graphs."
+                    )
+                indices = kept
+        nodes, color_data = paga_nodes(
+            adata,
+            key,
+            positions,
+            color=colors if colors is not None else color,
+            labels=labels,
+            node_size_scale=node_size_scale,
+            node_size_power=node_size_power,
+            solid=solid,
+            dashed=dashed,
+            use_raw=use_raw,
+            indices=indices,
+            palette=palette,
+        )
+        if indices is not None:
+            solid = solid.subgraph(indices)
+        solid_table = paga_edges(
+            solid,
             positions,
             edge_width_scale=edge_width_scale,
-            min_edge_width=None,
+            min_edge_width=min_edge_width,
             max_edge_width=max_edge_width,
         )
-        if dashed is not None
-        else pd.DataFrame()
-    )
-    chart = build_paga(
-        nodes,
-        solid_table,
-        dashed_table,
-        fontsize=fontsize,
-        fontweight=fontweight,
-        frameon=sc.settings._frameon if frameon is None else frameon,
-        title=title,
-        hover=hover,
-        zoom=zoom,
-        width=width,
-        height=height,
-        cmap=cmap,
-        colorbar=colorbar is not False,
-        group_key=key,
-        group_labels=list(map(str, adata.obs[key].cat.categories)),
-        color_title=node_color if isinstance(node_color, str) else key,
-        color_data=color_data,
-        edge_slider=edge_slider,
-        show_node_labels=show_node_labels,
-    )
+        dashed_table = (
+            paga_edges(
+                dashed,
+                positions,
+                edge_width_scale=edge_width_scale,
+                min_edge_width=None,
+                max_edge_width=max_edge_width,
+            )
+            if dashed is not None
+            else pd.DataFrame()
+        )
+        chart = build_paga(
+            nodes,
+            solid_table,
+            dashed_table,
+            fontsize=fontsize,
+            fontweight=fontweight,
+            frameon=sc.settings._frameon if frameon is None else frameon,
+            title=title,
+            hover=hover,
+            zoom=zoom,
+            width=width,
+            height=height,
+            cmap=cmap,
+            colorbar=colorbar is not False,
+            group_key=key,
+            group_labels=list(map(str, adata.obs[key].cat.categories)),
+            color_title=node_color if isinstance(node_color, str) else key,
+            color_data=color_data,
+            edge_slider=edge_slider,
+            show_node_labels=show_node_labels,
+        )
 
-    # Cache positions only after the chart has been built successfully.
+    # Store positions only when the caller explicitly requests this mutation.
     if add_pos:
         adata.uns["paga"]["pos"] = positions.copy()
-    return _finish_plot(chart, show, sc)
+    return _finish_plot(chart, show, sc) if chart is not None else None
 
 
 def dpt_timeseries(
@@ -3657,6 +3666,7 @@ def correlation_matrix(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.correlation_matrix"
+
     # Reject unsupported options before reading AnnData.
     _check_kwargs(
         kwds, {"cmap", "edgecolors", "linewidth"}, context="gsc.pl.correlation_matrix"
@@ -3673,6 +3683,7 @@ def correlation_matrix(
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
+
     # Retain Scanpy's flag while allowing the same option as other matrices.
     if show_values is None:
         show_values = show_correlation_numbers
@@ -3860,6 +3871,7 @@ def pca_loadings(
         raise ValueError(
             f"{context}: missing varm['PCs']; run sc.pp.pca explicitly first."
         )
+
     # Loadings select individual one-based components, rather than embedding pairs.
     try:
         if components is None:
@@ -3978,6 +3990,7 @@ def pca_variance_ratio(
             f"{context}: missing uns['pca']['variance_ratio']; run sc.pp.pca explicitly first."
         )
     ratios = stored["variance_ratio"]
+
     # Reject lazy vectors before table construction can materialize them.
     if (
         isinstance(ratios, (str, bytes))
@@ -4062,6 +4075,7 @@ def pca_overview(
     variance_chart = pca_variance_ratio(adata, show=False, save=False)
     assert embedding_chart is not None and isinstance(loadings_chart, gs.ConcatChart)
     assert third_loading is not None and variance_chart is not None
+
     # Keep PC3 and variance together to avoid an empty cell.
     last_row = gs.hconcat(third_loading, variance_chart, spacing=4).resolve_scale(
         x="independent", y="independent"
@@ -4215,6 +4229,7 @@ def _ranked_expression(
         context=context,
         table=ranking,
     )
+
     # Stored colors replace means; the parent still owns expression fractions.
     if values_to_plot is not None:
         table = ranked_statistic(
@@ -4268,7 +4283,7 @@ def rank_genes_groups_dotplot(
     save: bool | None = None,
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
-    highlight: bool = False,
+    highlight: bool | Literal["outline"] = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -4293,7 +4308,7 @@ def rank_genes_groups_dotplot(
         save: None or False; use native chart.save for HTML/JSON.
         hover: Enable the parent plot's native summary tooltips.
         zoom: True navigates y only; "xy" navigates both axes.
-        highlight: Enable the native row/column ruler.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered dot.
         width: Parent plot width in logical pixels.
         height: Parent plot height in logical pixels.
         **kwds: Existing dotplot options; dendrogram defaults True.

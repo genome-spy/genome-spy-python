@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Literal, Self
 
 from genome_spy.integrations.scanpy._expression.grouped_builder import _GroupedPlot
 from genome_spy.integrations.scanpy._guards import (
+    _check_grid_highlight,
     _check_grid_zoom,
     _check_kwargs,
     _check_point_options,
@@ -53,6 +54,7 @@ class MatrixPlot(_GroupedPlot):
         hover: Show gene, group and displayed mean or supplied value.
         zoom: True enables y navigation; "xy" also enables x navigation.
         show_values: Show values when native fitted text has enough room.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered tile.
         width: Plot-area width in logical pixels.
         height: Plot-area height in logical pixels.
         **kwds: Only cmap, scalar edgecolor and linewidth are supported.
@@ -98,6 +100,7 @@ class MatrixPlot(_GroupedPlot):
         hover: bool = True,
         zoom: bool | Literal["xy"] = False,
         show_values: bool = False,
+        highlight: bool | Literal["outline"] = False,
         width: float | None = None,
         height: float | None = None,
         **kwds: Any,
@@ -121,6 +124,7 @@ class MatrixPlot(_GroupedPlot):
                 f"{context}: standard_scale must be 'var', 'group', or None."
             )
         _check_grid_zoom(zoom, context=context)
+        _check_grid_highlight(highlight, context=context)
         _require_scanpy(context)
 
         from genome_spy.integrations.scanpy._expression.grouped_data import (
@@ -168,6 +172,7 @@ class MatrixPlot(_GroupedPlot):
             "hover": hover,
             "zoom": zoom,
             "show_values": show_values,
+            "highlight": highlight,
             "width": width,
             "height": height,
             "cmap": kwds.get("cmap", "viridis"),

@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from genome_spy.integrations.scanpy._data import (
+    check_value_limit,
     number,
     numeric_values,
     require_resident_expression,
@@ -57,6 +58,7 @@ def _feature_slots(
     """
     groups = []
     names: list[str]
+
     # A marker dictionary sets both gene order and bracket positions.
     if isinstance(var_names, Mapping):
         if labels is not None or positions is not None:
@@ -147,6 +149,7 @@ def _categories(
         raise TypeError(
             "Grouped plotting: multiple groupby keys require string categories."
         ) from error
+
     # Keep category order without inventing groups that have no cells.
     combinations = frame[keys].drop_duplicates().sort_values(keys)
     order = combinations.astype(object).agg("_".join, axis=1)
@@ -191,12 +194,14 @@ def grouped_expression(
     names, feature_groups = _feature_slots(
         var_names, var_group_labels, var_group_positions
     )
+
     # Stop oversized heatmaps before selecting or copying expression columns.
-    if value_limit is not None and adata.n_obs * len(names) > value_limit:
-        raise ValueError(
-            f"gsc.pl.heatmap: at most {value_limit:,} cell–gene values are supported; "
-            "subset cells or genes explicitly before plotting. No values were loaded."
+    if value_limit is not None:
+        check_value_limit(
+            adata.n_obs, len(names), value_limit, context="Grouped plotting"
         )
+
+    # Validate group keys before asking Scanpy for selected columns.
     keys = [groupby] if isinstance(groupby, str) else list(groupby)
     if (
         not keys
@@ -267,6 +272,8 @@ def grouped_expression(
             feature_groups,
             counts,
         )
+
+    # Copy only selected columns so repeated genes retain separate positions.
     table = frame.loc[:, names].copy()
     table.index = pd.CategoricalIndex(groups, name="_".join(keys))
     numeric = numeric_values(table, context="Grouped plotting: expression")
@@ -299,6 +306,7 @@ def group_means(
     if expression_cutoff is not None:
         _cutoff(expression_cutoff)
         values = values.where(values > expression_cutoff)
+
     # Match Scanpy's plotting means, which skip missing values.
     means = values.groupby(level=0, observed=True).mean()
     return means if expression_cutoff is None else means.fillna(0)
@@ -313,6 +321,7 @@ def expression_fractions(
     to the denominator in the same way.
     """
     _cutoff(expression_cutoff)
+
     # Count values strictly above the cutoff, including zeros in the denominator.
     expressed = values > expression_cutoff
     groups = expressed.groupby(level=0, observed=True)
@@ -332,6 +341,7 @@ def scale_values(
         raise ValueError(
             "Grouped plotting: standard_scale must be 'var', 'group', or None."
         )
+
     # Plot scaling maps each range to 0–1; sc.pp.scale would change the meaning.
     axis = 0 if standard_scale == "var" else 1
     shifted = values.sub(values.min(axis=axis), axis=1 - axis)
@@ -350,6 +360,7 @@ def matrixplot_statistics(
     Scale computed means once and preserve supplied values. The builder owns
     display transposition.
     """
+
     # Supplied means replace computed means and must not be scaled again.
     if values_df is not None:
         if not isinstance(values_df, pd.DataFrame):
@@ -395,6 +406,7 @@ def dotplot_summaries(
     Honor supplied values, expressed-only means and Scanpy's first scaling pass;
     rendering applies the second pass after ordering and optional transposition.
     """
+
     # Dot sizes always describe the cells, even when colors are supplied.
     fractions = expression_fractions(values, expression_cutoff=expression_cutoff)
     if fractions.empty:
@@ -440,6 +452,7 @@ def dotplot_summaries(
             raise ValueError(
                 "gsc.pl.dotplot: dot_color_df needs exactly the plotted group/feature labels."
             )
+
         # Repeated genes share the first supplied column, as in Scanpy 1.11.5.
         unique = dot_color_df.loc[:, ~dot_color_df.columns.duplicated()]
         colors = unique.loc[fractions.index, fractions.columns].copy()
@@ -472,6 +485,7 @@ def heatmap_values(
     # Heatmap calls row scaling 'obs'; summary plots call the same operation 'group'.
     scale = "group" if standard_scale == "obs" else standard_scale
     scaled = scale_values(values, scale)
+
     # Scanpy scales across all requested genes before marker blocks can omit any.
     if feature_order is not None:
         scaled = scaled.iloc[:, list(feature_order)]
@@ -533,6 +547,7 @@ def ordered_cell_expression(
         adata, var_names, groupby, value_limit=MAX_HEATMAP_VALUES, **options
     )
     tree = None
+
     # Cell plots attach two-group trees too, unlike grouped summary plots.
     if dendrogram is not False and len(selected.counts) > 1:
         tree = prepare_dendrogram(

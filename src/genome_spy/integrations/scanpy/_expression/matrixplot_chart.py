@@ -7,24 +7,22 @@ from typing import TYPE_CHECKING, Any, Literal
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._grid_interactions import zoom_axes, with_values
+from genome_spy.integrations.scanpy._grid_interactions import grid_interactions
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._expression.grouped_chart import (
     color_legend,
     finish_grouped_chart,
     grouped_axes,
-    index_scales,
     plot_dimensions,
     summary_records,
     totals_track,
 )
 from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._expression.colors import expression_scale
 
 from genome_spy.integrations.scanpy._style import (
     POINTS_TO_PIXELS as _PT,
-    color_bounds,
     native_color,
-    native_scheme,
 )
 
 if TYPE_CHECKING:
@@ -47,6 +45,7 @@ def build_matrixplot(
     hover: bool,
     zoom: bool | Literal["xy"],
     show_values: bool,
+    highlight: bool | Literal["outline"] = False,
     value_title: str,
     width: float | None,
     height: float | None,
@@ -64,7 +63,6 @@ def build_matrixplot(
     """
     context = "gsc.pl.matrixplot"
     rows, columns = colors.shape
-    scheme = native_scheme("viridis" if cmap is None else cmap, "cmap", context=context)
     no_edge = isinstance(edgecolor, str) and edgecolor.lower() == "none"
     stroke = (
         "gray" if no_edge else native_color(edgecolor, "edgecolor", context=context)
@@ -85,21 +83,16 @@ def build_matrixplot(
         context=context,
         legend_width=legend_width,
     )
-    low, high, _ = color_bounds(
+    scale = expression_scale(
         colors.to_numpy(dtype=float, na_value=float("nan")),
+        cmap,
         vmin,
         vmax,
         context=context,
     )
+
     # Tiles fill their slots; missing means leave an empty slot with its label.
-    x, y = grouped_axes(rows, columns, xpadding=0, ypadding=0)
-    x, y = zoom_axes(x, y, enabled=zoom, name=None)
-    scales = index_scales(x, y)
-    # The surround owns the scale definitions; marks retain fields and ticks.
-    x, y = (
-        gs.X("_x:I", axis=x.to_dict()["axis"]),
-        gs.Y("_y:I", axis=y.to_dict()["axis"]),
-    )
+    x, y, scales = grouped_axes(rows, columns, xpadding=0, ypadding=0, zoom=zoom)
     tiles = (
         gs.Chart(summary_records(colors, swap_axes=swap_axes, context=context))
         .transform_filter("isValid(datum._mean)")
@@ -113,14 +106,7 @@ def build_matrixplot(
             x=x,
             y=y,
             color=gs.Color("_mean:Q")
-            .scale(
-                type="linear",
-                domain=[low, high],
-                nice=False,
-                zero=False,
-                clamp=True,
-                scheme=scheme,
-            )
+            .scale(scale)
             .legend(
                 color_legend(colorbar_title).gradientLength(legend_width)
                 if show_colorbar
@@ -136,9 +122,10 @@ def build_matrixplot(
                 gs.Tooltip("_mean:Q", title=value_title, format=".4g"),
             ]
         )
+
     # Reuse the dotplot's labels, marker brackets, guides and tree placement.
     return finish_grouped_chart(
-        with_values(tiles, "_mean") if show_values else gs.layer(tiles),
+        grid_interactions(tiles, highlight, values="_mean" if show_values else None),
         colors,
         feature_groups,
         x,

@@ -67,6 +67,7 @@ def test_matrix_keeps_scanpy_defaults_without_matplotlib_axes():
         "height",
         "zoom",
         "show_values",
+        "highlight",
     }
 
 

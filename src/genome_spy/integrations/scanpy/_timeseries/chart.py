@@ -2,7 +2,6 @@
 
 from collections.abc import Collection, Mapping, Sequence
 from typing import Any
-from math import ceil
 
 import numpy as np
 
@@ -16,6 +15,7 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     profile_ruler,
     profile_segments,
     series_focus,
+    simulation_runs,
 )
 from genome_spy.integrations.scanpy._style import (
     AXIS_TEXT,
@@ -26,7 +26,43 @@ from genome_spy.integrations.scanpy._style import (
     zoom_point_size,
     color_bounds,
 )
-from genome_spy.integrations.scanpy._timeseries.data import CONTEXT, prepare_timeseries
+from genome_spy.integrations.scanpy._timeseries.data import (
+    CONTEXT,
+    TimeseriesData,
+    prepare_timeseries,
+)
+
+
+def _profile_paint(
+    prepared: TimeseriesData, scheme: Any, *, colorbar: bool, context: str
+) -> dict[str, Any]:
+    """Return category or numeric color settings from prepared profiles.
+
+    Keep constant values on the first palette color unless a colorbar expands them.
+    """
+    if prepared.color_domain is None:
+        labels = list(dict.fromkeys(prepared.table["_series"]))
+        scale = gs.Scale(type="ordinal", domain=labels, range=list(prepared.palette))
+        return {"field": "_series", "type": "nominal", "scale": scale}
+
+    low, high = prepared.color_domain
+    if colorbar:
+        low, high, _ = color_bounds(
+            np.array([low, high]), None, None, context=context, expand_constant=True
+        )
+    scale = gs.Scale(
+        type="linear",
+        domain=[low, high] if low != high else [0, 1],
+        scheme=scheme,
+        zero=False,
+        nice=False,
+        clamp=True,
+    )
+    paint: dict[str, Any] = {"type": "quantitative", "scale": scale}
+
+    # Matplotlib maps constant numeric colors to the start of the scheme.
+    paint.update({"field": "_color"} if low != high else {"datum": 0})
+    return paint
 
 
 def _series_legend(
@@ -46,6 +82,75 @@ def _series_legend(
     if style is not None:
         guide = guide.copy(**style.to_dict())
     return guide
+
+
+def _numeric_series_key(
+    points: gs.Chart, prepared: TimeseriesData, guide: gs.Legend, shape: str
+) -> gs.Chart:
+    """Add a series key to numeric-colored points using the first sample's color."""
+    assert prepared.color_domain is not None
+    first = prepared.table.iloc[0]
+    visible = np.isfinite(
+        first[["_time", "_value", "_color"]].to_numpy(dtype=float)
+    ).all()
+    low, high = prepared.color_domain
+    color_value = float(first["_color"]) if visible and low != high else 0
+    ink = gs.expr(f"scale('fill', {color_value})")
+    points = points.encode(
+        shape=gs.Shape("_series:N")
+        .scale(
+            type="ordinal",
+            domain=list(dict.fromkeys(prepared.table["_series"])),
+            range=[shape],
+        )
+        .legend(
+            guide.symbolFillColor(ink)
+            .symbolStrokeColor(ink)
+            .symbolOpacity(1 if visible else 0)
+        )
+    )
+    return points
+
+
+def _profile_axes(
+    prepared: TimeseriesData,
+    *,
+    xlabel: str | None,
+    ylabel: str | None,
+    xtick_labels: Mapping[float, str] | None,
+    zoom: bool,
+) -> tuple[gs.X, gs.Y]:
+    """Return axes from prepared limits, optional tick labels and zoom settings.
+
+    Leave scales unnamed so independently composed panels cannot collide.
+    """
+    x = (
+        gs.X("_time:Q")
+        .scale(
+            domain=sorted(prepared.x_domain),
+            reverse=prepared.x_domain[0] > prepared.x_domain[1],
+            zero=False,
+            nice=False,
+            zoom=False,
+        )
+        .axis(
+            title=xlabel if xtick_labels is None else None,
+            domain=False,
+            labels=xtick_labels is None,
+            values=list(xtick_labels) if xtick_labels is not None else Undefined,
+        )
+    )
+    y = (
+        gs.Y("_value:Q")
+        .scale(domain=list(prepared.y_domain), zero=False, nice=False, zoom=False)
+        .axis(
+            title=ylabel,
+            values=prepared.yticks if prepared.yticks is not None else Undefined,
+            domain=False,
+        )
+    )
+
+    return zoom_axes(x, y, enabled="xy" if zoom else False, name=None)
 
 
 def build_timeseries(
@@ -83,6 +188,8 @@ def build_timeseries(
             raise TypeError(f"{context}: {name} must be a string or None.")
     if not isinstance(legend, bool):
         raise TypeError(f"{context}: legend must be boolean.")
+
+    # One marker may stand for every series; mixed shapes are unsupported.
     marker_count = 1
     if not isinstance(marker, str) and isinstance(marker, (Sequence, np.ndarray)):
         marker = list(marker)
@@ -103,6 +210,8 @@ def build_timeseries(
     height = number(739.2 if height is None else height, "height", context=context)
     if not width or not height:
         raise ValueError(f"{context}: width and height must be positive.")
+
+    # Read and validate the profiles before assigning axes or colors.
     prepared, highlights = prepare_timeseries(
         X,
         time=time,
@@ -117,33 +226,11 @@ def build_timeseries(
     )
     if marker_count not in (1, prepared.table["_series"].nunique()):
         raise ValueError(f"{context}: marker needs one value or one per subset.")
-    x = (
-        gs.X("_time:Q")
-        .scale(
-            domain=sorted(prepared.x_domain),
-            reverse=prepared.x_domain[0] > prepared.x_domain[1],
-            zero=False,
-            nice=False,
-            zoom=False,
-        )
-        .axis(
-            title=xlabel if xtick_labels is None else None,
-            domain=False,
-            labels=xtick_labels is None,
-            values=list(xtick_labels) if xtick_labels is not None else Undefined,
-        )
+    x, y = _profile_axes(
+        prepared, xlabel=xlabel, ylabel=ylabel, xtick_labels=xtick_labels, zoom=zoom
     )
-    y = (
-        gs.Y("_value:Q")
-        .scale(domain=list(prepared.y_domain), zero=False, nice=False, zoom=False)
-        .axis(
-            title=ylabel,
-            values=prepared.yticks if prepared.yticks is not None else Undefined,
-            domain=False,
-        )
-    )
-    # Unnamed scales let independent panels compose without global name collisions.
-    x, y = zoom_axes(x, y, enabled="xy" if zoom else False, name=None)
+
+    # Keep series focus and simulation-run focus separate.
     shape, path_width = EMBEDDING_MARKERS[marker]
     size = 6 * (PT * path_width) ** 2
     focus = None
@@ -155,41 +242,17 @@ def build_timeseries(
     source = gs.Chart(prepared.table)
     run = None
     if realization_length is not None and (run_select or connect):
-        source = source.transform_calculate(
-            _run=gs.expr.format(
-                gs.expr.floor(gs.datum._sample / realization_length) + 1, "d"
-            )
+        source, run, run_opacity = simulation_runs(
+            source, "_sample", realization_length, samples=len(X), select=run_select
         )
-        if run_select:
-            labels = [str(i + 1) for i in range(ceil(len(X) / realization_length))]
-            run, run_opacity = series_focus(
-                labels, "_run", name="simulation_run", title="Run: "
-            )
+        if run is not None:
             opacity = gs.expr.min(opacity, run_opacity)
+
+    # The legend uses the same colors and shapes as the points.
     guide = _series_legend(
         size, shape, enabled=prepared.legend or colorbar, style=legend_style
     )
-    if prepared.color_domain is None:
-        labels = list(dict.fromkeys(prepared.table["_series"]))
-        scale = gs.Scale(type="ordinal", domain=labels, range=list(prepared.palette))
-        paint: dict[str, Any] = {"field": "_series", "type": "nominal", "scale": scale}
-    else:
-        low, high = prepared.color_domain
-        if colorbar:
-            low, high, _ = color_bounds(
-                np.array([low, high]), None, None, context=context, expand_constant=True
-            )
-        scale = gs.Scale(
-            type="linear",
-            domain=[low, high] if low != high else [0, 1],
-            scheme=scheme,
-            zero=False,
-            nice=False,
-            clamp=True,
-        )
-        paint = {"type": "quantitative", "scale": scale}
-        # Matplotlib maps constant numeric colors to the start of the scheme.
-        paint.update({"field": "_color"} if low != high else {"datum": 0})
+    paint = _profile_paint(prepared, scheme, colorbar=colorbar, context=context)
     fill, stroke = gs.Fill(**paint), gs.Stroke(**paint)
     if "field" in paint:
         fill = fill.legend(guide if prepared.color_domain is None else None)
@@ -228,26 +291,7 @@ def build_timeseries(
     else:
         points = points.encode(opacity=gs.value(0.8))
     if prepared.color_domain is not None and guide is not None and not colorbar:
-        first = prepared.table.iloc[0]
-        visible = np.isfinite(
-            first[["_time", "_value", "_color"]].to_numpy(dtype=float)
-        ).all()
-        low, high = prepared.color_domain
-        color_value = float(first["_color"]) if visible and low != high else 0
-        ink = gs.expr(f"scale('fill', {color_value})")
-        points = points.encode(
-            shape=gs.Shape("_series:N")
-            .scale(
-                type="ordinal",
-                domain=list(dict.fromkeys(prepared.table["_series"])),
-                range=[shape],
-            )
-            .legend(
-                guide.symbolFillColor(ink)
-                .symbolStrokeColor(ink)
-                .symbolOpacity(1 if visible else 0)
-            )
-        )
+        points = _numeric_series_key(points, prepared, guide, shape)
     if hover:
         points = points.encode(
             tooltip=[
@@ -262,6 +306,8 @@ def build_timeseries(
                 else []
             )
         )
+
+    # Draw connecting lines behind points and never join separate runs.
     chart = gs.layer(points)
     if connect:
         lines = (
@@ -282,6 +328,8 @@ def build_timeseries(
         chart = chart + vertical_highlights(highlights, *prepared.highlight_y)
     if ruler:
         chart = chart.add_params(profile_ruler())
+
+    # Keep layout and side labels separate from the plotted data.
     result: gs.LayerChart | gs.SurroundChart = chart.properties(
         width=width,
         height=height,

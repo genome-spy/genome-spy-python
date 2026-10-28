@@ -12,6 +12,29 @@ from genome_spy.integrations.scanpy._style import (
 )
 
 
+def _threshold_preview(bars: gs.Chart, cutoff: gs.Parameter) -> gs.Chart:
+    """Return histogram bars colored by the supplied preview cutoff.
+
+    Keep the stored scores and threshold unchanged.
+    """
+    return bars.transform_calculate(
+        _preview_cutoff=cutoff,
+        _threshold_status=gs.expr.if_(
+            gs.datum.end <= cutoff,
+            "Below cutoff",
+            gs.expr.if_(gs.datum.start > cutoff, "Above cutoff", "Contains cutoff"),
+        ),
+    ).encode(
+        color=gs.Color("_threshold_status:N")
+        .scale(
+            type="ordinal",
+            domain=["Below cutoff", "Contains cutoff", "Above cutoff"],
+            range=["#cbd5e1", "#94a3b8", "#2563a6"],
+        )
+        .legend(gs.Legend(title="Bins", orient="bottom", direction="horizontal"))
+    )
+
+
 def build_scrublet(
     bins: pd.DataFrame,
     thresholds: list[float | None],
@@ -44,6 +67,8 @@ def build_scrublet(
                     ),
                 )
             )
+
+        # Log panels need limits from positive density values only.
         density = rows.density.to_numpy()
         if scale == "log":
             ydomain = coordinate_domain(density[density > 0], 0.05, log=True)
@@ -95,27 +120,7 @@ def build_scrublet(
             )
         )
         if threshold_slider:
-            cutoff = cutoffs[-1]
-            bars = bars.transform_calculate(
-                _preview_cutoff=cutoff,
-                _threshold_status=gs.expr.if_(
-                    gs.datum.end <= cutoff,
-                    "Below cutoff",
-                    gs.expr.if_(
-                        gs.datum.start > cutoff, "Above cutoff", "Contains cutoff"
-                    ),
-                ),
-            ).encode(
-                color=gs.Color("_threshold_status:N")
-                .scale(
-                    type="ordinal",
-                    domain=["Below cutoff", "Contains cutoff", "Above cutoff"],
-                    range=["#cbd5e1", "#94a3b8", "#2563a6"],
-                )
-                .legend(
-                    gs.Legend(title="Bins", orient="bottom", direction="horizontal")
-                )
-            )
+            bars = _threshold_preview(bars, cutoffs[-1])
         if hover:
             tooltips = [
                 gs.Tooltip("batch:N", title="Batch"),

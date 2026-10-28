@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Literal, Self
 
 from genome_spy.integrations.scanpy._expression.grouped_builder import _GroupedPlot
 from genome_spy.integrations.scanpy._guards import (
+    _check_grid_highlight,
     _check_grid_zoom,
     _check_kwargs,
     _check_point_options,
@@ -54,7 +55,7 @@ class DotPlot(_GroupedPlot):
         norm: Reserved; Matplotlib normalization objects error.
         hover: Show gene, group, displayed value and expressing percentage.
         zoom: True enables y navigation; "xy" also enables x navigation.
-        highlight: Mark the hovered row and column with a native ruler.
+        highlight: False disables feedback; True shows a ruler; "outline" outlines a hovered dot.
         group_gap: Space between marker blocks in pixels; 0 keeps slots contiguous.
         width: Plot-area width in logical pixels.
         height: Plot-area height in logical pixels.
@@ -103,7 +104,7 @@ class DotPlot(_GroupedPlot):
         norm: Any = None,
         hover: bool = True,
         zoom: bool | Literal["xy"] = False,
-        highlight: bool = False,
+        highlight: bool | Literal["outline"] = False,
         group_gap: float = 0,
         width: float | None = None,
         height: float | None = None,
@@ -122,15 +123,14 @@ class DotPlot(_GroupedPlot):
             log=log,
             mean_only_expressed=mean_only_expressed,
             hover=hover,
-            highlight=highlight,
         )
         if standard_scale not in (None, "var", "group"):
             raise ValueError(
                 f"{context}: standard_scale must be 'var', 'group', or None."
             )
         _check_grid_zoom(zoom, context=context)
+        _check_grid_highlight(highlight, context=context)
         _require_scanpy(context)
-
         from genome_spy.integrations.scanpy._expression.grouped_data import (
             dotplot_summaries,
             grouped_expression,

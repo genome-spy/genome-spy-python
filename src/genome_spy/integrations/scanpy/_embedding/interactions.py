@@ -52,13 +52,15 @@ def brush_count(
     *,
     name: str,
     width: float,
+    within_brush: bool = False,
 ) -> gs.Chart:
-    """Return a native count row inheriting its cell data from the composition.
+    """Return native count text inheriting its cell data from the composition.
 
-    Read the brush bounds without changing the point marks.
+    Optionally fit the text inside the brush using native ranged-text encodings.
     """
     x, y = fields
     parameter = selection.name
+
     # shortcut: sum preserves zero counts in Core 1.2.0; replace after its fix ships.
     # Match the shader's lower-inclusive, upper-exclusive point membership.
     predicate = (
@@ -66,13 +68,49 @@ def brush_count(
         f"{parameter}.intervals.x[0] <= datum.{x} && datum.{x} < {parameter}.intervals.x[1] && "
         f"{parameter}.intervals.y[0] <= datum.{y} && datum.{y} < {parameter}.intervals.y[1]"
     )
-    return (
+    active = f"{parameter}.intervals.x && {parameter}.intervals.y"
+    label = (
+        "format(datum.count, ',') + ' cells'"
+        if within_brush
+        else "datum.count + ' cells selected'"
+    )
+    count = (
         gs.Chart()
         .transform_collect()
         .transform_formula(expr=f"({predicate}) ? 1 : 0", as_="selected")
         .transform_aggregate(fields=["selected"], ops=["sum"], as_=["count"])
-        .transform_formula(expr="datum.count + ' cells selected'", as_="label")
-        .mark_text(align="left", baseline="middle", size=12, tooltip=None)
+        .transform_formula(expr=label, as_="label")
+    )
+    if within_brush:
+        return (
+            count.transform_calculate(
+                _brush_x=f"({active}) ? {parameter}.intervals.x[0] : 0",
+                _brush_x2=f"({active}) ? {parameter}.intervals.x[1] : 0",
+                _brush_y=f"({active}) ? {parameter}.intervals.y[1] : 0",
+                _brush_y2=f"({active}) ? {parameter}.intervals.y[0] : 0",
+            )
+            .mark_text(
+                align="left",
+                baseline="top",
+                size=12,
+                color="black",
+                paddingX=6,
+                paddingY=5,
+                squeeze=False,
+                clip=True,
+                tooltip=None,
+            )
+            .encode(
+                x="_brush_x:Q",
+                x2="_brush_x2:Q",
+                y="_brush_y:Q",
+                y2="_brush_y2:Q",
+                text="label:N",
+            )
+            .properties(name=name)
+        )
+    return (
+        count.mark_text(align="left", baseline="middle", size=12, tooltip=None)
         .encode(x=gs.value(0), y=gs.value(0.5), text="label:N")
         .properties(name=name, width=width, height=24)
     )
@@ -97,11 +135,14 @@ def with_brush_count(
         gs.vconcat(chart, count, spacing=8)
         .properties(data=prepared.table)
         .resolve_scale(x="independent", y="independent")
-        .add_params(
-            gs.param(
-                name, value={"type": "interval", "intervals": {"x": None, "y": None}}
-            )
-        )
+        .add_params(brush_value(selection))
+    )
+
+
+def brush_value(selection: gs.Parameter) -> gs.Parameter:
+    """Return the outer native interval value shared by controllers and consumers."""
+    return gs.param(
+        selection.name, value={"type": "interval", "intervals": {"x": None, "y": None}}
     )
 
 
@@ -112,6 +153,7 @@ def brush_owner(
 
     Write to the outer selection so the other panels and count see the same value.
     """
+
     # Other panels only observe the shared value.
     return chart.add_params(
         selection.copy(name=selection.name, push="outer")

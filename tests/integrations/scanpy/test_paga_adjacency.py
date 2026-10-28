@@ -279,3 +279,51 @@ def test_named_strips_use_index_slots_and_collect_legend_outside_labels(zoom):
     assert spec["resolve"]["legend"]["default"] == "collected"
     title = spec["surround"]["bottom"][0]["title"]
     assert title["text"] == "Source group" and title["orient"] == "bottom"
+
+
+@pytest.mark.parametrize("as_heatmap", [True, False])
+def test_group_names_require_explicit_labels_and_only_name_axes_and_tooltips(
+    as_heatmap,
+):
+    labels = ["First", "Second", "Third"]
+    for supplied in (None, labels):
+        spec = gsc.pl.paga_adjacency(
+            make_adjacency(), labels=supplied, as_heatmap=as_heatmap, show=False
+        ).to_dict()
+        marks = leaf_marks(spec)
+        dots = next(mark for mark in marks if mark["mark"]["type"] == "point")
+        records = spec["datasets"][dots["data"]["name"]]
+        assert records
+        fields = {entry["field"] for entry in dots["encoding"]["tooltip"]}
+        if supplied is None:
+            assert all(
+                "_source_label" not in row and "_target_label" not in row
+                for row in records
+            )
+            assert fields.isdisjoint({"_source_label", "_target_label"})
+        else:
+            for row in records:
+                target = row["_y"] if as_heatmap else row["_target"]
+                assert row["_source_label"] == labels[row["_x"]]
+                assert row["_target_label"] == labels[target]
+            assert {"_source_label", "_target_label"} <= fields
+
+        # Group names must not become text over the tree points.
+        text_fields = {
+            mark["encoding"]["text"].get("field")
+            for mark in marks
+            if mark["mark"]["type"] == "text"
+        }
+        assert text_fields.isdisjoint({"_source_label", "_target_label"})
+        assert text_fields == ({"label"} if supplied is not None else set())
+        if supplied is not None:
+            ticks = [
+                rows
+                for rows in spec["datasets"].values()
+                if "slot" in rows[0] and "label" in rows[0]
+            ]
+            assert ticks
+            assert all(
+                rows == [{"slot": i, "label": name} for i, name in enumerate(labels)]
+                for rows in ticks
+            )

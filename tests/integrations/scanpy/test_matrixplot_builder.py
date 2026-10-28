@@ -52,6 +52,7 @@ def test_constructor_preserves_pinned_signature():
         "hover",
         "zoom",
         "show_values",
+        "highlight",
         "width",
         "height",
     }

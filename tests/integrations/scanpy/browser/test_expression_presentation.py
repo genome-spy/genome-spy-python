@@ -9,10 +9,7 @@ from PIL import Image
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.test_grid_interactions import (
-    position,
-    svg_root,
-)
+from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
 from tests.integrations.scanpy.browser.test_heatmap import hover_at
 from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
@@ -119,7 +116,7 @@ def test_dense_category_strips_have_no_outline_and_keep_hover(page):
         )
 
 
-def test_paga_labels_clear_nodes_and_links_and_colorbar_has_normal_width(page):
+def test_paga_labels_clear_nodes_and_colorbar_has_normal_width(page):
     chart = gsc.pl.paga(
         make_paga("gene_raw"),
         color="g1",
@@ -136,8 +133,30 @@ def test_paga_labels_clear_nodes_and_links_and_colorbar_has_normal_width(page):
     circles = list(next(e for e in panel.iter() if e.get("data-mark-type") == "point"))
     labels = list(next(e for e in panel.iter() if e.get("data-mark-type") == "text"))
     assert len(circles) == len(labels) == 4
-    for circle, label in zip(circles, labels, strict=True):
-        assert position(label)[1] <= float(circle.get("cy")) - 7
+    assert {label.text for label in labels} == {"A", "B", "C", "D"}
+    boxes = page.evaluate("""async () => {
+        const host = document.createElement('div');
+        host.style.cssText = 'position:absolute;visibility:hidden';
+        host.innerHTML = await (await api.imageExport.svg()).blob.text();
+        document.body.append(host);
+        const panel = host.querySelector('[data-name="panel-0"]');
+        const bounds = selector => [...panel.querySelectorAll(selector)].map(e => {
+            const {left, right, top, bottom} = e.getBoundingClientRect();
+            return {left, right, top, bottom};
+        });
+        const result = {nodes: bounds('circle'), labels: bounds('text')};
+        host.remove();
+        return result;
+    }""")
+    assert len(boxes["nodes"]) == len(boxes["labels"]) == 4
+    for label in boxes["labels"]:
+        for node in boxes["nodes"]:
+            assert (
+                label["right"] <= node["left"]
+                or label["left"] >= node["right"]
+                or label["bottom"] <= node["top"]
+                or label["top"] >= node["bottom"]
+            )
     gradients = [
         e
         for e in root.iter()

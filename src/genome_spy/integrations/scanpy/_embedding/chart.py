@@ -35,6 +35,7 @@ def _coordinate(
     horizontal: bool,
     label: str,
     show_ticks: bool,
+    domain: tuple[float, float] | None = None,
 ) -> gs.X | gs.Y:
     """Return an x or y encoding from a panel's coordinates and style.
 
@@ -43,7 +44,7 @@ def _coordinate(
     channel = gs.X if horizontal else gs.Y
     margin = style.xmargin if horizontal else style.ymargin
     result = channel(f"{field}:Q").scale(
-        domain=list(coordinate_domain(values, margin)),
+        domain=list(coordinate_domain(values, margin) if domain is None else domain),
         zero=False,
         nice=False,
         zoom=zoom,
@@ -71,6 +72,7 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
         if panel.key is None or style.legend_loc != "right margin":
             return None
         count = len(panel.legend_values)
+
         # Add columns only when a single column would make the legend too tall.
         columns = 1
         if count > 30:
@@ -89,6 +91,7 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
                 style.legend_symbol_size
                 * (POINTS_TO_PIXELS * EMBEDDING_MARKERS[panel.marker][1]) ** 2
             )
+
         # Moving the continuous guide must not move categorical legends.
         if style.colorbar_loc not in (None, "right"):
             legend = legend.orient("right").direction("vertical")
@@ -128,6 +131,7 @@ def _color(panel: Panel, index: int, style: EmbeddingStyle) -> gs.Color:
         color = color.scale(range=list(panel.palette))
     if not panel.categorical:
         color = color.scale(zero=False, clamp=True)
+
         # Without a guide, a constant range uses the last color only when centered.
         if panel.domain[0] == panel.domain[-1] and panel.scheme is not None:
             return gs.Color(
@@ -142,162 +146,72 @@ def _color(panel: Panel, index: int, style: EmbeddingStyle) -> gs.Color:
     return color.legend(_legend(panel, style))
 
 
-def _panel(
+def _point_size(index: int, maximum: float, diameter: float, *, zoom: bool) -> gs.Size:
+    """Map prepared point areas to pixels, sharing zoom sizing with the outlines."""
+    return (
+        gs.Size(f"_size_{index}:Q")
+        .scale(
+            domain=[0, maximum],
+            range=[0, zoom_point_size(maximum * diameter**2, zoom)],
+            nice=False,
+            zero=True,
+        )
+        .legend(None)
+    )
+
+
+def _outline_layers(
+    points: gs.Chart,
+    index: int,
+    style: EmbeddingStyle,
+    maximum_size: float,
+    diameter: float,
+    *,
+    zoom: bool,
+) -> list[gs.Chart]:
+    """Return the two background point layers from outline widths and colors.
+
+    Keep zero-size cells hidden and use the same zoom sizing as the foreground.
+    """
+    assert style.outline_width is not None
+    layers = []
+    background, gap = style.outline_width
+    for factor, color in zip(
+        (1 + 2 * gap + 2 * background, 1 + 2 * gap),
+        style.outline_color,
+        strict=True,
+    ):
+        outline = points.mark_point(
+            filled=True,
+            fillOpacity=1,
+            stroke=style.stroke,
+            strokeOpacity=style.stroke_opacity,
+            strokeWidth=style.stroke_width if style.stroke_opacity else 0,
+            inwardStroke=False,
+            tooltip=None,
+        ).encode(
+            color=gs.value(color),
+            size=_point_size(index, maximum_size, diameter * factor, zoom=zoom),
+        )
+        layers.append(outline)
+    return layers
+
+
+def _color_layers(
+    points: gs.Chart,
     prepared: PreparedEmbedding,
     panel: Panel,
     index: int,
     style: EmbeddingStyle,
-    *,
-    hover: bool,
-    zoom: bool,
-    selection: gs.Parameter | None,
-    edges: gs.Chart | None,
-) -> gs.TopLevelSpec:
-    """Return one embedding panel from prepared cells, panel settings and style.
+) -> list[gs.Chart]:
+    """Return point layers for regular, missing and out-of-range colors.
 
-    Draw points, missing values and labels in order, adding only requested interactions.
+    Separate missing values because numeric scales cannot assign their color.
     """
     table = prepared.table
-    x_field, y_field = [f"_coord_{d}" for d in panel.dimensions]
-    visible = table
-    if not panel.categorical and not panel.show_missing:
-        visible = table.loc[table[f"_value_{index}"].notna()]
-    limits = visible[[x_field, y_field]].to_numpy()
-    if prepared.edges is not None and not prepared.edges.empty:
-        # NetworkX pads edge endpoints before applying the usual axis margins.
-        connected = table.loc[
-            table["_obs_id"].isin(prepared.edges.to_numpy().ravel()), [x_field, y_field]
-        ].to_numpy()
-        low, high = connected.min(axis=0), connected.max(axis=0)
-        padding = (high - low) * 0.05
-        limits = np.vstack([limits, low - padding, high + padding])
-    x = _coordinate(
-        x_field,
-        limits[:, 0],
-        style,
-        zoom,
-        horizontal=True,
-        label=prepared.axis_labels[panel.dimensions[0]],
-        show_ticks=prepared.show_ticks,
-    )
-    y = _coordinate(
-        y_field,
-        limits[:, 1],
-        style,
-        zoom,
-        horizontal=False,
-        label=prepared.axis_labels[panel.dimensions[1]],
-        show_ticks=prepared.show_ticks,
-    )
-    # Scanpy uses square points for size; GenomeSpy uses square pixels.
-    maximum_size = max(1.0, float(table[f"_size_{index}"].max()))
-    shape, path_width = EMBEDDING_MARKERS[panel.marker]
-    diameter = POINTS_TO_PIXELS * path_width
-    points = (
-        gs.Chart(table)
-        # Keep browser-side row copies small by dropping other panels' fields.
-        .transform_project(
-            fields=[
-                "_obs_id",
-                "_obs_label",
-                x_field,
-                y_field,
-                f"_value_{index}",
-                f"_color_{index}",
-                f"_size_{index}",
-                f"_order_{index}",
-            ]
-        )
-        .transform_collect(sort={"field": f"_order_{index}", "order": "ascending"})
-        .mark_point(
-            filled=True,
-            fillOpacity=style.alpha,
-            stroke=style.stroke,
-            strokeOpacity=0
-            if style.outline_width is not None
-            else style.stroke_opacity,
-            strokeWidth=0 if style.outline_width is not None else style.stroke_width,
-            inwardStroke=False,
-            tooltip={"handler": "default"} if hover else None,
-        )
-        .encode(
-            x=x,
-            y=y,
-            key=gs.Key("_obs_id"),
-            size=gs.Size(f"_size_{index}:Q")
-            .scale(
-                domain=[0, maximum_size],
-                range=[0, zoom_point_size(maximum_size * diameter**2, zoom)],
-                nice=False,
-                zero=True,
-            )
-            .legend(None),
-        )
-        .properties(width=style.width, height=style.height)
-    )
-    if shape != "circle":
-        points = points.encode(shape=gs.value(shape))
-    layers: list[gs.Chart] = []
-    if edges is not None:
-        layers.append(
-            edges.encode(
-                x=x.field("_edge_x"),
-                x2=gs.X2("_edge_x2"),
-                y=y.field("_edge_y"),
-                y2=gs.Y2("_edge_y2"),
-            )
-        )
-    source = {}
-    if style.outline_width is not None or panel.color_extremes is not None:
-        # Point layers share one source and the prepared draw order.
-        source = {"data": points._kwds["data"], "transform": points._kwds["transform"]}
-        points = points._copy(deep=False, data=Undefined, transform=Undefined)
-    if style.outline_width is not None:
-        background, gap = style.outline_width
-        for factor, color in zip(
-            (1 + 2 * gap + 2 * background, 1 + 2 * gap),
-            style.outline_color,
-            strict=True,
-        ):
-            # Zero-size observations must not leave a painted outline edge.
-            outline = (
-                points.transform_filter(f"datum._size_{index} > 0")
-                .mark_point(
-                    filled=True,
-                    fillOpacity=1,
-                    stroke=style.stroke,
-                    strokeOpacity=style.stroke_opacity,
-                    strokeWidth=style.stroke_width if style.stroke_opacity else 0,
-                    inwardStroke=False,
-                    tooltip=None,
-                )
-                .encode(
-                    color=gs.value(color),
-                    size=gs.Size(f"_size_{index}:Q")
-                    .scale(
-                        domain=[0, maximum_size],
-                        range=[
-                            0,
-                            zoom_point_size(
-                                maximum_size * (diameter * factor) ** 2, zoom
-                            ),
-                        ],
-                        nice=False,
-                        zero=True,
-                    )
-                    .legend(None),
-                )
-            )
-            layers.append(outline)
-    points = point_hover(
-        points,
-        panel,
-        index,
-        axis_labels=prepared.axis_labels,
-        row_label=prepared.row_label,
-        hover=hover,
-    )
+    layers = []
     colored = points.encode(color=_color(panel, index, style))
+
     # Draw missing values separately because numeric color scales cannot color them.
     separate_missing = (
         panel.scheme is not None and table[f"_value_{index}"].isna().any()
@@ -330,6 +244,150 @@ def _panel(
             )
     else:
         layers.append(colored)
+    return layers
+
+
+def _panel_limits(prepared: PreparedEmbedding, panel: Panel, index: int) -> np.ndarray:
+    """Return visible coordinates with padding around stored graph endpoints.
+
+    Missing-value cells and graph edges affect Scanpy's initial plot limits.
+    """
+    table = prepared.table
+    fields = [f"_coord_{d}" for d in panel.dimensions]
+    visible = table
+    if not panel.categorical and not panel.show_missing:
+        visible = table.loc[table[f"_value_{index}"].notna()]
+    limits: np.ndarray = visible[fields].to_numpy()
+    if prepared.edges is None or prepared.edges.empty:
+        return limits
+
+    # NetworkX pads edge endpoints before applying the usual axis margins.
+    connected = table.loc[
+        table["_obs_id"].isin(prepared.edges.to_numpy().ravel()), fields
+    ].to_numpy()
+    low, high = connected.min(axis=0), connected.max(axis=0)
+    padding = (high - low) * 0.05
+    return np.vstack([limits, low - padding, high + padding])
+
+
+def _panel(
+    prepared: PreparedEmbedding,
+    panel: Panel,
+    index: int,
+    style: EmbeddingStyle,
+    *,
+    hover: bool,
+    zoom: bool,
+    selection: gs.Parameter | None,
+    edges: gs.Chart | None,
+    coordinate_domains: tuple[tuple[float, float], tuple[float, float]] | None = None,
+) -> gs.TopLevelSpec:
+    """Return one embedding panel from prepared cells, panel settings and style.
+
+    Draw points, missing values and labels in order, adding only requested interactions.
+    """
+    table = prepared.table
+    x_field, y_field = [f"_coord_{d}" for d in panel.dimensions]
+    limits = _panel_limits(prepared, panel, index)
+    x = _coordinate(
+        x_field,
+        limits[:, 0],
+        style,
+        zoom,
+        horizontal=True,
+        label=prepared.axis_labels[panel.dimensions[0]],
+        show_ticks=prepared.show_ticks,
+        domain=None if coordinate_domains is None else coordinate_domains[0],
+    )
+    y = _coordinate(
+        y_field,
+        limits[:, 1],
+        style,
+        zoom,
+        horizontal=False,
+        label=prepared.axis_labels[panel.dimensions[1]],
+        show_ticks=prepared.show_ticks,
+        domain=None if coordinate_domains is None else coordinate_domains[1],
+    )
+
+    # Scanpy uses square points for size; GenomeSpy uses square pixels.
+    maximum_size = max(1.0, float(table[f"_size_{index}"].max()))
+    shape, path_width = EMBEDDING_MARKERS[panel.marker]
+    diameter = POINTS_TO_PIXELS * path_width
+    points = (
+        gs.Chart(table)
+        # Keep browser-side row copies small by dropping other panels' fields.
+        .transform_project(
+            fields=[
+                "_obs_id",
+                "_obs_label",
+                x_field,
+                y_field,
+                f"_value_{index}",
+                f"_color_{index}",
+                f"_size_{index}",
+                f"_order_{index}",
+            ]
+        )
+        # Invisible observations must not become hover targets.
+        .transform_filter(f"datum._size_{index} > 0")
+        .transform_collect(sort={"field": f"_order_{index}", "order": "ascending"})
+        .mark_point(
+            filled=True,
+            fillOpacity=style.alpha,
+            stroke=style.stroke,
+            strokeOpacity=0
+            if style.outline_width is not None
+            else style.stroke_opacity,
+            strokeWidth=0 if style.outline_width is not None else style.stroke_width,
+            inwardStroke=False,
+            minPickingSize=5,
+            tooltip={"handler": "default"} if hover else None,
+        )
+        .encode(
+            x=x,
+            y=y,
+            key=gs.Key("_obs_id"),
+            size=_point_size(index, maximum_size, diameter, zoom=zoom),
+        )
+        .properties(width=style.width, height=style.height)
+    )
+    if shape != "circle":
+        points = points.encode(shape=gs.value(shape))
+
+    # Keep edges behind all point layers, including outlines.
+    layers: list[gs.Chart] = []
+    if edges is not None:
+        layers.append(
+            edges.encode(
+                x=x.field("_edge_x"),
+                x2=gs.X2("_edge_x2"),
+                y=y.field("_edge_y"),
+                y2=gs.Y2("_edge_y2"),
+            )
+        )
+
+    # Outlines and extreme colors must inherit the same source and draw order.
+    source = {}
+    if style.outline_width is not None or panel.color_extremes is not None:
+        source = {"data": points._kwds["data"], "transform": points._kwds["transform"]}
+        points = points._copy(deep=False, data=Undefined, transform=Undefined)
+    if style.outline_width is not None:
+        layers.extend(
+            _outline_layers(points, index, style, maximum_size, diameter, zoom=zoom)
+        )
+
+    # Only foreground points expose cell details.
+    points = point_hover(
+        points,
+        panel,
+        index,
+        axis_labels=prepared.axis_labels,
+        row_label=prepared.row_label,
+        hover=hover,
+    )
+    layers.extend(_color_layers(points, prepared, panel, index, style))
+
     # Keep group medians as anchors while native layout separates their labels.
     if panel.categorical and style.legend_loc == "on data":
         labels = []
@@ -355,6 +413,7 @@ def _panel(
                 font=style.font,
             ).encode(x=x.field("x"), y=y.field("y"))
         )
+
     # Size ranges use each mark's zoom, so layers keep their own size scales.
     result = (
         gs.layer(*layers).resolve_scale(size="independent")
@@ -363,6 +422,7 @@ def _panel(
     ).properties(width=style.width, height=style.height)
     if source:
         result = result.properties(**source)
+
     # Only the first panel edits the shared brush bounds.
     if selection is not None and index == 0:
         result = brush_owner(result, selection, prepared.basis)
@@ -417,6 +477,7 @@ def build_embedding(
     hover: bool,
     zoom: bool,
     selection: gs.Parameter | None = None,
+    coordinate_domains: tuple[tuple[float, float], tuple[float, float]] | None = None,
 ) -> gs.TopLevelSpec:
     """Return a composed embedding chart from prepared data, style and interaction options.
 
@@ -458,9 +519,11 @@ def build_embedding(
             zoom=zoom,
             selection=selection,
             edges=edges,
+            coordinate_domains=coordinate_domains,
         )
         for i, panel in enumerate(prepared.panels)
     ]
+
     # Share zoom only when the panels show the same coordinate pair.
     share_coordinates = zoom and len({p.dimensions for p in prepared.panels}) == 1
     chart = _compose(charts, style, share_coordinates=share_coordinates)
@@ -468,12 +531,14 @@ def build_embedding(
         chart = with_brush_count(chart, prepared, style, selection)
     horizontal = style.colorbar_loc in ("top", "bottom")
     gradient_length = style.width if horizontal else style.height
+
     # A single panel is also the root, so retain its text settings when configuring it.
     legend = (
         _legend_typography(prepared.panels[0], style)
         if len(charts) == 1
         else LegendConfig()
     )
+
     # Keep presentation defaults overridable through native chart configuration.
     return chart._configure_nested(
         "legend",

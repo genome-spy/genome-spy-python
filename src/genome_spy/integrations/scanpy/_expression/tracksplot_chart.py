@@ -1,5 +1,7 @@
 """Native per-cell expression tracks with shared cell positions and side guides."""
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 
@@ -17,6 +19,80 @@ from genome_spy.integrations.scanpy._expression.grouped_data import (
 )
 from genome_spy.integrations.scanpy._expression.grouped_chart import _category_strip
 from genome_spy.integrations.scanpy._style import FONT
+
+
+def _track_bars(
+    values: np.ndarray,
+    field: str,
+    name: str,
+    color: gs.Color,
+    *,
+    log: bool,
+    hover: bool,
+) -> gs.Chart:
+    """Return one gene's bars with its own value range and optional cell tooltips.
+
+    Log tracks hide nonpositive values and use the bottom edge as their baseline.
+    """
+    finite = values[np.isfinite(values)]
+    if log:
+        positive = finite[finite > 0]
+        domain = coordinate_domain(
+            positive if positive.size else np.array([1.0, 10.0]), 0.05, log=True
+        )
+    else:
+        domain = coordinate_domain(np.append(finite, 0), 0.05)
+
+    # Scanpy masks nonpositive log values; their baseline is the viewport bottom.
+    bars = (
+        gs.Chart()
+        .transform_filter(
+            f"isValid(datum.{field})" + (f" && datum.{field} > 0" if log else "")
+        )
+        .mark_rect(
+            minWidth=0,
+            minHeight=0,
+            minOpacity=1,
+            clip=True,
+            tooltip={"handler": "default"} if hover else None,
+        )
+        .encode(
+            x=gs.X("_cell:I").axis(None),
+            y=gs.Y(f"{field}:Q")
+            .scale(
+                type="log" if log else "linear",
+                domain=list(domain),
+                nice=False,
+                zero=False,
+                zoom=False,
+            )
+            .axis(
+                title=None,
+                orient="right",
+                values=[int(domain[1]) if not log or domain[1] >= 1 else domain[1]],
+                labelBaseline="top",
+                grid=False,
+                domain=False,
+                labelFontSize=10,
+            ),
+            y2=gs.value(0) if log else gs.Y2(datum=0),
+            color=color,
+        )
+    )
+    if hover:
+        bars = bars.encode(
+            tooltip=[
+                gs.Tooltip("_obs_id:N", title="Cell ID"),
+                gs.Tooltip("_obs_label:N", title="Cell"),
+                gs.Tooltip("_group:N", title="Group"),
+                gs.Tooltip(
+                    f"{field}:Q",
+                    title=f"{name} expression" + (" (log1p)" if log else ""),
+                    format=".4g",
+                ),
+            ]
+        )
+    return bars
 
 
 def build_tracksplot(
@@ -37,10 +113,16 @@ def build_tracksplot(
     width: float | None,
     height: float | None,
     figsize: tuple[float, float] | None,
-) -> gs.TopLevelSpec:
+    cell_data: pd.DataFrame | None = None,
+    value_fields: list[str] | None = None,
+    color_scale: gs.Scale | None = None,
+    highlight: dict[str, Any] | None = None,
+    show_legend: bool = True,
+) -> gs.VConcatChart:
     """Return one rect per cell and gene, with independent expression scales.
 
     Share cell slots across tracks, the category strip and optional group tree.
+    Linked charts can supply their cell table and a native selection filter.
     """
     context = "gsc.pl.tracksplot"
     values = prepared.values
@@ -61,16 +143,27 @@ def build_tracksplot(
 
     # Send cell metadata once; each track reads one selected expression column.
     numeric = values.to_numpy(dtype=float, na_value=np.nan)
-    table = pd.DataFrame(numeric, columns=[f"_value_{i}" for i in range(genes)]).assign(
-        _cell=np.arange(cells),
-        _group=np.asarray(values.index.astype(str)),
-        _obs_id=observation_ids,
-        _obs_label=observation_names,
+    if value_fields is None:
+        value_fields = [f"_value_{i}" for i in range(genes)]
+    table = (
+        cell_data
+        if cell_data is not None
+        else pd.DataFrame(numeric, columns=value_fields).assign(
+            _cell=np.arange(cells),
+            _group=np.asarray(values.index.astype(str)),
+            _obs_id=observation_ids,
+            _obs_label=observation_names,
+        )
     )
-    color = (
-        gs.Color("_group:N").scale(domain=categories, range=list(palette)).legend(None)
-    )
-    group_colors = dict(zip(categories, palette, strict=True))
+    if color_scale is None:
+        color_scale = gs.Scale(domain=categories, range=list(palette))
+    color = gs.Color("_group:N", scale=color_scale).legend(None)
+    group_colors = dict(zip(categories, palette, strict=True)) if feature_groups else {}
+    # Validated marker spans already follow the displayed gene order.
+    marker_colors: list[str] = []
+    for block, group in enumerate(feature_groups):
+        label = prepared.intervals["label"].iloc[min(block, len(palette) - 1)]
+        marker_colors.extend([group_colors[label]] * (group.end - group.start + 1))
     boundaries = (
         gs.Chart(
             [{"_boundary": int(stop)} for stop in prepared.intervals["stop"].iloc[:-1]]
@@ -84,86 +177,40 @@ def build_tracksplot(
             y2=gs.value(1),
         )
     )
+
+    # Every gene uses the same zero-line mark on its own value scale.
+    baseline = (
+        gs.Chart([{}])
+        .mark_rule(color="#999999", size=0.5, tooltip=None)
+        .encode(y=gs.value(0) if log else gs.Y(datum=0, type="quantitative"))
+    )
+
+    # Each gene keeps its own value range while sharing cell positions.
     tracks: list[gs.TopLevelSpec] = []
     for slot, name in enumerate(values.columns):
-        field = f"_value_{slot}"
-        finite = numeric[:, slot][np.isfinite(numeric[:, slot])]
-        if log:
-            positive = finite[finite > 0]
-            domain = coordinate_domain(
-                positive if positive.size else np.array([1.0, 10.0]), 0.05, log=True
-            )
-        else:
-            domain = coordinate_domain(np.append(finite, 0), 0.05)
-        # Scanpy masks nonpositive log values; their baseline is the viewport bottom.
-        bars = (
-            gs.Chart()
-            .transform_filter(
-                f"isValid(datum.{field})" + (f" && datum.{field} > 0" if log else "")
-            )
-            .mark_rect(
-                minWidth=0,
-                minHeight=0,
-                minOpacity=1,
-                clip=True,
-                tooltip={"handler": "default"} if hover else None,
-            )
-            .encode(
-                x=gs.X("_cell:I").axis(None),
-                y=gs.Y(f"{field}:Q")
-                .scale(
-                    type="log" if log else "linear",
-                    domain=list(domain),
-                    nice=False,
-                    zero=False,
-                    zoom=False,
-                )
-                .axis(
-                    title=None,
-                    orient="right",
-                    values=[int(domain[1]) if not log or domain[1] >= 1 else domain[1]],
-                    labelBaseline="top",
-                    grid=False,
-                    domain=False,
-                    labelFontSize=10,
+        field = value_fields[slot]
+        bars = _track_bars(
+            numeric[:, slot], field, str(name), color, log=log, hover=hover
+        )
+        marks = [bars]
+        if highlight is not None:
+            # Keep the full profile as context; selected cells retain their fixed slots.
+            marks = [
+                bars.encode(opacity=gs.value(0.15)).properties(
+                    name=f"tracks-all-{slot}"
                 ),
-                y2=gs.value(0) if log else gs.Y2(datum=0),
-                color=color,
-            )
-        )
-        if hover:
-            bars = bars.encode(
-                tooltip=[
-                    gs.Tooltip("_obs_id:N", title="Cell ID"),
-                    gs.Tooltip("_obs_label:N", title="Cell"),
-                    gs.Tooltip("_group:N", title="Group"),
-                    gs.Tooltip(
-                        f"{field}:Q",
-                        title=f"{name} expression" + (" (log1p)" if log else ""),
-                        format=".4g",
-                    ),
-                ]
-            )
-        baseline = (
-            gs.Chart([{}])
-            .mark_rule(color="#999999", size=0.5, tooltip=None)
-            .encode(y=gs.value(0) if log else gs.Y(datum=0, type="quantitative"))
-        )
+                bars.transform_filter(**highlight).properties(
+                    name=f"tracks-selected-{slot}"
+                ),
+            ]
         track: gs.LayerChart | gs.SurroundChart = gs.layer(
-            bars, baseline, boundaries
+            *marks, baseline, boundaries
         ).properties(width=width, height=height / genes)
         if feature_groups:
-            block = next(
-                i
-                for i, group in enumerate(feature_groups)
-                if group.start <= slot <= group.end
-            )
             marker = (
                 gs.Chart([{}])
                 .mark_rect(
-                    color=group_colors[
-                        prepared.intervals["label"].iloc[min(block, len(palette) - 1)]
-                    ],
+                    color=marker_colors[slot],
                     tooltip=None,
                 )
                 .properties(width=10)
@@ -186,10 +233,9 @@ def build_tracksplot(
             )
         )
 
-    strip_color = (
-        gs.Color("label:N")
-        .scale(domain=categories, range=list(palette))
-        .legend(title=groupby, orient="bottom", columns=2)
+    # Group labels and the tree follow the same positions as every track.
+    strip_color = gs.Color("label:N", scale=color_scale).legend(
+        gs.Legend(title=groupby, orient="bottom", columns=2) if show_legend else None
     )
     strip = _category_strip(
         list(values.index.astype(str)),

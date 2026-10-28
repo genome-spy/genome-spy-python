@@ -22,6 +22,99 @@ from genome_spy.integrations.scanpy._style import (
 CONTEXT = "gsc.pl.paga"
 
 
+def _adjacency_strip(
+    dots: gs.Chart,
+    points: pd.DataFrame,
+    groups: int,
+    *,
+    labels: list[str] | None,
+    zoom: bool | Literal["xy"],
+    width: float | None,
+    height: float | None,
+) -> gs.TopLevelSpec:
+    """Return a connectivity strip from prepared points and their native marks.
+
+    Use existing index-slot labels for named groups and numeric axes otherwise.
+    """
+    context = "gsc.pl.paga_adjacency"
+    width = number(496 if width is None else width, "width", context=context)
+    height = number(369.6 if height is None else height, "height", context=context)
+    if not width or not height:
+        raise ValueError(f"{context}: width and height must be positive.")
+    visible = points.loc[np.isfinite(points["_y"])]
+
+    # Empty plots retain Matplotlib's default limits around zero.
+    extent = visible[["_x", "_y"]].to_numpy() if len(visible) else np.zeros((1, 2))
+
+    # Named groups use slots; numeric calls retain Scanpy's original limits.
+    if labels is None:
+        x = gs.X("_x:Q").scale(
+            domain=list(coordinate_domain(extent[:, 0], 0.05)),
+            zero=False,
+            nice=False,
+        )
+    else:
+        from genome_spy.integrations.scanpy._expression.grouped_chart import coordinate
+
+        x = coordinate(gs.X, "_x", groups, 0)
+    y = gs.Y("_y:Q").scale(
+        domain=list(coordinate_domain(extent[:, 1], 0.05)), zero=False, nice=False
+    )
+    x, y = zoom_axes(x, y, enabled=zoom, name=None)
+    colors = gs.Scale(
+        type="ordinal", domain=["Adjacency", "Tree"], range=["#cbd5e1", "#2563a6"]
+    )
+    chart: gs.Chart | gs.SurroundChart = (
+        dots.transform_filter("isValid(datum._y)")
+        .encode(
+            x=x.axis(
+                title="Source group" if labels is None else None,
+                labels=labels is None,
+            ),
+            y=y.axis(title="Connectivity"),
+            fill=gs.Fill("_kind:N", scale=colors).legend(
+                gs.Legend(
+                    title=None,
+                    orient="bottom",
+                    direction="horizontal",
+                    symbolSize=36,
+                )
+            ),
+            stroke=gs.Stroke("_kind:N", scale=colors).legend(None),
+        )
+        .properties(
+            width=width,
+            height=height,
+            view={"stroke": "transparent", "strokeWidth": 0},
+        )
+        .configure_axis(
+            AXIS_TEXT,
+            titleFontWeight="normal",
+        )
+    )
+    if labels is not None:
+        from genome_spy.integrations.scanpy._expression.grouped_chart import (
+            _slot_labels,
+        )
+
+        source_labels = _slot_labels(labels, x.axis(None), horizontal=True).properties(
+            title=gs.Title(
+                text="Source group",
+                orient="bottom",
+                offset=4,
+                font=FONT,
+                fontSize=10 * PT,
+                fontWeight="normal",
+            )
+        )
+        chart = gs.surround(
+            chart,
+            surround=gs.SurroundSides(bottom=[source_labels]),
+            spacing=0,
+        ).resolve_legend(default="collected")
+    return chart.configure_legend(labelFont=FONT, labelFontSize=10 * PT)
+
+
 def build_paga_adjacency(
     values: np.ndarray,
     points: pd.DataFrame,
@@ -39,7 +132,6 @@ def build_paga_adjacency(
     from genome_spy.integrations.scanpy._expression.matrix_chart import build_matrix
     from genome_spy.integrations.scanpy._paga.data import adjacency_points
 
-    context = "gsc.pl.paga_adjacency"
     if not as_heatmap:
         points = adjacency_points(values, points)
     if labels is not None:
@@ -71,111 +163,39 @@ def build_paga_adjacency(
         tooltip={"handler": "default"} if hover else None,
     )
     if hover:
-        dots = dots.encode(
-            tooltip=[
-                gs.Tooltip("_x:Q", title="Source group", format="d"),
-                gs.Tooltip(
-                    "_y:Q" if as_heatmap else "_target:Q",
-                    title="Target group",
-                    format="d",
-                ),
-            ]
-            + (
+        tooltips = [
+            gs.Tooltip("_x:Q", title="Source group", format="d"),
+            gs.Tooltip(
+                "_y:Q" if as_heatmap else "_target:Q",
+                title="Target group",
+                format="d",
+            ),
+        ]
+        if labels is not None:
+            tooltips.extend(
                 [
                     gs.Tooltip("_source_label:N", title="Source"),
                     gs.Tooltip("_target_label:N", title="Target"),
                 ]
-                if labels is not None
-                else []
             )
-            + (
-                []
-                if as_heatmap
-                else [
+        if not as_heatmap:
+            tooltips.extend(
+                [
                     gs.Tooltip("_y:Q", title="Connectivity", format=".4g"),
                     gs.Tooltip("_kind:N", title="Edge"),
                 ]
             )
-        )
+        dots = dots.encode(tooltip=tooltips)
     if not as_heatmap:
-        width = number(496 if width is None else width, "width", context=context)
-        height = number(369.6 if height is None else height, "height", context=context)
-        if not width or not height:
-            raise ValueError(f"{context}: width and height must be positive.")
-        visible = points.loc[np.isfinite(points["_y"])]
-        # Empty plots retain Matplotlib's default limits around zero.
-        extent = visible[["_x", "_y"]].to_numpy() if len(visible) else np.zeros((1, 2))
-        # Named groups use slots; numeric calls retain Scanpy's original limits.
-        if labels is None:
-            x = gs.X("_x:Q").scale(
-                domain=list(coordinate_domain(extent[:, 0], 0.05)),
-                zero=False,
-                nice=False,
-            )
-        else:
-            from genome_spy.integrations.scanpy._expression.grouped_chart import (
-                coordinate,
-            )
-
-            x = coordinate(gs.X, "_x", len(values), 0)
-        y = gs.Y("_y:Q").scale(
-            domain=list(coordinate_domain(extent[:, 1], 0.05)), zero=False, nice=False
+        return _adjacency_strip(
+            dots,
+            points,
+            len(values),
+            labels=labels,
+            zoom=zoom,
+            width=width,
+            height=height,
         )
-        x, y = zoom_axes(x, y, enabled=zoom, name=None)
-        colors = gs.Scale(
-            type="ordinal", domain=["Adjacency", "Tree"], range=["#cbd5e1", "#2563a6"]
-        )
-        chart: gs.Chart | gs.SurroundChart = (
-            dots.transform_filter("isValid(datum._y)")
-            .encode(
-                x=x.axis(
-                    title="Source group" if labels is None else None,
-                    labels=labels is None,
-                ),
-                y=y.axis(title="Connectivity"),
-                fill=gs.Fill("_kind:N", scale=colors).legend(
-                    gs.Legend(
-                        title=None,
-                        orient="bottom",
-                        direction="horizontal",
-                        symbolSize=36,
-                    )
-                ),
-                stroke=gs.Stroke("_kind:N", scale=colors).legend(None),
-            )
-            .properties(
-                width=width,
-                height=height,
-                view={"stroke": "transparent", "strokeWidth": 0},
-            )
-            .configure_axis(
-                AXIS_TEXT,
-                titleFontWeight="normal",
-            )
-        )
-        if labels is not None:
-            from genome_spy.integrations.scanpy._expression.grouped_chart import (
-                _slot_labels,
-            )
-
-            source_labels = _slot_labels(
-                labels, x.axis(None), horizontal=True
-            ).properties(
-                title=gs.Title(
-                    text="Source group",
-                    orient="bottom",
-                    offset=4,
-                    font=FONT,
-                    fontSize=10 * PT,
-                    fontWeight="normal",
-                )
-            )
-            chart = gs.surround(
-                chart,
-                surround=gs.SurroundSides(bottom=[source_labels]),
-                spacing=0,
-            ).resolve_legend(default="collected")
-        return chart.configure_legend(labelFont=FONT, labelFontSize=10 * PT)
     return build_matrix(
         values,
         xlabel=None,
@@ -192,6 +212,131 @@ def build_paga_adjacency(
         height=height,
         context="gsc.pl.paga_adjacency",
         overlay=dots.encode(x="_x:I", y="_y:I"),
+    )
+
+
+def _edge_layers(
+    solid: pd.DataFrame,
+    dashed: pd.DataFrame,
+    cutoff: gs.Parameter | None,
+    *,
+    hover: bool,
+) -> list[gs.Chart]:
+    """Return dashed then solid edge marks with shared width scaling and optional cutoff."""
+    charts = []
+    edge_maximum = max(
+        [1.0]
+        + [float(edges["_width"].max()) for edges in (solid, dashed) if not edges.empty]
+    )
+    for edges, is_dashed in ((dashed, True), (solid, False)):
+        if edges.empty:
+            continue
+        rules = (
+            gs.Chart(edges)
+            .mark_rule(
+                color="grey" if is_dashed else "#999999",
+                opacity=0.5 if is_dashed else 1,
+                clip=True,
+                tooltip={"handler": "default"} if hover else None,
+                strokeDash=[round(v * PT) for v in (3.7, 1.6)]
+                if is_dashed
+                else Undefined,
+            )
+            .encode(
+                x2="_x2:Q",
+                y2="_y2:Q",
+                size=gs.Size("_width:Q")
+                .scale(
+                    domain=[0, edge_maximum],
+                    range=[0, edge_maximum * PT],
+                    zero=True,
+                    nice=False,
+                )
+                .legend(None),
+            )
+        )
+        if cutoff is not None:
+            rules = rules.transform_filter(gs.datum._weight >= cutoff)
+        if hover:
+            rules = rules.encode(
+                tooltip=[
+                    gs.Tooltip("_source:Q", title="Source group", format="d"),
+                    gs.Tooltip("_target:Q", title="Target group", format="d"),
+                    gs.Tooltip("_weight:Q", title="Connectivity", format=".4g"),
+                ]
+            )
+        charts.append(rules)
+    return charts
+
+
+def _node_paint(
+    nodes: pd.DataFrame,
+    *,
+    color_data: ColorData | None,
+    group_labels: list[str],
+    group_key: str,
+    cmap: str,
+    colorbar: bool,
+    color_title: str,
+) -> tuple[gs.Fill, gs.Stroke, bool]:
+    """Return node fill, stroke and numeric-color status from groups or stored values.
+
+    Keep categorical legends and numeric colorbars on the same scale as the nodes.
+    """
+    numeric = color_data is None and pd.api.types.is_numeric_dtype(nodes["_color"])
+    colors: dict[str, Any]
+    fill, stroke = gs.Fill("_group:N"), gs.Stroke("_group:N")
+    legend: gs.Legend | None = gs.Legend(
+        title=group_key,
+        values=nodes["_group"].tolist(),
+        symbolSize=49,
+        orient="bottom",
+        direction="horizontal",
+        columns=2,
+    )
+    if color_data is not None:
+        colors = dict(type="ordinal", domain=group_labels, scheme=color_data.scheme)
+    elif numeric:
+        low, high, constant = color_bounds(
+            nodes["_color"].to_numpy(),
+            None,
+            None,
+            context=CONTEXT,
+            expand_constant=colorbar,
+        )
+        fill, stroke = gs.Fill("_color:Q"), gs.Stroke("_color:Q")
+        legend = None
+        if constant and not colorbar:
+            # Scanpy maps a constant range without a guide to the first palette color.
+            _, high, _ = color_bounds(
+                nodes["_color"].to_numpy(), None, None, context=CONTEXT
+            )
+        colors = dict(
+            type="linear",
+            domain=[low, high],
+            scheme=cmap,
+            zero=False,
+            nice=False,
+            clamp=True,
+        )
+        if colorbar:
+            legend = gs.Legend(
+                title=color_title,
+                titleOrient="right",
+                gradientThickness=15,
+                gradientStrokeColor="black",
+                gradientStrokeWidth=0.8 * PT,
+            )
+    else:
+        colors = dict(
+            type="ordinal",
+            domain=nodes["_group"].tolist(),
+            range=nodes["_color"].tolist(),
+        )
+    return (
+        fill.scale(**colors).legend(legend),
+        stroke.scale(**colors).legend(None),
+        numeric,
     )
 
 
@@ -264,8 +409,10 @@ def build_paga(
         raise NotImplementedError(f"{CONTEXT}: fontweight supports 'normal' or 'bold'.")
     if title is not None and not isinstance(title, str):
         raise TypeError(f"{CONTEXT}: title must be a string or None.")
+
     x, y = _network_axes(nodes, solid, dashed, zoom=zoom)
-    charts = []
+
+    # The slider filters displayed edges without changing the stored graph.
     cutoff = None
     if edge_slider:
         weights = [
@@ -284,98 +431,20 @@ def build_paga(
                 min=0, max=max(1, *weights), step=0.01, name="Displayed edge cutoff: "
             ),
         )
-    edge_maximum = max(
-        [1.0]
-        + [float(edges["_width"].max()) for edges in (solid, dashed) if not edges.empty]
+
+    # Build edge and node colors separately so their guides stay independent.
+    charts = _edge_layers(solid, dashed, cutoff, hover=hover)
+    fill, stroke, numeric = _node_paint(
+        nodes,
+        color_data=color_data,
+        group_labels=group_labels,
+        group_key=group_key,
+        cmap=cmap,
+        colorbar=colorbar,
+        color_title=color_title,
     )
-    for edges, is_dashed in ((dashed, True), (solid, False)):
-        if edges.empty:
-            continue
-        rules = (
-            gs.Chart(edges)
-            .mark_rule(
-                color="grey" if is_dashed else "#999999",
-                opacity=0.5 if is_dashed else 1,
-                clip=True,
-                tooltip={"handler": "default"} if hover else None,
-                strokeDash=[round(v * PT) for v in (3.7, 1.6)]
-                if is_dashed
-                else Undefined,
-            )
-            .encode(
-                x2="_x2:Q",
-                y2="_y2:Q",
-                size=gs.Size("_width:Q")
-                .scale(
-                    domain=[0, edge_maximum],
-                    range=[0, edge_maximum * PT],
-                    zero=True,
-                    nice=False,
-                )
-                .legend(None),
-            )
-        )
-        if cutoff is not None:
-            rules = rules.transform_filter(gs.datum._weight >= cutoff)
-        if hover:
-            rules = rules.encode(
-                tooltip=[
-                    gs.Tooltip("_source:Q", title="Source group", format="d"),
-                    gs.Tooltip("_target:Q", title="Target group", format="d"),
-                    gs.Tooltip("_weight:Q", title="Connectivity", format=".4g"),
-                ]
-            )
-        charts.append(rules)
-    numeric = color_data is None and pd.api.types.is_numeric_dtype(nodes["_color"])
-    colors: dict[str, Any]
-    fill, stroke = gs.Fill("_group:N"), gs.Stroke("_group:N")
-    legend: gs.Legend | None = gs.Legend(
-        title=group_key,
-        values=nodes["_group"].tolist(),
-        symbolSize=49,
-        orient="bottom",
-        direction="horizontal",
-        columns=2,
-    )
-    if color_data is not None:
-        colors = dict(type="ordinal", domain=group_labels, scheme=color_data.scheme)
-    elif numeric:
-        low, high, constant = color_bounds(
-            nodes["_color"].to_numpy(),
-            None,
-            None,
-            context=CONTEXT,
-            expand_constant=colorbar,
-        )
-        fill, stroke = gs.Fill("_color:Q"), gs.Stroke("_color:Q")
-        legend = None
-        if constant and not colorbar:
-            # Scanpy maps a constant range without a guide to the first palette color.
-            _, high, _ = color_bounds(
-                nodes["_color"].to_numpy(), None, None, context=CONTEXT
-            )
-        colors = dict(
-            type="linear",
-            domain=[low, high],
-            scheme=cmap,
-            zero=False,
-            nice=False,
-            clamp=True,
-        )
-        if colorbar:
-            legend = gs.Legend(
-                title=color_title,
-                titleOrient="right",
-                gradientThickness=15,
-                gradientStrokeColor="black",
-                gradientStrokeWidth=0.8 * PT,
-            )
-    else:
-        colors = dict(
-            type="ordinal",
-            domain=nodes["_group"].tolist(),
-            range=nodes["_color"].tolist(),
-        )
+
+    # Node areas retain their meaning during navigation.
     maximum = max(1.0, float(nodes["_area"].max()))
     points = (
         gs.Chart(nodes)
@@ -391,8 +460,8 @@ def build_paga(
         )
         .encode(
             key=gs.Key("_id"),
-            fill=fill.scale(**colors).legend(legend),
-            stroke=stroke.scale(**colors).legend(None),
+            fill=fill,
+            stroke=stroke,
             size=gs.Size("_area:Q")
             .scale(
                 domain=[0, maximum], range=[0, maximum * PT**2], zero=True, nice=False
@@ -409,6 +478,8 @@ def build_paga(
         if numeric:
             tooltips.append(gs.Tooltip("_color:Q", title="Color value", format=".4g"))
         points = points.encode(tooltip=tooltips)
+
+    # Draw labels last and let native placement avoid the node marks.
     layers = [*charts, points]
     if show_node_labels:
         # Make room for painted nodes and their outlines; hidden nodes need no obstacle.

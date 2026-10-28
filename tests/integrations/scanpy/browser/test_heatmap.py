@@ -40,15 +40,17 @@ def tile_rects(root):
     return list(next(e for e in root.iter() if e.get("data-mark-type") == "rect"))
 
 
-def hover_at(page, x, y, *, probe=True):
+def hover_at(page, x, y, *, probe=True, canvas_index=0, target=None):
     """Pause then move within the native tooltip's small picking neighborhood."""
-    canvas = page.locator("canvas").first.bounding_box()
+    canvas = page.locator("canvas").nth(canvas_index).bounding_box()
     page.mouse.move(canvas["x"] + x - 2, canvas["y"] + y - 2)
     page.wait_for_timeout(450)
     offsets = ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)) if probe else ((0, 0),)
     for dx, dy in offsets:
         page.mouse.move(canvas["x"] + x + dx, canvas["y"] + y + dy)
         page.wait_for_timeout(80)
+        if target is not None and target.is_visible():
+            break
 
 
 @pytest.mark.parametrize("swapped", [False, True])

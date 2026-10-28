@@ -163,9 +163,8 @@ def test_highlight_uses_native_ruler_without_extra_marks_or_data():
                 "extent": "view",
                 "mark": {
                     "stroke": "#4682b4",
-                    "opacity": 0.55,
-                    "strokeWidth": 1,
-                    "zindex": 0,
+                    "opacity": 0.9,
+                    "strokeWidth": 1.5,
                 },
             },
         }

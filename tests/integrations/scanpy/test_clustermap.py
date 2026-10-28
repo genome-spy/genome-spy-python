@@ -36,6 +36,7 @@ def test_clustermap_signature_preserves_scanpy_contract():
         "hover",
         "zoom",
         "show_values",
+        "highlight",
         "width",
         "height",
     }

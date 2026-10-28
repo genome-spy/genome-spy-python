@@ -11,7 +11,7 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
-from genome_spy.integrations.scanpy._grid_interactions import index_offset
+from genome_spy.integrations.scanpy._grid_interactions import index_offset, zoom_axes
 from genome_spy.integrations.scanpy._data import figsize_pixels, number
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
@@ -115,6 +115,7 @@ def _brackets(
 
     Match bracket spans and label placement in either plot orientation.
     """
+
     # Place brackets by gene position so repeated names stay separate.
     table = [
         {
@@ -129,6 +130,7 @@ def _brackets(
     ]
     edge = gs.value(0)
     chart = gs.Chart(table)
+
     # A span ends before the next slot's gap; caps use single slot anchors.
     axis, extent = ("y", "height") if swapped else ("x", "width")
     end_offset = gs.expr(f"{end_band - 1:g} * bandwidth('{axis}') * {extent}")
@@ -337,29 +339,47 @@ def color_legend(title: str | None) -> gs.Legend:
 
 
 def grouped_axes(
-    rows: int, columns: int, *, xpadding: float, ypadding: float
-) -> tuple[Any, Any]:
-    """Return x/y encodings from table shape and padding, with fixed index ticks.
+    rows: int,
+    columns: int,
+    *,
+    xpadding: float,
+    ypadding: float,
+    zoom: bool | Literal["xy"],
+    grid: bool = False,
+    xgaps: Sequence[int] = (),
+    ygaps: Sequence[int] = (),
+    gap_width: float = 4,
+) -> tuple[gs.X, gs.Y, ScalesKwds]:
+    """Return x/y axes and shared scales from grouped table dimensions and padding.
 
-    Reverse row positions so the first matrix row appears at the top.
+    Keep labels and side tracks on the same positions as the marks.
     """
     axes = []
     for channel, field, count, padding, reverse in [
         (gs.X, "_x", columns, xpadding, False),
         (gs.Y, "_y", rows, ypadding, True),
     ]:
-        axes.append(
-            coordinate(channel, field, count, padding, reverse=reverse).axis(
-                values=list(range(count)),
-                labels=False,
-                title=None,
-                domain=False,
-                tickColor="black",
-                tickSize=3.5 * _PT,
-                tickWidth=0.8 * _PT,
-            )
+        axis = coordinate(channel, field, count, padding, reverse=reverse).axis(
+            values=list(range(count)),
+            labels=False,
+            title=None,
+            domain=False,
+            tickColor="black",
+            tickSize=3.5 * _PT,
+            tickWidth=0.8 * _PT,
         )
-    return axes[0], axes[1]
+        if grid:
+            axis = axis.axis(grid=True, gridColor="gray", gridWidth=0.1 * _PT)
+        axes.append(axis)
+    x, y = zoom_axes(*axes, enabled=zoom, name=None)
+    scales = index_scales(x, y, xgaps=xgaps, ygaps=ygaps, gap_width=gap_width)
+
+    # The surround owns scales; marks retain only their fields and tick settings.
+    return (
+        gs.X("_x:I", axis=x.to_dict()["axis"]),
+        gs.Y("_y:I", axis=y.to_dict()["axis"]),
+        scales,
+    )
 
 
 def finish_grouped_chart(
@@ -392,6 +412,7 @@ def finish_grouped_chart(
         height=height,
         name=f"{name}-cells",
     )
+
     # Each annotation owns a viewport and inherits the center's aligned scale.
     sides: dict[str, Any] = {
         "bottom": [_slot_labels(xlabels, x.axis(None), horizontal=True)],

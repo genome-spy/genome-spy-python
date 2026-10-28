@@ -10,7 +10,7 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
-    with_values,
+    grid_interactions,
 )
 from genome_spy.integrations.scanpy._data import figsize_pixels, number
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
@@ -28,13 +28,117 @@ from genome_spy.integrations.scanpy._expression.grouped_data import (
     FeatureGroup,
     HeatmapData,
 )
+from genome_spy.integrations.scanpy._expression.colors import expression_scale
 from genome_spy.integrations.scanpy._style import (
     FONT,
     GROUPED_FONT_SIZE as TICK,
     POINTS_TO_PIXELS as PT,
-    color_bounds,
-    native_scheme,
 )
+
+
+def _feature_tracks(
+    feature_groups: tuple[FeatureGroup, ...],
+    gene_axis: gs.X | gs.Y,
+    group_labels: list[str],
+    group_color: gs.Color,
+    *,
+    swap_axes: bool,
+    rotation: float | None,
+    zoom: bool,
+) -> dict[str, Any]:
+    """Return marker brackets or the swapped heatmap's colored gene strip.
+
+    Use the existing gene slots so annotations stay aligned when zoomed.
+    """
+    sides: dict[str, Any] = {}
+
+    # Preserve Scanpy's colored marker strip for swapped heatmaps.
+    if feature_groups and swap_axes:
+        matched = {group.label for group in feature_groups}.issubset(group_labels)
+        marker_rows: list[dict[str, int | str]] = []
+        for i, group in enumerate(feature_groups):
+            # If marker labels do not match the groups, Scanpy colors the blocks in order.
+            label = (
+                group.label if matched else group_labels[min(i, len(group_labels) - 1)]
+            )
+            marker_rows.extend(
+                {"slot": slot, "label": label}
+                for slot in range(group.start, group.end + 1)
+            )
+        sides["right"] = [
+            gs.Chart(marker_rows)
+            .mark_rect(clip=True, tooltip=None)
+            .encode(
+                y=gene_axis.field("slot"),
+                color=group_color,
+            )
+            .properties(width=12, name="heatmap-marker-strip")
+        ]
+    elif feature_groups:
+        sides["top"] = [
+            gs.layer(
+                *_brackets(
+                    feature_groups,
+                    gene_axis,
+                    swapped=False,
+                    rotation=rotation,
+                    end_band=0.8,
+                    zoom=bool(zoom),
+                )
+            ).properties(height=bracket_space(feature_groups), name="heatmap-brackets")
+        ]
+    return sides
+
+
+def _cell_tiles(
+    table: pd.DataFrame,
+    scale: gs.Scale,
+    *,
+    alpha: float,
+    hover: bool,
+    scaled: bool,
+    height: float,
+) -> gs.Chart:
+    """Return cell tiles with an expression legend and optional identity tooltips.
+
+    Keep cell IDs on the supplied table so hover identifies individual cells.
+    """
+    tiles = (
+        gs.Chart(table)
+        .transform_filter("isValid(datum._value)")
+        .mark_rect(opacity=alpha, tooltip={"handler": "default"} if hover else None)
+        .encode(
+            color=gs.Color("_value:Q")
+            .scale(scale)
+            .legend(
+                gs.Legend(
+                    title=None,
+                    orient="right",
+                    direction="vertical",
+                    gradientLength=min(height, 400),
+                    gradientThickness=15,
+                    gradientStrokeColor="black",
+                    gradientStrokeWidth=0.8 * PT,
+                    offset=15,
+                )
+            ),
+        )
+    )
+    if hover:
+        tiles = tiles.encode(
+            tooltip=[
+                gs.Tooltip("_obs_id:N", title="Cell ID"),
+                gs.Tooltip("_obs_label:N", title="Cell"),
+                gs.Tooltip("_gene:N", title="Gene"),
+                gs.Tooltip("_group:N", title="Group"),
+                gs.Tooltip(
+                    "_value:Q",
+                    title="Expression (scaled)" if scaled else "Expression",
+                    format=".4g",
+                ),
+            ]
+        )
+    return tiles
 
 
 def build_heatmap(
@@ -57,6 +161,7 @@ def build_heatmap(
     hover: bool,
     zoom: bool | Literal["xy"],
     show_values: bool,
+    highlight: bool | Literal["outline"] = False,
     group_gap: float,
     scaled: bool,
     width: float | None,
@@ -96,9 +201,10 @@ def build_heatmap(
     alpha = number(1 if alpha is None else alpha, "alpha", context=context)
     if alpha > 1:
         raise ValueError(f"{context}: alpha must be between 0 and 1.")
-    scheme = native_scheme("viridis" if cmap is None else cmap, "cmap", context=context)
+
+    # Resolve color limits before building one record per cell and gene.
     numeric = values.to_numpy(dtype=float, na_value=np.nan)
-    low, high, _ = color_bounds(numeric, vmin, vmax, context=context)
+    scale = expression_scale(numeric, cmap, vmin, vmax, context=context)
 
     # Keep one row per cell–gene pair, including missing values and repeated genes.
     cell, gene = np.indices((cells, genes))
@@ -113,6 +219,8 @@ def build_heatmap(
             "_value": numeric.ravel(),
         }
     )
+
+    # Use the same positions for tiles, gaps and side annotations.
     x = coordinate(gs.X, "_x", cells if swap_axes else genes, 0)
     y = coordinate(gs.Y, "_y", genes if swap_axes else cells, 0, reverse=True)
     x, y = zoom_axes(x, y, enabled=zoom, name="heatmap")
@@ -125,8 +233,10 @@ def build_heatmap(
         ygaps=gene_gaps if swap_axes else cell_gaps,
         gap_width=group_gap,
     )
+
     # The surround owns the scales; marks only declare fields and axes.
     x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
+
     # Only genes have ticks; individual cell rows remain unlabeled.
     if show_gene_labels:
         gene_axis = (y if swap_axes else x).axis(
@@ -142,58 +252,21 @@ def build_heatmap(
             y = gene_axis
         else:
             x = gene_axis
-    tiles = (
-        gs.Chart(table)
-        .transform_filter("isValid(datum._value)")
-        .mark_rect(opacity=alpha, tooltip={"handler": "default"} if hover else None)
-        .encode(
-            x=x,
-            y=y,
-            color=gs.Color("_value:Q")
-            .scale(
-                type="linear",
-                domain=[low, high],
-                scheme=scheme,
-                zero=False,
-                nice=False,
-                clamp=True,
-            )
-            .legend(
-                gs.Legend(
-                    title=None,
-                    orient="right",
-                    direction="vertical",
-                    gradientLength=min(height, 400),
-                    gradientThickness=15,
-                    gradientStrokeColor="black",
-                    gradientStrokeWidth=0.8 * PT,
-                    offset=15,
-                )
-            ),
-        )
-    )
-    if hover:
-        tiles = tiles.encode(
-            tooltip=[
-                gs.Tooltip("_obs_id:N", title="Cell ID"),
-                gs.Tooltip("_obs_label:N", title="Cell"),
-                gs.Tooltip("_gene:N", title="Gene"),
-                gs.Tooltip("_group:N", title="Group"),
-                gs.Tooltip(
-                    "_value:Q",
-                    title="Expression (scaled)" if scaled else "Expression",
-                    format=".4g",
-                ),
-            ]
-        )
-    center = (
-        with_values(tiles, "_value", alpha=alpha) if show_values else gs.layer(tiles)
+
+    # Hover belongs to cell tiles; side labels have their own guides.
+    tiles = _cell_tiles(
+        table, scale, alpha=alpha, hover=hover, scaled=scaled, height=height
+    ).encode(x=x, y=y)
+    center = grid_interactions(
+        tiles, highlight, values="_value" if show_values else None, alpha=alpha
     )
     center = center.properties(
         name="heatmap-cells",
         width=width,
         height=height,
     )
+
+    # Attach gene labels, group labels and trees after constructing the matrix.
     sides: dict[str, Any] = {}
     gene_axis, cell_axis = (y.axis(None), x) if swap_axes else (x.axis(None), y)
     gene_side, cell_side = ("left", "bottom") if swap_axes else ("bottom", "left")
@@ -236,41 +309,18 @@ def build_heatmap(
         tracks = [strip, labels] if swap_axes else [labels, strip]
         sides[cell_side] = gs.SurroundSideSpec(views=tracks, spacing=8)
 
-    # Preserve Scanpy's colored marker strip for swapped heatmaps.
-    if feature_groups and swap_axes:
-        matched = {group.label for group in feature_groups}.issubset(group_labels)
-        marker_rows: list[dict[str, int | str]] = []
-        for i, group in enumerate(feature_groups):
-            # If marker labels do not match the groups, Scanpy colors the blocks in order.
-            label = (
-                group.label if matched else group_labels[min(i, len(group_labels) - 1)]
-            )
-            marker_rows.extend(
-                {"slot": slot, "label": label}
-                for slot in range(group.start, group.end + 1)
-            )
-        sides["right"] = [
-            gs.Chart(marker_rows)
-            .mark_rect(clip=True, tooltip=None)
-            .encode(
-                y=gene_axis.field("slot"),
-                color=group_color,
-            )
-            .properties(width=12, name="heatmap-marker-strip")
-        ]
-    elif feature_groups:
-        sides["top"] = [
-            gs.layer(
-                *_brackets(
-                    feature_groups,
-                    gene_axis,
-                    swapped=False,
-                    rotation=rotation,
-                    end_band=0.8,
-                    zoom=bool(zoom),
-                )
-            ).properties(height=bracket_space(feature_groups), name="heatmap-brackets")
-        ]
+    sides.update(
+        _feature_tracks(
+            feature_groups,
+            gene_axis,
+            group_labels,
+            group_color,
+            swap_axes=swap_axes,
+            rotation=rotation,
+            zoom=bool(zoom),
+        )
+    )
+
     if tree is not None:
         sides["top" if swap_axes else "right"] = [
             tree_track(

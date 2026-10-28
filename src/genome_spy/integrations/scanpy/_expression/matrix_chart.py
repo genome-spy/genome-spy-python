@@ -1,8 +1,9 @@
 """Native tiles for a supplied numeric matrix, without AnnData computations."""
 
+from __future__ import annotations
+
 from collections.abc import Collection, Mapping
-from typing import Any, Literal
-from math import ceil
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -10,11 +11,13 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
+    grid_interactions,
     with_values,
     vertical_highlights,
     horizontal_tick_labels,
     profile_ruler,
     series_focus,
+    simulation_runs,
 )
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import (
@@ -35,6 +38,109 @@ from genome_spy.integrations.scanpy._style import (
     color_bounds,
     native_scheme,
 )
+
+
+if TYPE_CHECKING:
+    from genome_spy.schema._kwds import ScalesKwds
+
+
+def _matrix_axis(
+    axis: gs.X | gs.Y,
+    labels: Collection[str] | None,
+    names: list[str],
+    title: str | None,
+    *,
+    horizontal: bool,
+    cropped: bool,
+    tick_labels: Mapping[float, str] | None,
+) -> tuple[gs.X | gs.Y, gs.Chart | None]:
+    """Return an axis and optional side labels from row or column names.
+
+    Cropped matrices hide offscreen anchors without clipping the visible text.
+    """
+    axis = axis.axis(
+        title=title if labels is None else None,
+        titlePadding=8,
+        labels=labels is None,
+        values=list(range(len(names))) if labels is not None else Undefined,
+        domain=False,
+        tickSize=3.5 * PT,
+        tickWidth=0.8 * PT,
+        tickColor="black",
+        labelFont=FONT,
+        labelFontSize=TICK,
+        titleFont=FONT,
+        titleFontWeight="normal",
+        titleFontSize=10 * PT,
+    )
+    side: gs.Chart | None = None
+    if horizontal and tick_labels is not None:
+        axis = axis.axis(title=None, labels=False, values=list(tick_labels))
+        side = horizontal_tick_labels(tick_labels, title)
+
+    if labels is not None:
+        ticks = _slot_labels(
+            names,
+            axis.axis(None),
+            horizontal=horizontal,
+            clip=("y" if horizontal else "x") if cropped else True,
+        )
+        if cropped:
+            channel = "x" if horizontal else "y"
+            # The domain filter keeps boundary labels without pixel-rounding culls.
+            ticks = ticks.mark_text(cullByVisibleRange=False).transform_filter(
+                f"inrange(datum.slot, domain('{channel}'))"
+            )
+        if title is not None:
+            ticks = ticks.properties(
+                title=gs.Title(
+                    text=title,
+                    orient="bottom" if horizontal else "left",
+                    angle=0 if horizontal else -90,
+                    offset=8,
+                    font=FONT,
+                    fontSize=10 * PT,
+                    fontWeight="normal",
+                )
+            )
+        side = ticks
+
+    return axis, side
+
+
+def _matrix_coordinates(
+    rows: int,
+    columns: int,
+    *,
+    limits: tuple[tuple[float, float], tuple[float, float]] | None,
+    reverse_y: bool,
+    zoom: bool | Literal["xy"],
+) -> tuple[gs.X, gs.Y, ScalesKwds]:
+    """Return position encodings and shared scales for the supplied matrix shape.
+
+    Cropped time series need continuous coordinates; ordinary matrices use slots.
+    """
+    if limits is None:
+        x = coordinate(gs.X, "_x", columns, 0)
+        y = coordinate(gs.Y, "_y", rows, 0, reverse=reverse_y)
+        x, y = zoom_axes(x, y, enabled=zoom, name=None)
+        return gs.X("_x:I"), gs.Y("_y:I"), index_scales(x, y)
+
+    x = gs.X("_x:Q").scale(
+        type="linear", domain=list(limits[0]), zero=False, nice=False
+    )
+    y = gs.Y("_y:Q").scale(
+        type="linear",
+        domain=list(limits[1]),
+        reverse=reverse_y,
+        zero=False,
+        nice=False,
+    )
+    x, y = zoom_axes(x, y, enabled=zoom, name=None)
+    scales = gs.scales(
+        x=gs.Scale(**x.to_dict()["scale"]), y=gs.Scale(**y.to_dict()["scale"])
+    )
+    return gs.X("_x:Q"), gs.Y("_y:Q"), scales
 
 
 def build_matrix(
@@ -60,6 +166,7 @@ def build_matrix(
     overlay: gs.Chart | None = None,
     row_select: bool = False,
     ruler: bool = False,
+    highlight: bool | Literal["outline"] = False,
     run_select: bool = False,
     realization_length: float | None = None,
 ) -> gs.TopLevelSpec:
@@ -68,6 +175,7 @@ def build_matrix(
     Keep supplied values and order; only mask missing entries and normalize color.
     """
     array = matrix_array(matrix, context=context)
+
     # Pandas preserves numeric types and turns masked entries into missing values.
     values = numeric_values(pd.DataFrame(array), context=context)
     rows, columns = values.shape
@@ -83,6 +191,7 @@ def build_matrix(
         "viridis" if color_map is None else color_map, "color_map", context=context
     )
     low, high, _ = color_bounds(values, None, None, context=context)
+
     # Fit square cells inside a 400-pixel area unless dimensions are specified.
     cell_size = min(400 / rows, 400 / columns)
     width = number(
@@ -93,86 +202,34 @@ def build_matrix(
     )
     if not width or not height:
         raise ValueError(f"{context}: width and height must be positive.")
-    x = coordinate(gs.X, "_x", columns, 0)
-    y = coordinate(gs.Y, "_y", rows, 0, reverse=reverse_y)
-    if limits is not None:
-        x = gs.X("_x:Q").scale(
-            type="linear", domain=list(limits[0]), zero=False, nice=False
-        )
-        y = gs.Y("_y:Q").scale(
-            type="linear",
-            domain=list(limits[1]),
-            reverse=reverse_y,
-            zero=False,
-            nice=False,
-        )
+
+    # The surround owns shared scales; marks retain only fields and axes.
+    x, y, scales = _matrix_coordinates(
+        rows, columns, limits=limits, reverse_y=reverse_y, zoom=zoom
+    )
     name = context.rsplit(".", 1)[-1]
-    # Unnamed scales let independent panels compose without global name collisions.
-    x, y = zoom_axes(x, y, enabled=zoom, name=None)
-    if limits is None:
-        scales = index_scales(x, y)
-        x, y = gs.X("_x:I"), gs.Y("_y:I")
-    else:
-        scales = gs.scales(
-            x=gs.Scale(**x.to_dict()["scale"]), y=gs.Scale(**y.to_dict()["scale"])
-        )
-        x, y = gs.X("_x:Q"), gs.Y("_y:Q")
+
+    # Named rows and columns share the same axis and side-label rules.
     axes = []
     sides = {}
     for axis, labels, names, axis_title, horizontal, side in (
         (x, xticks, xlabels, xlabel, True, "bottom"),
         (y, yticks, ylabels, ylabel, False, "left"),
     ):
-        axes.append(
-            axis.axis(
-                title=axis_title if labels is None else None,
-                titlePadding=8,
-                labels=labels is None,
-                values=list(range(columns if horizontal else rows))
-                if labels is not None
-                else Undefined,
-                domain=False,
-                tickSize=3.5 * PT,
-                tickWidth=0.8 * PT,
-                tickColor="black",
-                labelFont=FONT,
-                labelFontSize=TICK,
-                titleFont=FONT,
-                titleFontWeight="normal",
-                titleFontSize=10 * PT,
-            )
+        axis, ticks = _matrix_axis(
+            axis,
+            labels,
+            names,
+            axis_title,
+            horizontal=horizontal,
+            cropped=limits is not None,
+            tick_labels=xtick_labels,
         )
-        if horizontal and xtick_labels is not None:
-            axes[-1] = axes[-1].axis(
-                title=None, labels=False, values=list(xtick_labels)
-            )
-            sides[side] = [horizontal_tick_labels(xtick_labels, xlabel)]
-        if labels is not None:
-            ticks = _slot_labels(
-                names,
-                axis.axis(None),
-                horizontal=horizontal,
-                clip=True if limits is None else ("y" if horizontal else "x"),
-            )
-            if limits is not None:
-                # Edge labels may straddle the cropped limit; hide only anchors outside it.
-                channel = "x" if horizontal else "y"
-                ticks = ticks.transform_filter(
-                    f"inrange(datum.slot, domain('{channel}'))"
-                )
-            if axis_title is not None:
-                ticks = ticks.properties(
-                    title=gs.Title(
-                        text=axis_title,
-                        orient="bottom" if horizontal else "left",
-                        angle=0 if horizontal else -90,
-                        offset=8,
-                        font=FONT,
-                        fontSize=10 * PT,
-                        fontWeight="normal",
-                    )
-                )
+        axes.append(axis)
+        if ticks is not None:
             sides[side] = [ticks]
+
+    # Use the shared tile renderer after both axes are ready.
     tiles = matrix_tiles(
         values,
         xlabels,
@@ -213,27 +270,31 @@ def build_matrix(
             y=axes[1].field("_y0"),
             y2=gs.Y2("_y1:Q"),
         )
+
+    # Row and run controls change opacity without removing matrix cells.
     focus = None
     opacity = gs.Expression("1")
     if row_select:
         focus, opacity = series_focus(list(dict.fromkeys(ylabels)), "_row")
     run = None
     if run_select and realization_length is not None:
-        tiles = tiles.transform_calculate(
-            _run=gs.expr.format(
-                gs.expr.floor(gs.datum._x / realization_length) + 1, "d"
-            )
-        )
-        choices = [str(i + 1) for i in range(ceil(columns / realization_length))]
-        run, run_opacity = series_focus(
-            choices, "_run", name="simulation_run", title="Run: "
+        tiles, run, run_opacity = simulation_runs(
+            tiles, "_x", realization_length, samples=columns, select=True
         )
         opacity = gs.expr.min(opacity, run_opacity)
     if focus is not None or run is not None:
         tiles = tiles.transform_calculate(_focus_opacity=opacity).encode(
             opacity=gs.Opacity("_focus_opacity:Q").scale(None).legend(None)
         )
-    center = with_values(tiles, "_value") if show_values else tiles
+
+    # Add optional values, highlights and overlays before placing side labels.
+    center: gs.Chart | gs.LayerChart
+    if highlight:
+        center = grid_interactions(
+            tiles, highlight, values="_value" if show_values else None
+        )
+    else:
+        center = with_values(tiles, "_value") if show_values else tiles
     if overlay is not None:
         center = gs.layer(center, overlay)
     if len(highlights_x):
@@ -305,8 +366,10 @@ def build_timeseries_heatmap(
         number(v, "highlights_x", context=context, minimum=-np.inf)
         for v in highlights_x
     ]
+
     # Scanpy's explicit center limits crop outer cells and expand singletons by 0.05.
     limits = tuple(coordinate_domain(np.array([0, n - 1]), 0) for n in array.shape)
+
     # Convert pandas columns before transposing so mixed numeric types stay numeric.
     if isinstance(array, pd.DataFrame):
         array = numeric_values(array, context=context)

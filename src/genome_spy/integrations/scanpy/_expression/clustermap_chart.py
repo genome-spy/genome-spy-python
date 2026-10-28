@@ -19,7 +19,7 @@ from genome_spy.integrations.scanpy._expression.grouped_chart import (
 )
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
-    with_values,
+    grid_interactions,
 )
 from genome_spy.integrations.scanpy._expression.matrix_chart import (
     matrix_tiles,
@@ -117,6 +117,7 @@ def _color_tracks(
                     labelLimit=1000,
                 )
             )
+
             # Missing annotations leave the white track background visible.
             chart = chart.transform_filter("isValid(datum._color)")
             if hover:
@@ -162,6 +163,7 @@ def build_clustermap(
     hover: bool,
     zoom: bool | Literal["xy"],
     show_values: bool,
+    highlight: bool | Literal["outline"] = False,
     width: float | None,
     height: float | None,
     cmap: Any = None,
@@ -181,6 +183,7 @@ def build_clustermap(
 
     Keep both trees, masks, labels and annotation tracks on the same permutations.
     """
+
     # Reserve tree and track space from the caller's size budget.
     trees = _ratios(dendrogram_ratio, "dendrogram_ratio")
     colors = _ratios(colors_ratio, "colors_ratio")
@@ -204,6 +207,7 @@ def build_clustermap(
     )
     if min(width, height) <= 0:
         raise ValueError(f"{CONTEXT}: width and height must be positive.")
+
     # Keep only color-guide options that the native renderer can honor.
     if cbar_pos is not None and (
         not isinstance(cbar_pos, (list, tuple))
@@ -220,6 +224,7 @@ def build_clustermap(
     if label is not None and not isinstance(label, str):
         raise TypeError(f"{CONTEXT}: colorbar label must be a string.")
     scheme = native_scheme("magma" if cmap is None else cmap, "cmap", context=CONTEXT)
+
     # Hidden cells do not influence the displayed color limits.
     values = numeric_values(data.values, context=CONTEXT).copy()
     values[data.mask] = np.nan
@@ -264,10 +269,13 @@ def build_clustermap(
     )
     x, y = zoom_axes(x, y, enabled=zoom, name="clustermap")
     scales = index_scales(x, y)
+
     # The surround owns both scales; tiles and side views only declare fields.
     x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
     tiles = tiles.encode(x=x, y=y)
-    center = with_values(tiles, "_value") if show_values else gs.layer(tiles)
+    center = grid_interactions(
+        tiles, highlight, values="_value" if show_values else None
+    )
     center = center.properties(name="clustermap-cells", width=width, height=height)
     sides: dict[str, Any] = {}
     for labels, option, axis, horizontal, side in (
@@ -277,6 +285,7 @@ def build_clustermap(
         ticks = _tick_labels(labels, option, axis, horizontal=horizontal)
         if ticks is not None:
             sides[side] = [ticks]
+
     # Trees and strips each own a viewport and share the center's gapped slots.
     for index, (tree, tracks, slot_axis, horizontal, extent) in enumerate(
         (

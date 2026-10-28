@@ -80,6 +80,16 @@ def numeric_values(table: pd.DataFrame, *, context: str) -> np.ndarray:
     return values
 
 
+def check_value_limit(rows: int, columns: int, limit: int, *, context: str) -> None:
+    """Reject oversized cell tables before reading or copying their values."""
+    if rows * columns > limit:
+        raise ValueError(
+            f"{context}: at most {limit:,} cell values are supported; "
+            "subset cells or genes, or request fewer observation columns. "
+            "No values were loaded."
+        )
+
+
 def matrix_array(matrix: Any, *, context: str, allow_vector: bool = False) -> Any:
     """Return resident 2D values, promoting a vector only when requested.
 
@@ -111,6 +121,7 @@ def resolve_use_raw(
         raise ValueError(f"{context}: use_raw=True and layer are incompatible.")
     if requested is True and adata.raw is None:
         raise ValueError(f"{context}: use_raw=True requires adata.raw.")
+
     # An explicit layer takes priority over the default raw matrix.
     if requested is None:
         return adata.raw is not None and layer is None
@@ -129,6 +140,7 @@ def require_resident_expression(
 
     if layer is not None and layer not in adata.layers:
         raise ValueError(f"{context}: layer {layer!r} is missing.")
+
     # Reading X from a disk-backed view can load many unrequested genes.
     if adata.isbacked:
         raise TypeError(

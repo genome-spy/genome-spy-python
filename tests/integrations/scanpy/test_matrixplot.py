@@ -63,6 +63,7 @@ def test_signature_preserves_pinned_defaults_and_native_boundary():
         "height",
         "zoom",
         "show_values",
+        "highlight",
     }
 
 

@@ -9,14 +9,13 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.schemapi import Undefined
-from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
+from genome_spy.integrations.scanpy._grid_interactions import grid_interactions
 from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._expression.grouped_chart import (
     color_legend,
     finish_grouped_chart,
     grouped_axes,
-    index_scales,
     feature_gaps,
     plot_dimensions,
     summary_records,
@@ -71,6 +70,7 @@ def dot_size_scale(
             "For all-zero fractions, set dot_max=1 explicitly."
         )
     difference = high - low
+
     # Match Scanpy's spacing between percentage labels.
     if difference <= 0.3:
         step = 0.05
@@ -80,6 +80,7 @@ def dot_size_scale(
         step = 0.2
     ticks = np.arange(high, low, -step)[::-1]
     ticks = np.round(ticks * 100, 10) / 100
+
     # Use the same percentage-to-area lookup for dots and legend symbols.
     domain = np.unique(np.concatenate([valid, ticks]))
     areas = smallest + ((np.clip(domain, low, high) - low) / difference) ** exponent * (
@@ -105,7 +106,7 @@ def build_dotplot(
     smallest_dot: float = 0,
     hover: bool,
     zoom: bool | Literal["xy"],
-    highlight: bool,
+    highlight: bool | Literal["outline"],
     value_title: str,
     linewidth: float | None,
     rotation: float | None,
@@ -175,6 +176,7 @@ def build_dotplot(
     }.items():
         if value is not None and not isinstance(value, str):
             raise TypeError(f"gsc.pl.dotplot: {name} must be a string or None.")
+
     # Calculate both scales before drawing so the dots and guides agree.
     values = colors.to_numpy(dtype=float, na_value=np.nan)
     low, high, constant_color = color_bounds(
@@ -194,27 +196,17 @@ def build_dotplot(
     if constant_color:
         # Scanpy freezes dot colors before its colorbar expands constant bounds.
         table["_paint"] = low
-    x, y = grouped_axes(
-        rows, columns, xpadding=x_padding - 0.5, ypadding=y_padding - 0.5
-    )
-    if grid:
-        x, y = (
-            axis.axis(grid=True, gridColor="gray", gridWidth=0.1 * _PT)
-            for axis in (x, y)
-        )
-    x, y = zoom_axes(x, y, enabled=zoom, name=None)
     gaps = feature_gaps(feature_groups, rows if swap_axes else columns)
-    scales = index_scales(
-        x,
-        y,
+    x, y, scales = grouped_axes(
+        rows,
+        columns,
+        xpadding=x_padding - 0.5,
+        ypadding=y_padding - 0.5,
+        zoom=zoom,
+        grid=grid,
         xgaps=[] if swap_axes else gaps,
         ygaps=gaps if swap_axes else [],
         gap_width=group_gap,
-    )
-    # The surround owns the scale definitions; marks retain fields and ticks.
-    x, y = (
-        gs.X("_x:I", axis=x.to_dict()["axis"]),
-        gs.Y("_y:I", axis=y.to_dict()["axis"]),
     )
     dots = (
         gs.Chart(table)
@@ -266,6 +258,7 @@ def build_dotplot(
     if smallest_dot == 0:
         # A zero-area dot must not leave a visible or hoverable outline.
         dots = dots.transform_filter(f"datum._percent > {100 * (dot_min or 0)}")
+
     # Hover reports the actual percentage, even when dot sizes are clipped.
     if hover:
         dots = dots.encode(
@@ -276,23 +269,9 @@ def build_dotplot(
                 gs.Tooltip("_percent:Q", title="Expressing cells (%)", format=".1f"),
             ]
         )
-    center = gs.layer(dots).properties(
+    center = grid_interactions(dots, highlight).properties(
         view=gs.view(stroke="black", strokeWidth=1.5 * _PT)
     )
-    if highlight:
-        # The plot container owns the ruler so it also tracks gaps between dots.
-        center = center.add_params(
-            gs.ruler(
-                "grid_cursor",
-                encodings=["x", "y"],
-                display="center",
-                extent="view",
-                persist=False,
-                mark=gs.RulerMarkConfig(
-                    stroke="#4682b4", opacity=0.55, strokeWidth=1, zindex=0
-                ),
-            )
-        )
     chart = finish_grouped_chart(
         center,
         colors,

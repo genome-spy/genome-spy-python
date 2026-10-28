@@ -60,6 +60,7 @@ def test_signature_retains_upstream_defaults_and_native_additions():
         "hover",
         "zoom",
         "show_values",
+        "highlight",
         "group_gap",
         "width",
         "height",

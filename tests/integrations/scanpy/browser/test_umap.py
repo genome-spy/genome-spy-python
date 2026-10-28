@@ -110,6 +110,50 @@ def test_hover_reports_known_zero_nonzero_and_missing_observations(page, color):
         assert page.get_by_text("Observation ID", exact=True).is_visible()
 
 
+@pytest.mark.parametrize("offset", [0.3, 0.65])
+def test_tiny_points_can_be_hovered_at_their_center(page, offset):
+    a = fixture()[:1].copy()
+    a.obsm["X_umap"] = np.array([[0.0, 0.0]])
+    chart = gsc.pl.umap(
+        a,
+        size=2,
+        frameon=False,
+        width=100,
+        height=100,
+        show=False,
+        obs_id="cell_id",
+    )
+    bounds = render(page, chart)
+    page.locator("#chart").evaluate(
+        "(element, offset) => element.style.marginLeft = `${offset}px`", offset
+    )
+    domain = points(chart.to_dict())["encoding"]["x"]["scale"]["domain"]
+    x, y = move_to(page, bounds, 0, 0, domain, domain, "stable-0")
+    page.mouse.move(x, y)
+    page.wait_for_timeout(80)
+    assert page.get_by_text("stable-0", exact=True).is_visible()
+
+
+def test_zero_size_observations_are_not_pickable(page):
+    a = fixture()[:2].copy()
+    chart = gsc.pl.umap(
+        a,
+        size=[2, 0],
+        frameon=False,
+        width=100,
+        height=100,
+        show=False,
+        obs_id="cell_id",
+    )
+    bounds = render(page, chart)
+    encoding = points(chart.to_dict())["encoding"]
+    domains = [encoding[d]["scale"]["domain"] for d in ("x", "y")]
+    move_to(page, bounds, *map(float, a.obsm["X_umap"][0, :2]), *domains, "stable-0")
+    assert page.get_by_text("stable-0", exact=True).is_visible()
+    move_to(page, bounds, *map(float, a.obsm["X_umap"][1, :2]), *domains, "stable-1")
+    assert not page.get_by_text("stable-1", exact=True).is_visible()
+
+
 @pytest.mark.parametrize("case", ["categorical", "continuous", "grid"])
 def test_complete_chart_has_original_guides_labels_and_unclipped_layout(
     page, tmp_path, case

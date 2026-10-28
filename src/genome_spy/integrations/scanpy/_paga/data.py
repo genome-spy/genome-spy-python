@@ -45,6 +45,7 @@ def adjacency_values(
     weights = numeric_values(pd.DataFrame(tree.data), context=context)
     if not np.isfinite(weights).all():
         raise ValueError(f"{context}: adjacency_tree weights must be finite.")
+
     # Scanpy places a tree entry (row, column) at x=row, y=column.
     rows, columns = tree.nonzero()
     points = pd.DataFrame({"_x": rows, "_y": columns})
@@ -68,6 +69,7 @@ def adjacency_points(values: np.ndarray, tree: pd.DataFrame) -> pd.DataFrame:
         _target=tree["_y"],
         _kind="Tree",
     )
+
     # Stable sorting retains gray-before-black order within each source group.
     return pd.concat([background, selected], ignore_index=True).sort_values(
         "_x", kind="stable", ignore_index=True
@@ -87,6 +89,7 @@ def _graph(adata: Any, key: str, count: int, threshold: float) -> tuple[Any, Any
             f"{CONTEXT}: paga[{key!r}] must be a {count}-by-{count} SciPy sparse graph."
         )
     source = matrix if matrix.format in {"csr", "csc"} else matrix.tocsr()
+
     # COO preserves stored edge order and gives every format the same filtering path.
     matrix = matrix.tocoo(copy=True)
     if not np.isfinite(matrix.data).all():
@@ -300,6 +303,7 @@ def _node_colors(
         raise NotImplementedError(
             f"{CONTEXT}: mixtures/pies and multiple color panels are unsupported."
         )
+
     # CSS colors take precedence over annotation and gene names in Scanpy.
     try:
         css = native_color(color, "color", context=CONTEXT)
