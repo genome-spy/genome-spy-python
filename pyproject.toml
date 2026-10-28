@@ -103,6 +103,21 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# Exclude local output even when building outside a normal Git checkout.
+[tool.hatch.build]
+exclude = [
+    "/tmp",
+    "/plans",
+    "/material",
+    "/docs/_build",
+    "/docs/gallery",
+    "/docs/generated",
+    "/docs/_static/specs",
+    "/docs/_static/generated",
+    "/tests/**/*.png",
+    "/tests/**/*performance*.json",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/genome_spy"]
 artifacts = [
