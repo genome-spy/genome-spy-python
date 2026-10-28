@@ -280,7 +280,7 @@ def test_expression_validation_only_checks_cells_in_the_path(use_raw):
         )
 
 
-def test_large_path_rejects_before_expression_access(monkeypatch):
+def test_large_path_reads_only_selected_gene_columns(monkeypatch):
     from anndata import AnnData
     from scipy import sparse
 
@@ -296,11 +296,26 @@ def test_large_path_rejects_before_expression_access(monkeypatch):
         var=pd.DataFrame(index=[f"g{i}" for i in range(20_000)]),
         uns={"paga": {"groups": "cluster"}},
     )
-    monkeypatch.setattr(
-        AnnData, "X", property(lambda self: pytest.fail("Read expression"))
+    original, shapes = sparse.csr_matrix.toarray, []
+
+    def selected(matrix, *args, **kwargs):
+        shapes.append(matrix.shape)
+        assert matrix.shape == (100_000, 3), "Densified unrequested genes"
+        return original(matrix, *args, **kwargs)
+
+    monkeypatch.setattr(sparse.csr_matrix, "toarray", selected)
+    prepared = prepare_paga_path(
+        a,
+        ["a"],
+        ["g1", "g2", "g3"],
+        use_raw=False,
+        annotations=(),
+        n_avg=1,
+        groups_key=None,
+        normalize_to_zero_one=False,
     )
-    with pytest.raises(ValueError, match="250,000"):
-        gsc.pl.paga_path(a, ["a"], ["g1", "g2", "g3"], show=False)
+    assert shapes == [(100_000, 3)]
+    assert prepared.values.shape == (100_000, 3)
 
 
 def test_return_data_after_display_and_disabled_hover(monkeypatch):

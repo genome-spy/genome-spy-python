@@ -312,19 +312,21 @@ def test_missing_values_colors_duplicates_and_raw_vocabulary_are_explicit():
         prepare_clustermap(subset, None, None)
 
 
-@pytest.mark.parametrize(
-    "shape,match",
-    [((100_000, 50), "250,000 values"), ((1500, 2), "pairwise distances")],
-)
-def test_limits_reject_before_expression_access(monkeypatch, shape, match):
+@pytest.mark.parametrize("shape", [(501, 501), (1500, 2)])
+def test_large_clustermaps_use_requested_clustering_without_size_caps(shape):
     from anndata import AnnData
 
-    adata = AnnData(sparse.csr_matrix(shape))
-    monkeypatch.setattr(
-        AnnData, "X", property(lambda self: pytest.fail("Read expression before limit"))
+    a = AnnData(np.random.default_rng(0).normal(size=shape))
+    cluster_rows = shape[0] == 1500
+    prepared = prepare_clustermap(
+        a, None, False, row_cluster=cluster_rows, col_cluster=False
     )
-    with pytest.raises(ValueError, match=match):
-        prepare_clustermap(adata, None, False)
+    assert prepared.values.shape == shape
+    if cluster_rows:
+        assert prepared.row_tree is not None
+        assert set(prepared.row_tree.order) == set(range(shape[0]))
+    else:
+        np.testing.assert_array_equal(prepared.values, a.X)
 
 
 @pytest.mark.parametrize(

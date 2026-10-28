@@ -423,9 +423,19 @@ def test_large_sparse_ranked_plots_only_read_the_selected_genes(
 
     monkeypatch.setattr(sparse.csr_matrix, "toarray", selected)
     if family == "heatmap":
-        with pytest.raises(ValueError, match="250,000"):
-            gsc.pl.rank_genes_groups_heatmap(a, n_genes=2, dendrogram=False, show=False)
-        assert not shapes
+        from genome_spy import Chart
+        from genome_spy.integrations.scanpy._expression import heatmap_chart
+
+        displayed = []
+
+        def render(prepared, *args, **kwargs):
+            displayed.append(prepared.values.shape)
+            return Chart().mark_rect()
+
+        monkeypatch.setattr(heatmap_chart, "build_heatmap", render)
+        gsc.pl.rank_genes_groups_heatmap(a, n_genes=2, dendrogram=False, show=False)
+        assert shapes == [(100_000, 4)]
+        assert displayed == [(100_000, 8)]
     else:
         chart = getattr(gsc.pl, f"rank_genes_groups_{family}")(
             a,

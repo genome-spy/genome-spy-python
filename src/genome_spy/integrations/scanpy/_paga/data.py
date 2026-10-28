@@ -15,7 +15,7 @@ CONTEXT = "gsc.pl.paga"
 def adjacency_values(
     adata: Any, adjacency: str, adjacency_tree: str
 ) -> tuple[np.ndarray, pd.DataFrame]:
-    """Read two stored adjacency matrices; return bounded dense values and tree-point positions."""
+    """Read two stored adjacency matrices; return dense values and tree-point positions."""
     from anndata import AnnData
     from scipy import sparse
 
@@ -35,10 +35,8 @@ def adjacency_values(
         matrices.append(matrix)
     source, tree = matrices
     count = source.shape[0]
-    if source.shape != (count, count) or not count or count * count > 250_000:
-        raise ValueError(
-            f"{context}: adjacency must be square with 1–250,000 values; subset explicitly."
-        )
+    if source.shape != (count, count) or not count:
+        raise ValueError(f"{context}: adjacency must be a nonempty square matrix.")
     if tree.shape != source.shape:
         raise ValueError(f"{context}: adjacency_tree must match the adjacency shape.")
     tree = tree.tocsr()

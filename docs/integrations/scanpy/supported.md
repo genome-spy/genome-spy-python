@@ -57,12 +57,10 @@ for those plots and its global style-setting helpers.
 
 ## Known limitations
 
-- **Large cell grids require explicit subsetting.** Heatmaps, tracks and
-  clustermaps allow at most 250,000 cell–gene values. `EmbeddingSummary` counts
-  loaded extra observation columns toward that limit too. Automatic clustermap
-  linkage is limited to 1,000,000 pairwise distances per clustered axis; provide
-  linkage or subset the data for larger requests. Storage support varies by
-  plot; these cell-expression views require resident expression.
+- **Storage support varies by plot.** Cell-expression views require resident
+  expression. They have no fixed cell or value cap. Preparation reads the chosen
+  genes; its memory use depends on cells × genes. Clustermap computes pairwise
+  distances unless linkage is supplied.
 - **Linked selections have a boundary mismatch.** In `EmbeddingSummary`, cells
   exactly on a brush's upper or right edge can appear in summaries but be omitted
   from the displayed count and Python selection results.

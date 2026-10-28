@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 
 from genome_spy.integrations.scanpy._data import (
-    check_value_limit,
     number,
     numeric_values,
     require_resident_expression,
@@ -35,9 +34,6 @@ class GroupedExpression:
     values: pd.DataFrame
     feature_groups: tuple[FeatureGroup, ...]
     counts: pd.Series
-
-
-MAX_HEATMAP_VALUES = 250_000
 
 
 @dataclass(frozen=True, slots=True)
@@ -171,14 +167,13 @@ def grouped_expression(
     categories_order: Sequence[Any] | None = None,
     var_group_labels: Sequence[str] | None = None,
     var_group_positions: Sequence[tuple[int, int]] | None = None,
-    value_limit: int | None = None,
     read_values: bool = True,
     observation_positions: np.ndarray | None = None,
 ) -> GroupedExpression:
     """Return requested AnnData values in a separate grouped table with marker brackets.
 
-    Preserve cell order and repeated genes; value_limit rejects oversized requests
-    before expression access, without changing AnnData. read_values=False returns
+    Read selected columns without changing AnnData, preserving cell order and
+    repeated genes. read_values=False returns
     only category/slot metadata after zero-row feature validation.
     observation_positions selects/reorders rows after column access, before validation.
     """
@@ -194,12 +189,6 @@ def grouped_expression(
     names, feature_groups = _feature_slots(
         var_names, var_group_labels, var_group_positions
     )
-
-    # Stop oversized heatmaps before selecting or copying expression columns.
-    if value_limit is not None:
-        check_value_limit(
-            adata.n_obs, len(names), value_limit, context="Grouped plotting"
-        )
 
     # Validate group keys before asking Scanpy for selected columns.
     keys = [groupby] if isinstance(groupby, str) else list(groupby)
@@ -489,10 +478,6 @@ def heatmap_values(
     # Scanpy scales across all requested genes before marker blocks can omit any.
     if feature_order is not None:
         scaled = scaled.iloc[:, list(feature_order)]
-    if scaled.size > MAX_HEATMAP_VALUES:
-        raise ValueError(
-            f"{context}: reordered marker blocks exceed the 250,000-value limit; subset markers explicitly."
-        )
     if category_order is not None:
         scaled.index = scaled.index.reorder_categories(
             list(category_order), ordered=True
@@ -543,9 +528,7 @@ def ordered_cell_expression(
         reorder_features,
     )
 
-    selected = grouped_expression(
-        adata, var_names, groupby, value_limit=MAX_HEATMAP_VALUES, **options
-    )
+    selected = grouped_expression(adata, var_names, groupby, **options)
     tree = None
 
     # Cell plots attach two-group trees too, unlike grouped summary plots.

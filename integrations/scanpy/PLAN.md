@@ -392,8 +392,8 @@ Heatmap M05.a/b is delivered as a bounded preview; see the
 [heatmap contract](COMPATIBILITY.md#heatmap-compatibility).
 It adds one chart module and small functions in the existing grouped data/tree
 modules, reusing access, scaling, palettes, feature ordering, labels and branches.
-The 250,000-value limit is checked before extraction; the 100k × 50 case tests
-rejection without data reads. Larger/chunked transport remains M05.d.
+No fixed value cap is imposed. Large sparse cases verify that extraction reads
+only requested genes. Larger/chunked transport remains a performance task in M05.d.
 The standalone `matrix` part of M05.b is delivered as a numeric-array preview,
 reusing numeric validation, linear color bounds, index slots and labels. Heatmap
 adds optional zoom with aligned cell annotations and clipped tree branches;
@@ -421,8 +421,8 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   supplied linkage and annotation colors, and routes supported clustering kwargs
   explicitly. Do not silently cluster a supplied ordering or densify an unrelated
   expression matrix. Reject unsupported Seaborn/Matplotlib options by name.
-  The delivered preview bounds tiles and pairwise distances before expression
-  access. Z-score/sample-SD and min–max scaling follow Seaborn, including missing
+  No fixed tile or pairwise-distance cap is imposed. Z-score/sample-SD and
+  min–max scaling follow Seaborn, including missing
   constant ranges; display masks do not change distances. Native palette/guide
   differences and unsupported kwargs remain explicit in the
   maintained contract, with broader options assigned to M14. Do not claim the
@@ -432,7 +432,7 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   strip hover already passes on Core 1.2. Explicit CSS tracks do not invent
   category names.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
-  record payload/render/memory limits and an explicit over-budget policy. Compare
+  measure payload, rendering and memory without imposing fixed caps. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.
 
 - M05.e (verified interaction preview; [evidence](STATUS.md#verification)):
@@ -919,8 +919,8 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   at x=tree row, y=tree column, including asymmetric/diagonal inputs. Preserve
   nonzero selection without thresholds or ordering changes; zeros stay excluded.
   Keep original numeric group axes and shared native color guides, hover, zoom
-  and fitted values. Accept matching resident SciPy sparse matrices/arrays up to
-  250,000 values; check shape/size before densification and never read expression.
+  and fitted values. Accept matching resident SciPy sparse matrices/arrays without an arbitrary size
+  cap; validate shape before densification and never read expression.
   Direct public references cover tiles, points, missing/constant values, guide
   bins and export DPI; observe hover/navigation/HTML and measure a larger matrix.
   as_heatmap=False reuses adjacency access and native point marks: gray points
@@ -976,7 +976,7 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   after smoothing shortens profiles/annotations. Keep numeric annotation tracks
   aligned and return (chart, frame) for show=False/return_data=True, or frame
   after display. The preview requires two keys/two smoothed cells, at most one
-  numeric annotation and 250,000 selected cell–key/annotation values. Reject
+  numeric annotation. Do not impose a fixed value cap. Reject
   categorical/multiple heatmap annotation tracks and custom margins clearly;
   xlim and legend font options are inactive in heatmap mode as upstream.
   Verify ordered/normalized/raw/sparse values, repeated nodes, annotations,
@@ -1228,8 +1228,8 @@ Each increment requires:
 - Widget and standalone HTML delivery, the updated packaged-PBMC expression
   workflow, and a representative payload/render/memory comparison. Track labels
   and bands must not duplicate the expression measurement table. Keep generated
-  media and notebook execution state out of Git. The existing 250,000-value
-  heatmap limit stays; larger/chunked transport remains M05.d.
+  media and notebook execution state out of Git. Do not impose a fixed value cap;
+  larger/chunked transport remains a performance task in M05.d.
 
 ## Documentation and release
 
@@ -1564,10 +1564,9 @@ changed row positions must match visible GPU pixels, not only means or SVG expor
 - Exclude missing expression before means and histogram binning; normalize each
   histogram over valid values in its cohort. Missing/all-missing groups have no
   invented zero mean or zero-expression bin. Keep selected-cell counts distinct
-  from valid-expression counts. Reuse resident-source guards and pre-read
-  value limits; genes plus explicitly loaded extra obs columns share the existing
-  250,000-value heatmap ceiling,
-  lowering it if measured payload, folding/aggregation or interaction costs require.
+  from valid-expression counts. Reuse resident-source guards and selected-column access. Do not impose a fixed
+  cell or value cap; measure payload, aggregation and interaction costs with large
+  inputs rather than rejecting them at an arbitrary threshold.
 - Methods mutate the builder and return self, like DotPlot/MatrixPlot.
   The constructor accepts the embedding title and each add method accepts its
   panel title: omitted retains the automatic default, a string overrides it,

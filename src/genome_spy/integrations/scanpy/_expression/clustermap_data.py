@@ -1,4 +1,4 @@
-"""Bounded expression access and SciPy row/column trees for clustermap."""
+"""Detached expression access and SciPy row/column trees for clustermap."""
 
 from dataclasses import dataclass
 from typing import Any
@@ -17,8 +17,6 @@ from genome_spy.integrations.scanpy._dendrogram_data import TreeData
 from genome_spy.integrations.scanpy._style import _categorical, _palette, native_color
 
 CONTEXT = "gsc.pl.clustermap"
-MAX_VALUES = 250_000
-MAX_DISTANCES = 1_000_000
 
 
 @dataclass(frozen=True, slots=True)
@@ -169,30 +167,19 @@ def prepare_clustermap(
     if z_score is not None and standard_scale is not None:
         raise ValueError(f"{CONTEXT}: z_score and standard_scale cannot be combined.")
 
-    # Choose storage before checking matrix and clustering size limits.
+    # Choose the expression source before preparing values and trees.
     raw = resolve_use_raw(adata, use_raw, None, context=CONTEXT)
     shape = (adata.n_obs, adata.raw.n_vars if raw else adata.n_vars)
 
-    # Bound both tile transport and quadratic clustering before reading expression.
-    if not all(shape) or shape[0] * shape[1] > MAX_VALUES:
-        raise ValueError(
-            f"{CONTEXT}: preview supports 1–{MAX_VALUES:,} values; subset AnnData explicitly."
-        )
+    if not all(shape):
+        raise ValueError(f"{CONTEXT}: at least one cell and one gene are required.")
     if shape[1] != adata.n_vars:
         raise ValueError(
             f"{CONTEXT}: raw and X must have the same number of variables, as required by Scanpy's clustermap; use_raw=False or prepare matching data."
         )
-    for count, enabled, linkage in (
-        (shape[0], row_cluster, row_linkage),
-        (shape[1], col_cluster, col_linkage),
-    ):
-        if enabled and linkage is None and count * (count - 1) // 2 > MAX_DISTANCES:
-            raise ValueError(
-                f"{CONTEXT}: automatic clustering exceeds {MAX_DISTANCES:,} pairwise distances; subset explicitly or supply linkage."
-            )
     matrix = require_resident_expression(adata, raw, None, context=CONTEXT)
 
-    # Clustermap requests the whole supplied matrix; only that bounded subset densifies.
+    # Clustermap requests the whole supplied matrix; only that supplied matrix densifies.
     values = pd.DataFrame(
         matrix.toarray() if sparse.issparse(matrix) else matrix,
         index=adata.obs_names,

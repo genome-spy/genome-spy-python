@@ -10,7 +10,6 @@ import pandas as pd
 
 from genome_spy.integrations.scanpy._data import numeric_values
 from genome_spy.integrations.scanpy._expression.grouped_data import (
-    MAX_HEATMAP_VALUES,
     grouped_expression,
 )
 
@@ -137,10 +136,6 @@ def prepare_paga_path(
     if as_heatmap and (len(keys) < 2 or len(order) - n_avg + 1 < 2):
         raise NotImplementedError(
             f"{CONTEXT}: this preview requires at least two keys and two smoothed cells."
-        )
-    if len(order) * (len(keys) + len(annotations)) > MAX_HEATMAP_VALUES:
-        raise ValueError(
-            f"{CONTEXT}: at most {MAX_HEATMAP_VALUES:,} path cell–key values are supported; subset explicitly."
         )
     if as_heatmap and len(annotations) > 1:
         raise NotImplementedError(

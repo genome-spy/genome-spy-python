@@ -84,7 +84,7 @@ diffusion-map examples. Scanpy computes those coordinates; plotting reads them.
 group means, marker tracks, gene or metadata histograms, and categorical composition bars. See the runnable
 [linked-expression guide](../../docs/integrations/scanpy/linked_expression.md). Choose genes, a categorical
 `groupby`, raw/X/layer, panel sides and collected legend placement. The builder
-copies at most 250,000 resident cell × (gene + extra obs column) values once;
+copies the selected resident gene and observation columns once;
 style changes do not reread
 AnnData. Native concat may expand panel dimensions to align adjacent plots.
 The UMAP starts square with equal coordinate units. Set `zoom=True` in the
@@ -536,7 +536,7 @@ semantics match the plot:
 | Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` uses only group rows and zero-row feature lookup validation | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
 | Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
 | Dendrograms | Stored `sc.tl.dendrogram` results, or that public method for a missing tree | Structural checks, shared leaf permutations and native branch rendering. |
-| Clustermap | Public SciPy `linkage`/`dendrogram(no_plot=True)`, as used by Scanpy/Seaborn, or supplied linkage | Detached pandas normalization, bounded source access, color-track alignment and shared numeric tiles/tree rendering. No group-profile tree is substituted for cell/gene clustering. |
+| Clustermap | Public SciPy `linkage`/`dendrogram(no_plot=True)`, as used by Scanpy/Seaborn, or supplied linkage | Detached pandas normalization, selected source access, color-track alignment and shared numeric tiles/tree rendering. No group-profile tree is substituted for cell/gene clustering. |
 | Ranked summaries | Public `sc.get.rank_genes_groups_df` and stored ranking metadata; existing dotplot, matrixplot and heatmap entry points | One detached result shared by marker selection and statistic colors, ordered marker slots, strict stored fold-change filtering and clear missing-result errors. No ranking is run or cached data repaired. |
 
 Scanpy 1.11.5 has no public standalone dotplot/matrixplot preparation method.
@@ -990,19 +990,11 @@ means or changes AnnData.
 | `show_values` | Default False. Reveal the plotted cell values to two decimals when the tiles have enough room; missing cells remain empty. |
 | `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Category-band tooltips show the group in its own native track. `hover=False` disables both. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
 
-This preview accepts **at most 250,000 cell–gene values**, counting repeated
-slots. Larger requests fail before expression extraction and ask for an explicit
-subset. No rows or columns are sampled, aggregated or silently truncated. The
-selected-column getter materializes only requested genes; disk-backed/lazy
-expression and sparse arrays remain explicit upstream access limits.
-
-The retained resource observation uses 5,000 cells × 50 markers from a 20,000-gene
-sparse matrix. Preparation peaked at 114 MB tracked Python allocations; the
-250,000-tile JSON was 26.2 MB, browser first paint including dispatch took 16.2 s,
-hover after a pointer pause took 96 ms and JS heap was 168 MB. These are local
-Chromium observations, not portable limits. The 100,000-cell × 50-marker case
-verifies early rejection without expression reads. Larger transport/chunking
-work remains in M05.d.
+There is no fixed cell or value cap. Repeated slots remain visible; no rows or
+columns are sampled, aggregated or silently truncated. The selected-column getter
+materializes only requested genes; disk-backed/lazy expression and sparse arrays
+remain explicit upstream access limits. Larger transport/chunking work remains
+in M05.d as a performance task, not a prerequisite for accepting larger inputs.
 
 Sixteen frozen Scanpy 1.11.5 figures retain complete labels/guides and registered
 tile/tree references at 100 display / 150 export DPI. Native checks at DPR 1.5
@@ -1451,7 +1443,7 @@ runs PAGA/DPT. Cells sort within each node, then complete windows average the
 combined path before optional per-key zero–one normalization. Constant normalized
 profiles fail clearly. Raw expression is used when available; `use_raw=False`
 selects X. Numeric observation keys use the same rows. Only requested genes are
-densified; the limit is 250,000 selected cell–key/annotation values.
+densified. There is no fixed path-value cap.
 
 The original group band keeps all cells after smoothing. Numeric annotation
 tracks use the smoothed values. All tracks share native sample coordinates and
@@ -1513,7 +1505,7 @@ fail clearly.
 Numeric annotation bands and heatmap color/guide options do not style lines.
 Group colors and `show_node_names` apply to both views. Numeric or
 categorical annotations can still be prepared, preserving the same returned
-pseudotime and group columns. The existing resident-data/value limit and explicit
+pseudotime and group columns. The existing resident-data requirements and explicit
 analysis contract apply to both modes.
 
 ### PAGA adjacency matrices
@@ -1531,8 +1523,7 @@ chart.display(inline=True, controls=False)
 The assignments share stored sparse matrices; they do not rerun analysis or copy
 expression. `adjacency` and `adjacency_tree` select other top-level keys. Both
 must contain resident SciPy sparse matrices or arrays with the same nonempty
-square shape, limited to 250,000 values. Shape and size checks precede
-densification; only the selected group adjacency becomes dense. Expression,
+square shape. Shape checks precede densification; only the selected group adjacency becomes dense. Expression,
 embeddings, group palettes and cached layouts are untouched.
 
 Color shows adjacency values in their supplied row/column order, with missing
@@ -1624,12 +1615,11 @@ Seaborn's upper-left inset. Explicit viridis references isolate layout/value fid
 from this palette difference. Custom `cbar_pos`, `pivot_kws`, `tree_kws`, `annot`,
 `center`, `robust`, `norm`, artist options and unknown kwargs reject by name.
 
-The preview accepts resident dense/CSR/CSC inputs and views, with at most **250,000
-matrix values** and **1,000,000 pairwise distances per automatically clustered
-axis**. Both guards run before expression access. Supplying linkage avoids the
-distance allocation, but not the tile limit. Backed/lazy matrices reject before
-reading expression; no silent sampling, aggregation or full unrelated matrix
-densification occurs. The expression notebook uses all 700 packaged PBMC cells
+Resident dense/CSR/CSC inputs and views have no fixed matrix-size or pairwise-
+distance cap. Supplied linkage skips distance computation. Backed/lazy matrices
+reject before reading expression; no silent sampling or aggregation occurs.
+Clustermap requests all supplied cells and genes, so its dense values and linkage
+computations depend on the supplied dimensions. The expression notebook uses all 700 packaged PBMC cells
 and the same ten marker genes. Clustermap rows and columns remain contiguous.
 Native surround tracks keep branches and color strips adjacent with zero track
 spacing.
@@ -1955,8 +1945,8 @@ The adapter reuses heatmap's selected-gene access and cell ordering. Raw is used
 when available unless a layer or `use_raw=False` selects another source. A marker
 dictionary adds a colored gene-group strip. Explicit marker spans must cover all
 genes once, in order. Stored group colors are preserved without changing AnnData.
-The preview supports up to 250,000 resident cell–gene values; subset explicitly for
-larger inputs. Backed/lazy expression and extra styling keywords fail clearly.
+Resident expression has no fixed cell–gene value cap. Backed/lazy expression and
+extra styling keywords fail clearly.
 
 Native bars give stepped profiles. Scanpy 1.11.5 fills between neighboring cell
 values. `log=True` preserves Scanpy's log1p values and logarithmic y-axis;

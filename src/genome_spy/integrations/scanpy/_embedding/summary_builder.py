@@ -109,12 +109,10 @@ class EmbeddingSummary:
         from anndata import AnnData
 
         from genome_spy.integrations.scanpy._embedding.data import prepare_embedding
-        from genome_spy.integrations.scanpy._data import check_value_limit
         from genome_spy.integrations.scanpy._embedding.summary_data import (
             prepare_observations,
         )
         from genome_spy.integrations.scanpy._expression.grouped_data import (
-            MAX_HEATMAP_VALUES,
             grouped_expression,
         )
 
@@ -148,9 +146,6 @@ class EmbeddingSummary:
                 f"{_CONTEXT}: obs_keys must name distinct observation columns."
             )
         keys = [key for key in keys if key != groupby]
-        check_value_limit(
-            adata.n_obs, len(names) + len(keys), MAX_HEATMAP_VALUES, context=_CONTEXT
-        )
         groups = adata.obs[groupby]
         if not isinstance(groups.dtype, pd.CategoricalDtype) and (
             pd.api.types.is_numeric_dtype(groups.dtype)

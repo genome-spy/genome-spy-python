@@ -80,16 +80,6 @@ def numeric_values(table: pd.DataFrame, *, context: str) -> np.ndarray:
     return values
 
 
-def check_value_limit(rows: int, columns: int, limit: int, *, context: str) -> None:
-    """Reject oversized cell tables before reading or copying their values."""
-    if rows * columns > limit:
-        raise ValueError(
-            f"{context}: at most {limit:,} cell values are supported; "
-            "subset cells or genes, or request fewer observation columns. "
-            "No values were loaded."
-        )
-
-
 def matrix_array(matrix: Any, *, context: str, allow_vector: bool = False) -> Any:
     """Return resident 2D values, promoting a vector only when requested.
 

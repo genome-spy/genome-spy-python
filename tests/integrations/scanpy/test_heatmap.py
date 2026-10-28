@@ -286,19 +286,36 @@ def test_sparse_views_densify_only_selected_genes(adata, monkeypatch, storage):
     assert len(records(chart)) == 15
 
 
-def test_large_request_fails_before_extraction(monkeypatch):
+@pytest.mark.parametrize("family", ["heatmap", "tracksplot"])
+def test_large_cell_plots_read_only_requested_columns(monkeypatch, family):
     import anndata as ad
+    import genome_spy as gs
+    from genome_spy.integrations.scanpy._expression import (
+        heatmap_chart,
+        tracksplot_chart,
+    )
 
     a = ad.AnnData(
         sparse.csr_matrix((100_000, 20_000)),
         obs=pd.DataFrame({"group": pd.Categorical(["A"] * 100_000)}),
     )
     a.var_names = [f"g{i}" for i in range(20_000)]
-    monkeypatch.setattr(
-        sc.get, "obs_df", lambda *a, **kw: pytest.fail("Read expression")
-    )
-    with pytest.raises(ValueError, match="250,000.*subset cells or genes"):
-        plot(a, var_names=[f"g{i}" for i in range(50)])
+    original, shapes, displayed = sparse.csr_matrix.toarray, [], []
+
+    def selected(matrix, *args, **kwargs):
+        shapes.append(matrix.shape)
+        assert matrix.shape == (100_000, 3), "Densified unrequested genes"
+        return original(matrix, *args, **kwargs)
+
+    def render(prepared, *args, **kwargs):
+        displayed.append(prepared.values.shape)
+        return gs.Chart().mark_rect()
+
+    monkeypatch.setattr(sparse.csr_matrix, "toarray", selected)
+    module = heatmap_chart if family == "heatmap" else tracksplot_chart
+    monkeypatch.setattr(module, f"build_{family}", render)
+    getattr(gsc.pl, family)(a, ["g0", "g1", "g2"], "group", use_raw=False, show=False)
+    assert shapes == displayed == [(100_000, 3)]
 
 
 def test_two_groups_get_a_tree_and_many_genes_hide_labels(adata):

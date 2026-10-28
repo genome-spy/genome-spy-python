@@ -47,6 +47,8 @@ acceptance criteria. Keep detailed parameter contracts in
 
 Test data semantics independently, then complete charts and observed interactions.
 Include sparse allocation, realistic memory use and notebook/HTML delivery.
+Do not impose artificial cell, value or clustering-size caps. Improve preparation
+and transport where measurements show a bottleneck.
 Test supported Scanpy versions separately from the pinned reference environment.
 Update the existing plan and status when a slice closes; remove obsolete working
 notes after their useful findings have permanent homes. Keep generated evidence

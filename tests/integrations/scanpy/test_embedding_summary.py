@@ -230,20 +230,6 @@ def test_composition_reuses_umap_palette_and_order_with_missing_values(adata):
     assert bars["encoding"]["y"]["scale"]["domain"] == ["B", "A", "NA"]
 
 
-def test_metadata_counts_toward_pre_read_limit(metadata_adata, monkeypatch):
-    import scanpy as sc
-    from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
-
-    monkeypatch.setattr(_grouped_data, "MAX_HEATMAP_VALUES", 11)
-
-    def forbidden(*args, **kwargs):
-        pytest.fail("Oversized gene + obs requests must stop before expression reads")
-
-    monkeypatch.setattr(sc.get, "obs_df", forbidden)
-    with pytest.raises(ValueError, match="No values were loaded"):
-        gsc.pl.EmbeddingSummary(metadata_adata, "HLA-DRA", "type", obs_keys="qc.score")
-
-
 def test_obs_keys_and_panel_types_are_explicit(metadata_adata):
     for keys in (["absent"], ["qc.score", "qc.score"], {"a": "qc.score"}):
         with pytest.raises(ValueError, match="distinct observation columns"):
@@ -368,18 +354,35 @@ def test_native_scope_isotropy_and_panel_replacement(adata, zoom):
     assert points["encoding"]["color"]["legend"] is None
 
 
-def test_cell_gene_guard_runs_before_expression_read(adata, monkeypatch):
-    import scanpy as sc
-    from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
+def test_large_summary_reads_only_requested_genes_and_observations(monkeypatch):
+    from anndata import AnnData
+    from scipy import sparse
 
-    monkeypatch.setattr(_grouped_data, "MAX_HEATMAP_VALUES", 5)
+    count = 100_001
+    a = AnnData(
+        sparse.csr_matrix((count, 20_000)),
+        obs=pd.DataFrame(
+            {
+                "type": pd.Categorical(["A"] * count),
+                "qc": np.arange(count),
+                "batch": pd.Categorical(["D1"] * count),
+            }
+        ),
+    )
+    a.var_names = [f"g{i}" for i in range(a.n_vars)]
+    a.obsm["X_umap"] = np.zeros((count, 2))
+    original, shapes = sparse.csr_matrix.toarray, []
 
-    def forbidden(*args, **kwargs):
-        pytest.fail("An oversized request must fail before reading expression")
+    def selected(matrix, *args, **kwargs):
+        shapes.append(matrix.shape)
+        assert matrix.shape == (count, 1), "Densified unrequested genes"
+        return original(matrix, *args, **kwargs)
 
-    monkeypatch.setattr(sc.get, "obs_df", forbidden)
-    with pytest.raises(ValueError, match="No values were loaded"):
-        gsc.pl.EmbeddingSummary(adata, "HLA-DRA", "type")
+    monkeypatch.setattr(sparse.csr_matrix, "toarray", selected)
+    plot = gsc.pl.EmbeddingSummary(a, "g1", "type", obs_keys=["qc", "batch"])
+    assert shapes == [(count, 1)]
+    assert len(plot._prepared.table) == count
+    assert set(plot._observations) == {"type", "qc", "batch"}
 
 
 def test_invalid_genes_and_numeric_grouping_are_explicit(adata):

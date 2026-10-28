@@ -157,14 +157,13 @@ def test_invalid_tables_fail_with_context(key, value, match):
         gsc.pl.paga_adjacency(a, show=False)
 
 
-def test_large_adjacency_rejects_before_densification(monkeypatch):
+def test_large_adjacency_is_not_rejected_by_a_fixed_size_limit():
     a = make_adjacency()
     a.uns["connectivities"] = sparse.csr_matrix((501, 501))
-    monkeypatch.setattr(
-        sparse.csr_matrix, "toarray", lambda *a, **k: pytest.fail("Densified")
-    )
-    with pytest.raises(ValueError, match="250,000"):
-        gsc.pl.paga_adjacency(a, show=False)
+    a.uns["connectivities_tree"] = sparse.csr_matrix((501, 501))
+    values, points = adjacency_values(a, "connectivities", "connectivities_tree")
+    assert values.shape == (501, 501)
+    assert points.empty
 
 
 def test_sparse_arrays_and_explicit_zeros_keep_the_same_point_orientation():

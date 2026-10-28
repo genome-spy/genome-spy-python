@@ -1538,8 +1538,8 @@ def tracksplot(
         precedence and cell order within groups. Each cell is one native rect,
         giving stepped profiles rather than Scanpy's fill between adjacent values.
         Optional trees reuse stored linkage or Scanpy's existing tree helper;
-        plotting never fits embeddings or rankings. The preview reads at most
-        250,000 cell–gene values from resident data, without changing AnnData.
+        plotting never fits embeddings or rankings. Read only selected resident
+        expression without changing AnnData.
 
     Args:
         adata: Annotated expression data.
@@ -1693,8 +1693,6 @@ def heatmap(
         optional cell/gene scaling before sorting cells by category. Render
         native tiles, category strips, marker annotations and optional stored
         dendrograms. Colors use cell values; embeddings and rankings are not rerun.
-        This preview supports at most 250,000 cell–gene values and rejects
-        larger requests before extraction; subset explicitly to plot more data.
 
     Args:
         adata: Annotated expression data.
@@ -1905,7 +1903,7 @@ def clustermap(
     Raises:
         ImportError: The supported Scanpy dependency is unavailable.
         TypeError: Options or data have unsupported types.
-        ValueError: Shapes, linkage, scaling or resource limits are invalid.
+        ValueError: Shapes, linkage or scaling are invalid.
         NotImplementedError: A renderer-specific option is unsupported.
 
     Example:

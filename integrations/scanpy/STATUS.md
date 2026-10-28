@@ -51,6 +51,13 @@ The working guide uses fixed gene lists, native brushing/counts, UMAP-linked
 histograms/means and PBMC3k tracks. Embedding and expression workflows remain
 separate; focused guides provide the user-facing pages and downloads.
 
+The prototype value and clustering-distance caps are removed. Heatmaps, tracks,
+linked summaries, ranked heatmaps, PAGA paths/adjacency and clustermaps accept
+larger inputs without an adapter-imposed threshold. Shape, source and storage
+checks remain. Large-input tests check selected-column allocation and real
+clustering beyond the former distance threshold. Relevant tests passed on both
+Scanpy versions: 782 passed and one existing expected failure each.
+
 ## Milestones
 
 States apply to the stated scope; a closed preview is not a closed full family.
@@ -194,7 +201,7 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Clustermap parameter group | Current support | Completion owner |
 | --- | --- | --- |
 | Resident raw/X, row/column linkage, scaling before distances, masks, annotation tracks, duplicates, native labels/hover | Tested bounded preview; exact forms in maintained contract | M05.c preview retained |
-| Larger/chunked values, backed/lazy data and quadratic-distance policy | Explicit pre-access guards; supplied linkage bypasses computation only | M05.d/M14.c |
+| Large values, backed/lazy data and clustering costs | No fixed value/distance caps; resident-data checks remain. Supplied linkage skips computation; chunked transport remains a performance task | M05.d/M14.c |
 | Zoom and fitted values | Shared grid helpers; y-only or both-axis navigation with aligned trees/strips/ticks | M05.e preview retained |
 | Linked cell selections | Not implemented | M14.c interaction/options review |
 | Seaborn rocket/inset colorbar, custom tree/heatmap kwargs, annotation forms and normalization | Native magma/right guide; unsupported options reject by name | M14.c; Matplotlib objects remain outside boundary |
