@@ -5130,3 +5130,14 @@ the refactor. All 68 complete chart specs match exactly; 157 Python and 53 brows
 checks pass, with the existing upstream component expected failure. Ruff,
 formatting and full source mypy pass. The full suite and resource benchmarks
 were not rerun. Evidence stays temporary; no plan is cleared.
+
+### PAGA comparison titles and position branches
+
+Comparison panels now name their shared or individual titles once. Position
+selection has flat median/cached branches, and one group-color decision controls
+both placement and palette forwarding. Supplied positions and existing source
+checks are unchanged; no helper or public option was added. All 48 complete chart
+specs match exactly; 157 Python and 11 browser checks pass, with the existing
+upstream component expected failure. Ruff, formatting and full source mypy pass.
+The full suite and resource benchmarks were not rerun. Evidence stays temporary;
+no plan is cleared. Other pending API work remains outside this focused commit.

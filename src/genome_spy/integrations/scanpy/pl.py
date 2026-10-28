@@ -2169,6 +2169,7 @@ def paga_compare(
         raise NotImplementedError(
             f"{context}: color must be a single observation key or gene."
         )
+    uses_group_colors = color == key
     if basis is None:
         basis = next(
             (
@@ -2184,7 +2185,12 @@ def paga_compare(
         raise NotImplementedError(
             f"{context}: components must select one coordinate pair."
         )
-    common_title = (color if title is None else title) if title_graph is None else None
+    # A graph title gives each panel its own title; otherwise share one heading.
+    common_title = None
+    embedding_title, graph_title = title, title_graph
+    if title_graph is None:
+        common_title = color if title is None else title
+        embedding_title = graph_title = ""
     embedding_chart = _embedding(
         adata,
         basis,
@@ -2204,7 +2210,7 @@ def paga_compare(
         palette=palette,
         frameon=frameon,
         size=9 if size is None else size,
-        title="" if title_graph is None else title,
+        title=embedding_title,
         hover=hover,
         zoom=zoom,
         width=width,
@@ -2212,25 +2218,26 @@ def paga_compare(
         show=False,
         save=False,
     )
-    if pos is None:
-        if color == key:
-            coordinates = pd.DataFrame(
-                adata.obsm[coordinate_key][:, list(dimensions[0])],
-                columns=["x", "y"],
-                index=adata.obs_names,
+
+    # Only group-colored comparisons place nodes at their embedding medians.
+    if pos is None and uses_group_colors:
+        coordinates = pd.DataFrame(
+            adata.obsm[coordinate_key][:, list(dimensions[0])],
+            columns=["x", "y"],
+            index=adata.obs_names,
+        )
+        pos = (
+            coordinates.groupby(adata.obs[key], observed=True)
+            .median()
+            .sort_index()
+            .to_numpy()
+        )
+    elif pos is None:
+        pos = stored.get("pos")
+        if pos is None:
+            raise ValueError(
+                f"{context}: non-group colors require supplied or cached PAGA positions."
             )
-            pos = (
-                coordinates.groupby(adata.obs[key], observed=True)
-                .median()
-                .sort_index()
-                .to_numpy()
-            )
-        else:
-            pos = stored.get("pos")
-            if pos is None:
-                raise ValueError(
-                    f"{context}: non-group colors require supplied or cached PAGA positions."
-                )
     labels = paga_graph_params.pop("labels", groups_graph)
     if legend_fontsize is not None:
         paga_graph_params["fontsize"] = _font_size(legend_fontsize) / POINTS_TO_PIXELS
@@ -2244,11 +2251,11 @@ def paga_compare(
     graph = paga(
         adata,
         colors=color,
-        palette=palette if color == key else None,
+        palette=palette if uses_group_colors else None,
         labels=labels,
         pos=pos,
         frameon=frameon,
-        title="" if title_graph is None else title_graph,
+        title=graph_title,
         hover=hover,
         zoom=False,
         width=300 if width is None else width,
@@ -2258,6 +2265,7 @@ def paga_compare(
         **paga_graph_params,
     )
     assert embedding_chart is not None and isinstance(graph, gs.LayerChart)
+
     # The graph inherits the embedding limits instead of contributing its own.
     graph = graph.encode(x=gs.X("_x:Q").axis(None), y=gs.Y("_y:Q").axis(None))
     chart = (
