@@ -5107,3 +5107,14 @@ Remaining worthwhile review targets are PAGA orchestration in pl.py, time-series
 legend/interaction setup, heatmap layout/side tracks, and linked-summary assembly.
 These files are partly simplified already; function length alone is not a reason
 to split native chart declarations. Evidence stays temporary; no plan is cleared.
+
+### Time-series series-legend construction
+
+The main time-series builder now delegates series-key construction and style
+overrides to a small local helper. Numeric legend colors use named bounds and
+a separate color value instead of a long conditional inside an expression.
+Hidden keys, missing/constant colors, DPT colorbars and simulation styles retain
+their behavior. All 79 complete chart specs match exactly; 164 Python and 45
+browser checks pass. Ruff, formatting and full source mypy pass. The full suite
+and resource benchmarks were not rerun. Evidence stays temporary; no plan is
+cleared. Other pending time-series refactors remain outside this focused commit.

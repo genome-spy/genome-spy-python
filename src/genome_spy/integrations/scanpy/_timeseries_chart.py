@@ -29,6 +29,25 @@ from genome_spy.integrations.scanpy._style import (
 from genome_spy.integrations.scanpy._timeseries_data import CONTEXT, prepare_timeseries
 
 
+def _series_legend(
+    size: float, shape: str, *, enabled: bool, style: gs.Legend | None
+) -> gs.Legend | None:
+    """Return a native series key from point dimensions and optional style overrides."""
+    if not enabled:
+        return None
+    guide = gs.Legend(
+        title=None,
+        orient="bottom",
+        direction="horizontal",
+        symbolSize=size,
+        symbolStrokeWidth=0,
+        symbolType=shape,
+    )
+    if style is not None:
+        guide = guide.copy(**style.to_dict())
+    return guide
+
+
 def build_timeseries(
     X: Any,
     *,
@@ -147,21 +166,9 @@ def build_timeseries(
                 labels, "_run", name="simulation_run", title="Run: "
             )
             opacity = gs.expr.min(opacity, run_opacity)
-    guide = (
-        gs.Legend(
-            title=None,
-            orient="bottom",
-            direction="horizontal",
-            symbolSize=size,
-            symbolStrokeWidth=0,
-            symbolType=shape,
-        )
-        if prepared.legend or colorbar
-        else None
+    guide = _series_legend(
+        size, shape, enabled=prepared.legend or colorbar, style=legend_style
     )
-    # Allow readable keys without enlarging the plotted points.
-    if guide is not None and legend_style is not None:
-        guide = guide.copy(**legend_style.to_dict())
     if prepared.color_domain is None:
         labels = list(dict.fromkeys(prepared.table["_series"]))
         scale = gs.Scale(type="ordinal", domain=labels, range=list(prepared.palette))
@@ -225,9 +232,9 @@ def build_timeseries(
         visible = np.isfinite(
             first[["_time", "_value", "_color"]].to_numpy(dtype=float)
         ).all()
-        ink = gs.expr(
-            f"scale('fill', {float(first['_color']) if visible and prepared.color_domain[0] != prepared.color_domain[1] else 0})"
-        )
+        low, high = prepared.color_domain
+        color_value = float(first["_color"]) if visible and low != high else 0
+        ink = gs.expr(f"scale('fill', {color_value})")
         points = points.encode(
             shape=gs.Shape("_series:N")
             .scale(
