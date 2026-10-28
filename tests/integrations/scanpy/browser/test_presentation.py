@@ -27,8 +27,11 @@ def plot_points(page):
     ]
 
 
-def test_hvg_slider_changes_both_panels_and_count_and_keeps_saved_flags(page):
+@pytest.mark.parametrize("missing", [None, "dispersions_norm", "means"])
+def test_hvg_slider_changes_both_panels_and_count_and_keeps_saved_flags(page, missing):
     result = make_hvg_result()
+    if missing is not None:
+        result.loc[result.index[0], missing] = np.nan
     before = result.copy(deep=True)
     chart = gsc.pl.highly_variable_genes(
         result, threshold_slider=True, zoom=True, show=False
@@ -36,19 +39,26 @@ def test_hvg_slider_changes_both_panels_and_count_and_keeps_saved_flags(page):
     render(page, chart)
     slider = page.locator('input[type="range"]')
     assert slider.count() == 1
-    for cutoff in [-1, 1.0, 2.5]:
+    for cutoff in [-1, 1.0, 2.5, 8.0]:
         slider.evaluate(
             "(el, value) => {el.value=value; el.dispatchEvent(new Event('input', {bubbles:true}));}",
             cutoff,
         )
-        expected = int((result.dispersions_norm >= cutoff).sum())
+        above = result.dispersions_norm >= cutoff
+        expected = int(above.sum())
         page.wait_for_function(
             "async count => (await (await api.imageExport.svg()).blob.text()).includes(count + ' genes above cutoff (preview)')",
             arg=expected,
         )
         circles = plot_points(page)
-        assert len(circles) == 2 * len(result)
-        assert sum(c.get("fill") == "#2563a6" for c in circles) == 2 * expected
+        visible = result.means.notna()
+        assert (
+            len(circles)
+            == visible.sum() + (visible & result.dispersions_norm.notna()).sum()
+        )
+        assert sum(c.get("fill") == "#2563a6" for c in circles) == 2 * int(
+            (visible & above).sum()
+        )
     np.testing.assert_array_equal(result.highly_variable, before.highly_variable)
 
 

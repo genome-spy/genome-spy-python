@@ -5061,3 +5061,16 @@ are unchanged. All 36 complete chart specs match exactly; 409 Python and 30
 browser checks pass. Ruff, formatting and full source mypy pass. The full suite
 and resource benchmarks were not rerun. Evidence stays temporary; no plan is
 cleared. Other pending changes remain outside this focused commit.
+
+### Shared variable-gene preview calculation
+
+Variable-gene point colors and the cutoff count now reuse one numeric preview
+flag on the unfiltered source. The count helper no longer repeats the cutoff
+expression or takes its inputs separately. This also commits the earlier local
+log-axis and tooltip readability cleanup. Missing mean-expression values still
+hide points without removing genes from the cutoff count; missing scores do not
+count. All three slider cases pass before and after the change, including exact
+cutoff equality. All 16 default chart specs match exactly; 61 Python and nine
+browser checks pass. Ruff, formatting and full source mypy pass. The full suite
+and resource benchmarks were not rerun. Evidence stays temporary; no plan is
+cleared. Other pending work remains outside this focused commit.

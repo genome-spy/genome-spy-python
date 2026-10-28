@@ -12,6 +12,36 @@ from genome_spy.integrations.scanpy._style import (
 )
 
 
+def _log_domains(table: pd.DataFrame, statistic: str) -> list[list[float]]:
+    """Return shared log-axis limits from means and raw scores, rejecting invalid values."""
+    raw = table[statistic].to_numpy()
+    means = table["means"].to_numpy()
+    if not np.isfinite(means).all() or not np.isfinite(raw).all() or (means <= 0).any():
+        raise NotImplementedError(
+            "gsc.pl.highly_variable_genes: log=True requires finite positive means and finite raw statistics."
+        )
+    low = 0.95 * raw.min() if raw.min() > 0 else 0.1
+    high = 1.05 * raw.max()
+    if not 0 < low < high:
+        raise NotImplementedError(
+            "gsc.pl.highly_variable_genes: log=True requires positive increasing raw-statistic limits."
+        )
+
+    # Scanpy uses the raw statistic's limits on both logarithmic panels.
+    return [[0.95 * means.min(), 1.05 * means.max()], [low, high]]
+
+
+def _cutoff_count(source: gs.Chart, width: float) -> gs.Chart:
+    """Return a count label from the shared preview source, before hiding points."""
+    return (
+        source.transform_aggregate(fields=["_above"], ops=["sum"], as_=["_count"])
+        .transform_calculate(_label="datum._count + ' genes above cutoff (preview)'")
+        .mark_text(align="left", baseline="middle", size=12, font=FONT, tooltip=None)
+        .encode(x=gs.value(0), y=gs.value(0.5), text="_label:N")
+        .properties(width=2.3 * width, height=24)
+    )
+
+
 def build_variable_genes(
     table: pd.DataFrame,
     statistic: str,
@@ -27,24 +57,9 @@ def build_variable_genes(
     width, height = 300 if width is None else width, 300 if height is None else height
     log_domains = None
     if log:
-        raw = table[statistic].to_numpy()
-        means = table["means"].to_numpy()
-        if (
-            not np.isfinite(means).all()
-            or not np.isfinite(raw).all()
-            or (means <= 0).any()
-        ):
-            raise NotImplementedError(
-                "gsc.pl.highly_variable_genes: log=True requires finite positive means and finite raw statistics."
-            )
-        low = 0.95 * raw.min() if raw.min() > 0 else 0.1
-        high = 1.05 * raw.max()
-        if not 0 < low < high:
-            raise NotImplementedError(
-                "gsc.pl.highly_variable_genes: log=True requires positive increasing raw-statistic limits."
-            )
-        # Scanpy uses the raw statistic's limits on both logarithmic panels.
-        log_domains = [[0.95 * means.min(), 1.05 * means.max()], [low, high]]
+        log_domains = _log_domains(table, statistic)
+
+    # The optional cutoff previews a choice without changing saved selections.
     cutoff = None
     normalized = f"{statistic}_norm"
     if threshold_slider:
@@ -74,23 +89,37 @@ def build_variable_genes(
         domain=statuses,
         range=["#2563a6", "#cbd5e1"],
     )
+
+    # One numeric flag drives both point colors and the cutoff count.
+    source = gs.Chart(table)
+    if cutoff is not None:
+        source = source.transform_calculate(
+            _above=gs.expr.if_(
+                gs.expr.isValid(gs.datum[normalized])
+                & (gs.datum[normalized] >= cutoff),
+                1,
+                0,
+            ),
+        ).transform_calculate(_preview_status=gs.expr.if_(gs.datum._above, *statuses))
+
+    # Both score panels share colors but keep independent axes.
     panels = []
     for index, field in enumerate((f"{statistic}_norm", statistic)):
         valid = table[["means", field]].dropna()
         axes = {}
-        for axis, key in (("x", "means"), ("y", field)):
-            domain = (
-                log_domains[0 if axis == "x" else 1]
-                if log_domains is not None
-                else coordinate_domain(
-                    valid[key].to_numpy() if len(valid) else np.array([0.0]), 0.05
-                )
-            )
-            label = (
-                "Mean expression"
-                if axis == "x"
-                else f"{'Normalized ' if index == 0 else ''}{statistic.removesuffix('s')}"
-            )
+        score_label = (
+            f"{'Normalized ' if index == 0 else ''}{statistic.removesuffix('s')}"
+        )
+        for axis, key, label in (
+            ("x", "means", "Mean expression"),
+            ("y", field, score_label),
+        ):
+            domain: list[float] | tuple[float, float]
+            if log_domains is not None:
+                domain = log_domains[0 if axis == "x" else 1]
+            else:
+                observed = valid[key].to_numpy() if len(valid) else np.array([0.0])
+                domain = coordinate_domain(observed, 0.05)
             channel = gs.X if axis == "x" else gs.Y
             axes[axis] = (
                 channel(f"{key}:Q")
@@ -102,14 +131,6 @@ def build_variable_genes(
                     zoom=zoom,
                 )
                 .axis(title=label, domain=False)
-            )
-        source = gs.Chart(table)
-        if cutoff is not None:
-            source = source.transform_calculate(
-                _above=gs.expr.isValid(gs.datum[normalized])
-                & (gs.datum[normalized] >= cutoff),
-            ).transform_calculate(
-                _preview_status=gs.expr.if_(gs.datum._above, *statuses)
             )
         panel: gs.Chart | gs.LayerChart = (
             source.transform_filter(
@@ -141,24 +162,20 @@ def build_variable_genes(
             .properties(width=width, height=height)
         )
         if hover:
-            panel = panel.encode(
-                tooltip=[
-                    gs.Tooltip("_obs_id:N", title="Gene ID"),
-                    gs.Tooltip("_obs_label:N", title="Gene"),
-                    gs.Tooltip("_status:N", title="Selection"),
-                    gs.Tooltip("means:Q", title="Mean expression", format=".4g"),
-                    gs.Tooltip(
-                        f"{field}:Q",
-                        title=f"{statistic} ({'normalized' if index == 0 else 'not normalized'})",
-                        format=".4g",
-                    ),
-                ]
-                + (
-                    [gs.Tooltip("_preview_status:N", title="Preview")]
-                    if cutoff is not None
-                    else []
-                )
-            )
+            tooltips = [
+                gs.Tooltip("_obs_id:N", title="Gene ID"),
+                gs.Tooltip("_obs_label:N", title="Gene"),
+                gs.Tooltip("_status:N", title="Selection"),
+                gs.Tooltip("means:Q", title="Mean expression", format=".4g"),
+                gs.Tooltip(
+                    f"{field}:Q",
+                    title=f"{statistic} ({'normalized' if index == 0 else 'not normalized'})",
+                    format=".4g",
+                ),
+            ]
+            if cutoff is not None:
+                tooltips.append(gs.Tooltip("_preview_status:N", title="Preview"))
+            panel = panel.encode(tooltip=tooltips)
         if cutoff is not None and index == 0:
             rule = (
                 gs.Chart([{}])
@@ -170,30 +187,13 @@ def build_variable_genes(
             )
             panel = gs.layer(rule, panel).properties(width=width, height=height)
         panels.append(panel)
+
+    # Collect the legend once below the two panels.
     result: gs.HConcatChart | gs.VConcatChart = gs.hconcat(
         *panels, spacing=0.3 * width
     ).resolve_scale(x="independent", y="independent", fill="shared")
     if cutoff is not None:
-        count = (
-            gs.Chart(table)
-            .transform_calculate(
-                _above=gs.expr.if_(
-                    gs.expr.isValid(gs.datum[normalized])
-                    & (gs.datum[normalized] >= cutoff),
-                    1,
-                    0,
-                )
-            )
-            .transform_aggregate(fields=["_above"], ops=["sum"], as_=["_count"])
-            .transform_calculate(
-                _label="datum._count + ' genes above cutoff (preview)'"
-            )
-            .mark_text(
-                align="left", baseline="middle", size=12, font=FONT, tooltip=None
-            )
-            .encode(x=gs.value(0), y=gs.value(0.5), text="_label:N")
-            .properties(width=2.3 * width, height=24)
-        )
+        count = _cutoff_count(source, width)
         result = gs.vconcat(result, count, spacing=8).add_params(cutoff)
     return (
         result.resolve_scale(
