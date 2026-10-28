@@ -5162,3 +5162,13 @@ source values; both tests passed before the cleanup. All 49 sampled complete
 chart specs match exactly, and all 38 clustermap Python tests pass. Ruff,
 formatting and full source mypy pass. Browser tests, the full suite and resource
 benchmarks were not rerun. No plan is cleared; unrelated work stays unstaged.
+
+### Ranking label-spacing calculation
+
+The ranking renderer now measures each rotated label in a short loop with named
+label height and space above its score. Layout stays inside that renderer; no
+helper, shared policy or public option was added. All 32 sampled complete chart
+specs match exactly. All 127 targeted Python and two PCA overview browser tests
+pass, along with Ruff, formatting and full source mypy. The full suite and
+resource benchmarks were not rerun. No plan is cleared; unrelated work remains
+unstaged. Generated evidence stays in temporary directories.

@@ -79,17 +79,15 @@ def build_ranking(
                     gs.Tooltip("_rank:Q", title="Rank", format="d"),
                 ]
             )
+
         # Reserve only the part of a rotated label that can extend above the plot.
-        top_space = max(
-            0,
-            max(
-                len(label) * fontsize * POINTS_TO_PIXELS
-                - (domain[1] - score) / (domain[1] - domain[0]) * height
-                for label, score in panel.values[["_label", "_score"]].itertuples(
-                    index=False, name=None
-                )
-            ),
-        )
+        top_space = 0
+        for label, score in panel.values[["_label", "_score"]].itertuples(
+            index=False, name=None
+        ):
+            label_height = len(label) * fontsize * POINTS_TO_PIXELS
+            space_above_score = (domain[1] - score) / (domain[1] - domain[0]) * height
+            top_space = max(top_space, label_height - space_above_score)
         charts.append(
             chart.properties(
                 width=width,
