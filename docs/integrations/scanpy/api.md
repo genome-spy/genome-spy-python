@@ -1,7 +1,7 @@
 # Scanpy API reference
 
-This integration is an unreleased preview, tested with Scanpy 1.11.5.
-See [supported plots and options](supported.md) for limits and differences.
+See [Scanpy compatibility](supported.md) for coverage, shared differences and
+supported options.
 
 ## Plotting
 
@@ -9,6 +9,7 @@ See [supported plots and options](supported.md) for limits and differences.
 .. automodule:: genome_spy.integrations.scanpy.pl
    :members:
    :imported-members:
+   :inherited-members:
 ```
 
 ## Selected cells

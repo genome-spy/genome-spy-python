@@ -3,17 +3,10 @@
 Keep using Scanpy for preprocessing, embeddings and gene ranking. Use GenomeSpy
 for interactive plots of those results.
 
-:::{note}
-This integration is an **unreleased preview**, tested with **Scanpy 1.11.5**.
-It is not included in the published genome-spy-python 0.7.0 release.
-:::
-
 ## Install
 
-From the project folder containing this preview:
-
 ```sh
-python -m pip install -e '.[scanpy]'
+pip install --upgrade 'genome-spy-python[scanpy]'
 ```
 
 Use that environment as your Jupyter kernel. Scanpy remains an optional dependency.
@@ -31,12 +24,16 @@ gsc.pl.umap(adata, color="louvain", zoom=True)
 The plot reads the existing `adata.obsm["X_umap"]` coordinates. It does not compute
 an embedding or change your analysis.
 
-Start with [UMAP and embeddings](umap.md) to plot, select cells and customize a chart.
+Start with [UMAP and embeddings](umap.md) to plot UMAP, t-SNE and diffusion maps,
+select cells and customize a chart.
 Use [expression plots](expression.md) to compare marker genes across cell groups
 with dotplots, matrixplots, heatmaps and clustermaps. That guide also covers
 numeric matrices, correlations, dendrograms and builders.
 Use [expression tracks](tracks.md) to inspect individual cells with aligned gene
 profiles, hover and zoom.
+Try [linked expression summaries](linked_expression.md) to brush a UMAP and compare
+marker expression within cell types, alongside selected-cell histograms, or highlight
+the same PBMC3k cells across marker tracks.
 
 Inspect stored [PCA diagnostics](pca.md) or plot [ranked genes](ranked.md) using
 results already computed by Scanpy.
@@ -44,9 +41,10 @@ results already computed by Scanpy.
 Explore [PAGA graphs and paths](paga.md), or compare [ordered profiles and
 simulations](profiles.md), including simulation heatmaps and DPT plots.
 
-Use [data checks](quality.md) with Scanpy's full PBMC3k counts, or try
-[a larger PBMC dataset](larger_data.md) with 11,769 cells.
-Check [supported plots and options](supported.md) for available calls and differences
+Use [data checks](quality.md) with Scanpy's full PBMC3k counts.
+See [save and export](export.md) for interactive HTML, chart definitions and
+PNG/SVG images, including the plot buttons.
+Check [Scanpy compatibility](supported.md) for available calls and differences
 from Scanpy. Unsupported options raise an error.
 
 ```{toctree}
@@ -56,11 +54,12 @@ UMAP and embeddings <umap>
 PCA diagnostics <pca>
 Expression plots <expression>
 Expression tracks <tracks>
+Linked expression summaries <linked_expression>
 Ranked genes <ranked>
 PAGA graphs and paths <paga>
 Profiles and simulations <profiles>
 Data checks <quality>
-A larger dataset <larger_data>
-Supported plots and options <supported>
+Save and export <export>
+Scanpy compatibility <supported>
 API reference <api>
 ```

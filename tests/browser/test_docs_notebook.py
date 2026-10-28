@@ -338,77 +338,6 @@ def test_data_check_guide_sliders_update_saved_results_preview(monkeypatch, page
     assert reloaded.var["highly_variable"].equals(before)
 
 
-def test_larger_data_guide_hover_zoom_and_point_growth(monkeypatch, page):
-    pytest.importorskip("scanpy")
-    from scipy.spatial import cKDTree
-
-    specs = _render_guide(page, monkeypatch, "larger_data.ipynb")
-    assert len(specs) == 4
-    rows = next(iter(specs[2]["datasets"].values()))
-    assert len(rows) == 11537
-    coordinates = np.array([[r["_coord_0"], r["_coord_1"]] for r in rows])
-    nearest, _ = cKDTree(coordinates).query(coordinates, k=2)
-    isolated = rows[int(nearest[:, 1].argmax())]
-    page.evaluate("""() => {
-        window.largePoints = () => guideApis[2].debug.getViewRoot().getDescendants()
-            .find(v => v.spec.mark?.type === 'point' && v.spec.encoding?.x?.field === '_coord_0');
-        window.largeDomains = () => ['x','y'].map(c => largePoints().getScaleResolution(c).getDomain());
-    }""")
-    chart = page.locator("canvas").nth(2)
-    chart.scroll_into_view_if_needed()
-    bounds = page.evaluate("""() => {
-        const {x,y,width,height} = largePoints().coords; return {x,y,width,height};
-    }""")
-    domains = page.evaluate("largeDomains()")
-    fraction = [
-        (isolated[f"_coord_{i}"] - low) / (high - low)
-        for i, (low, high) in enumerate(domains)
-    ]
-    local_x = bounds["x"] + fraction[0] * bounds["width"]
-    page.locator(".canvas-wrapper").nth(2).evaluate(
-        "(el, x) => el.scrollLeft = Math.max(0, x - el.clientWidth / 2)", local_x
-    )
-    canvas = chart.bounding_box()
-    x = canvas["x"] + local_x
-    y = canvas["y"] + bounds["y"] + (1 - fraction[1]) * bounds["height"]
-    page.mouse.move(x - 1, y - 1)
-    page.wait_for_timeout(400)
-    tooltip_id = (
-        page.locator("table.attributes")
-        .get_by_text(isolated["_obs_id"], exact=True)
-        .first
-    )
-    for dx, dy in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]:
-        page.mouse.move(x + dx, y + dy)
-        page.wait_for_timeout(100)
-        if tooltip_id.is_visible():
-            break
-    tooltip_id.wait_for(state="visible", timeout=2000)
-
-    def radii():
-        root = ET.fromstring(
-            page.evaluate(
-                "async () => (await guideApis[2].imageExport.svg()).blob.text()"
-            )
-        )
-        return [
-            float(p.get("r"))
-            for g in root.iter()
-            if g.get("data-mark-type") == "point" and g.get("clip-path")
-            for p in g
-            if p.tag.endswith("circle")
-        ]
-
-    before = radii()
-    assert len(before) == 2 * len(rows)
-    page.mouse.wheel(0, -450)
-    page.wait_for_function(
-        "before => largeDomains()[0][1]-largeDomains()[0][0] < before[0][1]-before[0][0]",
-        arg=domains,
-    )
-    assert min(radii()) > max(before)
-
-
 def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
     sc = pytest.importorskip("scanpy")
     import genome_spy.integrations.scanpy as gsc
@@ -501,11 +430,150 @@ def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
         assert canvas.bounding_box()["x"] == pytest.approx(before - offset)
 
 
+@pytest.mark.parametrize(
+    "index,labels",
+    [
+        (2, ["UMAP1", "UMAP2"]),
+        (7, ["PC1", "PC2"]),
+        (11, ["tSNE1", "tSNE2"]),
+        (12, ["DC2", "DC3"]),
+    ],
+)
+def test_prepared_embedding_guide_hover_and_zoom(monkeypatch, page, index, labels):
+    pytest.importorskip("scanpy")
+    from scipy.spatial import cKDTree
+    from tests.integrations.scanpy.browser.test_heatmap import hover_at
+
+    specs = _render_guide(page, monkeypatch, "umap.ipynb")
+    assert len(specs) == 13
+    page.evaluate("i => {window.api = guideApis[i];}", index)
+    bounds = page.evaluate("""() => {
+        window.embedding = api.debug.getViewRoot().getDescendants()
+            .find(v => v.spec.mark?.type === 'point'
+                && v.spec.encoding?.x?.field?.startsWith('_coord_'));
+        const {x,y,width,height} = embedding.coords;
+        return {x,y,width,height};
+    }""")
+    chart = page.locator("canvas").nth(index)
+    chart.scroll_into_view_if_needed()
+    host = page.locator(".gs-doc-embed").nth(index)
+    size = page.evaluate("api.getLogicalCanvasSize()")
+    assert size["width"] <= 736
+    assert size["height"] <= host.bounding_box()["height"]
+    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    texts = [e.text for e in ET.fromstring(svg).iter() if e.tag.endswith("text")]
+    if index == 2:
+        assert "VWF expression (36,785 cells)" in texts
+        radius = max(
+            float(e.get("r"))
+            for e in ET.fromstring(svg).iter()
+            if e.tag.endswith("circle")
+        )
+    else:
+        assert all(
+            any(
+                text == label or (text or "").startswith(label + " (") for text in texts
+            )
+            for label in labels
+        )
+    rows = next(
+        rows for rows in specs[index]["datasets"].values() if "_obs_id" in rows[0]
+    )
+    assert len(rows) == {2: 36785, 7: 2638, 11: 2638}.get(index, 700)
+    fields = page.evaluate("['x','y'].map(c => embedding.spec.encoding[c].field)")
+    before = page.evaluate(
+        "['x','y'].map(c => embedding.getScaleResolution(c).getDomain())"
+    )
+    coordinates = np.array([[row[field] for field in fields] for row in rows])
+    low, high = np.array(before).T
+    normalized = (coordinates - low) / (high - low)
+    distances, _ = cKDTree(normalized).query(normalized, k=2)
+    selected = int(distances[:, 1].argmax())
+    x, y = normalized[selected]
+    page.locator(".canvas-wrapper").nth(index).evaluate(
+        "(el, x) => {el.scrollLeft = Math.max(0, x-el.clientWidth/2);}",
+        bounds["x"] + x * bounds["width"],
+    )
+    tooltip = (
+        page.locator("table.attributes")
+        .get_by_text(rows[selected]["_obs_label"], exact=True)
+        .first
+    )
+    hover_at(
+        page,
+        bounds["x"] + x * bounds["width"],
+        bounds["y"] + (1 - y) * bounds["height"],
+        canvas_index=index,
+        target=tooltip,
+    )
+    tooltip.wait_for(state="visible")
+    # Tiny overview points need a closer zoom before their growth is visible.
+    page.mouse.wheel(0, -1600 if index == 2 else -350)
+    page.wait_for_function(
+        """({before, fraction}) => ['x','y'].every((c,i) => {
+            const d=embedding.getScaleResolution(c).getDomain();
+            return d[1]-d[0] < fraction*(before[i][1]-before[i][0]);
+        })""",
+        arg={"before": before, "fraction": 0.4 if index == 2 else 1},
+    )
+    if index == 2:
+        zoomed = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+        grown = max(
+            float(e.get("r"))
+            for e in ET.fromstring(zoomed).iter()
+            if e.tag.endswith("circle")
+        )
+        assert radius < grown <= 2 * radius
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+
+def test_export_guide_buttons_download_native_images(monkeypatch, page):
+    pytest.importorskip("scanpy")
+    from PIL import Image
+
+    monkeypatch.syspath_prepend(str(ROOT / "docs/_ext"))
+    extension = importlib.import_module("genomespy_notebook")
+    definitions, _ = extension.core.default_control_config()
+    monkeypatch.setattr(
+        extension.core,
+        "default_control_config",
+        lambda: (definitions, {"core": "/controls.js"}),
+    )
+    page.route(
+        "http://guide.test/controls.js",
+        lambda route: route.fulfill(
+            content_type="text/javascript",
+            body=(ROOT / "src/genome_spy/static/controls.js").read_text(),
+        ),
+    )
+    specs = _render_guide(page, monkeypatch, "export.ipynb")
+    assert len(specs) == 1
+    page.get_by_role("button", name="PNG", exact=True).wait_for(state="attached")
+    page.keyboard.press("Tab")
+    for format in ("PNG", "SVG"):
+        with page.expect_download() as pending:
+            page.get_by_role("button", name=format, exact=True).click()
+        download = pending.value
+        assert download.suggested_filename == f"genomespy.{format.lower()}"
+        path = download.path()
+        if format == "PNG":
+            image = Image.open(path).convert("RGB")
+            assert min(image.size) >= 300
+            assert len(image.getcolors(maxcolors=1_000_000)) > 10
+        else:
+            root = ET.parse(path).getroot()
+            assert sum(e.tag.endswith("circle") for e in root.iter()) >= 700
+
+
 def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
     pytest.importorskip("scanpy")
     from tests.integrations.scanpy.browser.test_grid_interactions import value_texts
 
     specs = _render_guide(page, monkeypatch, "expression.ipynb")
+    assert page.evaluate("""() => [
+        [0, 'grid_cursor'], [1, 'grid_hover'], [2, 'grid_cursor'],
+        [3, 'grid_hover'], [6, 'grid_cursor'], [7, 'grid_cursor'], [8, 'grid_hover']
+    ].every(([index, name]) => Boolean(guideApis[index].getParam(name)))""")
     sizes = page.evaluate("""() => [...document.querySelectorAll('.gs-doc-embed')]
         .map((host, i) => ({height:host.clientHeight,
             canvas:guideApis[i].getLogicalCanvasSize().height}))""")
@@ -555,7 +623,7 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
         page.evaluate("async () => (await guideApis[2].imageExport.svg()).blob.text()")
     )
     assert not value_texts(overview)
-    for index in range(3):
+    for index in [0, 1, 7, 8, 2]:
         chart = page.locator("canvas").nth(index)
         chart.scroll_into_view_if_needed()
         bounds = page.evaluate("gridBounds", index)
@@ -572,6 +640,10 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
             canvas["y"] + bounds["y"] + bounds["height"] / 2,
         )
         page.mouse.wheel(0, -800)
+        if index != 2:
+            page.wait_for_timeout(180)
+            assert page.evaluate("domains", index) == before
+            continue
         page.wait_for_function(
             """({index, before}) => {
             const after = domains(index)[1];
@@ -618,7 +690,10 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
         ][0]
         assert gene in exports[0]
         assert "CD19+ B" in exports[0]
-        assert all(gene in svg for svg in exports[1:])
+        assert len(specs) == 6
+        assert all(gene in svg for svg in exports[1:4])
+        assert "Log2 fold change" in exports[4]
+        assert "−log10 adjusted p-value" in exports[5]
     else:
         assert "PC1" in exports[0] and "PC2" in exports[0]
         assert all(size["height"] - size["canvas"] <= 40 for size in sizes), sizes
@@ -651,3 +726,54 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
             )
         )
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+
+@pytest.mark.parametrize("index", [1, 2, 4, 5])
+def test_ranked_summary_guide_hover_without_zoom(monkeypatch, page, index):
+    pytest.importorskip("scanpy")
+    from tests.integrations.scanpy.browser.test_heatmap import hover_at
+
+    specs = _render_guide(page, monkeypatch, "ranked.ipynb")
+    page.evaluate("i => {window.api = guideApis[i];}", index)
+    bounds = page.evaluate("""() => {
+        window.rankGrid = api.debug.getViewRoot().getDescendants()
+            .find(v => v.spec.encoding?.color?.field === '_mean');
+        const {x,y,width,height} = rankGrid.coords;
+        return {x,y,width,height};
+    }""")
+    rows = next(
+        rows for rows in specs[index]["datasets"].values() if "_gene" in rows[0]
+    )
+    row = max((r for r in rows if r["_x"] == 2), key=lambda r: r.get("_percent", 1))
+    fractions = page.evaluate(
+        """row => ['x', 'y'].map(channel => {
+            const scale = rankGrid.getScaleResolution(channel).getScale();
+            const value = scale(row[`_${channel}`]);
+            return (channel === 'x' ? value : 1 - value) + scale.bandwidth() / 2;
+        })""",
+        row,
+    )
+    chart = page.locator("canvas").nth(index)
+    chart.scroll_into_view_if_needed()
+    page.locator(".canvas-wrapper").nth(index).evaluate(
+        "(el, x) => {el.scrollLeft = Math.max(0, x-el.clientWidth/2);}",
+        bounds["x"] + bounds["width"] * fractions[0],
+    )
+    hover_at(
+        page,
+        bounds["x"] + bounds["width"] * fractions[0],
+        bounds["y"] + bounds["height"] * fractions[1],
+        canvas_index=index,
+    )
+    tooltip = page.locator("table.attributes")
+    tooltip.get_by_text(row["_gene"], exact=True).wait_for(state="visible")
+    tooltip.get_by_text(row["_group"], exact=True).wait_for(state="visible")
+    before = page.evaluate(
+        "['x','y'].map(c => rankGrid.getScaleResolution(c).getDomain())"
+    )
+    page.mouse.wheel(0, -450)
+    page.wait_for_timeout(180)
+    assert (
+        page.evaluate("['x','y'].map(c => rankGrid.getScaleResolution(c).getDomain())")
+        == before
+    )

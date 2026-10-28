@@ -3,9 +3,9 @@
 Keep your analysis workflow. Replace supported plotting calls with interactive
 GenomeSpy charts.
 
-| Library | Status | Tested version |
-| --- | --- | --- |
-| [Scanpy](scanpy/index.md) | Unreleased preview | 1.11.5 |
+| Library | Available plots |
+| --- | --- |
+| [Scanpy](scanpy/index.md) | [Supported functions and options](scanpy/supported.md) |
 
 ```{toctree}
 :hidden:

@@ -2,6 +2,9 @@
 
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/supported.md).
+The [detailed compatibility reference](COMPATIBILITY.md) retains parameter-level
+contracts, computation reuse decisions and validation evidence for development.
+See [remaining coverage](FUTURE.md) for the short post-release handoff.
 Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
 `gsc.pl.scatter(...)`, `gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
 `gsc.pl.correlation_matrix(...)` or `gsc.pl.clustermap(...)`.
@@ -23,8 +26,10 @@ Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 The focused [UMAP](guides/umap.ipynb), [expression](guides/expression.ipynb),
 [tracks](guides/tracks.ipynb),
 [PCA](guides/pca.ipynb) and [ranked-gene](guides/ranked.ipynb)
-guide notebooks each supply their rendered page and notebook download. The longer
-notebooks under `notebooks/` remain the development workflows. Documentation builds execute only
+guide notebooks each supply their rendered page and notebook download.
+The [save/export notebook](guides/export.ipynb) demonstrates native image buttons,
+interactive HTML and JSON saving; the page links the shared export user guide.
+The longer notebooks under `notebooks/` remain the development workflows. Documentation builds execute only
 the guide's page examples; `jupyter-only` cells are shown without running them.
 `gsc.pl.sim(...)` displays stored simulation realizations using the time-series
 point and heatmap renderers; it never runs simulation.
@@ -101,7 +106,7 @@ raw symbol lookup differ from UMAP's behavior. Grouped plots use that public
 getter directly, with only selected unique keys. Public AnnData string conversion
 operates on the detached table, preserving category order without mutating AnnData.
 Grouped statistics are independently tested before adding the dotplot chart.
-The [computation reuse audit](../../docs/integrations/scanpy/supported.md#reusing-scanpy-computations)
+The [computation reuse audit](COMPATIBILITY.md#reusing-scanpy-computations)
 records which public methods are used and why aggregate/scale or plotting-class
 shortcuts would change semantics or ownership.
 
@@ -173,8 +178,10 @@ Focused, output-free notebooks in [guides/](guides/) supply both the live pages
 and their downloads. [PAGA](guides/paga.ipynb) covers networks, comparisons,
 adjacency and paths. [Profiles and simulations](guides/profiles.ipynb) covers
 supplied profiles, Krumsiek11 runs and DPT results, with native run/gene focus.
-Data checks use full Scanpy PBMC3k counts; the larger-data
-guide uses the separate 10x PBMC10k v3 cohort from Scanpy's tutorial. Attribution
+Data checks use full Scanpy PBMC3k counts. Other Scanpy datasets belong in the
+relevant plotting guides, with one-line dataset loading. The UMAP guide also
+uses all 36,785 ovarian cortex cells from Expression Atlas E-MTAB-8381, with
+explicit Scanpy preparation and the same plotting API. Attribution
 and processing are recorded in each notebook and [third-party notices](../../THIRD_PARTY_NOTICES.md).
 
 Prepare their inputs explicitly before building the docs (Python 3.11+):

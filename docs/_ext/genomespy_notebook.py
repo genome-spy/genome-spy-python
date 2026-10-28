@@ -15,6 +15,7 @@ from docutils.statemachine import StringList
 from sphinx.application import Sphinx
 
 from genomespy_gallery import _tutorial_embed_html, core
+from genome_spy._embed import normalize_controls
 
 
 def _preparation_digest(notebook: dict[str, Any]) -> str:
@@ -108,6 +109,7 @@ def _notebook_markdown(
         try:
             exec(compile(source, f"{path}:cell {index + 1}", "exec"), namespace)
             if chart := metadata.get("genomespy"):
+                definitions, modules = core.default_control_config()
                 markup = _tutorial_embed_html(
                     chart["chart"],
                     namespace[chart["chart"]].to_dict(),
@@ -115,6 +117,9 @@ def _notebook_markdown(
                     height=chart["height"],
                     title=chart["title"],
                     identity=f"{path}:{index}",
+                    controls=normalize_controls(chart.get("controls", False)),
+                    control_definitions=definitions,
+                    control_module_urls=modules,
                 )
                 parts.append(f"```{{raw}} html\n{markup}\n```")
         except Exception as exc:

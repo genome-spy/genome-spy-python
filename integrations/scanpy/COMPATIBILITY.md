@@ -1,0 +1,2039 @@
+# Detailed Scanpy compatibility reference
+
+Use the [Scanpy compatibility page](../../docs/integrations/scanpy/supported.md)
+for the user-facing overview, the [API reference](../../docs/integrations/scanpy/api.md)
+for current signatures, and [STATUS](STATUS.md) for delivery and release gates.
+This developer reference retains detailed plot contracts, computation reuse
+choices and validation evidence previously kept on the public overview page.
+
+Keep your existing Scanpy analysis and replace supported plotting calls:
+
+```python
+import scanpy as sc
+import genome_spy.integrations.scanpy as gsc
+
+# Scanpy analysis: after your usual preprocessing, compute the embedding once.
+sc.pp.neighbors(adata, random_state=0)
+sc.tl.umap(adata, random_state=0)  # Writes adata.obsm["X_umap"].
+
+# GenomeSpy plotting: reads those coordinates and returns an interactive chart.
+chart = gsc.pl.umap(
+    adata, color=["cell_type", "MS4A1"], vmax="p99",
+    width=300, height=300, ncols=2,
+    show=False, hover=True, zoom=True,
+)
+chart.save("umap.html", inline=True)
+```
+
+**Scanpy computes UMAP; GenomeSpy renders it.** If your workflow already has
+`adata.obsm["X_umap"]`, go straight to `gsc.pl.umap`. The plotting adapter never
+runs neighbors or UMAP analysis. A missing embedding produces an error asking
+you to compute it explicitly first.
+
+This development preview implements shared categorical/continuous 2D embeddings
+(UMAP, t-SNE, diffusion maps, saved graph layouts, PCA and custom bases), cell/gene scatter plots, plain dotplots
+and matrixplots, individual-cell heatmaps, supplied numeric matrices, clustermaps,
+standalone dendrograms, correlation matrices, stored rank/score panels and ranked
+dotplot/matrixplot/heatmap wrappers.
+Full public Scanpy plotting coverage is the destination; the inventory below
+records remaining work. Stored PCA loadings and variance ratios share the ranking panels;
+PCA overview composes these with the existing embedding chart. The native
+`DotPlot` and `MatrixPlot` builders support the documented chains below;
+`StackedViolin` remains planned.
+
+## Shared 2D embeddings
+
+UMAP, t-SNE, diffusion maps, saved graph layouts and PCA use the same preparation,
+point rendering and native interactions. Generic `embedding` reads any stored
+`obsm` basis. Named wrappers expose the same shared keyword defaults as Scanpy;
+`pca_scatter` is an alias of `pca`.
+
+```python
+pca = gsc.pl.pca(
+    pbmc, color=["louvain", "CD79A"], annotate_var_explained=True,
+    width=280, height=280, zoom=True, show=False,
+)
+custom = gsc.pl.embedding(pbmc, "pca", dimensions=(1, 2), show=False)
+
+sc.tl.tsne(pbmc, use_rep="X_pca", random_state=0, n_jobs=1)  # Explicit analysis.
+tsne = gsc.pl.tsne(pbmc, color="louvain", zoom=True, show=False)
+```
+
+A basis resolves its exact `obsm` name first, then `X_<basis>`. Components use
+Scanpy's one-based strings; `dimensions` uses zero-based pairs. Supplied columns,
+precision, observation IDs, masks, color order and raw/layer lookup share the UMAP
+path. No coordinates, neighbors or PCA metadata are fitted by plotting.
+
+`diffmap` preserves pinned Scanpy 1.11.5's first-two-column default (`DC1`, `DC2`);
+use `components="2,3"` explicitly for other columns. `draw_graph(layout=None)`
+reads `uns["draw_graph"]["params"]["layout"]`; an explicit layout selects its
+stored `X_draw_graph_<layout>` coordinates. Missing coordinates or metadata error.
+PCA's optional variance labels read `uns["pca"]["variance_ratio"]` for the displayed
+components and appear consistently in axes and hover. For Python brush retrieval,
+use the same basis and pair: `gsc.selection_mask(adata, snapshot, basis="pca",
+dimensions=(0, 1))`. The default remains UMAP.
+
+The supported controls and visual limits below apply to all these embeddings.
+3D, other graph forms/arrows and remaining marker/normalization options stay in M07.d/M14.
+The [UMAP guide](../../docs/integrations/scanpy/umap.md) includes packaged PCA and explicitly prepared t-SNE and
+diffusion-map examples. Scanpy computes those coordinates; plotting reads them.
+
+## Linked expression builder
+
+`gsc.pl.EmbeddingSummary` is a GenomeSpy extension with optional brush-linked
+group means, marker tracks, gene or metadata histograms, and categorical composition bars. See the runnable
+[linked-expression guide](../../docs/integrations/scanpy/linked_expression.md). Choose genes, a categorical
+`groupby`, raw/X/layer, panel sides and collected legend placement. The builder
+copies at most 250,000 resident cell × (gene + extra obs column) values once;
+style changes do not reread
+AnnData. Native concat may expand panel dimensions to align adjacent plots.
+The UMAP starts square with equal coordinate units. Set `zoom=True` in the
+constructor to scroll-zoom both axes and drag outside the selection to pan.
+Hold Shift and drag to select cells; dragging inside the box moves it.
+The default `zoom=False` keeps ordinary drag selection. Track navigation remains
+independent and is controlled by `add_tracks(zoom=...)`.
+`show_count=True` in the constructor shows the selected-cell count inside the
+brush; False omits the counter and its computation. It defaults to True. Small
+brushes hide the text when it does not fit. This option does not change selection
+or linked panels.
+The guide starts with stored QC above phase-level marker means, followed by two
+marker histograms on the left and three below, then marker means below
+the UMAP with all panel types. A PBMC3k example links the UMAP to five marker tracks.
+
+`add_tracks(["CD3D", "LYZ"])` reuses the loaded expression and the existing tracks
+renderer. Tracks keep a fixed cell-type order and cell identity. Brushing leaves
+selected cells prominent and fades the others; clearing restores the full tracks.
+Native selection filters draw the selected marks over a faint full-cell reference.
+Each cell remains a stepped rect, as in `tracksplot`. `zoom=True` enables linked
+horizontal navigation across the tracks and category strip without moving the UMAP.
+Set `group_gap` and `spacing` for optional separation; both default to zero.
+Missing groups and unused categories must be labeled/removed explicitly before
+adding tracks. No analysis or new AnnData reads occur when adding or styling them.
+
+Pass a gene list to `add_histogram(...)` for several histograms. Left/right groups
+stack vertically; top/bottom groups form a row. Add groups on different sides
+with separate calls. Calling again on the same side replaces that group;
+`show=False` removes only the requested side.
+Set `gene_controls=True` on `add_histogram` or `add_heatmap` for native dropdowns
+that choose from the constructor's loaded genes. The add method's gene list sets
+the initial choices and number of histograms or heatmap rows. Choices are separate
+per panel and preserve the shared cell brush. Duplicate heatmap choices show once.
+
+Missing expression is excluded from means and histogram denominators. The
+all-cell histogram remains fixed while brushing. Current Core upper-boundary selection semantics
+differ from the embedding count/Python mask; exact agreement remains a release
+gate, covered by an expected-failure browser test. This is a bounded preview.
+
+Choose extra stored annotations with `obs_keys=["sample", "pct_counts_mt"]` at
+construction. `add_composition("sample")` compares each category's share of
+selected/all cells; `add_composition()` uses the UMAP group colors and order.
+Faint bars represent all cells and solid bars the selection. Categories stay
+visible; missing metadata appears as NA. Counts and cohort denominators are in
+the tooltip. `add_histogram(obs="pct_counts_mt")` uses the existing histogram for
+numeric metadata. Missing numeric values are excluded, with valid/missing counts
+shown when present. Composition calls replace their previous panel; `show=False`
+hides it. Scores, QC metrics and other analysis must already be stored in obs.
+
+Set `title="PBMC cells"` on the constructor to name the embedding, and `title=...`
+on each `add_heatmap`, `add_tracks`, `add_histogram` or `add_composition` call to name that panel.
+Omitted titles retain their automatic labels; `title=None` hides them. Titles are
+native chart properties and do not change the prepared data.
+
+`add_heatmap(show_values=True)` adds fitted group means, formatted to two decimal
+places with the shared black/white contrast style. It defaults to False. Values
+update with the brush; missing or unselected groups stay blank.
+
+`cmap="seurat"` is also available for `heatmap`, `matrixplot` and `MatrixPlot`.
+It uses a native magenta–black–yellow range centered at zero, with symmetric
+automatic limits. Explicit limits must straddle zero. It does not rescale values.
+
+## Stored embedding density
+
+Compute density explicitly with Scanpy on an existing embedding, then plot its
+stored result. Plotting never runs KDE, recomputes coordinates, reads expression
+or adds temporary observation columns.
+
+```python
+sc.tl.embedding_density(pbmc, basis="umap", groupby="phase")
+density = gsc.pl.embedding_density(
+    pbmc, groupby="phase", bg_dotsize=8, fg_dotsize=20,
+    width=150, height=240, wspace=0.05, zoom=True, show=False,
+)
+density.display(inline=True, controls=False)
+```
+
+The adapter reuses the embedding coordinate, identity, size, color-bound,
+point-rendering and interaction helpers. Its small preparation module only
+resolves density-specific stored metadata and foreground/background groups.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `basis`, `key`, `groupby` | Basis is lowercased; `fa` selects `draw_graph_fa`. Pinned Scanpy 1.11.5 always defaults to `umap_density`, even for another basis; groupby appends its suffix. Pass key or groupby, not both. Require matching obs values and uns key_params. |
+| Coordinates | Require the named X_ embedding, then retain the shared direct-name-before-X_ lookup used by Scanpy plotting. The two one-based stored components are authoritative. components/dimensions kwargs reject rather than overriding them. |
+| `group` | All stored categorical levels by default, including unused categories; select one string or a list/tuple in supplied order, including repeats. None requires an ungrouped result. Explicit groups for an ungrouped result error rather than being silently ignored. Numeric categories are outside this preview. |
+| `bg_dotsize`, `fg_dotsize` | Original defaults 80 and 180 squared points; finite nonnegative scalars. A zero size hides that point. Smaller values in the notebook are explicit customization. |
+| `color_map`, bounds | YlOrRd selects the native yelloworangered scheme, whose stops differ from Matplotlib. Other supported GenomeSpy scheme names work; colormap objects and unsupported names error. Default bounds remain 0–1. Shared numeric/percentile/callable bounds and vcenter retain the background sentinel in their inputs, as Scanpy does. |
+| Under/over colors and order | Native filtered point layers paint lightgray below the lower bound, the continuous scheme within the bounds, and black above the upper bound. They share data, styling and the prepared sort. sort_order=False errors when values span multiple color ranges, because layering would change overlaps; it works within one range. |
+| Style | Shared frame, one supported marker (including a one-element list), scalar alpha/edge/linewidth styles, four colorbar sides/None, titles, ncols, hspace and wspace. norm objects, multiple markers and unknown kwargs reject clearly. |
+| Native delivery | hover=True reports stable cell ID, original stored density and coordinates, including for background cells. zoom=False by default; True links x/y navigation. Width/height default to 300 pixels per panel. show/save follow the common native contract; no ax/return_fig or Matplotlib objects. |
+
+Stored densities must be finite numeric values in [0, 1], with a categorical
+covariate and valid stored component pair. Views and backed AnnData work when
+their observation metadata and embedding are resident. Results are detached
+snapshots; callers must explicitly recompute density after changing its analysis
+inputs. Missing or malformed results never trigger automatic analysis.
+
+Complete reference comparisons use viridis to separate geometry, bounds and draw
+order from differing native palette stops. The default native palette and its
+under/over colors are checked separately. Fonts, outer layout and guide tick
+spacing retain the shared native rendering boundary.
+
+## PCA loadings
+
+`pca_loadings` reads stored `varm["PCs"]` and `var_names`. It reuses the same
+preparation and native text panels as `ranking`, just as Scanpy delegates this
+plot to its ranking function. No PCA, expression access or source mutation runs.
+
+```python
+# This packaged dataset stores loadings only for its highly variable genes.
+pca_genes = pbmc[:, pbmc.var["highly_variable"]]
+loadings = gsc.pl.pca_loadings(
+    pca_genes, components="1,2", n_points=20,
+    width=280, height=280, show=False,
+)
+loadings.display(inline=True, controls=False)
+```
+
+Components are one-based strings or integer sequences, in display order; the
+default is the first three. Repeated components and variable labels are retained.
+`n_points=None` selects min(30, n_vars); explicit counts cannot exceed n_vars.
+`include_lowest=True` splits that count between high and low loadings, with a gap
+when ranks are omitted. It requires at least two ranks. Top-only mode preserves
+Scanpy's extra label when available. Sorting, signed scores and ties use the
+existing NumPy ranking path.
+
+Selected loadings must be finite resident NumPy data. Sparse expression, views
+and backed AnnData work when their selected loadings are resident; sparse/lazy
+loadings reject without densification. Missing loadings require explicit Scanpy
+PCA first. Select valid genes explicitly when a stored array has missing rows;
+the packaged PBMC example selects its 309 highly variable genes. Scanpy 1.11.5
+also errors on that full array. A single component renders normally here despite
+an indexing error in the pinned upstream plotting function.
+
+Native `hover` shows gene, loading score and displayed rank; `hover=False`
+disables it. `width`/`height` size each plot area. Native fonts, ticks and outer
+spacing retain the ranking renderer's documented differences. Rotated ASCII dots
+render the omitted-rank marker because the native font lacks vertical ellipsis.
+`show`/`save` use the common native delivery contract.
+
+PCA text plots add 30% of the score range above the values to leave room inside
+the y-axis for labels. Scores and font sizes stay unchanged; these axis limits
+differ from Scanpy. Very long labels or short panels may need a larger `height`.
+
+## PCA variance ratios
+
+`pca_variance_ratio` reads `uns["pca"]["variance_ratio"]` and uses the existing
+ranking preparation and native text panels. It never runs PCA, reads expression,
+renormalizes ratios or changes stored results.
+
+```python
+variance = gsc.pl.pca_variance_ratio(
+    pbmc, n_pcs=10, log=True, width=360, height=240, show=False,
+)
+variance.display(inline=True, controls=False)
+```
+
+Defaults match Scanpy: `n_pcs=30`, `log=False`. NumPy sorts the supplied scores;
+original one-based PC labels stay attached, including ties. Scanpy's top-only
+ranking convention includes the next PC when available, so `n_pcs=10` displays
+eleven labels. Short results keep the requested rank-axis extent.
+
+`log=True` takes the **natural logarithm of scores before ranking**, rather than
+using a logarithmic axis. Hover shows the plotted score, original PC label and
+zero-based displayed rank. `hover=False` disables it; native `width`/`height`
+set the plot area. Common show/save rules and ranking typography limits apply.
+
+The stored vector must be nonempty, real and finite; NumPy arrays and resident
+sequences are supported. Log mode requires all stored ratios to be positive.
+Sparse/lazy vectors reject without materialization. Sparse expression, views and
+backed AnnData work with resident stored ratios, without needing PCA coordinates
+or loadings. Missing ratios error and ask for explicit Scanpy PCA. Supplied
+finite linear scores are plotted as given, with no added range or sum constraint.
+
+## PCA overview
+
+`pca_overview` reuses `pca`, `pca_loadings` and `pca_variance_ratio`, in that order.
+Scanpy opens three plots; the native result displays once. Cell positions sit
+above two compact diagnostic rows: PC1/PC2, then PC3/explained variance. Loadings
+use 280-pixel panels. Each plot keeps its data, axes and independent scales and
+guides.
+
+```python
+pca_genes = pbmc[:, pbmc.var["highly_variable"]]
+overview = gsc.pl.pca_overview(
+    pca_genes, color="louvain", zoom=True, width=280, height=280, show=False,
+)
+overview.display(inline=True, controls=False)
+```
+
+As in Scanpy, forwarded plotting options affect **only the PCA embedding**.
+This includes component choices and the native `hover`, `zoom`, `width` and
+`height` controls. Loadings keep their first-three-component and extreme-rank
+defaults; variance ratios keep `n_pcs=30, log=False`. To customize diagnostics,
+call them separately and compose the resulting charts with native operators.
+
+All three plots use supplied results. Plotting never fits PCA or filters genes;
+the packaged-data example explicitly selects genes with stored finite loadings.
+Missing or unsupported results retain their parent's named error. All children
+are constructed before displaying, so an error cannot leave a partial overview.
+Common show/save rules apply to the whole result, including standalone HTML.
+
+## Scatter cells or genes
+
+`scatter` retains its own Scanpy signature and lookup rules while reusing the
+embedding point renderer, color helpers, sizing, guides, native hover and x/y zoom.
+
+```python
+cells = gsc.pl.scatter(
+    pbmc, x="n_counts", y="n_genes", color=["louvain", "percent_mito"],
+    width=280, height=280, zoom=True, show=False,
+)
+genes = gsc.pl.scatter(
+    pbmc, x="means", y="dispersions", color="dispersions_norm",
+    use_raw=False, zoom=True, show=False,
+)
+expression = gsc.pl.scatter(pbmc, "CD79A", "MS4A1", use_raw=True, show=False)
+```
+
+All x/y/color annotation keys must agree on an orientation. Observation
+annotations and gene-expression keys plot cells; variable annotations and
+observation-expression keys plot genes. Observation orientation wins when both
+match. The adapter calls public AnnData vector accessors and never transposes the
+full object or densifies the full expression matrix. It reads repeated keys once
+per source and retains duplicate point labels with distinct positional IDs.
+The UMAP notebook includes both packaged cell and gene annotation examples.
+
+Use native chart methods to collect guides below the panels and make them compact:
+
+```python
+cells = cells.resolve_legend(default="collected").configure_legend(
+    orient="bottom", direction="horizontal", columns=6,
+    symbolSize=64, gradientLength=140, gradientThickness=10, tickCount=3,
+    layout={"anchor": "middle", "wrap": True},
+)
+```
+
+These methods also work on shared embedding plots. Color scales stay independent;
+compatible guides are collected in one place. Ordinary calls preserve Scanpy's
+scatter legend symbol area of 300 points² (about 24 pixels across). Native
+`symbolSize` uses logical pixel area, so 64 gives smaller symbols without changing
+the plotted points. Panel `height` sizes the plot area; external guides add height.
+
+Core 1.2 clips later columns of vertical categorical legends. Large scatter
+symbols can also overflow a short single-column guide. The compact horizontal
+configuration above avoids these cases. Automatic default-guide fitting remains
+open under C11 in the integration status ledger; point data and hover are unaffected.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `x`, `y`, `color` | Numeric coordinates, categorical/numeric annotation or expression colors, opaque CSS names/hex, or multiple color panels. Default color is gray. Annotation fields take precedence over expression and literal colors. Variable hover identifies genes. |
+| `basis`, `components` | Exact `obsm["X_" + basis]` lookup; one one-based component pair. Unlike `embedding`, scatter's diffusion-map basis skips the first stored column. Supplied basis takes priority over x/y. Missing coordinates error without analysis. |
+| `use_raw`, `layers` | Cell expression defaults to raw if present. One layer or an x/y/color triple; None/`"X"` chooses X. When raw is present, nondefault layers require explicit `use_raw=False`. Variable orientation drops automatic raw as Scanpy's transpose does; no physical transpose is used here. |
+| `groups`, `palette` | Saved category order and CSS palettes; gray background for missing/excluded groups without an NA legend. Explicit group order controls painting and the legend. Nested palettes follow categorical panels, even after numeric panels. For several categorical panels, use nested palettes; a flat list currently errors because pinned Scanpy applies it only to the first. |
+| `sort_order` | Pinned 1.11.5 does not forward this flag: numeric colors use NumPy's ascending sort for both values. Categories paint gray background first, then groups; source order is preserved within a group. |
+| `size`, `marker`, `alpha` | Scalar area, default 120000 / point count; dot, circle, square or diamond, once or per panel; scalar opacity. Same native point units as UMAP. |
+| `frameon`, `title` | x/y plots retain numeric axes/frame, as in Scanpy; basis frames follow the setting/request. Default titles replace key underscores with spaces; flat colors have no title. All color panels occupy one row. |
+| `legend_loc`, `legend_fontsize`, `legend_fontweight`, `color_map` | Right-margin or no legend; native font sizing and continuous scheme. Font weight has no effect on these external legends upstream. On-data label positions/weight and other legend locations remain M07.d/M14. |
+| `hover`, `zoom`, `width`, `height` | Four keyword-only native additions. Hover defaults True, zoom False; panel size defaults to 300 × 300 logical pixels. Scatter does not yet expose linked brushing or Python membership retrieval. |
+| `show`, `save`, `ax` | Same native display/export rules as other plots; `ax` is omitted and fails if passed. No image saving or Matplotlib return objects. |
+| `projection`, `legend_fontoutline`, `left_margin`, `right_margin`, stored `uns["highlights"]` | Only 2D and ordinary defaults are supported. Nondefault forms fail with the option named; native guides own layout. |
+
+Only finite numeric coordinates and resident selected expression are supported;
+backed metadata works, backed/lazy expression errors. Missing numeric colors are
+omitted from painting and coordinate limits, matching scatter rather than UMAP's
+gray missing-value layer. Native schemes can differ from Matplotlib's palette
+bins. Native axes/guide ticks and layout are not pixel-identical to Matplotlib;
+explicit opaque palettes preserve category paints. Other color forms, 3D, marker,
+margin, label and storage limits retain M07.d/M14 owners.
+
+## Scrublet score distributions
+
+```python
+counts = sc.datasets.pbmc3k()
+sc.pp.scrublet(counts, threshold=0.25, random_state=0, use_approx_neighbors=False)
+chart = gsc.pl.scrublet_score_distribution(
+    counts, zoom=True, threshold_slider=True, show=False
+)
+chart.display(inline=True, controls=False)
+```
+
+The threshold above is a demonstration setting; use your chosen analysis
+threshold. Plotting only reads `obs["doublet_score"]` and stored `uns["scrublet"]`
+results. It never runs Scrublet, reads expression or modifies the supplied data.
+Metadata-only AnnData views and backed objects are supported.
+
+Each batch gets an observed/simulated pair. Histograms use NumPy with Scanpy's
+fixed **50 edges / 49 bins** from 0 to 1. Each density divides by its own number
+of scores falling in that range and by bin width. Missing and finite out-of-range
+scores are excluded; 1 belongs to the final bin. A score vector with no in-range
+values fails clearly. Native gray bars and a black stored-threshold rule retain
+their initial score/density limits, including thresholds outside [0, 1].
+
+| Option/storage | Supported behavior |
+| --- | --- |
+| `scale_hist_obs`, `scale_hist_sim` | Defaults `"log"` / `"linear"`; either panel accepts either scale. Density values stay unchanged. Other Matplotlib scale names, including symlog/logit, fail explicitly. |
+| Single result | Read `uns["scrublet"]["doublet_scores_sim"]` and optional `threshold`. |
+| Batched result | Read `batched_by`, the named obs column and each `batches[batch]` result. Preserve categorical order, or Scanpy's category conversion for other labels; missing batch labels are omitted. No pooling. |
+| `figsize=(8, 3)` | Approximate per-batch figure dimensions at 100 logical pixels/inch, reserving space for axes/titles. Native layout controls fonts/ticks; physical export DPI is independent. |
+| Native additions | Keyword-only `hover=True`, `zoom=False`, `threshold_slider=False`, `width=None`, `height=None`. Width/height set plot area per panel (default 340 × 210); they cannot be mixed with a nondefault figsize. |
+| Hover/zoom | Populated-bin hover shows batch, sample, boundaries, count and density. Optional score-axis zoom is independent per panel, with thresholds following the same score scale. Bins stay fixed. |
+| Display | Scanpy's `show=True` default is retained; False returns one native chart for the full layout. Common native save/HTML rules apply; `return_fig`/`ax` are omitted. |
+
+Scores must be resident one-dimensional numeric vectors. Infinity, malformed
+results and unused batch categories fail clearly. Unused categories can be
+removed explicitly before plotting; they are not silently pooled or discarded.
+Histograms are aggregate marks, so hover describes bins rather than cell IDs.
+
+Set `threshold_slider=True` to preview a cutoff. Each batch gets one slider for
+both panels. Blue bars lie wholly above the cutoff. Pale bars lie below it.
+A bin containing the cutoff stays neutral because it can contain scores on both
+sides. The rule moves with the slider; bin counts and densities stay fixed.
+Scrublet calls scores strictly greater than its threshold doublets. This preview
+does not change saved scores, thresholds or doublet calls. A missing saved
+threshold starts the preview at 0.5. The slider uses steps of 0.001.
+
+## Highest-expression genes
+
+```python
+counts = sc.datasets.pbmc3k()  # Count data; downloads on first use.
+chart = gsc.pl.highest_expr_genes(counts, n_top=20, zoom=True, show=False)
+chart.display(inline=True, controls=False)
+```
+
+The adapter calls public `sc.pp.normalize_total` on a detached AnnData shell to
+calculate each gene's percentage of each cell's **total across all genes**.
+It ranks genes by mean percentage, including zero-total cells, and preserves
+Scanpy's reverse-argsort tie order. X is used unless `layer` is given; `raw` is
+ignored. Counts, metadata and views stay unchanged. Sparse counts stay sparse
+except for one selected gene column at a time.
+
+Native boxes show the 25th/50th/75th percentiles, 1.5-IQR whiskers and individual
+outliers. `log=True` changes the percentage axis after computing linear summaries.
+Hover reports box statistics or outlier cell IDs and percentages; `zoom=True`
+enables navigation along the percentage axis. The returned native chart supports
+notebook rendering and standalone HTML through the common display/save contract.
+
+The Scanpy defaults are retained (`n_top=30`, `layer=None`, `gene_symbols=None`,
+`log=False`). Native keyword-only additions are `hover=True`, `zoom=False`,
+`width=None`, `height=None`. Default width is 387.5 logical pixels; height follows
+Scanpy's requested gene count. `gene_symbols` reads a var column; selected labels
+must be unique and nonmissing. Counts must be finite, nonnegative and resident;
+zero-total cells produce Scanpy's warning and remain zero. An all-zero log plot
+errors clearly. Backed/lazy counts, duplicate/missing selected labels and all
+forwarded Seaborn styling options fail explicitly. Matplotlib `ax`/`return_fig`
+are omitted. Native boxes use the built-in category10 palette (repeating after ten genes),
+without Seaborn saturation adjustments. Fonts/ticks do not follow Matplotlib
+global settings.
+
+## Variable-gene diagnostics
+
+```python
+pbmc = sc.datasets.pbmc68k_reduced()
+chart = gsc.pl.highly_variable_genes(
+    pbmc.var, zoom=True, width=280, height=240, show=False
+)
+```
+
+This plots the stored normalized and raw dispersion against mean expression.
+Blue points are selected genes; light gray points are other genes. Selected genes
+draw last. Hover shows gene identity and stored values. With `zoom=True`, points
+grow gently as you zoom, up to twice their starting diameter. Each panel has its
+own navigation, with one legend below the pair.
+
+Add `threshold_slider=True` to preview a cutoff on the stored normalized score.
+The slider updates both panels and a gene count. Hover distinguishes the preview
+from the saved selection. This leaves your data unchanged. It does not reproduce
+Scanpy's top-N or batch-aware gene selection. Use Scanpy to change the analysis.
+The slider requires linear axes and a varying, nonmissing normalized score.
+
+Pass AnnData after explicitly running `sc.pp.highly_variable_genes` in your
+analysis workflow, or supply its result DataFrame/record array. The packaged PBMC
+table already has statistics but predates `uns["hvg"]` metadata, so this example
+passes `pbmc.var` directly. Plotting never computes a new selection or reads
+expression. Repeated gene labels retain separate point identities.
+
+| Input/option | Supported behavior |
+| --- | --- |
+| AnnData | Read `var` and stored `uns["hvg"]["flavor"]`; views and backed metadata are supported without reading X/raw/layers. Missing analysis errors clearly. |
+| DataFrame | Read supplied columns; `variances_norm` selects variance fields, otherwise dispersion fields, as in Scanpy. |
+| Record array | Use supplied dispersion fields and positional gene identities, preserving the pinned legacy behavior. |
+| `highly_variable_genes` | True reads the boolean `highly_variable` column; False reads `gene_subset`. Selected genes draw after other genes. |
+| `log` | Use log axes without transforming stored values. As in 1.11.5, both panels use raw-statistic y limits. Means must be finite and positive; raw statistics must be finite with positive increasing limits. Other forms fail explicitly. |
+| Missing values | Omit missing coordinate pairs independently per panel; retain their stored values. Infinity, ambiguous columns and missing/nonboolean selection flags error. |
+| `show`, `save` | Common native display behavior; save only None/False, with HTML/JSON available through the chart. |
+| Native additions | Keyword-only `hover=True`, `zoom=False`, `threshold_slider=False`, `width=None`, `height=None`; default plot areas are 300 × 300 logical pixels. |
+
+`filter_genes_dispersion(result, ...)` delegates to the same implementation with
+`highly_variable_genes=False` and preserves the upstream deprecation warning.
+Its `show=False` returns a native chart, rather than the old wrapper's None.
+AnnData flavor detection follows Scanpy 1.11.5 exactly: only `seurat_v3` selects
+variance columns; a supplied DataFrame selects them by the column's presence.
+No cached statistics or caller data are changed.
+
+Native fonts, ticks and the collected bottom guide use GenomeSpy layout. The
+stored values and axis limits are checked independently against Scanpy. Colors,
+point appearance, draw order and guide placement use the reviewed native style.
+
+## Installation and version contract
+
+```sh
+pip install --upgrade 'genome-spy-python[scanpy]'
+```
+
+The integration supports **Scanpy >=1.11.5,<1.13**. Older versions, 1.13 and
+prereleases raise an actionable error at the plotting call. Importing either genome_spy or
+genome_spy.integrations.scanpy does not import Scanpy, AnnData, NumPy, pandas, SciPy,
+Matplotlib, or PyArrow. The scientific dependencies load when plotting.
+
+The optional arrow extra speeds notebook transport. It is not required for
+JSON or interactive HTML. The reproducible reference environment is the
+scanpy-test dependency group and uv.lock; exact scientific-stack versions are
+also recorded in the reference manifest.
+
+### Scanpy 1.12 differences
+
+- Swapped dotplots follow Scanpy 1.12's corrected scaling. Scanpy 1.11 retains
+  its original scaling. One shared builder handles functions and ranked plots.
+- `timeseries`, `timeseries_subplot`, `timeseries_as_heatmap` and `pca_scatter`
+  are deprecated forwarding wrappers upstream. We retain their explicit argument
+  names and defaults; live comparisons still check the resulting plots.
+- New `group_colors` colormaps on `dotplot`/`DotPlot` are unsupported and rejected.
+  New `dpt_groups_pseudotime(return_fig=...)` remains outside the Matplotlib boundary.
+- Scanpy 1.12.4's automatic PAGA `rt`/`rt_circular` layouts omit a required internal
+  argument. We report this failure clearly; supplied `pos` and other layouts still
+  work. No replacement layout or monkey patch is applied.
+- The new `dogplot` Easter egg is outside the plotting integration. `violin`'s
+  changed `multi_panel` default does not affect the currently unsupported family.
+
+The pinned inventory remains the 1.11.5 baseline. Compatibility tests separately
+check the newer public API, direct numerical/rendered comparisons, allocation,
+mutation, workflows and native interactions. Newer AnnData may return a sparse
+column as a vector or a one-column array; both retain selected-column allocation.
+
+## Reusing Scanpy computations
+
+The integration reuses public data access and computation methods where their
+semantics match the plot:
+
+| Plot | Reused methods/results | Native preparation retained |
+| --- | --- | --- |
+| 2D embeddings | Existing `obsm` coordinates; public AnnData `obs_vector`/`raw.obs_vector`; Scanpy's public palette lists | Masks, draw order, component selection, stable IDs and native color/size/guide mapping. No embedding computation. |
+| Scatter | Public AnnData `obs_vector`/`raw.obs_vector`/`var_vector` and stored X_ coordinates; existing embedding color/style/point helpers | Distinct orientation, per-axis layers, legacy component labels and paint order; no full transpose or analysis. |
+| PCA loadings | Stored `varm["PCs"]` and `var_names`; existing ranking preparation and chart builder | One-based component/count validation; no PCA or expression access. |
+| PCA variance ratios | Stored `uns["pca"]["variance_ratio"]`; existing ranking preparation, NumPy sorting/log and chart builder | Named result/count checks; original PC labels stay attached. No PCA, renormalization or expression access. |
+| PCA overview | Existing PCA scatter, loadings and variance-ratio entry points | Native vertical composition displays once, with independent scales/guides and unchanged diagnostic defaults. |
+| Dotplot | Public `sc.get.obs_df`, including selected raw/layer/symbol lookup; AnnData categorization on the detached table | Shared pandas means, strict-cutoff fractions and plotting min–max scaling. Native marks and guides use those results. |
+| Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` uses only group rows and zero-row feature lookup validation | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
+| Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
+| Dendrograms | Stored `sc.tl.dendrogram` results, or that public method for a missing tree | Structural checks, shared leaf permutations and native branch rendering. |
+| Clustermap | Public SciPy `linkage`/`dendrogram(no_plot=True)`, as used by Scanpy/Seaborn, or supplied linkage | Detached pandas normalization, bounded source access, color-track alignment and shared numeric tiles/tree rendering. No group-profile tree is substituted for cell/gene clustering. |
+| Ranked summaries | Public `sc.get.rank_genes_groups_df` and stored ranking metadata; existing dotplot, matrixplot and heatmap entry points | One detached result shared by marker selection and statistic colors, ordered marker slots, strict stored fold-change filtering and clear missing-result errors. No ranking is run or cached data repaired. |
+
+Scanpy 1.11.5 has no public standalone dotplot/matrixplot preparation method.
+Their calculations live in the Matplotlib plotting classes; their common private
+preparer also sanitizes the caller's AnnData. The adapter uses the documented
+[`sc.get.obs_df` plus pandas grouping recipe](https://scanpy.readthedocs.io/en/1.11.x/generated/scanpy.get.obs_df.html)
+without constructing those classes or calling private plotting helpers.
+
+`sc.get.aggregate` is not equivalent to these plots: its means propagate NaN,
+while the plotting means skip it. Its `count_nonzero` also counts negatives and
+values below `expression_cutoff`. Likewise, `sc.pp.scale` computes z-scores,
+whereas plotting's `standard_scale` is min–max scaling. Retain the small shared
+pandas/NumPy operations rather than adding conversions or changing statistics.
+Plot `log=True` applies NumPy `log1p` to the selected table, just as Scanpy's
+grouped plotting preparer does; it does not preprocess or mutate AnnData.
+
+UMAP uses AnnData vector access, as Scanpy's embedding code does. Forcing it
+through `sc.get.obs_df` would change raw-symbol lookup and reject unrelated
+duplicate variable labels, even for coordinate-only requests. Native color
+mapping also avoids Scanpy's private Matplotlib color/palette mutation helpers.
+
+## UMAP compatibility
+
+The native function retains the effective Scanpy UMAP parameter names and
+defaults, within the explicit native rendering boundaries below. A parameter
+present in the signature can be reserved for later support: unsupported values
+raise an error instead of being ignored.
+
+| Parameters | Current behavior |
+| --- | --- |
+| color | None, one key, or multiple observation/gene keys. Each panel retains its original numeric measurements and supplied coordinates. |
+| use_raw, layer, gene_symbols | raw.X by default if available; a layer overrides the automatic raw choice. Explicit use_raw=True plus a layer is an error. Symbol lookup follows UMAP's adata.var lookup before selected expression extraction. |
+| palette, na_color, na_in_legend | Opaque CSS color sequences/mappings, GenomeSpy scheme names, stored CSS category colors, or Scanpy default palette values. Preserve categorical order and unused categories. Named schemes with missing values require na_in_legend=False; use an explicit CSS palette for an NA legend. |
+| cmap, color_map, vmin, vmax | GenomeSpy scheme names (default viridis) and numeric, percentile or callable bounds, including per-panel lists. Callables receive a copy of the masked numeric colors in painting order, including missing values, and must return a finite real number. Conflicting aliases error. GenomeSpy maps the retained measurements and draws the numeric guide. Unsupported names such as coolwarm and Matplotlib colormap objects error. |
+| sort_order | Scanpy's continuous sort, including reversed equal-value ties; missing points draw first. Categorical source order is retained apart from moving missing points behind other points. |
+| size, s, marker | Scalar or observation-length sizes in points squared; dot (`"."`), circle (`"o"`), square (`"s"`) and diamond (`"D"`) markers, once or per panel. Conversion accounts for marker path width, using a fixed 100/72 logical pixels per point. As in 1.11.5, an observation-size vector is carried in its reordered form between panels; reference tests cover this version-specific behavior. |
+| mask_obs, groups | Recolor observations without dropping coordinates. Masks can be boolean arrays or an observation-column key. Groups and masks are mutually exclusive. |
+| components, dimensions | One-based component pairs or zero-based dimension pairs; broadcasting follows Scanpy. Both cannot be supplied together. |
+| frameon, title, ncols, hspace, wspace | Frame defaults to Scanpy's frame setting; panel layout uses explicit native defaults. Titles and guides remain per panel; guides are not automatically collected. |
+| width, height (GenomeSpy additions) | Plot-area dimensions per panel in logical pixels. None uses 300 by 300 logical pixels. Explicit dimensions size each panel and its guide directly; axes and legends add space. Marker and font sizes are unchanged. |
+| legend_loc, legend_fontsize, legend_fontweight | Centered right-margin legend, labels anchored at group medians with native displacement, or no legend; point font sizes use the fixed native conversion. On-data labels currently require legend_fontweight="normal" (or 400); the upstream bold default errors for that location because its glyph atlas is not bundled. |
+| alpha, edgecolor/edgecolors, linewidth/linewidths | Scalar opacity and edge styling; conflicting aliases error. Matplotlib color shorthands, numeric RGB(A) tuples, cyclers, and per-entry alpha are rejected. Use opaque CSS names/hex and scalar alpha. |
+| show | False returns a native chart; True displays once through anywidget and returns None. None uses Scanpy settings.autoshow. |
+| save | None/False are supported when no automatic image save is requested. Image formats and automatic save currently error; native chart.save supports HTML/JSON. |
+| ax, return_fig | Omitted. Passing either, even ax=None, raises a targeted error. Use show=False and native chart composition/configuration. |
+| edges, edges_width, edges_color, neighbors_key | Optional stored undirected neighbor edges beneath the points and outlines. Width defaults to 0.1 points; color defaults to grey and accepts one opaque CSS color. The graph is read once, with native endpoint lookups into the shared cell table. Requires the first two components and a graph without self-loops. |
+| projection, arrows, scale_factor | Only the ordinary 2D/no-arrow defaults are supported yet; nondefault scale_factor remains unsupported. |
+| vcenter | None keeps a linear color scale. A number, percentile string or callable places that value at the native scheme midpoint; singleton/per-panel lists are supported. Automatic bounds expand if needed to enclose the center. Explicit bounds must strictly enclose it. |
+| norm | Matplotlib normalization objects remain unsupported and raise an error. |
+| add_outline, outline_width, outline_color | Optional two opaque outline layers behind the foreground, matching Scanpy’s relative widths and draw order. Widths are nonnegative pairs; colors are pairs of opaque CSS names/hex. Foreground opacity defaults to 0.7 only when outlines are enabled; explicit alpha (including None) retains its usual meaning. Foreground edges are disabled, while outline edges use the supplied scalar edge/linewidth options. |
+| legend_fontoutline | Not implemented yet; unsupported values fail by name. |
+| colorbar_loc | `"right"` (default), `"left"`, `"top"`, `"bottom"`, or None to hide continuous colorbars. Categorical legends retain `legend_loc`. |
+| Arbitrary scatter kwargs, other markers/legend locations | Error with the unsupported argument named. |
+
+```python
+chart = gsc.pl.umap(
+    pbmc, color=["louvain", "CD79A"], add_outline=True,
+    outline_width=(0.3, 0.05), outline_color=("black", "white"),
+    zoom=True, show=False,
+)
+```
+
+Square and diamond markers use native `square` and `diamond` shape encodings,
+including missing-value points and outlines. They reuse the same colors, hover,
+navigation and selection paths, without extra data or layers. For example,
+`gsc.pl.umap(pbmc, color=["louvain", "CD79A"], marker=["s", "D"], size=20, show=False)`
+uses a square in the first panel and a diamond in the second. Scanpy's diamond
+is a rotated square: its horizontal/vertical width is √2 times the square's at
+the same size. The native size encoding accounts for this without changing the
+supplied sizes. Thin diamond (`"d"`) and other unsupported markers still error.
+
+Triangle markers (`"^"`, `"v"`, `"<"`, `">"`) remain unsupported: Core 1.2.0's
+native triangles are equilateral, while Scanpy's triangles have equal width and
+height. Uniform sizing cannot match both dimensions; the adapter does not
+approximate this geometry.
+
+Category keys follow each panel's marker shape through native legend inheritance.
+This deliberately differs from Scanpy 1.11.5's circular embedding keys; scatter
+keys already follow their points upstream. Diamond keys include their converted
+size on the color legend; customize that legend's
+`symbolSize` directly to override it. Other native legend defaults remain
+available through chart configuration.
+
+Outlines reuse the same observation records, sorted sizes and coordinate scales;
+they add no data extraction or analysis. Outer outlines draw first, inner outlines
+second, and colored/missing points last. Only foreground points provide tooltips.
+Brushing retains all three layers unchanged and reports the selected-cell count.
+Category legends stay opaque, as in Scanpy. Thin edges can differ at the pixel
+level between WebGL, browser scaling and Matplotlib exports. Outline settings
+have no visual effect while `add_outline` is False or None. All shared embedding
+functions, including PCA overview's embedding panel, inherit this path; `scatter`
+keeps its own Scanpy signature and does not add outline arguments.
+
+`edges=True` reads the existing default neighbor connectivities from
+`obsp["connectivities"]`, requiring `uns["neighbors"]`. A custom `neighbors_key`
+uses that metadata's `connectivities_key`. Current storage takes precedence over
+the legacy matrix in the neighbors metadata. NetworkX supplies the same
+undirected edge order as Scanpy, including asymmetric entries and explicitly
+stored sparse zeros; weights do not change edge width or color. No neighbors,
+embedding or expression matrix is computed or densified. Missing, nonfinite,
+wrong-shaped or unsupported graph storage raises a named error.
+
+Edges share point navigation, use Scanpy's extra endpoint padding and remain
+unpickable behind the points. Cell hover, linked counts and Python retrieval
+still describe cells; brushing does not recolor graph edges. This increment
+supports `dimensions=(0, 1)` only. Additional stored coordinate columns are
+left intact and the first pair is used; Scanpy 1.11.5's edge renderer assumes its
+stored positions are already two dimensional and ignores requested component
+pairs. Other pairs, self-loops and per-edge/numeric colors currently error.
+Empty graphs render the ordinary point chart. Edge style/key options have no
+effect while `edges=False`, as in Scanpy.
+
+Callable `vmin`/`vmax`/`vcenter` run once per numeric panel when creating the chart. Use
+missing-aware functions such as `np.nanmin` or
+`lambda values: np.nanpercentile(values, 99)`. Callbacks receive copied values
+after masking and sorting; `sort_order=False` keeps source order. They can also
+appear in singleton or per-panel lists mixed with numeric/percentile bounds and
+None. Categorical panels skip bounds. Invalid results raise a named error;
+exceptions from the callback propagate. Hover, zoom and HTML delivery use the
+resolved numeric limits without calling Python again.
+
+For example, `vcenter=0, cmap="redblue"` assigns half the color scheme to each
+side of zero, preserving unequal observed limits. The existing measurements
+stay in the chart; a native three-value domain, equivalent to `domainMid`,
+controls interpolation and guide positions. This applies to all shared embedding
+functions and PCA overview's embedding panel; scatter keeps its own signature.
+For constant values equal to the center, a visible colorbar expands and uses
+the midpoint color; without a colorbar Scanpy 1.11.5 uses the last scheme color.
+
+Continuous colorbars span the plot height on the left/right and the plot width
+on the top/bottom, including non-square panels. These are native guide defaults,
+so `.resolve_legend(default="collected")` and `.configure_legend(...)` can still
+collect and restyle numeric colorbars. When moving colorbars, categorical legends
+remain explicitly on the right in vertical order.
+
+```python
+chart = gsc.pl.umap(
+    adata, color=["n_counts", "percent_mito"], colorbar_loc="top", show=False
+)
+chart.resolve_legend(default="collected").configure_legend(
+    gradientLength=140, gradientThickness=8
+)
+```
+
+Supported input arrays are NumPy and SciPy CSR/CSC matrices/arrays. Views preserve
+positional correspondence. Only requested unique expression columns are
+densified; AnnData can materialize dense views through its public array access.
+Metadata and resident embeddings also work with backed AnnData;
+requested backed/lazy expression is not supported yet. Coordinates must be
+finite. Continuous values can be missing but must include a finite value;
+infinities and ambiguous variable/symbol labels fail clearly.
+Category labels must remain distinct when serialized as strings. A category
+named "NA" alongside missing values currently errors because the native guide
+cannot distinguish those two labels faithfully.
+
+Plot preparation does not mutate AnnData, write palettes, run Scanpy plotting
+functions, import Matplotlib directly, construct artists, or perform analysis. Scanpy itself
+depends on Matplotlib; the plotting adapter does not call it. Charts contain
+detached snapshots: later AnnData edits do not change an existing chart.
+
+### Visual fidelity boundaries
+
+The adapter retains source coordinates/domains, numeric color bounds, categorical
+order and explicit palette values, point footprints, draw order, titles, axis
+labels, and per-panel guide meaning. GenomeSpy owns numeric color mapping and
+guide ticks. Its scheme interpolation can differ from Matplotlib's lookup-table
+bins. Named categorical schemes also use native color ordering/sampling; use
+explicit CSS colors when category colors must match exactly. There are no Python color-conversion utilities or hidden guide marks.
+
+Native defaults use 300 by 300 logical pixels, fixed typography, and fixed
+point-unit conversion. Matplotlib rcParams and style sheets do not affect the
+result. Reference comparisons explicitly match known plot-area sizes and export
+DPI rather than recreating Matplotlib's subplot layout in production.
+
+The native runtime embeds **Lato Regular**, while the default reference font is
+DejaVu Sans. This preview uses bundled Lato to make the default chart portable
+offline. Font shape, text measurement, guide padding, and browser antialiasing
+therefore differ from Matplotlib. Native panel edges round to backing pixels;
+registered plot comparisons allow that rounding and renderer antialiasing.
+This is not a claim of pixel-identical complete figures or support for arbitrary
+Matplotlib rcParams/style sheets. Exact typography and per-entry transparent
+guides need native runtime work; unsupported bold/outlined on-data styling errors
+instead of fetching a remote font or silently changing the requested style.
+
+## Dotplot compatibility
+
+```python
+pbmc = sc.datasets.pbmc68k_reduced()
+chart = gsc.pl.dotplot(
+    pbmc, {"B-cell": ["CD79A", "MS4A1"], "T-cell": ["CD3D"]},
+    groupby="bulk_labels", show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Dot color represents group mean expression and dot area represents the fraction
+strictly above `expression_cutoff`. Only selected unique columns are read through
+public `sc.get.obs_df`. Chart construction receives detached summary tables;
+it does not read AnnData or call Scanpy plotting. No embedding, clustering,
+ranking, palette write, or cached-result mutation occurs.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `var_names`, `groupby` | String/list/mapping features, repeated slots and labeled brackets; categorical, string, numeric-bin or multiple categorical string groups. Missing single-key groups are excluded. Unused categories error; remove them explicitly or pre-bin numeric data. Missing multi-key groups and joined-label collisions error. |
+| `use_raw`, `layer`, `gene_symbols` | Scanpy public getter lookup, including raw symbol annotations. Raw is automatic when available, a layer overrides that default, explicit raw+layer conflicts error. Dense NumPy and CSR/CSC matrices and views work; backed/lazy expression and sparse arrays error before extraction. |
+| `categories_order`, `num_categories` | Full category order and Scanpy numeric-bin edges. Repeated feature labels retain distinct slots. Ambiguous variable names error. |
+| `log`, `expression_cutoff`, `mean_only_expressed` | `log1p` before comparison/aggregation; strict `>` threshold. Fractions use comparison/count denominators, including implicit zeros. Ordinary NaN compares false; nullable NA follows upstream count exclusion. Expressed-only means use their own denominator and fill empty means with zero. |
+| `standard_scale`, `swap_axes` | Preserve 1.11.5's constructor scaling and second render-time scaling after optional transpose. Constant ranges become zero. |
+| `dot_color_df` | Labeled authoritative table, aligned by group/feature. Repeated feature slots use its first matching column. No means are substituted. As upstream, supplied colors skip constructor scaling but receive render-time scaling. Missing/extra labels, duplicate group labels and nonnumeric values error. |
+| `dot_min`, `dot_max`, `smallest_dot` | Clip fractions, normalize to the specified interval, raise to 1.5, then map area from `smallest_dot` to 200 points squared. Default upper limit rounds the observed maximum up to 0.1. Exact native area lookup also drives the percentage guide. Degenerate/inverted limits error; for all-zero fractions pass `dot_max=1` to retain invisible zero-area dots. |
+| `cmap`, `vmin`, `vmax` | Native schemes (default `Reds` selects Vega `reds`) and finite numeric bounds. Constant bounds paint the first palette color; the guide expands by 10%, or ±0.1 at zero, matching Scanpy's precomputed dot colors. Missing values are omitted from painting without removing their slots; infinities and all-missing colors error. |
+| `title`, `colorbar_title`, `size_title`, `var_group_*` | Native labels, bracket rules and size/color guides. Mapping features supply brackets directly. Scalar `linewidth` styles dot edges. The matrix viewport has a black 1.5-point frame; side tracks remain unframed. |
+| `width`, `height` | Plot-area logical pixels; defaults are 37 pixels per feature column and 35 per group row, exchanged with the axes. Labels and guides add space. |
+| `zoom`, `highlight` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Zoom/panning retain aligned labels and tree branches; highlight=True uses a native crosshair ruler at row and column centers, including gaps between dots; highlight="outline" outlines the hovered dot instead. Dot sizes and both guides keep their original mapping. Repeated labels retain separate integer slots. |
+| `hover` | Enabled by default. Tooltips show gene, group, displayed mean/color value and actual expressing-cell percentage, before dot-size clipping. Use `hover=False` to disable them. Scaled means and supplied color values are labeled explicitly. |
+| `group_gap` | Space between partitioned marker blocks in logical pixels, default 0. A positive width creates native gaps shared by dots, labels and brackets. Works with `DotPlot` and ranked dotplots too. |
+| `figsize` | Explicit native layout budget at 100 logical pixels/inch: subtract a fixed 150-pixel guide allowance from width; height sizes the plot area. Labels and renderer padding add space, so this does not fix the outer canvas dimensions. Conflicts with `width`/`height` error. |
+| `show`, `save`, `ax`, `return_fig` | Same native return/display/export boundary as UMAP. No Axes dictionaries or fake builders. |
+| `dendrogram`, `norm`, `vcenter`, other forwarded kwargs | Trees accept True or a stored key; see the tree contract below. Nondefault norm/vcenter and other kwargs error. Only scalar `linewidth` is accepted from scatter kwargs; the builder below supports separate style chains and supplied fractions. |
+
+Rows and columns use integer index-scale slots with padding that preserves the
+initial Scanpy spacing. Marker blocks are contiguous by default; `group_gap=4`
+adds fixed four-pixel gaps under zoom. Labels, brackets and trees use aligned `gs.surround`
+side tracks; native guides sit outside the whole chart. Repeated gene labels
+retain separate slots. Hover describes group/feature summaries; these dots do not identify individual cells.
+Brushes and individual-cell selection remain deferred.
+
+Native labels use portable Lato Regular and native guides. Line breaks in guide
+titles become spaces. Dotplot defaults to the shorter titles `Cells expressing (%)`
+and `Mean expression`, with native guides centered below the gene labels.
+The guides wrap onto separate lines when needed.
+These presentation defaults differ from Scanpy; `size_title`, `colorbar_title`
+and `DotPlot.legend()` still accept custom titles. Fractional percentage ticks
+retain native numeric precision
+instead of Scanpy's integer label rounding. Guide sizing/padding and rotated text alignment
+differ from Matplotlib. Vega `reds` has different stops from Matplotlib `Reds`,
+including a darker low end; no Matplotlib colors are sampled or imported. Use
+`cmap="viridis"` for the shared-palette reference comparisons. Browser tests
+register plot areas at the recorded export DPI and check positions, sizes and
+paint with renderer-specific tolerances; they do not claim identical full figures.
+
+<a id="scanpy-dotplot-builder"></a>
+### DotPlot builder
+
+```python
+plot = gsc.pl.DotPlot(pbmc, marker_genes, "bulk_labels", zoom="xy")
+plot.add_dendrogram().swap_axes().style(
+    cmap="viridis", dot_edge_color="black", largest_dot=140,
+).legend(colorbar_title="Mean expression")
+chart = plot.to_chart()
+chart.display()
+chart.save("markers.html", inline=True)
+```
+
+The constructor reads selected expression once. It shares the functional
+dotplot's summaries, scaling, ordering and native renderer. Chaining mutates the
+builder and returns it. `.to_chart()` creates a detached native chart each time;
+later chains and edits to expression or supplied tables do not change earlier
+charts. `.show()` displays once through anywidget and returns None. Construction
+and explicit `.show()` do not consult Scanpy's autoshow/autosave settings.
+
+| Method/input | Supported behavior |
+| --- | --- |
+| Constructor | Same expression/grouping/storage boundary as dotplot. `ax` is omitted. `dot_color_df` follows the functional contract; `dot_size_df` supplies finite fractions in [0, 1], with exactly the plotted feature slots and group labels. Sizes are copied and group rows aligned. |
+| `.swap_axes(swap_axes=True)` | Set the orientation; repeated calls do not toggle it. False/None restores features on x. |
+| `.add_dendrogram(show=True, dendrogram_key=None, size=0.8)` | Reuse the shared stored/public Scanpy tree path and marker permutations. Replace totals with a native tree track. Hiding a decoration retains its established ordering. |
+| `.add_totals(show=True, sort=None, size=0.8, color=None)` | Native group-count bars and labels replace the tree track. Optional ascending/descending count sorting keeps dots and labels aligned. A CSS color or one per displayed group is supported; the default is Scanpy 1.11.5's effective salmon fallback. Track size uses 100 logical pixels/inch. |
+| `.style(...)` | Native scheme, clipped fraction limits, minimum/maximum dot areas, positive size exponent, CSS edge color/width, grid and x/y padding. Omitted arguments retain their previous values; explicit None resets nullable settings. Padding must be at least 0.5 slot units. Only `color_on="dot"` is supported; square backgrounds error explicitly. |
+| `.legend(...)` | Shared `show`, separate `show_size_legend`/`show_colorbar`, titles and `width`. Visibility changes guides without changing scales. Width sets the native gradient length and figsize guide allowance at 100 logical pixels/inch; automatic native symbol-guide layout may extend beyond it. |
+| Native delivery | `.to_chart()` supports normal chart composition, configuration and HTML/JSON saving. Independent charts retain native scale identity when composed. `.show(return_axes=True)` errors with the native alternative. Matplotlib `get_axes`, figure/artist attributes, `make_figure` and `savefig` are unavailable; use `.to_chart()`, `.display()` and `.save()` instead. |
+
+Changing the decoration after hiding it preserves the last category/marker
+ordering, as in Scanpy. Builder summaries are snapshots; attaching a tree later
+still reads the current stored tree through the shared helper. Construct a new
+builder after changing the underlying grouping or expression. Existing native
+palette, typography and layout differences above apply to builders too.
+
+## Matrixplot compatibility
+
+```python
+chart = gsc.pl.matrixplot(
+    pbmc, marker_genes, "bulk_labels", standard_scale="var",
+    cmap="Blues", colorbar_title="column scaled\nexpression", show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Each tile represents a group/feature mean. Matrixplot shares dotplot's selected
+expression access, category/feature handling, native labels, brackets and sizing.
+It uses its own tile chart and statistical path; expression fractions are not
+computed. It performs no analysis or AnnData/cache writes.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `var_names`, `groupby`, `use_raw`, `layer`, `gene_symbols`, `num_categories`, `categories_order` | Same grouped access and storage limits as dotplot. Repeated feature slots remain distinct. Computed means require observed categories; unused categories error explicitly. |
+| `log`, `standard_scale`, `swap_axes` | Apply log1p to selected observations, aggregate means, then min–max scale per gene (`"var"`) or group (`"group"`) once before an optional transpose. Constant ranges become zero. Matrixplot does not use dotplot's second scaling pass. |
+| `values_df` | Authoritative real numeric table. Preserve supplied values and row/column order; only explicit `categories_order` reindexes its rows. `log` and `standard_scale` do not transform the supplied table. Require exactly the plotted groups and feature multiplicities, with unique group labels. Repeated supplied feature columns retain their own slot values. Missing/extra labels, unexpected duplicates, infinities and nonnumeric entries error. |
+| `cmap`, `vmin`, `vmax` | Native scheme (default viridis) with finite numeric bounds and clipping. Constant bounds expand the guide by 10%, or ±0.1 at zero; tiles map against that expanded domain, unlike dotplot's frozen constant colors. Missing tiles are unpainted but retain their slots; all-missing values error. |
+| `title`, `colorbar_title`, `var_group_*`, `width`, `height`, `figsize` | Shared native grouped layout and a horizontal color guide centered below the gene labels, including builder charts. Index slots have no outer padding or group gaps; tiles remain adjacent across marker blocks. Default cells are 37 × 35 logical pixels, exchanged when axes swap. The outer frame is omitted. |
+| `edgecolor`, `linewidth` in kwargs | Scalar opaque CSS edge color and nonnegative width in points; defaults are gray and 0.1. `edgecolor="none"` disables edges. Plural aliases error: Scanpy 1.11.5 overwrites those forwarded forms with its defaults; use the singular forms explicitly. Other pcolor kwargs error. |
+| `zoom`, `show_values` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Enable fitted two-decimal plotted values; see [shared grid interactions](#shared-grid-interactions). |
+| `hover` | Enabled by default; show gene, group and displayed mean/scaled mean or supplied value. `hover=False` disables picking without changing tile geometry. Summary tiles do not identify individual cells. |
+| `show`, `save`, `ax`, `return_fig`, `dendrogram`, `norm`, `vcenter` | Same native delivery boundary as dotplot. Trees accept True or a stored key; norm/vcenter error. MatrixPlot chains are described below. Brushes remain deferred. |
+
+Native palette interpolation, fonts and guide layout have the same documented
+fidelity boundaries as dotplot. Complete-chart checks cover labels, brackets,
+plot and guide placement; registered tile comparisons use 150 export DPI and
+DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
+
+### MatrixPlot builder
+
+```python
+plot = gsc.pl.MatrixPlot(
+    pbmc, marker_genes, "bulk_labels", standard_scale="var", zoom="xy",
+)
+chart = (
+    plot.add_dendrogram().swap_axes()
+    .style(cmap="Blues", edge_color="navy", edge_lw=0.6)
+    .legend(title="Scaled group mean", width=1.8)
+    .to_chart()
+)
+chart.display()
+counts = plot.add_totals(sort="descending", color="steelblue").to_chart()
+```
+
+The constructor shares functional matrixplot's data access, one-pass scaling
+and tile renderer. It reads selected expression once, or copies `values_df`
+without reading expression values, averaging or scaling. Real group counts come
+from the same grouping metadata even when values are supplied. Methods mutate
+the builder and return it; `.to_chart()` creates a detached native snapshot.
+The earlier `chart` keeps its tree and ordering after totals replace the track.
+
+Tree, totals and axis methods have the same arguments and ordering behavior as
+the [DotPlot builder](#scanpy-dotplot-builder). `.style(cmap=..., edge_color=..., edge_lw=...)`
+updates only supplied styles. Native schemes and opaque CSS colors follow the
+functional matrixplot limits; `edge_color="none"` removes edges. Explicit None
+uses portable defaults: viridis, black edges and 1.5-point width. Matplotlib
+rcParams and colormap objects are not consulted. Constructor kwargs accept the
+functional names `cmap`, `edgecolor` and `linewidth`.
+
+`.legend(show=True, title="Expression\nlevel in group", width=1.5)` controls the
+native color guide. Width sets its gradient length and figsize allowance at
+100 logical pixels/inch; False/None hides it and releases the allowance. The
+constructor's initial title is "Mean expression in group", as in Scanpy.
+Guide typography/layout and palette interpolation retain the functional limits.
+`.show()` displays once through anywidget, independently of Scanpy autoshow and
+autosave. `show(return_axes=True)` errors; use `.to_chart()` and the native chart's
+configuration, composition and HTML/JSON saving methods. Matplotlib figure/artist
+methods and public constant customization remain outside this preview.
+
+## Shared grid interactions
+
+Dotplots retain a black frame around the matrix viewport, including across group
+gaps; labels, brackets and trees remain unframed. Heatmaps and matrix plots omit
+the outer frame, a deliberate visual difference from Scanpy. Dot outlines and
+tile-edge options are preserved. Native
+`chart.configure_view(stroke="black", strokeWidth=1)` can add a frame to unframed
+plots. Ranked variants inherit the same defaults.
+
+Grid interactions are optional additions to the Scanpy signatures:
+
+```python
+heatmap = gsc.pl.heatmap(pbmc, markers, "bulk_labels", zoom=True, highlight=True, show_values=True, show=False)
+matrixplot = gsc.pl.matrixplot(pbmc, markers, "bulk_labels", zoom=True, highlight="outline", show_values=True, show=False)
+matrix = gsc.pl.matrix(values, zoom=True, show_values=True, show=False)
+clustermap = gsc.pl.clustermap(cells, zoom=True, show_values=True, show=False)
+correlations = gsc.pl.correlation_matrix(pbmc, "bulk_labels", show_values=True, show=False)
+dotplot = gsc.pl.dotplot(pbmc, markers, "bulk_labels", zoom=True, highlight=True, show=False)
+```
+
+Every matrix/heatmap entry point accepts `show_values`, including ranked,
+time-series, simulation, DPT and PAGA heatmaps. For functions with line or point
+output too, this option requires heatmap mode. Values are off by default.
+Correlation matrices retain Scanpy's `show_correlation_numbers` name as an alias:
+`show_values=None` follows that flag, which defaults to False. Combining
+`show_values=False` with `show_correlation_numbers=True` raises a clear error.
+Correlation matrices currently keep fixed axes; the other grids' navigation
+options are unchanged.
+
+Use the mouse wheel inside the plot to zoom y and drag to pan y with
+`zoom=True`; x stays fixed. Set `zoom="xy"` to enable zooming and panning both
+axes. Native axis-margin gestures can then zoom one axis. Row/column labels and
+dendrograms follow the visible slots; outside labels and partially visible gene brackets are hidden.
+Heatmap category bands and group gaps follow individual cells. Clustermap's
+two trees and annotation tracks follow the live row/column positions; automatic
+tick labels reveal more names as slots grow. Defaults remain
+`zoom=False`, `show_values=False` and `highlight=False`.
+Basic workflow examples leave numeric labels off. Group gaps are also opt-in:
+dotplot and heatmap use `group_gap=0` by default, while matrixplot stays contiguous.
+
+Category-strip tooltips use the native default handler and the same `hover` flag
+as tiles. They work with the bundled Core 1.2.0 runtime, including after zoom and
+pan. All expression grids use native `gs.surround` side tracks with shared
+index scales for labels, brackets, trees and color tracks. Supplied matrices
+and correlation matrices use the same track helpers. There is no patched bundle or custom hover listener
+in the integration.
+
+`show_values` uses native `fitToBand` text, shared tile records and the plotted
+value after any log transform/scaling. Values fade in as cells become large
+enough and show two decimals; tooltips retain more precision. Missing cells have
+no text. Black/white contrast uses the native palette sampled at 256 bins,
+clamped color bounds and tile opacity over white. Sampling runs in GenomeSpy;
+there is no Python colormap implementation.
+
+`highlight=False` (the default) disables pointer feedback on dotplots, matrixplots,
+cell heatmaps, supplied matrices and clustermaps, including the DotPlot and
+MatrixPlot builders. `highlight=True` adds a native two-axis ruler, including
+between dots, and clears on leaving the plot. `highlight="outline"` instead
+outlines the hovered mark using the same native point selection and conditional
+stroke pattern as the [DepMap gallery heatmap](../../docs/gallery/clustered_heatmap.md).
+The outline changes existing marks; it adds no overlay dataset or highlight layer.
+Native `order` draws the hovered mark last so neighboring tile fills cannot hide
+half of its border. The outline clears on leave and preserves ordinary borders.
+Value labels retain their normal order and remain unoutlined.
+Both modes work independently of `hover` and do not brush cells. Integer slots
+preserve repeated gene labels.
+Zooming changes positions while keeping the dot percentage-to-area mapping,
+color limits and guides fixed. These interactions run in the browser and never
+read AnnData again or rerun Scanpy analysis. Notebook widgets and standalone HTML
+use the same native specifications.
+
+## Heatmap compatibility
+
+```python
+heatmap = gsc.pl.heatmap(
+    pbmc, marker_genes, "bulk_labels", dendrogram=True,
+    standard_scale="var", cmap="viridis", group_gap=4,
+    width=400, height=450, zoom=True, show=False,
+)
+heatmap.display(inline=True, controls=False)
+```
+
+Each tile represents one cell and one requested gene. Heatmap shares the grouped
+getter, source/storage checks, palettes, scaling, labels, marker ordering and
+native tree renderer. Preparation keeps one explicit cell permutation; values,
+IDs, category bands, group gaps and branches follow it. Scanpy's category
+sorting includes its within-group tie order. The adapter never substitutes group
+means or changes AnnData.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `var_names`, `groupby`, `use_raw`, `layer`, `gene_symbols`, `num_categories` | Grouped access rules and resident NumPy/CSR/CSC storage limits apply. Repeated gene slots and views are supported. Missing group labels and unused categories fail explicitly; single-group data retains cell order without a category strip or tree. |
+| `log`, `standard_scale` | Apply log1p before min–max scaling of individual cell values: `"var"` scales each gene across cells; `"obs"` scales each cell across requested genes. Constant ranges become zero. These are not matrixplot's scaled group means. |
+| `dendrogram` | False, True or a stored-result key. Reuse Scanpy's stored result or the guarded public computation. Heatmap supports two-group trees. Interpolate stored branches to the centers of unequal cell-group spans; native link endpoints keep them connected across gaps. Group labels share those centers, correcting the old half-row offset. Matching marker blocks follow tree order too. |
+| `swap_axes`, `show_gene_labels`, `var_group_*` | Ordinary heatmaps use gene brackets above the matrix; swapped heatmaps use a colored gene-group strip on the right, as Scanpy does. Group names appear without repeating the group field as an axis title. Show gene labels by default for at most 50 slots. `var_group_rotation` affects ordinary brackets. |
+| `cmap`, `vmin`, `vmax`, `alpha`, `interpolation` | Native scheme (default viridis), numeric bounds, scalar opacity and nearest-neighbor tiles. Missing values keep their positions but are unpainted; all-missing colors error. Other interpolation, norm/vcenter, Matplotlib colormaps and unsupported imshow kwargs error by name. |
+| `group_gap` | Space between cell groups and partitioned marker blocks in CSS pixels, default 0. Choose a positive width to separate groups. The same option works in `rank_genes_groups_heatmap`. Native surround tracks share the tile scales, keeping bands, labels and trees aligned. Gap widths stay fixed under zoom and DPR changes. A single group has no internal gap; arbitrary or overlapping brackets do not create groups. |
+| Category colors | Reuse saved AnnData colors or the shared Scanpy default palettes without writing them back. Numeric and multi-key strips use native category20, currently limited to 20 groups. |
+| `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
+| `zoom` | Defaults False. `True` enables y-only wheel zoom and drag panning; `"xy"` enables both index axes. Bands, gaps, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
+| `show_values` | Default False. Reveal the plotted cell values to two decimals when the tiles have enough room; missing cells remain empty. |
+| `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Category-band tooltips show the group in its own native track. `hover=False` disables both. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
+
+This preview accepts **at most 250,000 cell–gene values**, counting repeated
+slots. Larger requests fail before expression extraction and ask for an explicit
+subset. No rows or columns are sampled, aggregated or silently truncated. The
+selected-column getter materializes only requested genes; disk-backed/lazy
+expression and sparse arrays remain explicit upstream access limits.
+
+The retained resource observation uses 5,000 cells × 50 markers from a 20,000-gene
+sparse matrix. Preparation peaked at 114 MB tracked Python allocations; the
+250,000-tile JSON was 26.2 MB, browser first paint including dispatch took 16.2 s,
+hover after a pointer pause took 96 ms and JS heap was 168 MB. These are local
+Chromium observations, not portable limits. The 100,000-cell × 50-marker case
+verifies early rejection without expression reads. Larger transport/chunking
+work remains in M05.d.
+
+Sixteen frozen Scanpy 1.11.5 figures retain complete labels/guides and registered
+tile/tree references at 100 display / 150 export DPI. Native checks at DPR 1.5
+allow 12/255 RGB paint differences for palette bins and browser rasterization;
+they preserve positions, group spans and branch paths without fitting images.
+Lato typography, native guide ticks and outer spacing are renderer differences.
+
+## Supplied matrix compatibility
+
+```python
+chart = gsc.pl.matrix(
+    values, xticks=genes, yticks=groups, xlabel="Genes", ylabel="Groups",
+    title="Supplied values", color_map="viridis", show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`matrix` displays the given resident 2D numeric NumPy/masked array, nested sequence
+or DataFrame directly. It does not access AnnData, aggregate values, reorder axes,
+or compute linkage. DataFrame index/column labels are used only when supplied as
+`yticks`/`xticks`, matching Scanpy's array conversion. Explicit tick labels must
+match the axis length; repeated names retain separate index slots. Explicit
+labels and their titles occupy native side tracks and follow the same index
+scales during navigation; numeric defaults remain native axes.
+
+Colors use linear normalization over finite values, including negative values.
+Missing/masked entries stay blank; constant limits expand by 10% (or ±0.1 at
+zero), matching Scanpy's colorbar normalization. All-missing or infinite values
+fail clearly. `color_map=None` uses native viridis; native scheme names work,
+while Matplotlib colormap/image/axes objects, sparse/lazy sources and RGB images
+are unsupported. Unknown options fail rather than being ignored.
+
+`colorbar_shrink=0.5` sets the vertical guide length relative to the native tile
+area height. Default square cells fit inside a 400 × 400-pixel area; `width` and
+`height` explicitly size that area. Native fonts, automatic numeric tick density,
+outer layout and colorbar allocation differ from Matplotlib's figure layout.
+Titles and axis labels are supported. Default hover shows row, column and value;
+`hover=False` disables it. Existing `show`/`save` and native return/export rules
+apply. Optional `zoom=True` enables y-only wheel zoom and drag panning, with aligned tick labels. Use `zoom="xy"` for both axes. `show_values=True` adds fitted two-decimal values. Nonlinear normalization is unsupported.
+
+Eight frozen Scanpy figures retain values, color bounds, labels, complete charts
+and registered crops at 100 display / 150 export DPI. Native DPR 1.5 checks cover
+tile footprints, missing paint and palette-bin differences; separate checks
+exercise hover after resizing and offline HTML delivery. A resident 200 × 1,000
+float32 resource check retained all 200,000 values: warm preparation took 0.14 s,
+default formatted/validated JSON was 28.1 MB and took 12.0 s with allocation tracing, and tracked peak
+allocation including serialization was 344 MB. Browser first paint including
+dispatch took 10.3 s; paused hover was 113 ms. These local observations expose
+the current serialization cost; larger/chunked transport remains M05.d.
+
+## Supplied time-series heatmaps
+
+```python
+# Analysis owns the ordering; plotting preserves exactly these supplied profiles.
+chart = gsc.pl.timeseries_as_heatmap(
+    profiles, var_names=genes, highlights_x=[12.5], color_map="viridis",
+    zoom="xy", show_values=True, width=700, height=280, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`timeseries_as_heatmap` accepts resident numeric arrays, nested sequences and
+DataFrames with **samples in rows and variables in columns**. It transposes them
+for display and puts the first variable at the bottom, matching Scanpy 1.11.5.
+It never sorts, normalizes, smooths, infers time or recomputes analysis. Provide
+any time/pseudotime ordering explicitly before plotting. DataFrame labels are
+used only when passed as `var_names`; empty labels use numeric positions. Repeated
+names retain separate rows. Two-dimensional label arrays use their first column.
+Ordinary label sequences also work; the pinned upstream helper requires an array.
+
+The default center limits are `[0, samples - 1]` and `[0, variables - 1]`, cropping
+half of the outer cells as Scanpy does. Singleton axes use `[-0.05, 0.05]`.
+`highlights_x` accepts finite fractional, repeated or outside positions; dashed
+black rules are clipped to the supplied limits and never expand them. Native dash
+lengths round to whole pixels (8 on, 3 off). Values use finite-range linear color
+normalization and a native right-hand color guide at half the plot height.
+Missing entries stay blank. Scanpy's array conversion discards NumPy masks for
+this helper; explicit NaNs are needed to hide masked values.
+
+`color_map=None` uses native viridis. Global Matplotlib settings, color objects,
+sparse/lazy sources, complex/infinite values and all-missing inputs are unsupported.
+The default native plot area is 372 × 616 logical pixels; fonts, automatic tick
+density and outer colorbar allocation follow GenomeSpy. Native palette sampling
+and browser rasterization can differ slightly from the reference. Optional hover
+reports Row (variable), Column (sample position) and Value. `zoom=True` enables
+y-only navigation; `"xy"` enables both axes. `show_values=True` reuses fitted
+two-decimal matrix labels. Native show/save, return objects and offline HTML
+delivery follow the other plotting calls; these keywords extend the upstream
+helper, which has no show/save parameters.
+
+## Supplied time-series points
+
+```python
+chart = gsc.pl.timeseries(
+    profiles, time=times, var_names=genes, highlights_x=[0],
+    xlabel="Supplied time", marker="o", zoom=True,
+    width=600, height=300, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Scanpy 1.11.5's `timeseries` draws **scatter points**, without connecting lines.
+The native version preserves supplied sample order and time coordinates, including
+unsorted or repeated times. It never sorts, smooths, normalizes or infers time.
+Resident numeric vectors and samples-by-variables arrays, sequences and DataFrames
+are supported. DataFrame labels are used only when supplied as `var_names`.
+
+| Input/options | Supported behavior |
+| --- | --- |
+| Multiple variables | Draw columns in supplied order, retaining sample order within each. `color` is unused, as upstream. Default colors use Scanpy's public Vega 10 palette; `palette` accepts a sufficient sequence of CSS colors. |
+| One variable | Requires a sample-length `color` vector. A floating first color selects continuous coloring; other sortable values, including integers, define sorted categorical subsets. Sample order within each category is retained. |
+| Continuous color | Finite jointly visible time/value/color entries determine linear limits. Constant colors use the start of the native scheme. `color_map="viridis"` is the default; None also uses viridis. Native schemes are supported. |
+| Labels/legend | `var_names` labels the variables or single-variable subsets. Nonempty names must cover all subsets and be distinct strings; extra names are unused. `legend=True` shows a native bottom series legend when names exist. Continuous coloring has a series key, without a gradient colorbar, as upstream. |
+| Limits/highlights | Default time is the sample position. Automatic limits use a 5% margin; highlights expand the x range. Dashed rules retain the original y endpoints even when explicit `yticks` expand the y view. `xlim` overrides x limits and may reverse the axis. |
+| Missing values | Jointly missing/masked time, value or continuous color hides the point and excludes it from automatic limits. Categorical colors cannot be missing; at least one visible point is required. |
+| Markers | Shared native `.`, `o`, `s` and `D` shapes, also as a singleton or identical per-subset list. The starting area is 6 points² with Scanpy's dot-path width, no heavy outline and partial opacity. Points grow gently when zoom is enabled. |
+| Interaction/delivery | Hover reports series, original sample position, time, value and numeric color. `zoom=True` enables both axes, drag panning and native reset; both options use existing helpers. Native show/save and HTML/JSON delivery rules apply. |
+
+The default native plot area is 992 × 739.2 logical pixels. Fonts, numeric tick
+density, bottom legend layout, palette sampling and browser rasterization follow
+GenomeSpy rather than Matplotlib's figure system. Global Matplotlib settings,
+axes/cycler/colormap objects, sparse/lazy sources, complex/infinite values,
+repeated series labels and differing per-subset marker shapes fail clearly.
+
+Set `series_select=True` to add a dropdown. Choose a gene or series to emphasize
+it while keeping the other points visible. Set `ruler=True` to follow the cursor
+with a vertical guide. Both options are off by default and leave sample values,
+order and identities unchanged.
+
+### Compose time-series subplots
+
+`timeseries_subplot` exposes the pinned helper's explicit plotting arguments and
+uses the same preparation, points, guides and interactions as `timeseries`.
+Its default native plot area is 496 × 369.6 pixels, matching an ordinary upstream
+subplot at 100 logical pixels/inch. It uses no current figure or axes state.
+`ax` is omitted and errors if supplied; use native composition instead:
+
+```python
+import genome_spy as gs
+
+left = gsc.pl.timeseries_subplot(
+    profiles_a, time=times, var_names=genes_a, zoom=True,
+    width=280, height=220, show=False,
+)
+right = gsc.pl.timeseries_subplot(
+    profiles_b, time=times, var_names=genes_b, zoom=True,
+    width=280, height=220, show=False,
+)
+chart = (
+    gs.hconcat(left, right, spacing=30)
+    .resolve_scale(default="independent")
+    .resolve_legend(default="independent")
+)
+chart.display(inline=True, controls=False)
+```
+
+Scales and guides stay independent when panels use different color modes or
+ranges. Hover, wheel zoom and drag panning operate within each panel. The added
+`show`/`save` keywords follow the shared native delivery contract; use `show=False`
+to obtain a chart for composition. Data, marker, palette and storage restrictions
+are identical to `timeseries`. This returns a native chart rather than mutating
+a supplied Matplotlib subplot; unknown options fail by name.
+
+### Plot stored simulation realizations
+
+```python
+simulation = sc.datasets.krumsiek11()[:, ["Gata2", "Gata1", "Pu.1"]]
+chart = gsc.pl.sim(
+    simulation, tmax_realization=160, as_heatmap=True,
+    zoom="xy", show_values=True, width=480, height=230, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`sim` reads `adata.X` and `var_names`; it never runs simulation, normalizes,
+sorts or truncates observations. Realization length uses `tmax_realization`, then
+`uns['tmax_write']`, then `n_obs`. It places boundaries and one-based run labels,
+including an incomplete final run. Positive fractional stored lengths are accepted.
+Points keep Scanpy's `[0, 1.25 * n_obs]` horizontal limits; heatmaps keep the
+existing time-series cell crop. Hover and value labels use the shared renderers.
+
+`shuffle=True` preserves Scanpy's exact seed-1 permutation without changing global
+NumPy random state. As upstream, this always draws points even with
+`as_heatmap=True`, with an ordinary numeric index axis. `marker` is unused for
+unshuffled heatmaps. `zoom=True` enables both point axes or heatmap y;
+`zoom="xy"` enables both axes. `show_values=True` requires heatmap output.
+Use `series_select=True` to focus on a gene in either view. Add `ruler=True` for
+a sample-position guide. These controls reuse the profile and matrix renderers.
+
+For ordered simulations, set `connect=True` to join neighboring samples within
+each run. Missing values leave gaps. This is available for point output only.
+Set `run_select=True` to add a run dropdown in either view. Combine it with
+`series_select=True` to emphasize one gene in one run. Neither dropdown removes
+data. Shuffled output rejects both `connect` and `run_select`.
+The point legend sits below the run labels and x-axis title.
+
+The preview supports resident dense AnnData and read-only views; it rejects
+backed, lazy and sparse X before loading or densifying. Point output retains the
+time-series limits: multiple genes, distinct labels, sufficient native palette
+colors and supported shared markers. Choose at most ten genes for the default
+point palette. Heatmaps also accept a single gene and repeated names. Explicit
+`show=False` returns a native chart; `save` has the shared HTML/JSON boundary.
+
+### Inspect stored DPT groups and pseudotime
+
+```python
+sc.pp.neighbors(simulation, n_neighbors=10, use_rep="X", random_state=0)
+sc.tl.diffmap(simulation, random_state=0)
+sc.tl.dpt(simulation, n_dcs=10, n_branchings=1)
+chart = gsc.pl.dpt_groups_pseudotime(
+    simulation, marker="o", zoom=True, width=480, height=180, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Scanpy owns these explicit analysis calls; the packaged Krumsiek11 example
+already supplies `uns['iroot'] = 0`. Plotting only reads categorical
+`obs['dpt_groups']`, `obs['dpt_order']`, `obs['dpt_pseudotime']` and
+`uns['dpt_changepoints']`. It never accesses expression or reruns analysis, so
+read-only views and backed metadata work. Missing fields error with the required
+Scanpy preparation. Stored order coordinates use the existing time-series numeric
+validation; filtered views retain their global ranks and saved boundaries.
+
+The two panels reuse the time-series renderer. The upper y values retain category
+codes, including unused category slots; palette colors follow sorted observed
+groups as in Scanpy. Integer group ticks are explicit below five categories.
+The lower values retain pseudotime, with explicit ticks at 0 and 1. Missing or
+infinite pseudotimes are blank in that panel only. Stored order coordinates and
+boundaries are preserved without sorting or rewriting observations.
+
+Native `color_map=None` uses viridis; palettes and markers have the existing
+time-series restrictions. Hover reports original row position, stored order and
+value. `zoom=True` enables independent x/y zoom and pan in each panel. Dimensions
+are per panel, defaulting to 496 × 168 pixels. The native “DPT group” legend sits
+beside the upper panel. Readable markers match the plotted category names,
+colors and shapes. A native colorbar explains continuous pseudotime; integer
+pseudotime has a category key. These guides are added to help read the native
+plot. Native show/save rules apply.
+
+Reference limitation: Scanpy 1.11.5's parent plotting entry fails with installed
+pandas 2.3.3 because it indexes a Series as `X[:, None]`. Validation uses its two
+public `timeseries_subplot` calls with group codes supplied as a NumPy array.
+The direct parent-entry comparison remains open; no upstream code is patched.
+
+### Plot expression in stored DPT order
+
+```python
+# Reuse the explicit DPT analysis above; select genes while retaining all cells.
+dpt_profiles = simulation[:, ["Gata2", "Gata1", "Cebpa", "Pu.1", "Gfi1"]]
+chart = gsc.pl.dpt_timeseries(
+    dpt_profiles, zoom="xy", show_values=True, width=600, height=240, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`dpt_timeseries` reads resident dense `X` and `var_names`, indexes rows using
+`obs['dpt_order_indices']`, and draws the stored `uns['dpt_changepoints']`.
+It uses neither raw/layers nor the distinct `dpt_order` rank coordinates.
+No neighbors, diffusion map, DPT, sorting, normalization or smoothing runs.
+Missing fields name the required explicit analysis. Indices use NumPy's row
+indexing semantics, including repeated/negative positions; invalid or stale
+indices fail clearly rather than being repaired. Gene-only views retain usable
+indices; slicing/reordering observations can make saved indices stale.
+
+The default heatmap reuses the transposed, center-cropped time-series matrix
+renderer with its first gene at the bottom, native colorbar and viridis default.
+`color_map` selects a native scheme; `marker` is inactive in this mode.
+`as_heatmap=False` uses the existing point renderer, preserving palette/variable
+order, the gene legend, marker semantics and `[0, 1.3 * n_obs]` x limits.
+`color_map` is inactive for points, as in Scanpy. Both label x as `dpt order`.
+
+Hover reports a variable, ordered sample position and value. Native navigation,
+fitted heatmap values, dimensions and HTML/JSON delivery reuse their parent paths.
+`zoom=True` navigates heatmap y or both point axes; `zoom="xy"` navigates both.
+`show_values=True` requires heatmap mode. Default plot areas are 372 × 616 pixels
+for heatmaps and 992 × 739.2 for points. Backed/lazy/sparse expression is rejected
+before loading or densification. Point mode inherits its requirement for at least
+two distinctly named genes and the ten-color default palette limit; heatmaps can
+show a single gene. The direct public Scanpy reference works for this entry;
+the Series-indexing limitation above affects the separate group diagnostic.
+
+## Stored PAGA graphs
+
+Compute group connectivity explicitly with Scanpy, using an existing neighbor
+graph, then replace the plotting call:
+
+```python
+sc.tl.paga(pbmc, groups="bulk_labels")
+chart = gsc.pl.paga(
+    pbmc, threshold=0.03, fontsize=9, width=700, height=460,
+    hover=True, zoom=True, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`uns['paga']` supplies the categorical grouping and sparse connectivity matrices.
+Plotting never computes neighbors or PAGA analysis. Gene colors read one selected
+expression column; metadata and degree colors do not read expression matrices.
+When pos=None, it reuses public `sc.pl.paga(plot=False)` on metadata-only AnnData
+for **layout computation only**, without a Matplotlib figure. This recomputes the
+layout even when positions are cached, as upstream. Pass
+`pos=pbmc.uns['paga']['pos']` to reuse coordinates. Missing results fail clearly.
+CSR/CSC graphs keep their stored edge order. LIL graphs use the same layout path
+after SciPy prepares compatible sparse storage; stored graphs remain unchanged.
+Solid links are muted gray so black labels remain readable. Labels sit eight
+pixels above their nodes. Numeric guides use the same 15-pixel width as matrix
+colorbars. Their titles sit beside the bars; native layout fits each bar to the
+plot height. Positions, connectivity weights and node sizes are unchanged.
+Core 1.2 rule and link marks do not support a separate edge border, so overlapping
+PAGA edges currently have no white outline.
+
+| Parameters | Current behavior |
+| --- | --- |
+| threshold, solid_edges, dashed_edges | Read copies of stored sparse graphs. None uses 0.01; positive thresholds remove strictly smaller weights. Zero/negative thresholds do not filter, including explicitly stored zeros. NetworkX retains upstream undirected edge order. Self-loops and retained negative/nonfinite weights reject. |
+| layout, layout_kwds, init_pos, root, random_state | Passed to Scanpy only when pos is None. Explicit finite n-by-2 positions are authoritative; file-based coordinates are unsupported. The optional Scanpy dependency includes its PAGA/igraph extra. |
+| color, colors | Default/group key uses existing group colors or shared Scanpy defaults; a CSS string or one CSS string per node is supported. Numeric observation keys show group means, skipping missing values. Gene keys show mean expression; a missing gene value makes that group's mean missing, as in Scanpy. Missing means omit the node's paint while retaining its label and edges. The legacy colors alias overrides color. Palettes are read without writing a color cache; a cached palette with the wrong length errors. Other categorical annotations, mixtures/pies, numeric lists and multiple color panels remain unsupported. |
+| degree_solid, degree_dashed | Use these strings as color keys. Compute weighted degrees from the displayed solid or dashed graph after thresholding, then normalize to 0–1. degree_dashed requires dashed_edges. Equal degrees have undefined normalization in Scanpy and raise a clear error. The existing graph helper preserves CSR/CSC edge order, including asymmetric weights. |
+| use_raw | Gene colors default to raw when present, otherwise X; False uses X. No layer or gene-symbol option is added. Reuse the grouped public getter and mean helpers; only the selected gene column is materialized. Resident dense/CSR/CSC and views follow the shared getter's limits. Ambiguous observation/gene names and CSS colors that also name annotations/genes reject. |
+| palette (native addition) | Group colors reuse the embedding palette resolver: an opaque CSS sequence or mapping, or a native scheme name. A supplied palette overrides saved colors without writing AnnData, and retains the full category domain when filtering components. Inactive for numeric/gene/degree colors. |
+| cmap, colorbar | Native continuous scheme, default viridis. colorbar=None or True adds a native guide for numeric observation, gene and degree colors. False hides the numeric guide. Group colors have a native categorical legend below the plot, arranged in two columns. These guide defaults deliberately differ from Scanpy 1.11.5. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
+| labels, groups | One string label per node, defaulting to category names. The deprecated groups alias overrides labels with Scanpy's warning. |
+| single_component | True shows the largest thresholded solid component by node count; ties choose the first component in original group order. Keep original node IDs and coordinates. Filtering a disconnected graph requires dashed_edges=None. Inactive when plot=False. |
+| node_size_scale, node_size_power | Preserve Scanpy's areas from stored group sizes divided by their median. With component filtering, the node count and median use displayed groups. Missing sizes use ones. Nodes retain fixed pixel sizes while zooming. |
+| edge_width_scale, min_edge_width, max_edge_width | Preserve the default 7.5-point weight multiplier; solid edges clamp both bounds, dashed edges clamp only the maximum. Native dashed rules are gray at half opacity. Their fixed pixel dash pattern differs from Matplotlib's width-scaled dashes; widths and weights remain faithful. |
+| add_pos, plot | add_pos=True stores successful coordinates, the only caller mutation. False leaves the cache untouched. plot=False computes/caches layout and returns None without a chart. Errors do not write positions. |
+| fontsize, fontweight, title, frameon | Native Lato labels use 10 points and bold by default; normal/bold and a string title are supported. frameon=None follows Scanpy's frame setting. Global Matplotlib styling and exact font metrics are outside this preview. |
+| Native delivery | hover=True shows group/label/cell counts, numeric color values and edge indices/weights. zoom=False by default; True enables both-axis wheel zoom and drag pan. width/height set plot area (default 548 by 384 pixels). Native charts compose and save to HTML/JSON. show/save follow the shared contract; ax/cax are omitted and reject. |
+
+Scanpy 1.11.5's direct single_component=True call fails for disconnected graphs:
+it trims node colors but retains all coordinates. This native preview implements
+the intended component view and is checked against an explicitly subsetted public
+Scanpy input; direct parent-call fidelity remains blocked. Numeric means and
+normalized degrees are computed before filtering, then the native color domain
+uses displayed values. The full position cache is retained, including hidden nodes.
+
+transitions, label outlines/text kwargs, nondefault
+left_margin, colorbar kwargs and export_to_gexf=True reject clearly.
+normalize_to_color and arrowsize are inactive in the supported undirected modes,
+as upstream; cmap is inactive for CSS colors. Native guide ticks, fonts and outer
+spacing can differ from Matplotlib. No cell-selection brush is attached to
+aggregated group nodes. The expression notebook compares group, numeric, gene
+and degree colors, plus a largest-component view, on packaged PBMC data using
+the same stored coordinates.
+
+### Compare cells and their PAGA graph
+
+`paga_compare` places a stored embedding beside the stored group graph. Both
+panels share the embedding's coordinate limits and optional zoom/pan. Colors
+and point sizes stay independent. The group key sits below both views:
+
+```python
+chart = gsc.pl.paga_compare(
+    pbmc, basis="umap", palette="tableau10", legend_fontweight="normal",
+    threshold=0.03, add_pos=False, zoom=True, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+With the default group color, omitted positions are group medians in the selected
+embedding components, in Scanpy's group order. With another observation key or
+gene, omitted positions read `uns["paga"]["pos"]`; a missing cache errors instead
+of computing a layout. Explicit `pos` is retained. `add_pos=True` updates the
+position cache after successful parent construction, as in Scanpy; False keeps
+it unchanged. No embedding or PAGA analysis runs.
+
+For group colors, `palette` applies to both cells and graph nodes through the
+same category-palette resolver. CSS sequences and mappings match Scanpy; named
+schemes remain native GenomeSpy scales. Filtering the graph keeps the full palette
+domain, so a group keeps its color. The saved AnnData palette is unchanged.
+Standalone `paga` accepts the same native `palette` addition.
+
+Comparisons compose without assigning scale names:
+
+```python
+pairs = (chart & chart).resolve_scale(default="independent").resolve_legend(
+    default="independent"
+)
+```
+
+Each row shares navigation between its own two panels; the rows navigate
+independently. The shared embedding renderer lets native scale resolution manage
+identity, including embeddings, PCA, scatter and density charts. PAGA positions
+are inherited from the graph layer root; comparison changes that root encoding
+with ordinary native chart methods.
+
+When `basis=None`, selection prefers stored `X_draw_graph_fa`, `X_umap`, `X_tsne`,
+then `X_draw_graph_fr`. A missing embedding requires explicit preparation.
+`components` selects one pair. `groups` highlights embedding categories without
+filtering graph nodes. `groups_graph` provides node labels; `labels` overrides it.
+When `title_graph=None`, `title` (or the color key) is the common title; otherwise
+the two titles belong to their respective panels. `width` and `height` size each
+plot area, defaulting to 300 pixels.
+
+This bounded preview requires `legend_fontweight="normal"` for on-data labels.
+The pinned bold default remains an explicit unsupported case because only the
+regular font atlas is bundled. One color/component pair is supported. Custom
+margins, `plot=False`, outlines, directed graphs and the other parent rendering
+restrictions remain unsupported. Native layout and fonts retain the existing
+renderer boundary; this is not full `paga_compare` parameter compatibility.
+
+PAGA comparisons use compact embedding points when `size` is omitted. Supply
+`size` to choose another starting area. Points grow on zoom; graph node sizes
+continue to represent their stored group sizes. Group names appear on hover.
+Use `show_node_labels=True` for permanent graph labels. They move apart as you
+zoom and make room for the node circles. Hiding labels keeps names on hover.
+Graph labels and on-data embedding labels share native `displace2d` placement.
+Graph anchors stay at the supplied node positions; embedding anchors stay at
+group medians. Labels whose anchors leave the viewport are hidden. Native
+legends identify node colors in every graph, including comparisons.
+
+Set `edge_slider=True` on `paga` or `paga_compare` to hide weaker displayed edges.
+The slider filters the graph already selected by `threshold`; it does not restore
+excluded edges. Degree-colored graphs reject the slider, so the colors cannot
+become stale as edges disappear. Both controls use native marks and
+parameters. Legend clicks do not select groups in this release.
+
+### PAGA path heatmaps and lines
+
+Use a supplied sequence of groups and explicitly computed pseudotime:
+
+```python
+import numpy as np
+
+# Scanpy owns this analysis; run it explicitly before plotting.
+sc.tl.diffmap(pbmc, random_state=0)
+pbmc.uns["iroot"] = int(np.flatnonzero(pbmc.obs["bulk_labels"] == "CD34+")[0])
+sc.tl.dpt(pbmc)
+path_cells = pbmc[np.isfinite(pbmc.obs["dpt_pseudotime"])]
+chart, values = gsc.pl.paga_path(
+    path_cells,
+    nodes=["CD34+", "CD14+ Monocyte", "Dendritic"],
+    keys=["LYZ", "FCER1A", "CST3", "FCGR3A", "NKG7", "CD3D"],
+    n_avg=25,
+    normalize_to_zero_one=True,
+    return_data=True,
+    zoom="xy",
+    show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`groups_key=None` reads `uns['paga']['groups']`; an explicit categorical
+`groups_key` also works. Names or integer category indices set the path order.
+Repeated nodes repeat their cells. Plotting reads stored pseudotime and never
+runs PAGA/DPT. Cells sort within each node, then complete windows average the
+combined path before optional per-key zero–one normalization. Constant normalized
+profiles fail clearly. Raw expression is used when available; `use_raw=False`
+selects X. Numeric observation keys use the same rows. Only requested genes are
+densified; the limit is 250,000 selected cell–key/annotation values.
+
+The original group band keeps all cells after smoothing. Numeric annotation
+tracks use the smoothed values. All tracks share native sample coordinates and
+follow x navigation. `zoom=True` navigates y; `zoom="xy"` also navigates x.
+`show_values=True` reveals fitted tile values. Hover reports plotted values and
+group/annotation values. A smoothed window does not represent one cell ID.
+Group names use native ranged text at their normal font size. Names that do not
+fit the visible group span stay hidden until zoom provides enough room. Native
+legends identify the displayed groups and numeric annotation scale independently
+of the expression guide; no custom legend or browser callback is used.
+
+`return_data=True` returns `(chart, table)` with `show=False`, or the table after
+display. Columns contain the plotted keys, averaged numeric group codes, and
+`distance` when pseudotime is an annotation. Scanpy 1.11.5's default unsmoothed
+`return_data` call fails on a Python list; a strict parent-reference check tracks
+that failure separately from the plotted data.
+
+This preview requires two keys and two smoothed samples, with at most one numeric
+annotation. Categorical/multiple heatmap annotation tracks and custom margins
+reject clearly. `xlim` and legend font options are inactive in heatmap mode,
+matching Scanpy. Native CSS group colors and color schemes use shared helpers.
+Native Greys uses RGB 226 through 30; Scanpy's Greys uses white through black.
+This native palette difference is an accepted preview limit. Values and color
+normalization retain Scanpy's behavior.
+
+Set `as_heatmap=False` to show the same prepared profiles as lines:
+
+```python
+lines = gsc.pl.paga_path(
+    path_cells,
+    nodes=["CD34+", "CD14+ Monocyte", "Dendritic"],
+    keys=["LYZ", "FCER1A", "CST3", "FCGR3A", "NKG7", "CD3D"],
+    n_avg=25,
+    normalize_to_zero_one=True,
+    as_heatmap=False,
+    zoom="xy",
+    show=False,
+)
+lines.display(inline=True, controls=False)
+```
+
+Native window/lead transforms connect adjacent samples with round-cap rules.
+Missing values leave gaps. Hover reports both sample values; zoom and pan use
+the same shared navigation helpers. No extra join marks or custom geometry are
+added. Corners, line ends and browser antialiasing have minor differences from
+Scanpy.
+
+`xlim=(start, stop)` slices the smoothed, normalized samples by position, including
+negative Python slice bounds. Displayed x coordinates restart at zero; returned
+data stays uncropped. Native category10 colors follow key order and cycle after
+ten keys. The built-in legend sits below the plot; `legend_fontsize` sets its
+size. A single key has no series legend. The value axis remains visible, with
+“Value (0–1)” when normalization is enabled. A group strip follows the same path
+and stays aligned after cropping. Set `series_select=True` to emphasize one key
+or `ruler=True` to read positions along the path. Both work in heatmap mode too.
+One-sample and empty crops are valid. Repeated line keys and `show_values=True`
+fail clearly.
+
+Numeric annotation bands and heatmap color/guide options do not style lines.
+Group colors and `show_node_names` apply to both views. Numeric or
+categorical annotations can still be prepared, preserving the same returned
+pseudotime and group columns. The existing resident-data/value limit and explicit
+analysis contract apply to both modes.
+
+### PAGA adjacency matrices
+
+`paga_adjacency` retains Scanpy's legacy top-level `uns` keys. Make modern PAGA
+results available under those keys explicitly, then plot the same input:
+
+```python
+pbmc.uns["connectivities"] = pbmc.uns["paga"]["connectivities"]
+pbmc.uns["connectivities_tree"] = pbmc.uns["paga"]["connectivities_tree"]
+chart = gsc.pl.paga_adjacency(pbmc, zoom="xy", show=False)
+chart.display(inline=True, controls=False)
+```
+
+The assignments share stored sparse matrices; they do not rerun analysis or copy
+expression. `adjacency` and `adjacency_tree` select other top-level keys. Both
+must contain resident SciPy sparse matrices or arrays with the same nonempty
+square shape, limited to 250,000 values. Shape and size checks precede
+densification; only the selected group adjacency becomes dense. Expression,
+embeddings, group palettes and cached layouts are untouched.
+
+Color shows adjacency values in their supplied row/column order, with missing
+entries blank. The native matrix color guide defaults to viridis; `color_map`
+accepts native schemes. Black native points mark nonzero tree entries, including
+diagonal or negative entries. As in Scanpy, a tree entry `(row, column)` appears
+at **x=row, y=column**, even for asymmetric input. No thresholding, clustering or
+category reordering occurs. The axes retain numeric group indices unless you
+supply `labels=[...]` in matrix row/column order. The plot does not guess labels
+from unrelated observation categories.
+
+`hover=True` shows cell values and source/target indices for tree points.
+`zoom=True` navigates y; `zoom="xy"` navigates both axes. Larger tree points grow
+gently on zoom and stay inside their cells. `show_values=True` uses the shared fitted
+cell labels. `width` and `height` set the matrix area; defaults fit square cells
+within 400 pixels. Standard native display and HTML/JSON delivery apply. Fonts,
+automatic tick density and outer spacing retain the shared matrix preview's limits.
+
+For connectivity strips, reuse the same stored matrices:
+
+```python
+strips = gsc.pl.paga_adjacency(pbmc, as_heatmap=False, zoom=True, show=False)
+strips.display(inline=True, controls=False)
+```
+
+X is the source group index; y is its stored adjacency value to a target group.
+Light gray points exclude the diagonal. Blue points select nonzero tree entries,
+including selected diagonals; their y values come from adjacency, not tree weights.
+Draw order follows Scanpy: background points, then tree points for each source row.
+Missing values stay undrawn and do not affect automatic limits. Constant or empty
+plots retain Scanpy's expanded limits. Hover reports source/target indices,
+connectivity and edge type. Both zoom modes and independent composition work for
+strips too. `color_map` is inactive, and `show_values=True` requires heatmap mode.
+The stripplot area defaults to 496 by 369.6 pixels. Points grow on zoom. A native
+legend explains the two edge types, and the vertical axis shows connectivity.
+With explicit `labels`, source groups use index-scaled slots. The legend sits
+below the group names and x-axis title. Named labels share the index scale in a
+native side view: the released axis API cannot map index ticks to arbitrary
+names. Repeated labels retain separate slots. Unlabelled strips keep Scanpy's
+numeric x limits. The optional `labels` also appear in tree-edge tooltips.
+
+Zoomable matrix charts can use independent native panels and guides:
+
+```python
+panels = (chart | chart).resolve_scale(default="independent")
+panels = panels.resolve_legend(default="independent")
+panels.display(inline=True, controls=False)
+```
+
+This works for both `matrix` and `paga_adjacency`. Wheel zoom and drag pan affect
+only the panel under the pointer. The expression notebook shows two native color
+schemes side by side.
+
+## Clustermap compatibility
+
+```python
+genes = ["CD79A", "MS4A1", "CD3D", "NKG7"]
+cells = pbmc.raw[:, genes].to_adata()
+chart = gsc.pl.clustermap(
+    cells, obs_keys="bulk_labels", use_raw=False, cmap="viridis",
+    yticklabels=False, zoom=True, show_values=True, width=400, height=450, show=False,
+)
+```
+
+Clustermap retains individual cells and clusters both rows and columns by default.
+Annotation strips retain every cell and have no outlines. Dense category changes
+can blend in the overview; zooming reveals the individual rows.
+It does not reuse the group-profile tree from dotplot/matrixplot: its distances
+describe the supplied cell/gene values. Scanpy delegates this plot to Seaborn;
+the adapter uses the same public SciPy calculations without constructing a figure.
+Plotting-only linkage is local and never written to AnnData.
+
+| Option | Supported preview |
+| --- | --- |
+| `use_raw` | Defaults to raw when present. The entire supplied matrix is requested, so subset AnnData first. Scanpy 1.11.5 labels raw columns with `adata.var_names`; differing raw/X variable counts raise a clear error. No layer/symbol extensions are added. |
+| `method`, `metric`, `row_cluster`, `col_cluster` | SciPy string names, default average linkage and Euclidean distance. Disabling an axis keeps its supplied order. No embedding, group analysis or ranking runs. |
+| `row_linkage`, `col_linkage` | Finite valid linkage with the matching leaf count. Supplied trees are authoritative and are not recomputed; each axis can use a different method/metric. |
+| `z_score`, `standard_scale` | None, 0 (rows), or 1 (columns); mutually exclusive. Scaling precedes linkage. Z-scores use sample standard deviation, matching Seaborn; constant ranges become missing rather than the zero convention of grouped expression plots. Missing distances fail. |
+| `mask` | Matching boolean array or identically indexed DataFrame. Masks affect display and color bounds, never linkage. Missing values may be displayed blank when clustering is disabled or valid linkage is supplied. At least one unmasked finite value is required. |
+| `obs_keys`, `row_colors`, `col_colors` | One categorical observation key, or explicit CSS color tracks. `obs_keys` gives the strip a native category legend using saved order and palette, independent of the expression colorbar. Pandas Series/DataFrames align by index; lists are positional, with nested lists representing tracks. Missing annotations are white and omitted from the legend. Explicit CSS tracks have no category labels or legend. Saved category palettes/order are reused without mutation. `obs_keys` conflicts with explicit row colors. |
+| `xticklabels`, `yticklabels` | Auto spacing, True/False, positive stride, or a complete label list. Repeated labels retain distinct index slots. The matrix, labels, strips and branches follow the same permutation. |
+| Layout/colors | Native scheme names, numeric `vmin`/`vmax`, `linewidths`, CSS `linecolor`, tree/track ratios and native matrix dimensions. Legends are centered on the right. `figsize` uses 100 logical pixels/inch and conflicts with width/height. `cbar_pos=None` hides the guide; `cbar_kws` supports its label. |
+| `zoom`, `show_values` | Opt-in shared grid navigation and fitted plotted values. `zoom=True` navigates y only; `zoom="xy"` navigates both axes. Trees, strips and visible labels follow the same ordered slots. Both options default False. |
+| Delivery | Default native hover reports original cell name, gene and plotted value. Native `obs_keys` strip tooltips show the observation category. `hover=False` disables both. `show`, `save` and chart HTML/JSON delivery follow the shared contract. The result is a native chart, not Seaborn's ClusterGrid; its artist attributes/chains are unavailable. |
+
+The default native palette is magma rather
+than Seaborn's rocket, and the native color guide is on the right rather than in
+Seaborn's upper-left inset. Explicit viridis references isolate layout/value fidelity
+from this palette difference. Custom `cbar_pos`, `pivot_kws`, `tree_kws`, `annot`,
+`center`, `robust`, `norm`, artist options and unknown kwargs reject by name.
+
+The preview accepts resident dense/CSR/CSC inputs and views, with at most **250,000
+matrix values** and **1,000,000 pairwise distances per automatically clustered
+axis**. Both guards run before expression access. Supplying linkage avoids the
+distance allocation, but not the tile limit. Backed/lazy matrices reject before
+reading expression; no silent sampling, aggregation or full unrelated matrix
+densification occurs. The expression notebook uses all 700 packaged PBMC cells
+and the same ten marker genes. Clustermap rows and columns remain contiguous.
+Native surround tracks keep branches and color strips adjacent with zero track
+spacing.
+
+## Stored rankings and ranked expression plots
+
+Scanpy owns differential-expression analysis. The packaged PBMC object already
+has a `rank_genes_groups` result; plotting reads it directly:
+
+```python
+pbmc = sc.datasets.pbmc68k_reduced()
+scores = gsc.pl.rank_genes_groups(pbmc, n_genes=5, show=False)
+dots = gsc.pl.rank_genes_groups_dotplot(pbmc, n_genes=3, zoom=True, show=False)
+means = gsc.pl.rank_genes_groups_matrixplot(
+    pbmc, n_genes=3, standard_scale="var", show_values=True, show=False,
+)
+cells = gsc.pl.rank_genes_groups_heatmap(
+    pbmc, n_genes=3, standard_scale="var", zoom=True, show_values=True, show=False,
+)
+```
+
+For new data, run `sc.tl.rank_genes_groups(...)` explicitly during analysis first.
+Missing or malformed results fail without running analysis or overwriting `uns`.
+Ranked expression wrappers select through the public
+[`sc.get.rank_genes_groups_df`](https://scanpy.readthedocs.io/en/1.11.x/generated/scanpy.get.rank_genes_groups_df.html)
+and call the existing native plot. They inherit its source selection, summaries,
+normalization order, trees, hover, limits and opt-in interactions.
+
+| Surface | Current behavior |
+| --- | --- |
+| Stored marker selection | Default `n_genes=None` selects ten per list. A positive count takes the first ranks; a negative count takes the stored tail without reversing it. Filtered missing names are dropped before slicing. Repeated genes retain their slots and group brackets. |
+| `groups`, `groupby`, `key` | Preserve requested rank-list order; a string selects one group. `groups` selects gene lists, not observation subsets. Expression grouping defaults to stored params; `groupby` overrides it. `key=None` uses `rank_genes_groups`. |
+| `var_names`, symbols and threshold | Explicit lists/dictionaries replace automatic selection and conflict with explicit `n_genes`. Symbols for ranked marker selection use the getter's `adata.var` lookup. `min_logfoldchange` applies a strict `>` filter only when selecting automatic lists; it needs stored fold changes. As in Scanpy, explicit markers bypass that filter. |
+| Raw/layer and trees | Expression uses the parent plot's raw/layer defaults and explicit kwargs; it does not automatically switch to a ranking's stored layer. `dendrogram` defaults True and can be disabled. Reading a rank list never computes a tree; the parent plot owns its normal tree policy. |
+| Metric colors | Dotplot/matrixplot accept `scores`, `logfoldchanges`, `pvals`, `pvals_adj`, `log10_pvals` and `log10_pvals_adj`. The log options use **−log10(p)**. Colors read all stored ranking groups; `groups` selects marker lists only. Dot sizes still use expression fractions. Matrix statistics bypass `standard_scale`; dotplot retains its parent scaling order. Heatmaps keep individual-cell expression. |
+| `rank_genes_groups` panels | Stored order and scores, requested groups, native label sizing, shared/separate score bounds and `n_panels_per_row` alias. Symbol labels use raw/var according to the ranking's stored `use_raw`. No expression matrix is read, including for backed data and views. Nonfinite scores or missing names error; filtered lists remain available through the expression wrappers. |
+| `ranking` | Supplied var/obs/uns/varm/obsm score columns or a nested dictionary. Dense array `indices`, label lists/prefixes, natural-log scores and `include_lowest` are supported. Sorting follows Scanpy, including its extra top label when `include_lowest=False`. Sparse/backed array-column selection errors. This function has no save argument and does not use autosave, as in Scanpy. |
+| Native rendering and delivery | Rank panels use rotated labels and native axes; width/height default to 300 pixels per panel. Fonts, automatic tick density and outer layout differ from Matplotlib. Expression wrappers return their parent chart type and accept its options; Matplotlib objects and unknown kwargs error. Notebook and offline HTML delivery use the existing chart/widget. |
+
+The [ranked-gene guide](../../docs/integrations/scanpy/ranked.md) shows packaged scores, ranked expression plots,
+fold-change dots and adjusted-p-value tiles. Its notebook prepares complete
+Scanpy rankings explicitly; the page loads those prepared results.
+
+Statistic colors require complete stored rankings, as in Scanpy. The packaged
+logreg cache contains only 100 ranks per group; prepare a new result explicitly:
+
+```python
+sc.tl.rank_genes_groups(
+    pbmc, "bulk_labels", method="wilcoxon", use_raw=True,
+    n_genes=pbmc.n_vars, key_added="rank_stats",
+)
+dots = gsc.pl.rank_genes_groups_dotplot(
+    pbmc, key="rank_stats", n_genes=3, values_to_plot="logfoldchanges",
+    cmap="redblue", vmin=-4, vmax=4, show=False,
+)
+tiles = gsc.pl.rank_genes_groups_matrixplot(
+    pbmc, key="rank_stats", n_genes=3, values_to_plot="log10_pvals_adj",
+    cmap="viridis", zoom=True, show_values=True, show=False,
+)
+```
+
+Rank colors match genes by label in each stored group, including repeated plot
+slots and gene symbols. Without a tree or explicit category order, matrixplot
+retains the statistic table’s alphabetic group order; dotplot restores observation
+category order, matching Scanpy. A `groupby` override must have the same group labels.
+Expression raw/layer defaults and explicit options remain independent of ranking
+params; saved statistics are never recomputed from the selected expression source.
+The metric supplies the default colorbar title; `colorbar_title` overrides it.
+
+Missing metrics, incomplete rankings, ambiguous labels, absent gene/group pairs,
+and nonfinite selected values fail clearly. Unlike Scanpy’s missing-value fill,
+this preview does not substitute `1` for missing statistics. Raw p-values may be
+zero; log-transformed p-values must be positive because zero yields infinity.
+No clipping or replacement analysis occurs. These cases remain compatibility
+limits tracked in M14.
+
+## Dendrograms and correlation matrices
+
+Compute a tree explicitly in Python and reuse it across plots:
+
+```python
+sc.tl.dendrogram(pbmc, "bulk_labels")  # Uses the packaged X_pca representation.
+
+dots = gsc.pl.dotplot(pbmc, marker_genes, "bulk_labels", dendrogram=True, show=False)
+tiles = gsc.pl.matrixplot(pbmc, marker_genes, "bulk_labels", dendrogram=True, show=False)
+tree = gsc.pl.dendrogram(pbmc, "bulk_labels", orientation="left", show=False)
+correlations = gsc.pl.correlation_matrix(
+    pbmc, "bulk_labels", show_values=True, show=False,
+)
+```
+
+All computations run in Python. GenomeSpy renders supplied branch coordinates
+with native orthogonal links; it does not calculate profiles, correlations or linkage.
+A missing tree delegates to the public `sc.tl.dendrogram(..., inplace=False)`.
+Scanpy computes group means, Pearson correlations, `1 - correlation` distances,
+complete linkage and branch coordinates; the adapter does not implement these
+computations. No result is written to `adata.uns` by plotting. For different
+representations, components or methods, call `sc.tl.dendrogram` explicitly first.
+
+Default profiles use resident `X` when `n_vars <= sc.settings.N_PCS`, otherwise
+existing `obsm["X_pca"]`. Tree profiles do not use the selected marker genes,
+`raw`, `layer`, plot `log`, or summary scaling. Missing PCA produces an error
+asking for explicit preparation; no plotting function fits PCA, UMAP or gene
+rankings. Automatic computation requires resident dense X or X_pca because of
+Scanpy 1.11.5's input limits. It rejects sparse/backed/lazy computation clearly,
+without densifying expression. Existing trees can be rendered with sparse or
+backed data because reading a stored tree does not access X or its representation.
+
+Stored trees are treated as Scanpy snapshots. The adapter checks their structure,
+group labels, array shapes and finite values, then copies their correlations,
+leaf order and branch coordinates. It does not recompute profiles, correlations,
+linkage or layout to verify an existing result. Custom Scanpy computations such
+as `n_pcs`, `var_names`, correlation/linkage methods and optimal ordering are
+honored as stored. Reordered categories are aligned by labels. Malformed or
+incompatible results fail without overwrite. As in Scanpy, recompute the tree
+explicitly after changing the underlying data or group membership; the adapter
+does not infer staleness from expression values.
+
+| Surface | Current behavior |
+| --- | --- |
+| Grouped `dendrogram` | False retains the original plot; True uses `uns["dendrogram_<groupby>"]`, and a string selects another key. Missing results delegate to Scanpy. Tree order overrides explicit `categories_order`, as in Scanpy. Dotplot/matrixplot warn and omit attachments with at most two groups; heatmap supports two-group attachments. |
+| Category and feature order | Carry the same leaf permutation through means, fractions, supplied tables and labels. When marker-block labels match the group categories, reorder their feature slots and brackets too; otherwise retain marker order. Multiple categorical string keys use Scanpy's lexically ordered joined tree groups. |
+| Standalone `dendrogram` | All four orientations and `remove_labels`, including a two-group tree. At least two observed categories are required. Unused categories, ambiguous joined/string labels, and undefined constant/missing profiles error explicitly. Native width/height default to 300 × 300 logical pixels. |
+| `correlation_matrix` | Cached or locally computed group correlations. None/True draws a left tree and orders both axes by leaves; a string selects the cache. False keeps current category order without drawing a tree. `show_values=True` enables shared fitted two-decimal labels; `show_correlation_numbers=True` remains supported. Default summary hover uses the same records. Native side tracks hold vertical column labels, right row labels and the optional left tree; the colorbar stays beneath the matrix. |
+| Correlation colors/style | Default native redblue with reversed scheme extent gives blue negatives and red positives; the guide increases from -1 to 1. Native cmap names, scalar edgecolors and linewidth are supported kwargs. Other kwargs, norm/vcenter and Matplotlib colormaps error. Native interpolation differs from Scanpy's default bwr. |
+| Correlation size/delivery | Default tile area is 60 pixels per group in each direction; width/height override it. Figsize uses a 100-pixels/inch budget, subtracting 180 pixels for a tree and 20 for the guide. Labels and padding add space. Existing show/save/native-return rules apply; ax is omitted. |
+
+Dotplot/matrixplot trees reserve an 80-pixel branch region; heatmaps use 100 pixels
+on the right or 80 above, and correlation trees use 180.
+Zero-distance leaves meet the matrix edge without a gap or distance-axis padding.
+Attached trees share native viewport-based height fitting: after zooming or panning,
+`gs.ViewportDomainRef(mode="contain")` fits the height scale to branches whose
+endpoints lie in the visible slots. This expands local tree detail without
+recomputing heights or clusters. The full overview retains its original root margin.
+Entirely zero-height trees keep a fixed nonzero range. A released Core limitation
+remains when only a zero-height subtree is visible inside a larger tree: its
+degenerate height range centers the branches (C13 in the integration ledger).
+All dendrograms share native orthogonal links, as in the
+[GenomeSpy clustered-heatmap example](https://genomespy.app/docs/examples/generic/clustered-heatmap/).
+Each stored merge becomes two parent-to-child links; the native vertical or
+horizontal elbow preserves its merge height. Python still computes the trees.
+Complete SVG paths, WebGL and inline HTML are verified across the four standalone
+orientations and attached trees. Core's separate straight-link SVG issue (C12 in
+the integration ledger) does not affect these orthogonal trees.
+Native dataflow projections follow the plot dimensions and fixed index-slot
+padding. Optional grouped navigation uses the same live index projection for
+branches and row/column labels. Summary hover remains available. Distances,
+leaf positions and guide/label clearance are checked against frozen complete
+Scanpy figures, including swapped axes and different plot sizes. These are native
+font/layout comparisons, not a claim of identical Matplotlib outer figures.
+
+## Interaction and native results
+
+hover=True adds observation ID, original observation name, value/source, and
+coordinate tooltips without changing the initial marks. hover=False disables
+record hover. zoom=True enables coordinate navigation; it is off by default.
+The selection argument supports an x/y interval brush, owned by the first panel,
+and a live selected-cell count. Point appearance stays unchanged across panels
+showing the same dimension pair. Point selection, initial brush values, and
+caller-supplied push scopes currently error.
+
+obs_id selects an existing unique, nonmissing observation-column key. Without it,
+unique obs_names supply IDs. Duplicate names receive distinct snapshot-local row
+keys, preserving every observation even when coordinates repeat. Those local
+keys are not cross-AnnData identity; supply explicit IDs when matching selections
+back to an AnnData object that may have been reordered or sliced.
+
+Use normal native chart composition and configuration:
+
+```python
+cells = gsc.pl.umap(adata, color="cell_type", show=False)
+expression = gsc.pl.umap(adata, color="MS4A1", show=False)
+combined = cells | expression
+combined.save("cells.html", inline=True)
+```
+
+Interactive HTML works without Python when data and runtime are embedded.
+Python callbacks require a live notebook kernel. HTML bundling does not make
+external URL datasets offline. Native results do not emulate Matplotlib Axes,
+Figure attributes, or artist styling methods.
+
+### Linked UMAP brushing
+
+Use Scanpy’s packaged PBMC data, which already contains UMAP coordinates:
+
+```python
+import scanpy as sc
+import genome_spy as gs
+import genome_spy.integrations.scanpy as gsc
+
+pbmc = sc.datasets.pbmc68k_reduced()
+brush = gs.selection_interval("cells", encodings=["x", "y"], on="mousedown", zoom=False)
+chart = gsc.pl.umap(
+    pbmc, color=["louvain", "CD79A"], selection=brush,
+    zoom=False, width=280, height=280, show=False,
+)
+view = chart.widget(parameter_names=[brush.name], inline=True, controls=False)
+view
+```
+
+**Drag in the first panel without holding any keys.** The default brush rectangle
+marks the selected region. A native text mark below the panels updates the exact
+selected-cell count while you drag; point colors and opacity stay unchanged.
+Double-click in the first panel to clear. Navigation is disabled in this example
+so ordinary dragging always brushes. Only the first panel starts a brush; both
+panels retain their original points.
+
+The count runs entirely in GenomeSpy, including in exported interactive HTML.
+Clearing or selecting an empty region reports zero. The count uses all plotted
+cells inside the bounds, independently of semantic point visibility. All panels
+must use the same dimension pair; their color scales, palettes, guides, and draw
+orders remain independent.
+
+Live counting currently scans the plotted cells on each brush update and can
+slow dragging on very large datasets. The faster native counting path awaits
+a published Core release with correct empty-selection counts.
+
+The existing JupyterChart synchronizes the named parameter through
+`parameter_values`. After brushing, run an ordinary Python cell:
+
+```python
+mask = gsc.selection_mask(pbmc, view.parameter_values.get(brush.name))
+selected_ids = pbmc.obs_names[mask]
+selected_adata = pbmc[mask].copy()
+```
+
+No asynchronous setup, callback registration, or separate widget controls are
+needed. Rerun the retrieval cell after changing the brush to refresh the subset.
+Only interval bounds cross to Python; expression data is copied only when you
+explicitly request the AnnData subset. Python retrieval requires a live kernel.
+
+`selection_mask` reads the unchanged plotted embedding and returns membership in
+the supplied AnnData's current row order, preserving distinct coincident rows.
+It uses the same lower-inclusive, upper-exclusive bounds as the native count.
+It supports reordered/sliced observations that retain their
+coordinates. Do not recompute or edit UMAP between plotting and retrieval.
+Pass `dimensions=(i, j)` if you plotted a nondefault component pair.
+
+The linked-brushing section of the
+[UMAP notebook](notebooks/scanpy_umap.ipynb)
+uses this normal widget path. For navigation and brushing together, use
+`zoom=True` and the default interval gesture: Shift-drag brushes, ordinary
+dragging pans. Custom `on`, `clear`, and brush-zoom settings follow the native
+interval parameter. Command-drag is not the default brush gesture.
+
+### Examples adapted from Scanpy tutorials
+
+The examples load `sc.datasets.pbmc68k_reduced()` through Scanpy's public API:
+700 real PBMC observations, 765 genes, annotations, and stored UMAP coordinates.
+The plotting adapter does not recompute the embedding or differential expression.
+No dataset copy is vendored here.
+
+Two notebooks run independently:
+
+- [UMAP](notebooks/scanpy_umap.ipynb):
+  basic categorical/continuous UMAP, linked brushing/count/Python retrieval, then
+  customization with subsets, titles/frames, categorical order/palettes, square
+  and diamond markers, outlines, stored neighbor edges, an explicit Scanpy gene score and
+  the eight-panel marker overview, followed by
+  stored PCA with variance labels/loadings, variance ratios and the composed overview,
+  explicitly prepared t-SNE and cell/gene scatter.
+- [Expression plots](notebooks/scanpy_expression.ipynb):
+  marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
+  `bulk_labels`, clustermap, stored score panels and ranked expression variants,
+  with aligned dendrograms and value hover.
+  QC sections inspect the packaged variable-gene statistics and load PBMC3k counts for highest-expression percentages.
+
+These adapt supported UMAP, dotplot, matrixplot and heatmap sections of Scanpy's
+[core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
+[advanced](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
+plotting tutorials. Grouped examples reuse a tree explicitly computed in Python
+with `sc.tl.dendrogram`; clustermap computes separate cell/gene linkage. Ranked
+examples read the packaged stored results; statistic-color examples explicitly
+prepare a separate complete ranking with Scanpy. Remaining tutorial plots and
+Matplotlib artist styling are not implemented yet.
+
+### Native plot sizing
+
+Set panel dimensions through GenomeSpy without importing or configuring
+Matplotlib:
+
+```python
+chart = gsc.pl.umap(
+    adata, color=["cell_type", "MS4A1"],
+    width=300, height=300, ncols=2, show=False,
+)
+```
+
+`width` and `height` are keyword-only GenomeSpy controls in logical pixels, not
+figure inches or marker areas. They apply to each plot area; titles, axes,
+spacing, and legends take additional space. Numeric guides use the requested
+height. An omitted dimension retains its Scanpy-compatible default, and plotting
+does not change global settings. Use `ncols` to arrange the panels, `wspace` and
+`hspace` for relative gaps, and `size` for marker area.
+
+For a multi-panel result, setting dimensions on the outer composition with
+`.properties()` does not resize its fixed child panels. Pass `width`/`height`
+at the plotting call to size the panels and guides together.
+
+## Expression tracks
+
+Try the [expression tracks guide](../../docs/integrations/scanpy/tracks.md) for live examples and a notebook.
+
+Show one gene per track and one bar per cell:
+
+```python
+tracks = gsc.pl.tracksplot(
+    pbmc, ["CD79A", "MS4A1", "CD3D"], "bulk_labels",
+    dendrogram=True, zoom=True, width=650, show=False,
+)
+tracks.display(inline=True, controls=False)
+```
+
+Hover a bar to read its cell, gene, group and expression. Wheel zoom and drag pan
+across cells; all tracks, category colors and the tree follow together. Each gene
+has its own y-scale. `height` sets the combined track height, excluding the tree
+and legends. `zoom` and `hover` can be turned off.
+Use `group_gap=3` to separate cell groups and `spacing=6` to separate tracks,
+the tree and the category strip. Both are measured in pixels and default to zero.
+Gaps follow the shared cell positions while zooming.
+
+The adapter reuses heatmap's selected-gene access and cell ordering. Raw is used
+when available unless a layer or `use_raw=False` selects another source. A marker
+dictionary adds a colored gene-group strip. Explicit marker spans must cover all
+genes once, in order. Stored group colors are preserved without changing AnnData.
+The preview supports up to 250,000 resident cell–gene values; subset explicitly for
+larger inputs. Backed/lazy expression and extra styling keywords fail clearly.
+
+Native bars give stepped profiles. Scanpy 1.11.5 fills between neighboring cell
+values. `log=True` preserves Scanpy's log1p values and logarithmic y-axis;
+nonpositive values do not draw on that axis. Ranked tracks are still planned.
+
+## Full plotting coverage inventory
+
+The tracked API snapshot contains 50 public callables, including aliases,
+three builders, and two rcParams helpers. It records callable targets so aliases
+remain visible. Function coverage and parameter coverage are separate.
+
+| Delivery | Public entries |
+| --- | --- |
+| Available as partial previews | DotPlot, MatrixPlot, umap, dotplot, matrixplot, heatmap, tracksplot, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
+| Distributions and ranked tracks | violin, stacked_violin, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
+| Trajectories and graphs | Broader paga/path/adjacency/compare options |
+| Spatial | spatial |
+| Remaining builders and methods | StackedViolin; DotPlot square-background styling and broader native parameter closure |
+| Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
+
+All entries except the available plotting previews and settings helpers remain required future integration
+work. Settings remain owned by Scanpy. The external.pl namespace is separate
+from this core inventory.
+
+Dendrograms belong with grouped-plot coverage. Read stored Scanpy results or
+delegate missing computation to `sc.tl.dendrogram`, then render native orthogonal links
+through the shared renderer. A dedicated tree mark is unnecessary. This does
+not authorize rerunning the user's UMAP or differential-expression analysis.
+Violin densities and track envelopes can likewise be prepared in Python, while
+their filled geometry needs appropriate native rendering support.
+
+## Reference preparation and validation
+
+Reference assets use original, synthetic test data under the project's MIT
+license. They contain duplicate observation names and coordinates, different
+raw/X variable vocabularies, unequal category order, missing values, and ties.
+No benchmark scripts or real datasets were promoted. Upstream source describes
+the contract; the adapter does not vendor Scanpy plotting implementations or
+read rendered artists.
+
+Developers can reproduce the pinned API metadata and full reference figures:
+
+```sh
+uv sync --dev --extra scanpy --group scanpy-test
+uv run --no-sync python -m tests.integrations.scanpy.generate_references
+uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
+uv run --no-sync python -m playwright install chromium
+uv run --no-sync pytest tests/integrations/scanpy/browser
+```
+
+Refreshing the frozen numerical/API metadata is explicit and separate from tests
+and runtime. Browser tests use the pinned generators to render reference images
+in pytest's temporary directory without changing that metadata. Generated PNGs,
+screenshots and overlays are never committed or pushed. Explicit refresh commands
+write images to ignored `tmp/scanpy-references/<family>/`; checksums, dimensions,
+DPI and version metadata remain under `tests/integrations/scanpy/fixtures`.
+Independent tests check hand-calculated values, source identities, sparse
+allocation and mutation behavior. Browser checks measure actual marker footprints,
+retain temporary registered overlays and complete-chart captures, and exercise
+hover, navigation and offline delivery.
+
+### Resource baseline
+
+The explicit benchmark is reproducible without local research directories:
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.benchmark --cells 100000 --panels 8 --output /tmp/umap-memory.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark --cells 10000 --panels 8 --browser --output /tmp/umap-browser.json
+```
+
+Benchmark output records versions, source dimensions, payloads, hardware,
+viewport, timing definitions and memory use. Write it to a temporary directory;
+these observations are not reference fixtures or portable timing limits.
+Use Arrow for large notebook payloads. Validated JSON export can be expensive.
+Semantic tests separately verify selected-column access and sparse allocation.
+
+The [self-contained UMAP notebook](notebooks/scanpy_umap.ipynb)
+demonstrates the native widget and its live Python connection. CI runs semantic
+and browser checks with the pinned stack on Python 3.11, 3.12, and 3.13, and
+renders both workflow notebooks through JupyterLab. Local validation used Python 3.11.

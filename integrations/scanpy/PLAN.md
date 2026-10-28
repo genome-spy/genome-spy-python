@@ -51,9 +51,9 @@ Native presentation and interaction defaults may deliberately differ after
 plot-by-plot review; document and test each accepted difference. Add keyword-only
 GenomeSpy controls. Track meaningful unsupported parameters until implemented or
 explicitly resolved as a renderer boundary. Signature presence alone is not support.
-Scanpy 1.11.5 is the only accepted version today; broaden the optional dependency
-range only after the version checks in M14 pass. Keep base and namespace imports
-free of the scientific stack.
+Support Scanpy >=1.11.5,<1.13, with the reference environment pinned to 1.11.5.
+Validate both ends of the range and audit changed parameters before widening it.
+Keep base and namespace imports free of the scientific stack.
 
 ### Rendering boundary
 
@@ -131,7 +131,7 @@ raw-symbol and duplicate-label behavior. Do not force a single accessor onto
 families with different lookup semantics. Do not call upstream plotting, inspect
 rendered artists, import benchmark scripts, or promote prototype geometry as
 runtime preparation. Source and dataset provenance are reviewed before reuse.
-The [Scanpy 1.11.5 reuse audit](../../docs/integrations/scanpy/supported.md#reusing-scanpy-computations)
+The [Scanpy 1.11.5 reuse audit](COMPATIBILITY.md#reusing-scanpy-computations)
 and [delegation/counterexample tests](../../tests/integrations/scanpy/test_upstream_reuse.py)
 make these boundaries explicit. Recheck them when adding support for a version
 that exposes suitable public plotting-preparation methods.
@@ -265,8 +265,8 @@ backed expression, and broader selection modes stay in M07/M14.
 
 ### M02 — grouped access and dotplot (plain-chart preview closed)
 
-M02.a–d are verified for the plain-chart preview; see [data evidence](STATUS.md#m02ab-preparation-and-statistics)
-and [chart evidence and limits](STATUS.md#m02cd-plain-dotplot-preview).
+M02.a–d are verified for the plain-chart preview; see [data evidence](STATUS.md#verification)
+and [chart evidence and limits](STATUS.md#verification).
 The public dotplot function includes index-scaled slots and optional summary hover.
 Trees, builders and summary selections remain in their named later slices.
 
@@ -343,7 +343,7 @@ builder styling completes in M13.
 ### M04 — dendrogram and correlation (preview closed)
 
 M04.a–d are verified for standalone trees/correlation and dotplot/matrixplot
-attachments; see [scope and evidence](STATUS.md#m04ad-dendrogram-and-correlation-preview).
+attachments; see [scope and evidence](STATUS.md#verification).
 Later-family attachments remain with M05/M08/M09. Normalization, kwargs and
 export compatibility remain in M14.
 
@@ -388,8 +388,8 @@ in M14, not an excuse to declare full automatic compatibility.
 ### M05 — heatmap, matrix and clustermap
 
 Heatmap M05.a/b is delivered as a bounded preview; see the
-[status record](STATUS.md#m05ab-cell-heatmap-preview) and maintained
-[heatmap contract](../../docs/integrations/scanpy/supported.md#heatmap-compatibility).
+[status record](STATUS.md#verification) and maintained
+[heatmap contract](COMPATIBILITY.md#heatmap-compatibility).
 It adds one chart module and small functions in the existing grouped data/tree
 modules, reusing access, scaling, palettes, feature ordering, labels and branches.
 The 250,000-value limit is checked before extraction; the 100k × 50 case tests
@@ -400,7 +400,7 @@ adds optional zoom with aligned cell annotations and clipped tree branches;
 y-only by default, with both axes explicitly available.
 Shared grid interactions are M05.e below. M05.c has a bounded clustermap preview
 with public SciPy or supplied linkage, ordered annotation tracks and shared
-tiles/branches; see its [status evidence](STATUS.md#m05c--clustermap-preview).
+tiles/branches; see its [status evidence](STATUS.md#verification).
 Larger transport remains M05.d; stored ranking and ranked summaries belong to M06.
 
 - M05.a: observation-level heatmap reuses source/group/slot access. Carry one
@@ -435,7 +435,7 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   record payload/render/memory limits and an explicit over-budget policy. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.
 
-- M05.e (verified interaction preview; [evidence](STATUS.md#m05e-shared-grid-interactions)):
+- M05.e (verified interaction preview; [evidence](STATUS.md#verification)):
   share index navigation and live annotation projection across heatmap,
   matrixplot, matrix, clustermap and dotplot. Offer opt-in fitted two-decimal values on the
   tile families and a native row/column crosshair ruler on dotplot. Preserve plotted
@@ -496,8 +496,8 @@ native typography/guide differences in M14 rather than claiming full-family clos
 
 Target: `gsc.pl.rank_genes_groups_dotplot(pbmc, key="rank_genes_groups", n_genes=3, show=False)`.
 Acceptance: frozen stored ranks produce identical slots and labels; hand-checked
-rank-statistic colors do not alter expression denominators. Ranked violin/tracks
-are deliberately assigned to M08/M09 until their parent chart exists.
+rank-statistic colors do not alter expression denominators. Ranked violin remains
+M08; ranked tracks reuse M09's existing parent renderer in a separate increment.
 
 ### M07 — embeddings, scatter and PCA
 
@@ -510,7 +510,7 @@ commit evidence and unmet verification gates live in the
   `tsne`, `diffmap`, `draw_graph`, `pca` and alias `pca_scatter`. Resolve basis/layout
   names, components/dimensions and explained-variance labels from stored results.
   Missing coordinates error; no neighbors, PCA, t-SNE or force layout rerun.
-- M07.b ([contract and evidence](STATUS.md#m07b-scatter)): `scatter` x/y/basis selection, observation versus variable
+- M07.b ([contract and evidence](STATUS.md#verification)): `scatter` x/y/basis selection, observation versus variable
   orientation, per-axis `layers`, labels, palettes and multiple colors. Share
   point/color code while preserving its distinct signature/lookup behavior.
   Public AnnData vector access reads each selected source once without a full
@@ -583,7 +583,7 @@ commit evidence and unmet verification gates live in the
   The colorbar-placement contract covers `colorbar_loc=None` and all four sides
   through native guide orientation, preserving categorical guides, multi-panel
   bounds, collected/native configuration overrides, hover/zoom and transported
-  records. Its [completed increment](STATUS.md#m07d-native-colorbar-placement)
+  records. Its [completed increment](STATUS.md#verification)
   does not alter scatter's distinct signature or resolve C11's categorical
   multi-column extent bug.
   Callable-bound acceptance: `gsc.pl.umap(pbmc, color=["CD79A", "MS4A1"],
@@ -597,7 +597,7 @@ commit evidence and unmet verification gates live in the
   limits against public Scanpy, reuse complete numeric charts and native
   interactions, run the packaged UMAP workflow and measure callback preparation
   overhead without full expression-matrix reads. The
-  [delivery record](STATUS.md#m07d-callable-color-bounds) retains evidence;
+  [delivery record](STATUS.md#verification) retains evidence;
   Centered-color acceptance: reuse this resolver for `vcenter=None`, numbers,
   percentiles, callables and singleton/per-panel lists. Match Scanpy's two linear
   slopes around the center through a native three-value domain (equivalent to
@@ -607,7 +607,7 @@ commit evidence and unmet verification gates live in the
   clipping and numeric guide positions. Compare public Scanpy limits and painted
   points, including asymmetric ranges, and verify native hover/zoom/brush/HTML,
   packaged notebook execution and a realistic resource workload. The
-  [centered-color record](STATUS.md#m07d-centered-embedding-colors) retains evidence.
+  [centered-color record](STATUS.md#verification) retains evidence.
   Matplotlib normalization objects remain outside the supported boundary.
   Stored-edge acceptance: `gsc.pl.umap(pbmc, color="louvain", edges=True,
   show=False)` reads stored connectivities, with default/custom neighbor keys
@@ -623,7 +623,7 @@ commit evidence and unmet verification gates live in the
   positions, views/backed access without densification, inactive/empty graphs,
   complete-chart overlays, stroke coverage, hover/zoom/brush/HTML and resources.
   Keep explicit notebook sizes smaller while retaining the public size default.
-  The [edge delivery record](STATUS.md#m07d-stored-neighbor-graph-edges) owns evidence;
+  The [edge delivery record](STATUS.md#verification) owns evidence;
   remaining edge forms retain M07.d/M14 owners.
   Square-marker acceptance: `marker="s"` maps to native square points in shared
   embeddings, PCA overview and scatter; existing scalar/per-panel broadcasting,
@@ -631,7 +631,7 @@ commit evidence and unmet verification gates live in the
   Verify occupied square corners as well as side lengths against Scanpy exports,
   then test hover, linked brushing, zoom and HTML through the shared helpers.
   Run the packaged notebook and a representative multi-panel resource comparison.
-  The [square-marker record](STATUS.md#m07d-square-markers) owns delivery evidence.
+  The [square-marker record](STATUS.md#verification) owns delivery evidence.
   Diamond-marker acceptance: `marker="D"` uses native diamonds with Scanpy's
   √2 path-width conversion, including outlines and scalar/per-panel inputs.
   Share marker definitions across validation, points and guide sizing. Category
@@ -641,12 +641,12 @@ commit evidence and unmet verification gates live in the
   occupied area, hover/brush/zoom/HTML, unchanged data, the packaged workflow
   and a representative resource workload. Do not enable thin diamonds or other
   markers merely because a similarly named native shape exists. The
-  [diamond-marker record](STATUS.md#m07d-diamond-markers) owns delivery evidence.
+  [diamond-marker record](STATUS.md#verification) owns delivery evidence.
   Triangle audit: compare `"^"`, `"v"`, `"<"`, `">"` with their native shapes,
   using Scanpy paths and rendered footprints with/without strokes. Enable them
   through the shared marker table only if both paths and paint match; scalar
   resizing must not hide different aspect ratios. The
-  [audit record](STATUS.md#m07d-triangular-marker-audit) retains the native gap
+  [audit record](STATUS.md#verification) retains the native gap
   and a strict expected-failure check. Support stays blocked by C14 until a
   released native shape or aspect control preserves Scanpy's geometry.
 
@@ -787,7 +787,7 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   Preserve the 6-point² default area and one-point face-colored edge. Native
   guides collect below the plot; fonts/ticks and global styles have the same
   explicit renderer boundary as other previews. Completion evidence is retained
-  in [STATUS](STATUS.md#m11a-supplied-time-series-points).
+  in [STATUS](STATUS.md#verification).
   Per-subset marker differences, repeated legend labels and broader storage
   remain explicit M14 restrictions.
 - M11.a subplot increment: expose `timeseries_subplot` with the pinned explicit
@@ -1020,7 +1020,7 @@ where marks represent cells; nodes/edges carry group/edge IDs instead.
   yelloworangered stops; shared-palette fidelity uses viridis. Reject unsorted
   points spanning those layers instead of changing their overlap order. Broader
   categories, missing-density forms and unsorted mixed ranges retain M14 owners;
-  [STATUS](STATUS.md#m12a-stored-embedding-density) records verification and limits.
+  [STATUS](STATUS.md#verification) records verification and limits.
 - M12.b: `spatial` reuses point/color access but resolves library/image keys,
   spot diameter, scale factors, crop, coordinate origin/aspect, background image,
   alpha and black/white image behavior. Image decode/coordinates are independently
@@ -1195,7 +1195,7 @@ Deliver in small increments, updating the current queue in STATUS after each:
    preserving stored heights, leaf order and Python clustering. Reuse the live
    index-offset helper for fractional anchors on gapped tracks. Verify complete
    SVG paths including elbows, all orientations, unequal heatmap group spans,
-   zero-height merges, resizing and zoom. The [shared renderer delivery](STATUS.md#shared-native-orthogonal-dendrograms)
+   zero-height merges, resizing and zoom. The [shared renderer delivery](STATUS.md#verification)
    closes this increment; C12's separate straight-link export bug remains upstream.
    Side tracks use native viewport-contained height domains to expand visible
    subtrees after navigation, with zero pinned at the matrix edge. Preserve the
@@ -1240,6 +1240,10 @@ The target is a Python package and documentation publication during **26 October
 spatial and violin/stacked violin remain deferred. The user authorized the native
 cell-track preview and its focused guide on 27 October 2026. This publication does
 not require full Scanpy plotting compatibility and must state its supported scope.
+Publish the supported subset as a normal package release. Missing plot families
+do not require a preview label. User dependencies accept the tested Scanpy range;
+keep the reference environment pinned for reproducible comparisons. The separate
+compatibility CI job tests 1.12.4 without changing the pinned reference job.
 The long-term inventory and capability backlog remain in this plan and STATUS.
 
 Review plots one at a time with the user, starting with UMAP. Each review covers:
@@ -1340,7 +1344,7 @@ Integrations
     Expression plots: summaries, heatmaps, matrices, trees, builders
     Expression tracks: cell-level profiles, hover, shared zoom and a group tree
     Ranked genes: stored scores and expression plots
-    Supported plots and options: tested versions, differences, limits
+    Scanpy compatibility: tested versions, differences, limits
     API reference
 ```
 
@@ -1361,16 +1365,35 @@ or customization. STATUS owns delivery states and the active queue.
 
 | Guide | Examples to include |
 | --- | --- |
-| UMAP and embeddings | Categorical/gene UMAP, linked selection and Python retrieval, category order/palettes, continuous bounds, outlines/stored neighbor edges. Extend with stored PCA/other 2D bases, cell/gene scatter and stored embedding density. Show explicit Scanpy preparation where results are absent. |
+| UMAP and embeddings | Categorical/gene UMAP, linked selection and Python retrieval, category order/palettes, continuous bounds, outlines/stored neighbor edges, PCA, cell/gene scatter and embedding density. The custom color-range UMAP uses all 36,785 ovarian cortex cells from Expression Atlas E-MTAB-8381, loaded through Scanpy in one line and explicitly prepared with public Scanpy calls. Use `sc.datasets.pbmc3k_processed()` for PCA/t-SNE examples with saved coordinates. Compute missing diffusion coordinates explicitly with a fixed seed and show components 2 and 3. The existing preparation cache supplies page data; the downloaded notebook runs the visible Scanpy calls. |
 | PCA diagnostics | Loadings, variance ratios and the composed PCA overview, using the supplied PCA results. Link back to the embedding guide for PCA scatter. |
 | Expression plots | The same marker dictionary in dotplot, matrixplot and cell heatmap; one explicit Scanpy group tree reused by all three; row zoom, dotplot ruler, optional gaps and zoomed values. Add concise DotPlot/MatrixPlot builder examples after the basic calls. |
 | Matrices and trees (on the expression page) | Supplied numeric matrix, stored group correlations, standalone group dendrogram and cell/gene clustermap. Show optional values and zoom; distinguish stored trees from explicitly requested Python clustering. |
 | Expression tracks | Basic per-cell tracks and marker groups ordered by a Scanpy-computed group dendrogram. Reuse packaged PBMC data; demonstrate aligned x zoom and hover. Explain stepped bars versus Scanpy's continuous fill. Ranked tracks follow their future implemented API. |
-| Ranked genes | Stored rank/score labels, ranking tables and ranked dotplot/matrixplot/heatmap calls; show fold-change or adjusted-p-value colors on grouped summaries. Compute rankings explicitly with Scanpy when the example needs statistics not already stored. |
+| Ranked genes | Stored rank/score labels and ranked dotplot/matrixplot/heatmap calls; fold-change dots and adjusted-p-value tiles share explicitly prepared complete Wilcoxon rankings. Summary dotplots/matrixplots keep fixed axes with hover; the individual-cell heatmap retains row zoom. Preserve the packaged score results under their original key. The page loads matching cached rankings; the downloaded notebook runs the visible Scanpy preparation. |
 | Data checks | Highest-expression genes on counts; stored highly-variable-gene statistics with an optional cutoff preview; Scrublet score distributions with an optional threshold slider. Explain that previews do not change saved classifications. The legacy dispersion entry can share the variable-gene example. |
-| Larger real data | Use full PBMC3k counts for data checks and the separate 10x PBMC10k v3 cohort for count summaries, cell QC, marker UMAP and PCA variance. Show explicit filtering/normalization/analysis and retain sparse expression. Verify actual input sizes, selected-column access, complete charts, hover/zoom and local resource costs. Record provenance; do not commit downloaded or prepared datasets. |
+| Dataset variety within guides | Use different, larger real datasets through one-line `sc.datasets` loaders in the relevant plot examples. Keep data loading simple and show any required Scanpy analysis explicitly. Reuse prepared inputs for page builds. Verify dimensions, selected-column access, provenance and useful interactions. Do not add a separate larger-data page or commit datasets. |
 | PAGA | Group and continuous node colors; graph/embedding comparison; adjacency heatmap and connectivity strips; supplied path as heatmap and lines. Use explicitly computed Scanpy PAGA and shared positions. |
 | Ordered profiles | Stored DPT groups/pseudotime and DPT expression; supplied time-series heatmap, points and subplot composition; stored simulation points/heatmap with optional run focus. Explain actual sample order and keep separate runs separate. |
+
+Dataset variety started with Scanpy's built-in loaders. The user then requested
+a larger Expression Atlas study on 27 October 2026. Keep loading to one line and
+vary inputs within the relevant guides:
+
+| Dataset | Cells | Use and remaining work |
+| --- | --- | --- |
+| `sc.datasets.pbmc68k_reduced()` | 700 | Existing introductory examples with supplied annotations/coordinates. |
+| `sc.datasets.pbmc3k_processed()` | 2,638 | PCA/t-SNE examples and existing marker tracks; reuse supplied results. |
+| `sc.datasets.pbmc3k()` | 2,700 | Existing count/QC examples. |
+| `sc.datasets.ebi_expression_atlas("E-MTAB-8381")` | 36,785 | Existing custom UMAP: public ovarian cortex study, sparse counts, 2,000 variable genes for PCA, explicit Scanpy neighbors/UMAP, VWF expression, native zoom/hover and smaller points. Keep all Atlas cells; this is not a reproduction of the paper's analysis. |
+| `sc.datasets.paul15()` | 2,730 | Candidate mouse expression/graph examples; review provenance and show any needed Scanpy preparation explicitly. |
+| `sc.datasets.moignard15()` | 3,934 | Candidate mouse embryo diffusion/profile examples. Review provenance and the loader's optional Excel dependency before adding an example. |
+
+Use full datasets where the plot supports them. Do not enlarge examples with
+synthetic cells or replicate rows. Add no dataset-specific runtime adapter or
+separate large-data guide. Downloads and analysis belong in a guide's explicit
+preparation, with cached page inputs. Other Atlas studies remain optional future
+work; this example needs no new dependency or dataset-specific runtime code.
 
 The PAGA guide shows group, gene, numeric-score and degree colors, a largest
 component, both adjacency modes, the linked graph/UMAP comparison and both path
@@ -1426,7 +1449,7 @@ Add examples only when their plotting APIs are implemented. The
 ordinary Sphinx build must not run unbounded analysis or downloads. A static page
 can run hover/brush/count; Python subset retrieval requires a live kernel.
 
-For the count/Scrublet and larger-data guides, run
+For guides with prepared analysis or downloaded data, including ranked genes, run
 `uv run integrations/scanpy/prepare_guide_data.py` explicitly before Sphinx.
 Notebook metadata names the ignored H5AD inputs; preparation uses the notebook's
 own code, and page builds load those inputs while showing that code. Source,
@@ -1455,3 +1478,247 @@ limits and version range. Update STATUS with the release and residual scope befo
 clearing any completed working plans. Another library starts with its own small
 contract, inventory and workflow, reusing this layout without assuming Scanpy's
 AnnData semantics apply to it.
+
+
+### Linked expression documentation example
+
+The user selected a native UMAP-linked heatmap summarized by cell type on
+27 October 2026. First deliver a runnable guide, not a new public plot family:
+reuse the existing UMAP brush and compose native gene-by-cell-type means with
+one selected-vs-all gene histogram. Read a bounded resident gene panel through
+Scanpy's public accessor; filter before folding genes in the browser. Preserve
+fixed domains/order/bins, independent all-cell reference, native clear semantics
+and selected counts. Empty groups remain absent rather than becoming zero means.
+
+Use a native magenta–black–yellow range with an explicit zero midpoint for the
+stored scaled values. This demonstrates the palette through an ordinary Scale;
+a named cmap alias and a general linked-plot helper are outside this first slice.
+Acceptance: source-oracle means/counts, histogram normalization, real brush/clear,
+page fit, unchanged reference and an output-free downloadable notebook. Test the
+700-cell packaged example honestly; large-data live aggregation remains unverified.
+
+
+### Linked expression builder
+
+The user chose a class matching the DotPlot/MatrixPlot builder conventions on
+27 October 2026. `gsc.pl.EmbeddingSummary` is now an implemented preview. This is a
+GenomeSpy extension; no corresponding Scanpy class is claimed. The native boundary
+agreement and full retained-memory/resource gates below remain open for release.
+Heatmap gene controls also await the released categorical-mapping fix (C18);
+changed row positions must match visible GPU pixels, not only means or SVG export.
+
+- Construction initially accepts unique gene names (string or sequence), one
+  categorical observation column as `groupby`, `basis="umap"`, `use_raw`/`layer`,
+  `gene_symbols`, explicit category order and extra `obs_keys` copied once. Reject unsupported mappings, repeated
+  genes, multiple grouping keys and numeric grouping rather than silently changing
+  their familiar Scanpy meanings. Reuse `grouped_expression`'s cell-level preparation
+  where compatible; do not duplicate source lookup or grouping rules.
+  Prepare a detached cell table and requested gene columns once, without display
+  or AnnData mutation. Use internal feature fields independent of gene labels.
+  Keep cell-level values: means are recomputed by native browser aggregation when
+  the brush changes, not frozen at construction like a static MatrixPlot summary.
+- Start with the embedding. `add_heatmap(...)` and `add_histogram(...)` enable
+  panels and accept a side, dimensions and genes from the constructor's pool.
+  The heatmap accepts a subset; the histogram accepts a gene subset or one
+  loaded numeric observation key via `obs=...`. `add_composition(...)` accepts a
+  loaded categorical observation key, defaulting to the UMAP grouping column.
+  Heatmap/composition calls replace their panel; `show=False` hides it. Keep one
+  histogram group per side: same-side calls replace that group and `show=False`
+  removes only that side. Use a small side-keyed dictionary, without a panel registry.
+  The user expanded the histogram slice to several genes on 27 October 2026.
+  Reuse the single-histogram renderer: native vertical concat for left/right
+  groups and horizontal concat for top/bottom groups. Dimensions apply to each
+  histogram. The guide shows two histograms left and three below the same UMAP;
+  verify all five means-free distributions, independent histograms, one cohort key,
+  unchanged references and shared-brush behavior at desktop/narrow widths.
+  Optional gene_controls on histograms/heatmaps create native
+  dropdowns per histogram/heatmap row, drawing choices from constructor genes.
+  Controls belong to the composition root, with no AnnData reads or callbacks.
+  Histogram bins cover all candidate genes when controls are enabled; heatmap
+  order follows its controls, with duplicate choices shown once by the native scale.
+  The guide uses fixed gene lists without dropdowns at the user's request
+  (28 October 2026). After adopting the release with interactive legends, update
+  these examples to native legend-based gene selection. Retain the existing
+  dropdown API tests and the C18 regression until its released fix is verified.
+- `add_tracks(...)` adds one marker-track panel using constructor genes and the
+  existing tracks renderer. Reuse `heatmap_values` for group order/original row
+  positions and the prepared group color scale. Keep one shared cell table with
+  stable observation IDs and fixed track slots. A native interval filter draws
+  selected-cell marks over a faint full-cell reference; clearing restores all cells.
+  No custom membership expression, browser listener or local Core patch is allowed.
+  Preserve independent UMAP/track axes; optional x zoom is shared by tracks and
+  category strip. Group gaps and track spacing are explicit and default to zero.
+  The PBMC3k guide uses saved UMAP coordinates and raw log-normalized expression;
+  no embeddings, normalization or trees are recomputed. Verify source values,
+  duplicate-label identity, colors, independent ordering, canvas opacity, hover,
+  clear, gap/zoom registration, desktop/narrow delivery and fresh-kernel execution.
+- `style(...)` controls UMAP size/appearance and composition spacing;
+  `legend(...)` controls the native collected legends, default bottom. Keep
+  unrelated scales independent and avoid child placements that defeat collection.
+  Heatmap options include the shared Seurat preset and color limits; do not
+  recompute expression scaling. Gene/group order and histogram bins stay fixed
+  while brushing; optional gene dropdowns change the displayed genes.
+  `add_heatmap(show_values=False)` optionally reuses the shared native fitted mean
+  text, including two-decimal formatting and contrast. Keep summary data on its
+  named tile unit when a text layer is added.
+- Exclude missing expression before means and histogram binning; normalize each
+  histogram over valid values in its cohort. Missing/all-missing groups have no
+  invented zero mean or zero-expression bin. Keep selected-cell counts distinct
+  from valid-expression counts. Reuse resident-source guards and pre-read
+  value limits; genes plus explicitly loaded extra obs columns share the existing
+  250,000-value heatmap ceiling,
+  lowering it if measured payload, folding/aggregation or interaction costs require.
+- Methods mutate the builder and return self, like DotPlot/MatrixPlot.
+  The constructor accepts the embedding title and each add method accepts its
+  panel title: omitted retains the automatic default, a string overrides it,
+  and None omits the native title property. No generated title is forced.
+  `to_chart()` creates a fresh ordinary GenomeSpy chart; `show()` displays it.
+  Use the returned chart's existing widget, composition and save methods. Later
+  builder edits must not change previously returned charts or reread expression.
+- Reuse data access, guards, embedding, brush, palette and native chart helpers.
+  Do not inherit `_GroupedPlot`: its static group-summary/tree state does not own
+  this interactive cell-level workflow. Add no new general builder framework or
+  redundant function wrapper.
+
+UMAP defaults to a square plotting area and equal pixels per coordinate unit.
+Pad the shorter domain around its center without altering stored coordinates;
+constructor `zoom=False` retains ordinary drag selection. Opt-in `zoom=True`
+reuses the shared embedding scales and native interval gestures: wheel zoom,
+pan outside the selection, Shift-drag to create a selection, and drag inside it
+to move it. Keep brush intervals in data coordinates while navigating. Verify
+equal coordinate units during wheel/pan gestures inside the plot, count/summary
+agreement after navigation, and independent track axes. Axis-gutter interactions
+follow native per-axis behavior; initial isotropy does not lock those axes together.
+
+Placement uses native concat for independent UMAP/summary axes and surround for
+aligned annotations/marginals. Surround's aligned axis cannot be disconnected;
+do not force cell-type/gene axes onto UMAP coordinates or add positioning wrappers.
+Supporting independent surround panels would require separate upstream design.
+Resolve x/y independently at every independent-panel composition boundary.
+Own the shared brush value at the builder's composition root, with one UMAP
+controller using native `push="outer"`; count and summary consumers descend from
+that owner. Constructor `show_count=True` preserves the count by default; False
+omits its dataflow without changing the brush or linked panels. Validate boolean
+input before reading data. Show the total count inside the brush, using native formulas on the
+single count row and ranged text tied to all four interval bounds. Hide it when
+cleared or too small to fit; no separate count row or point effects. Reuse brush
+helpers at this boundary rather than nesting the finished
+counted UMAP chart unchanged beside its consumers. Collect distinct cell-type,
+expression and cohort legends at the root, removing conflicting child placements;
+collection does not merge independent scales.
+
+**Native correctness gate found in review:** the current selection filter includes
+the upper boundary, while the embedding count and Python mask exclude it. Require
+one convention across native filtering, count and mask, including zero-width and
+exact-boundary cases. Do not add a parallel hand-written membership predicate to
+hide the discrepancy. If a Core correction is needed, follow the upstream planning
+and PR skills and wait for its published release, as previously agreed. Layout and
+data preparation can proceed independently; coherent linked selection gates release.
+
+Delivery: settle the chain API, then extract the working example's preparation,
+summary rendering and composition helpers. Implement/export the builder and
+replace the notebook's construction code with its chain. Keep browser-only native
+updates, no-selection behavior, unchanged all-cell reference and no point effects.
+
+Acceptance: constructor data snapshot and no mutation; gene/layer/group choices;
+repeat/hide/reposition panel calls; style/legend changes without new data reads;
+fresh chart snapshots; real brush updates with every supported panel side and two
+composed instances; collected legends and independent domains; square/isotropic
+UMAP; source-oracle means and every histogram bin/count/percentage, including
+negative values and exact bin edges; punctuation in gene labels and missing
+expression, including all-missing genes; exact brush-boundary membership; clear
+versus an active brush selecting no cells; unchanged reference; page fit,
+notebook/docs, types and lint.
+Measure cells × genes, sparse allocations, serialized payload, initial render,
+large-selection updates and retained memory using the existing resource gates.
+No million-cell aggregation claim or new performance framework is part of this slice.
+
+Review and examples (27 October 2026): keep the existing detached preparation and
+shared embedding, brush, palette and fitted-value helpers. Heatmap axis/tooltip
+labels must use the requested grouping key, including non-cell-type annotations.
+Add two independent guide examples using the existing builder: LYZ distribution
+left of the UMAP with legends right, and stored detected-gene QC above a
+phase-colored UMAP with marker means right. No new panel types, analysis or layout
+framework. Check source-oracle summaries, independent brush state, clear, square
+UMAP and actual desktop/mobile Furo bounds for all three guide charts.
+
+### Further brush-linked summaries
+
+User approved the categorical and numeric metadata slice on 27 October 2026;
+both are now implemented previews. Other candidates below remain proposals.
+The guide places the heatmap below the UMAP/histogram/composition
+row. Native concat places left/right panels first, then top/bottom panels across
+that row; dimensions remain native layout budgets.
+
+| Priority | Data and question | Proposed view |
+| --- | --- | --- |
+| Implemented preview | Categorical obs: cell type, donor, sample, batch or condition. Which groups make up this selection? | Native nested-band horizontal paired percentage bars; count/cohort denominator tooltip. Category colors and order reuse the embedding helpers; missing values form a visible NA category. |
+| Implemented preview | Stored numeric obs: QC metrics, doublet scores, gene-program scores or pseudotime. How does this region differ? | Reuse fixed-bin selected/reference histograms via obs=; normalize valid values and show valid/missing counts. Read stored values only; ECDF remains later. |
+| Later | A chosen marker panel. Is a mean driven by a few cells or broad expression? | Optional selected/reference mean or delta heatmap; detection-fraction dots only with a declared expression source and threshold. Zero in scaled expression is not a detection threshold. |
+
+Selected-cell counts per cell type could sit above the heatmap columns as a native
+surround track sharing their categorical x axis. Independent donor/batch panels
+remain concat views; distinguish cell counts from per-gene valid-value counts.
+
+Keep comparison semantics explicit. "Share of selected cells" and "fraction of
+each category captured" have different denominators; the first is the composition
+default, the second is a separately labeled later option. Preserve category order,
+colors, bins and all reference categories while brushing. Missing metadata must
+have a visible count or category rather than silently changing denominators.
+Retain no-selection versus active-zero-selection semantics.
+
+Reference initially remains all loaded cells. An optional unselected-cell reference
+could make contrasts clearer, but must be labeled and use consistent denominators
+across panels; it is not yet implemented. Users choose loaded genes/obs columns
+explicitly to bound transport and browser work. Keep live updates to native
+filter/count/aggregate operations. Differential expression and enrichment require
+explicit analysis on a selection snapshot, not recomputation during drag.
+
+Implementation keeps one panel per type and one detached observation snapshot.
+The constructor's obs_keys plus genes share the pre-read value guard; presentation
+methods do not retain or reread AnnData. Histogram and composition reuse one native
+cohort-count/percentage transform helper. Empty selected cohorts produce no summary
+rows, with the brush's total count still showing zero. The guide uses the packaged
+phase and S_score annotations, without rerunning cell-cycle scoring.
+
+Stored metadata sources: Scanpy's [QC metrics](https://scanpy.scverse.org/en/stable/generated/scanpy.pp.calculate_qc_metrics.html)
+and [gene scores](https://scanpy.scverse.org/en/stable/generated/scanpy.tl.score_genes.html).
+
+### Optional grid pointer feedback — 27 October 2026
+
+Keep DotPlot/dotplot's existing highlight=False default and highlight=True native
+ruler. Extend the same option to MatrixPlot/matrixplot, heatmap, matrix and
+clustermap. Add highlight="outline" using the DepMap gallery's native ephemeral
+point-selection plus conditional stroke pattern on existing marks. Keep
+feedback independent of tooltip hover, with no new data overlay, Python callback
+or custom listener. One shared helper owns grid feedback and optional fitted
+values; value text must not inherit tile strokes. Preserve normal borders, value
+and size encodings, missing/zero-area marks, repeated slots and aligned guides.
+Validate flags before data access. Verify leave/clear, zoom, tooltip independence,
+rendered outline/ruler geometry and unchanged data. Keep profile/time-series
+rulers and unrelated plot interactions unchanged.
+
+Grid feedback review: use native conditional order as well as stroke for the
+hovered mark. Centered rect strokes overlap adjacent fills, so draw priority is
+required for equally visible edges. Keep fitted-value text at normal order and
+remove copied hover parameters from labels. Verify actual WebGL edge pixels on
+an interior tile, with and without values, as well as native selection/clear and
+SVG behavior. Examples should opt into rulers or outlines explicitly; package
+defaults stay off. Keep hover parameter construction inside outline mode and use
+simple branches for the numeric-matrix composition.
+
+### Concise public compatibility guide — 28 October 2026
+
+Keep the public compatibility page focused on current callable coverage, shared
+renderer differences and limitations that affect users. Link guides and API
+docstrings for usage and options. Retain detailed contracts, computation reuse
+decisions and validation evidence in COMPATIBILITY.md; STATUS owns delivery
+readiness. Preserve existing contract anchors when moving workspace references.
+
+### Saving and image export guide — 28 October 2026
+
+Show HTML/JSON saving and native PNG/SVG controls on a real Scanpy plot. Reuse the
+shared export user guide and notebook renderer. Let notebook chart metadata opt
+into existing native controls, with shared validation and no custom download code.
+Keep save/display cells runnable in the downloaded notebook but unexecuted by
+Sphinx. Check actual image downloads, output-free source and the page/download match.

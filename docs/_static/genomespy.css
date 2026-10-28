@@ -440,8 +440,8 @@ p.lead {
   margin: 1.25rem 0 0.5rem;
 }
 
-/* Keep fixed-width notebook panels reachable on narrow pages. */
-.gs-notebook .gs-doc-embed .canvas-wrapper {
+/* Keep native chart bounds reachable when wider than the article. */
+.gs-doc-embed.genome-spy .canvas-wrapper {
   overflow-x: auto;
 }
 

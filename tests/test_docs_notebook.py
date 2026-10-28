@@ -16,11 +16,11 @@ pytestmark = pytest.mark.docs
 ROOT = Path(__file__).resolve().parents[1]
 GUIDE = ROOT / "integrations/scanpy/guides/umap.ipynb"
 EXPRESSION_GUIDE = GUIDE.with_name("expression.ipynb")
+EXPORT_GUIDE = GUIDE.with_name("export.ipynb")
 TRACKS_GUIDE = GUIDE.with_name("tracks.ipynb")
 PCA_GUIDE = GUIDE.with_name("pca.ipynb")
 RANKED_GUIDE = GUIDE.with_name("ranked.ipynb")
 QUALITY_GUIDE = GUIDE.with_name("quality.ipynb")
-LARGER_GUIDE = GUIDE.with_name("larger_data.ipynb")
 PAGA_GUIDE = GUIDE.with_name("paga.ipynb")
 PROFILES_GUIDE = GUIDE.with_name("profiles.ipynb")
 
@@ -125,57 +125,116 @@ def test_tracks_page_reuses_scanpy_access_and_only_the_explicit_tree(
     np.testing.assert_array_equal(loaded.X, original.X)
 
 
-def test_umap_page_preserves_coordinates_and_prepares_density(
+def test_umap_page_reads_prepared_coordinates_without_analysis(
     notebook_extension, monkeypatch
 ):
     sc = pytest.importorskip("scanpy")
+    from anndata import read_h5ad
     from genome_spy.chart import TopLevelSpec
+    from scipy.sparse import csr_matrix, issparse
 
-    original = sc.datasets.pbmc68k_reduced()
-    loaded = original.copy()
-    monkeypatch.setattr(sc.datasets, "pbmc68k_reduced", lambda: loaded)
+    notebook = json.loads(GUIDE.read_text())
+    if not notebook_extension._preparation_current(notebook, ROOT):
+        pytest.skip("Run integrations/scanpy/prepare_guide_data.py umap first")
+    cached = notebook_extension._prepared_paths(notebook, ROOT)
+    original = read_h5ad(cached["pbmc"])
+    larger = read_h5ad(cached["pbmc3k"])
+    assert larger.shape == (2638, 1838)
+    ovary = read_h5ad(cached["ovary"])
+    assert ovary.shape == (36785, 23772)
+    assert issparse(ovary.X)
+    ovary_obs = ovary.obs.copy()
+    ovary_umap = ovary.obsm["X_umap"].copy()
+    expression = ovary[:, ["ENSG00000110799"]].X.toarray().ravel()
+    supplied = sc.datasets.pbmc68k_reduced()
+    for key in ("X_umap", "X_pca"):
+        np.testing.assert_array_equal(original.obsm[key], supplied.obsm[key])
+    assert original.obs[supplied.obs.columns].equals(supplied.obs)
+    for key in supplied.obsp:
+        assert (original.obsp[key] != supplied.obsp[key]).nnz == 0
+    loaded = {
+        cached["pbmc"]: original.copy(),
+        cached["pbmc3k"]: larger.copy(),
+        cached["ovary"]: ovary,
+    }
+    reads = []
+    dense_shapes = []
+    toarray = csr_matrix.toarray
+
+    def selected_column(matrix, *args, **kwargs):
+        assert matrix.shape[1] == 1, "The page densified more than a selected gene"
+        dense_shapes.append(matrix.shape)
+        return toarray(matrix, *args, **kwargs)
+
+    def read_prepared(filename):
+        assert filename in loaded
+        reads.append(filename)
+        return loaded[filename]
 
     def forbidden(*args, **kwargs):
-        pytest.fail(
-            "A documentation page ran analysis, downloaded data or made a widget"
-        )
+        pytest.fail("The prepared UMAP page ran analysis, loaded data or made a widget")
 
+    monkeypatch.setattr("anndata.read_h5ad", read_prepared)
+    monkeypatch.setattr(csr_matrix, "toarray", selected_column)
     for module, name in [
+        (sc.datasets, "pbmc68k_reduced"),
+        (sc.datasets, "pbmc3k_processed"),
+        (sc.datasets, "ebi_expression_atlas"),
+        (sc.pp, "normalize_total"),
+        (sc.pp, "log1p"),
+        (sc.pp, "highly_variable_genes"),
+        (sc.pp, "pca"),
         (sc.pp, "neighbors"),
         (sc.tl, "umap"),
+        (sc.tl, "tsne"),
+        (sc.tl, "diffmap"),
+        (sc.tl, "embedding_density"),
         (sc.tl, "rank_genes_groups"),
         (sc.readwrite, "_download"),
         (TopLevelSpec, "widget"),
         (TopLevelSpec, "save"),
     ]:
         monkeypatch.setattr(module, name, forbidden)
-    density, density_calls = sc.tl.embedding_density, []
-
-    def prepare_density(*args, **kwargs):
-        density_calls.append(kwargs)
-        return density(*args, **kwargs)
-
-    monkeypatch.setattr(sc.tl, "embedding_density", prepare_density)
     markdown = notebook_extension._notebook_markdown(
         GUIDE, download_path="umap.ipynb", bundle_url="/core.js"
     )
     specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
-    assert len(specs) == 11
-    for spec in specs[:7]:
-        rows = next(rows for rows in spec["datasets"].values() if "_coord_0" in rows[0])
-        assert len(rows) == 700
-        np.testing.assert_array_equal(
-            [[row["_coord_0"], row["_coord_1"]] for row in rows],
-            original.obsm["X_umap"],
+    assert len(specs) == 13
+    assert reads == list(cached.values())
+    for index, basis, dimensions in [
+        *[(i, "X_umap", (0, 1)) for i in range(7)],
+        (7, "X_pca", (0, 1)),
+        (11, "X_tsne", (0, 1)),
+        (12, "X_diffmap", (1, 2)),
+    ]:
+        rows = next(
+            rows for rows in specs[index]["datasets"].values() if "_obs_id" in rows[0]
         )
-    np.testing.assert_array_equal(loaded.obsm["X_umap"], original.obsm["X_umap"])
-    assert loaded.obs[original.obs.columns].equals(original.obs)
-    assert set(loaded.obs) - set(original.obs) == {"umap_density_phase"}
-    assert density_calls == [{"basis": "umap", "groupby": "phase"}]
-    pca_rows = next(iter(specs[7]["datasets"].values()))
+        source = {2: ovary, 7: larger, 11: larger}.get(index, original)
+        assert [row["_obs_id"] for row in rows] == source.obs_names.tolist()
+        assert len(rows) == len(source)
+        np.testing.assert_array_equal(
+            [[row[f"_coord_{i}"] for i in dimensions] for row in rows],
+            source.obsm[basis][:, dimensions],
+        )
+        if index == 2:
+            np.testing.assert_array_equal([row["_color_0"] for row in rows], expression)
+    assert [shape for shape in dense_shapes if shape[0] == len(ovary)] == [(36785, 1)]
+    assert ovary.obs.equals(ovary_obs)
+    np.testing.assert_array_equal(ovary.obsm["X_umap"], ovary_umap)
+    for key in original.obsm:
+        np.testing.assert_array_equal(
+            loaded[cached["pbmc"]].obsm[key], original.obsm[key]
+        )
+    for key in larger.obsm:
+        np.testing.assert_array_equal(
+            loaded[cached["pbmc3k"]].obsm[key], larger.obsm[key]
+        )
+    assert loaded[cached["pbmc"]].obs.equals(original.obs)
+    assert loaded[cached["pbmc3k"]].obs.equals(larger.obs)
+    assert "umap_density_phase" in original.obs
     np.testing.assert_array_equal(
-        [[r["_coord_0"], r["_coord_1"]] for r in pca_rows],
-        original.obsm["X_pca"][:, :2],
+        loaded[cached["pbmc"]].uns["diffmap_evals"], original.uns["diffmap_evals"]
     )
     assert "view.parameter_values.get(brush.name)" in markdown
     assert "{download}`Download notebook <umap.ipynb>`" in markdown
@@ -184,13 +243,13 @@ def test_umap_page_preserves_coordinates_and_prepares_density(
 @pytest.mark.parametrize(
     "notebook, title, section, charts",
     [
-        (GUIDE, "UMAP and embeddings", "select-cells", 11),
+        (GUIDE, "UMAP and embeddings", "select-cells", 13),
         (EXPRESSION_GUIDE, "Expression plots", "heatmap", 9),
+        (EXPORT_GUIDE, "Save and export", "use-the-plot-buttons", 1),
         (TRACKS_GUIDE, "Expression tracks", "plot-individual-cells", 3),
         (PCA_GUIDE, "PCA diagnostics", "show-the-pca-overview", 3),
-        (RANKED_GUIDE, "Ranked genes", "inspect-ranking-scores", 4),
+        (RANKED_GUIDE, "Ranked genes", "inspect-ranking-scores", 6),
         (QUALITY_GUIDE, "Data checks", "check-the-most-abundant-genes", 3),
-        (LARGER_GUIDE, "A larger PBMC dataset", "inspect-the-original-counts", 4),
         (PAGA_GUIDE, "PAGA graphs and paths", "plot-group-connections", 10),
         (PROFILES_GUIDE, "Profiles and simulations", "plot-simulation-runs", 7),
     ],
@@ -262,11 +321,11 @@ def test_notebook_failures_identify_the_cell(notebook_extension, tmp_path):
     [
         GUIDE,
         EXPRESSION_GUIDE,
+        EXPORT_GUIDE,
         TRACKS_GUIDE,
         PCA_GUIDE,
         RANKED_GUIDE,
         QUALITY_GUIDE,
-        LARGER_GUIDE,
         PAGA_GUIDE,
         PROFILES_GUIDE,
     ],
@@ -393,12 +452,11 @@ def test_preparation_command_reuses_matching_inputs(
         command.main()
 
 
-@pytest.mark.parametrize("path, charts", [(QUALITY_GUIDE, 3), (LARGER_GUIDE, 4)])
-def test_real_data_pages_use_sparse_prepared_inputs(
-    notebook_extension, monkeypatch, path, charts
-):
+def test_real_data_pages_use_sparse_prepared_inputs(notebook_extension, monkeypatch):
     sc = pytest.importorskip("scanpy")
     from scipy.sparse import csc_matrix, csr_matrix, issparse
+
+    path, charts = QUALITY_GUIDE, 3
 
     notebook = json.loads(path.read_text())
     if not notebook_extension._preparation_current(notebook, ROOT):
@@ -435,22 +493,11 @@ def test_real_data_pages_use_sparse_prepared_inputs(
     specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
     assert len(specs) == charts
     assert dense_shapes
-    assert max(rows for rows, _ in dense_shapes) == (
-        2700 if path == QUALITY_GUIDE else 11769
-    )
+    assert max(rows for rows, _ in dense_shapes) == 2700
     files = notebook_extension._prepared_paths(notebook, ROOT)
-    counts = sc.read_h5ad(files["counts" if path == QUALITY_GUIDE else "raw"])
-    assert counts.shape == ((2700, 32738) if path == QUALITY_GUIDE else (11769, 33538))
+    counts = sc.read_h5ad(files["counts"])
+    assert counts.shape == (2700, 32738)
     assert issparse(counts.X)
-    if path == LARGER_GUIDE:
-        prepared = sc.read_h5ad(files["adata"])
-        assert prepared.shape == (11537, 20292)
-        assert isinstance(prepared.X, csr_matrix)
-        rows = next(iter(specs[2]["datasets"].values()))
-        assert len(rows) == 11537
-        np.testing.assert_array_equal(
-            [[r["_coord_0"], r["_coord_1"]] for r in rows], prepared.obsm["X_umap"]
-        )
 
 
 @pytest.mark.parametrize("path, charts", [(PAGA_GUIDE, 10), (PROFILES_GUIDE, 7)])
@@ -590,32 +637,52 @@ def test_expression_page_reuses_one_explicit_tree(notebook_extension, monkeypatc
     assert cell["_value"] == pytest.approx(expected)
 
 
-@pytest.mark.parametrize("path, charts", [(PCA_GUIDE, 3), (RANKED_GUIDE, 4)])
+@pytest.mark.parametrize("path, charts", [(PCA_GUIDE, 3), (RANKED_GUIDE, 6)])
 def test_diagnostic_guides_read_stored_results(
     notebook_extension, monkeypatch, path, charts
 ):
     sc = pytest.importorskip("scanpy")
-    original = sc.datasets.pbmc68k_reduced()
+    from anndata import read_h5ad
+
+    notebook = json.loads(path.read_text())
+    prepared = notebook_extension._prepared_paths(notebook, ROOT)
+    if prepared:
+        if not notebook_extension._preparation_current(notebook, ROOT):
+            pytest.skip("Run integrations/scanpy/prepare_guide_data.py ranked first")
+        original = read_h5ad(prepared["pbmc"])
+    else:
+        original = sc.datasets.pbmc68k_reduced()
     loaded = original.copy()
     monkeypatch.setattr(sc.datasets, "pbmc68k_reduced", lambda: loaded)
+    reads = []
+
+    def read_prepared(filename):
+        assert filename == prepared["pbmc"]
+        reads.append(filename)
+        return loaded
 
     def forbidden(*args, **kwargs):
         pytest.fail(
             "A diagnostic guide reran PCA, embeddings or differential expression"
         )
 
+    if prepared:
+        monkeypatch.setattr("anndata.read_h5ad", read_prepared)
+        monkeypatch.setattr(sc.datasets, "pbmc68k_reduced", forbidden)
     for module, name in [
         (sc.pp, "pca"),
         (sc.tl, "pca"),
         (sc.tl, "umap"),
         (sc.tl, "rank_genes_groups"),
+        (sc.tl, "dendrogram"),
         (sc.readwrite, "_download"),
     ]:
         monkeypatch.setattr(module, name, forbidden)
     markdown = notebook_extension._notebook_markdown(
         path, download_path=path.name, bundle_url="/core.js"
     )
-    assert len(re.findall(r"const spec = (.*);", markdown)) == charts
+    specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
+    assert len(specs) == charts
     assert loaded.obs.equals(original.obs)
     assert loaded.var.equals(original.var)
     np.testing.assert_array_equal(loaded.obsm["X_pca"], original.obsm["X_pca"])
@@ -627,3 +694,38 @@ def test_diagnostic_guides_read_stored_results(
         np.testing.assert_array_equal(
             loaded.uns["rank_genes_groups"][key], original.uns["rank_genes_groups"][key]
         )
+    if path == RANKED_GUIDE:
+        assert reads == [prepared["pbmc"]]
+        result = original.uns["rank_stats"]
+        assert len(result["names"]) == original.raw.n_vars
+        assert result["params"]["method"] == "wilcoxon"
+        assert result["params"]["use_raw"]
+        for key in ("names", "scores", "logfoldchanges", "pvals", "pvals_adj"):
+            np.testing.assert_array_equal(loaded.uns["rank_stats"][key], result[key])
+        statistics = sc.get.rank_genes_groups_df(
+            original, group=None, key="rank_stats"
+        ).set_index(["group", "names"])
+        genes = {
+            gene
+            for group in ("CD19+ B", "CD14+ Monocyte")
+            for gene in result["names"][group][:3]
+        }
+        expression = sc.get.obs_df(original, keys=sorted(genes), use_raw=True)
+        for spec, metric in zip(
+            specs[4:], ["logfoldchanges", "pvals_adj"], strict=True
+        ):
+            rows = next(
+                rows for rows in spec["datasets"].values() if "_gene" in rows[0]
+            )
+            assert {row["_gene"] for row in rows} == genes
+            assert len(rows) == 6 * len(original.obs["bulk_labels"].cat.categories)
+            for row in rows:
+                expected = statistics.loc[(row["_group"], row["_gene"]), metric]
+                if metric == "pvals_adj":
+                    assert 0 < expected <= 1
+                    expected = -np.log10(expected)
+                assert row["_mean"] == pytest.approx(expected)
+                if metric == "logfoldchanges":
+                    group = original.obs["bulk_labels"] == row["_group"]
+                    fraction = (expression.loc[group, row["_gene"]] > 0).mean()
+                    assert row["_percent"] == pytest.approx(100 * fraction)

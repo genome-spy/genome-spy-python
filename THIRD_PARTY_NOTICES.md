@@ -130,15 +130,24 @@ The Scanpy data-check guide uses the full raw PBMC3k counts loaded through
 `scanpy.datasets.pbmc3k()` (2,700 cells × 32,738 genes). Scanpy prepares the
 normalization, variable-gene statistics and Scrublet results explicitly.
 
-The larger-data guide uses the [10x Genomics PBMC10k v3 dataset](https://www.10xgenomics.com/datasets/10-k-pbm-cs-from-a-healthy-donor-v-3-chemistry-3-standard-3-0-0),
-Cell Ranger 3.0.0 (11,769 cells × 33,538 genes), licensed CC BY 4.0.
-Credit 10x Genomics. Its filtered feature-matrix archive is read by
-`scanpy.read_10x_mtx`; the guide filters cells/genes, calculates quality metrics,
-normalizes/log-transforms counts, selects variable genes and computes PCA,
-neighbors and UMAP. The archive checksum comes from the
-[Scanpy tutorial source](https://github.com/scverse/scanpy-tutorials/blob/897eef59b945f88f9c86715656286796eea43853/tutorial_pearson_residuals.ipynb).
-Raw and prepared H5AD files stay in ignored caches; only plot data is embedded
-in the built documentation. No source dataset is added to Git.
+## Expression Atlas ovarian cortex example
+
+The UMAP guide uses the public [E-MTAB-8381 study](https://www.ebi.ac.uk/gxa/sc/experiments/E-MTAB-8381)
+from EMBL-EBI Single Cell Expression Atlas: 36,785 cells × 23,772 genes in the
+download accessed on 27 October 2026. Credit Wagner, Yoshihara, Douagi et al.,
+[Single-cell analysis of human ovarian cortex identifies distinct cell populations
+but no oogonial stem cells](https://doi.org/10.1038/s41467-020-14936-3),
+Nature Communications 11, 1147 (2020), and the Atlas contributors.
+The publication is CC BY 4.0; the public Atlas download is provided under the
+[EMBL-EBI terms of use](https://www.ebi.ac.uk/about/terms-of-use/), which impose
+no additional restrictions beyond those of the data owner and require attribution.
+
+Scanpy loads the study, normalizes/log-transforms counts, selects 2,000 variable
+genes for PCA, and computes neighbors and UMAP with seed 0. All Atlas cells are
+retained. The chart shows normalized VWF expression (ENSG00000110799), with the
+color range capped at the 99th percentile. This plotting example does not
+reproduce the paper's filtering, integration or biological analysis. Downloads and
+prepared H5AD files stay in ignored caches; no dataset is added to Git.
 
 ## Scanpy simulation examples
 
