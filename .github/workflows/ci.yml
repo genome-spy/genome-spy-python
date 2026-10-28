@@ -98,6 +98,35 @@ jobs:
           path: ${{ runner.temp }}/scanpy-browser
           if-no-files-found: ignore
 
+  scanpy-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: "3.12"
+      - name: Install current Scanpy separately from the reference environment
+        run: |
+          uv venv --python 3.12 "$RUNNER_TEMP/scanpy-compat"
+          uv pip install --python "$RUNNER_TEMP/scanpy-compat/bin/python" \
+            -e '.[scanpy]' 'scanpy==1.12.4' pytest pillow playwright pyarrow
+      - name: Check data semantics and workflows
+        run: >-
+          "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
+          tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -q
+      - run: '"$RUNNER_TEMP/scanpy-compat/bin/python" -m playwright install --with-deps chromium'
+      - name: Check native interactions with current Scanpy
+        run: >-
+          "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
+          tests/integrations/scanpy/browser/test_grid_interactions.py
+          tests/integrations/scanpy/browser/test_brushing.py
+          tests/integrations/scanpy/browser/test_embedding_summary.py
+          tests/integrations/scanpy/browser/test_embedding_summary_tracks.py
+          -q --basetemp="${{ runner.temp }}/scanpy-compat-browser"
+
   codegen:
     runs-on: ubuntu-latest
     steps:

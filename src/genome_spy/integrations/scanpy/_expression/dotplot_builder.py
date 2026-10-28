@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from importlib.metadata import version
 from typing import TYPE_CHECKING, Any, Literal, Self
 
 from genome_spy.integrations.scanpy._expression.grouped_builder import _GroupedPlot
@@ -131,6 +132,10 @@ class DotPlot(_GroupedPlot):
         _check_grid_zoom(zoom, context=context)
         _check_grid_highlight(highlight, context=context)
         _require_scanpy(context)
+        from packaging.version import Version
+
+        self._fixed_swapped_scaling = Version(version("scanpy")) >= Version("1.12")
+
         from genome_spy.integrations.scanpy._expression.grouped_data import (
             dotplot_summaries,
             grouped_expression,
@@ -324,7 +329,11 @@ class DotPlot(_GroupedPlot):
         fractions = self._fractions.loc[self._order].iloc[:, slots]
         if self._swapped:
             colors, fractions = colors.T, fractions.T
-        colors = scale_values(colors, self._standard_scale)
+        scale = self._standard_scale
+        # Scanpy 1.12 keeps scaling tied to genes/groups after swapping axes.
+        if self._swapped and self._fixed_swapped_scaling:
+            scale = {"var": "group", "group": "var", None: None}[scale]
+        colors = scale_values(colors, scale)
         return build_dotplot(
             colors,
             fractions,

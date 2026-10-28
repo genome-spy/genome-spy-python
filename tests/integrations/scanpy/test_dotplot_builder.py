@@ -28,6 +28,37 @@ def table(chart):
     return pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
 
 
+@pytest.mark.parametrize("swapped", [False, True])
+@pytest.mark.parametrize("standard_scale", ["var", "group"])
+@pytest.mark.parametrize("supplied", [False, True])
+def test_displayed_color_values_match_installed_scanpy(
+    adata, swapped, standard_scale, supplied
+):
+    from matplotlib import colormaps
+    import matplotlib.pyplot as plt
+
+    options = {"standard_scale": standard_scale, "cmap": "viridis"}
+    if supplied:
+        options["dot_color_df"] = pd.DataFrame(
+            [[1, 2, 3], [2, 3, 9], [4, 7, 8], [6, 1, 2]],
+            index=adata.obs["group"].cat.categories,
+            columns=["g1", "g2", "g3"],
+        )
+    native = gsc.pl.DotPlot(adata, ["g1", "g2", "g3"], "group", **options).swap_axes(
+        swap_axes=swapped
+    )
+    reference = sc.pl.DotPlot(adata, ["g1", "g2", "g3"], "group", **options).swap_axes(
+        swap_axes=swapped
+    )
+    try:
+        reference.make_figure()
+        expected = reference.get_axes()["mainplot_ax"].collections[0].get_facecolors()
+        values = table(native.to_chart())["_mean"].to_numpy()
+        np.testing.assert_allclose(colormaps["viridis"](values), expected)
+    finally:
+        plt.close("all")
+
+
 def test_constructor_preserves_the_pinned_signature():
     reference = json.loads(
         Path(__file__).with_name("fixtures").joinpath("api.json").read_text()

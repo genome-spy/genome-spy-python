@@ -51,7 +51,7 @@ Issues = "https://github.com/genome-spy/genome-spy-python/issues"
 [project.optional-dependencies]
 anndata = ["anndata>=0.11.0"]
 arrow = ["pyarrow>=18.0.0"]
-scanpy = ["scanpy[paga]==1.11.5"]
+scanpy = ["scanpy[paga]>=1.11.5,<1.13"]
 
 [dependency-groups]
 scanpy-test = [

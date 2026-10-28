@@ -154,20 +154,30 @@ def prepare_paga(
         graph_data = AnnData(
             obs=adata.obs[[key]], uns={"paga": {**stored, solid_edges: source}}
         )
-        sc.pl.paga(
-            graph_data,
-            threshold=threshold,
-            solid_edges=solid_edges,
-            layout=layout,
-            layout_kwds=layout_kwds,
-            init_pos=init_pos,
-            root=root,
-            random_state=random_state,
-            plot=False,
-            add_pos=True,
-            show=False,
-            save=False,
-        )
+        try:
+            sc.pl.paga(
+                graph_data,
+                threshold=threshold,
+                solid_edges=solid_edges,
+                layout=layout,
+                layout_kwds=layout_kwds,
+                init_pos=init_pos,
+                root=root,
+                random_state=random_state,
+                plot=False,
+                add_pos=True,
+                show=False,
+                save=False,
+            )
+        except TypeError as error:
+            missing_direction = "required keyword-only argument: 'directed'" in str(
+                error
+            )
+            if layout in {"rt", "rt_circular"} and missing_direction:
+                raise NotImplementedError(
+                    f"{CONTEXT}: this Scanpy version cannot compute tree layouts; supply pos explicitly."
+                ) from error
+            raise
         pos = graph_data.uns["paga"]["pos"]
     positions = numeric_values(
         pd.DataFrame(matrix_array(pos, context=CONTEXT)), context=CONTEXT

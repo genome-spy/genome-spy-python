@@ -1,6 +1,8 @@
 """Time-series data semantics compared with the pinned public Scanpy helper."""
 
 import inspect
+import json
+from pathlib import Path
 import warnings
 
 import numpy as np
@@ -12,6 +14,10 @@ import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._timeseries.data import prepare_timeseries
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
+
+SUBPLOT_PARAMETERS = json.loads(
+    Path(__file__).with_name("fixtures").joinpath("api.json").read_text()
+)["entries"]["timeseries_subplot"]["parameters"]
 
 
 @pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
@@ -82,7 +88,6 @@ def test_profiles_match_scanpy_positions_limits_colors_and_draw_order(
 
 
 def test_forwarded_defaults_match_the_pinned_subplot_signature():
-    import scanpy as sc
     from genome_spy.integrations.scanpy._timeseries.chart import build_timeseries
 
     native = inspect.signature(gsc.pl.timeseries).parameters
@@ -94,9 +99,10 @@ def test_forwarded_defaults_match_the_pinned_subplot_signature():
         if name not in {"X", "kwargs"}
     )
     actual = inspect.signature(build_timeseries).parameters
-    for name, p in inspect.signature(sc.pl.timeseries_subplot).parameters.items():
+    for parameter in SUBPLOT_PARAMETERS:
+        name = parameter["name"]
         if name not in {"X", "ax"}:
-            assert actual[name].default == p.default
+            assert repr(actual[name].default) == parameter["default"]
 
 
 def test_subplot_keeps_explicit_upstream_arguments_and_native_defaults():
@@ -105,13 +111,16 @@ def test_subplot_keeps_explicit_upstream_arguments_and_native_defaults():
     import scanpy as sc
 
     native = inspect.signature(gsc.pl.timeseries_subplot).parameters
-    upstream = inspect.signature(sc.pl.timeseries_subplot).parameters
+    upstream = {p["name"]: p for p in SUBPLOT_PARAMETERS}
     for name, parameter in upstream.items():
         if name == "ax":
             assert name not in native
         else:
-            assert native[name].kind == parameter.kind
-            assert native[name].default == parameter.default
+            assert native[name].kind.name == parameter["kind"]
+            default = native[name].default
+            assert (
+                None if default is inspect.Parameter.empty else repr(default)
+            ) == parameter["default"]
     assert set(native) - set(upstream) == {
         "show",
         "save",

@@ -18,9 +18,17 @@ def test_signature_matches_scanpy_and_adds_only_native_options():
     actual = inspect.signature(gsc.pl.dpt_groups_pseudotime).parameters
     upstream = inspect.signature(sc.pl.dpt_groups_pseudotime).parameters
     for name, value in upstream.items():
+        if name == "return_fig":
+            assert name not in actual
+            continue
         assert actual[name].kind == value.kind
         assert actual[name].default == value.default
     assert actual.keys() - upstream.keys() == {"hover", "zoom", "width", "height"}
+
+
+def test_matplotlib_return_option_is_rejected():
+    with pytest.raises(TypeError, match="return_fig"):
+        gsc.pl.dpt_groups_pseudotime(object(), return_fig=True)
 
 
 @pytest.mark.parametrize("case", dpt_cases())

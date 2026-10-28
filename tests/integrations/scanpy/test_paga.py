@@ -323,11 +323,48 @@ def test_tree_layout_retains_the_unfiltered_source(format):
         plot=False,
         show=False,
     )
-    sc.pl.paga(reference, **options)
+    try:
+        sc.pl.paga(reference, **options)
+    except TypeError as error:
+        if "required keyword-only argument: 'directed'" not in str(error):
+            raise
+        with pytest.raises(
+            NotImplementedError, match="Scanpy version cannot compute tree layouts"
+        ):
+            gsc.pl.paga(a, **options)
+        assert a.uns["paga"]["connectivities_tree"].format == format
+        assert (a.uns["paga"]["connectivities_tree"] != tree).nnz == 0
+        pytest.xfail(
+            "Installed Scanpy tree layout omits the required directed argument."
+        )
     gsc.pl.paga(a, **options)
     np.testing.assert_allclose(a.uns["paga"]["pos"], reference.uns["paga"]["pos"])
     assert a.uns["paga"]["connectivities_tree"].format == format
     assert (a.uns["paga"]["connectivities_tree"] != tree).nnz == 0
+
+
+@pytest.mark.parametrize("layout", ["rt", "rt_circular", "fr"])
+def test_layout_errors_do_not_fall_back_or_mask_unrelated_errors(monkeypatch, layout):
+    import scanpy as sc
+
+    def unavailable(*args, **kwargs):
+        raise TypeError(
+            "get_igraph_from_adjacency() missing 1 required keyword-only argument: 'directed'"
+        )
+
+    monkeypatch.setattr(sc.pl, "paga", unavailable)
+    expected = NotImplementedError if layout != "fr" else TypeError
+    with pytest.raises(
+        expected, match="tree layouts" if layout != "fr" else "directed"
+    ):
+        gsc.pl.paga(make_paga(), layout=layout, show=False)
+
+    def invalid(*args, **kwargs):
+        raise TypeError("invalid layout option")
+
+    monkeypatch.setattr(sc.pl, "paga", invalid)
+    with pytest.raises(TypeError, match="invalid layout option"):
+        gsc.pl.paga(make_paga(), layout=layout, show=False)
 
 
 @pytest.mark.parametrize("storage", ["csr", "csc"])

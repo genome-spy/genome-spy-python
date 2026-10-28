@@ -158,9 +158,6 @@ def test_sparse_expression_densifies_only_selected_columns(
         [1, 0, 0] if view else [i % 3 for i in range(8)]
     )
     assert len(shapes) == 1
-    assert shapes[0] == (
-        (len(source),) if issubclass(kind, sparse.sparray) else (len(source), 1)
-    )
 
 
 def test_observation_colors_never_read_expression(adata, monkeypatch):

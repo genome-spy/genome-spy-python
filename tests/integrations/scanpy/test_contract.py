@@ -331,16 +331,30 @@ def test_unsupported_arguments_fail_before_dependencies_or_data(
 
 
 @pytest.mark.parametrize("context", ["umap", "DotPlot", "MatrixPlot"])
-def test_wrong_version_has_an_actionable_error(monkeypatch, context) -> None:
-    monkeypatch.setattr(_guards, "version", lambda _: "1.12.0")
+@pytest.mark.parametrize("installed", ["1.11.4", "1.13.0", "1.12.4rc1"])
+def test_wrong_version_has_an_actionable_error(monkeypatch, context, installed) -> None:
+    monkeypatch.setattr(_guards, "version", lambda _: installed)
     with pytest.raises(
         ImportError,
-        match=rf"gsc.pl.{context} supports Scanpy 1.11.5; found 1.12.0",
+        match=rf"gsc.pl.{context} supports Scanpy >=1.11.5,<1.13; found {installed}",
     ):
         if context != "umap":
             getattr(gsc.pl, context)(object(), ["g1"], "group")
         else:
             gsc.pl.umap(object(), show=False)
+
+
+@pytest.mark.parametrize("installed", ["1.11.5", "1.11.6", "1.12.0", "1.12.4"])
+def test_supported_versions_return_the_scanpy_module(monkeypatch, installed) -> None:
+    sc = pytest.importorskip("scanpy")
+    monkeypatch.setattr(_guards, "version", lambda _: installed)
+    assert _guards._require_scanpy() is sc
+
+
+@pytest.mark.parametrize("family", ["dotplot", "DotPlot"])
+def test_new_scanpy_group_colormaps_are_rejected_explicitly(family) -> None:
+    with pytest.raises(TypeError, match="unsupported option.*group_colors"):
+        getattr(gsc.pl, family)(object(), ["g1"], "group", group_colors={"A": "red"})
 
 
 @pytest.mark.parametrize("context", ["umap", "DotPlot", "MatrixPlot"])

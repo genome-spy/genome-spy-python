@@ -85,7 +85,9 @@ def test_complete_embedding_specs_match_pinned_reference_coordinates_and_labels(
 @pytest.mark.parametrize("family", FAMILIES)
 def test_effective_signatures_match_pinned_scanpy_with_only_native_additions(family):
     native = inspect.signature(getattr(gsc.pl, family)).parameters
-    upstream = inspect.signature(getattr(sc.pl, family)).parameters
+    upstream = inspect.signature(
+        getattr(sc.pl, "pca" if family == "pca_scatter" else family)
+    ).parameters
     for name, p in upstream.items():
         if name in {"ax", "return_fig"}:
             assert name not in native

@@ -106,10 +106,18 @@ def test_gene_view_uses_x_and_saved_indices_without_raw_layers_or_other_dpt_fiel
     source.raw = source
     adata = source[:, [1, 0]]
     expected = source.X[source.obs["dpt_order_indices"].to_numpy()][:, [1, 0]]
-    for name in ("raw", "layers"):
-        monkeypatch.setattr(
-            AnnData, name, property(lambda self: pytest.fail("Read raw/layers"))
-        )
+    monkeypatch.setattr(AnnData, "raw", property(lambda self: pytest.fail("Read raw")))
+
+    # AnnData 0.13 stores X under layers[None]; named layers must remain unread.
+    def guard(getitem):
+        def read(self, key):
+            assert key is None, "Read a named layer"
+            return getitem(self, key)
+
+        return read
+
+    for layer_type in {type(source.layers), type(adata.layers)}:
+        monkeypatch.setattr(layer_type, "__getitem__", guard(layer_type.__getitem__))
     spec = gsc.pl.dpt_timeseries(adata, show=False).to_dict()
     mark = next(m for m in leaf_marks(spec) if m["mark"]["type"] == "rect")
     rows = spec["datasets"][mark["data"]["name"]]

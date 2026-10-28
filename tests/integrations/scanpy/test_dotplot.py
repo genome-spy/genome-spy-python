@@ -135,11 +135,28 @@ def test_hand_calculated_means_fractions_and_exact_area_mapping(adata):
     assert unit["mark"]["tooltip"] == {"handler": "default"}
 
 
-def test_swapped_scaling_preserves_both_scanpy_scaling_passes(adata):
+@pytest.mark.parametrize(
+    "installed,expected",
+    [
+        ("1.11.5", [0, 1 / 6, 1, 0, 0, 1, 0, 1, 0]),
+        ("1.12.0", [0, 1 / 3, 1, 0, 1 / 5, 1, 0, 1, 5 / 6]),
+        ("1.12.4", [0, 1 / 3, 1, 0, 1 / 5, 1, 0, 1, 5 / 6]),
+    ],
+)
+def test_swapped_scaling_preserves_both_scanpy_scaling_passes(
+    adata, monkeypatch, installed, expected
+):
+    from genome_spy.integrations.scanpy._expression import dotplot_builder
+
+    monkeypatch.setattr(dotplot_builder, "version", lambda _: installed)
+    adata.obs["group"] = pd.Categorical(["A", "A", "B", "B", None, "C"])
+    adata.X = np.array(
+        [[1, 2, 3], [1, 2, 3], [2, 3, 9], [2, 3, 9], [99, 99, 99], [4, 7, 8]],
+        dtype=float,
+    )
     data = table(chart(adata, standard_scale="var", swap_axes=True))
-    # First scale columns, transpose, then scale the displayed columns again.
-    np.testing.assert_allclose(data["_mean"], [1, 0, 0, 1, 0, 0])
-    np.testing.assert_allclose(data["_percent"], [100 / 3, 50, 200 / 3, 50, 100, 100])
+    np.testing.assert_allclose(data["_mean"], expected)
+    np.testing.assert_allclose(data["_percent"], [100] * 9)
 
 
 def test_supplied_colors_align_labels_scale_once_and_do_not_mutate(adata):

@@ -18,11 +18,13 @@ def _require_scanpy(context: str = "gsc.pl.umap") -> Any:
         installed = version("scanpy")
     except PackageNotFoundError as error:
         raise ImportError(
-            f"{context} requires genome-spy-python[scanpy] (Scanpy 1.11.5)."
+            f"{context} requires genome-spy-python[scanpy] (Scanpy >=1.11.5,<1.13)."
         ) from error
-    if installed != "1.11.5":
+    from packaging.specifiers import SpecifierSet
+
+    if not SpecifierSet(">=1.11.5,<1.13").contains(installed, prereleases=False):
         raise ImportError(
-            f"{context} supports Scanpy 1.11.5; found {installed}. "
+            f"{context} supports Scanpy >=1.11.5,<1.13; found {installed}. "
             "Install genome-spy-python[scanpy]."
         )
     import scanpy
