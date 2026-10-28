@@ -15,7 +15,7 @@ from genome_spy.integrations.scanpy._grid_interactions import (
 from genome_spy.integrations.scanpy._data import figsize_pixels, number
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
-from genome_spy.integrations.scanpy._grouped_chart import (
+from genome_spy.integrations.scanpy._expression.grouped_chart import (
     _brackets,
     _category_strip,
     _slot_labels,
@@ -24,7 +24,10 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     feature_gaps,
     index_scales,
 )
-from genome_spy.integrations.scanpy._grouped_data import FeatureGroup, HeatmapData
+from genome_spy.integrations.scanpy._expression.grouped_data import (
+    FeatureGroup,
+    HeatmapData,
+)
 from genome_spy.integrations.scanpy._style import (
     FONT,
     GROUPED_FONT_SIZE as TICK,

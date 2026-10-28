@@ -50,7 +50,7 @@ def selection_mask(
         >>> selected = adata[mask].copy()
     """
     import numpy as np
-    from genome_spy.integrations.scanpy._embedding_data import embedding_key
+    from genome_spy.integrations.scanpy._embedding.data import embedding_key
 
     key = embedding_key(adata, basis, context="selection_mask")
     embedding = adata.obsm[key]

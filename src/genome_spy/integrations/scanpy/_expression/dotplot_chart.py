@@ -10,9 +10,9 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
-from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._data import number
-from genome_spy.integrations.scanpy._grouped_chart import (
+from genome_spy.integrations.scanpy._expression.grouped_chart import (
     color_legend,
     finish_grouped_chart,
     grouped_axes,

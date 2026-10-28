@@ -6,10 +6,13 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._clustermap_data import ClusteredMatrix, CONTEXT
+from genome_spy.integrations.scanpy._expression.clustermap_data import (
+    ClusteredMatrix,
+    CONTEXT,
+)
 from genome_spy.integrations.scanpy._data import figsize_pixels, number, numeric_values
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
-from genome_spy.integrations.scanpy._grouped_chart import (
+from genome_spy.integrations.scanpy._expression.grouped_chart import (
     coordinate,
     index_scales,
     _slot_labels,
@@ -18,7 +21,10 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
     with_values,
 )
-from genome_spy.integrations.scanpy._matrix_chart import matrix_tiles, _labels
+from genome_spy.integrations.scanpy._expression.matrix_chart import (
+    matrix_tiles,
+    _labels,
+)
 from genome_spy.integrations.scanpy._style import (
     FONT,
     GROUPED_FONT_SIZE as TICK,

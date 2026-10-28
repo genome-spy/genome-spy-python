@@ -169,7 +169,7 @@ def test_layout_never_reads_expression_or_creates_a_figure(
 def test_layout_only_skips_chart_options_and_respects_position_cache(
     monkeypatch, add_pos
 ):
-    from genome_spy.integrations.scanpy import _paga_chart
+    from genome_spy.integrations.scanpy._paga import chart as _paga_chart
 
     a = make_paga()
     previous = a.uns["paga"]["pos"].copy()

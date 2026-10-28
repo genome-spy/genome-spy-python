@@ -9,7 +9,7 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._grid_interactions import zoom_axes, with_values
 from genome_spy.integrations.scanpy._data import number
-from genome_spy.integrations.scanpy._grouped_chart import (
+from genome_spy.integrations.scanpy._expression.grouped_chart import (
     color_legend,
     finish_grouped_chart,
     grouped_axes,
@@ -18,7 +18,7 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     summary_records,
     totals_track,
 )
-from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
 
 from genome_spy.integrations.scanpy._style import (
     POINTS_TO_PIXELS as _PT,

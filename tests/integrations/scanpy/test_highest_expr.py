@@ -9,7 +9,9 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._highest_expr_data import prepare_highest_expression
+from genome_spy.integrations.scanpy._qc.highest_expr_data import (
+    prepare_highest_expression,
+)
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.highest_expr_fixture import make_counts
 

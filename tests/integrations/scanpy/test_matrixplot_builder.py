@@ -10,7 +10,10 @@ import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy import _grouped_data, _matrixplot_builder
+from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
+from genome_spy.integrations.scanpy._expression import (
+    matrixplot_builder as _matrixplot_builder,
+)
 from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
 from tests.integrations.scanpy.helpers import points
 

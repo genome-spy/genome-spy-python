@@ -11,7 +11,8 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy import _grouped_data, pl
+from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
+from genome_spy.integrations.scanpy import pl
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata, heatmap_cases
 from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
 from tests.integrations.scanpy.helpers import leaf_marks, points

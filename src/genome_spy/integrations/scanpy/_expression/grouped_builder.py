@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
     from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
-    from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+    from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
 
 
 class _GroupedPlot:

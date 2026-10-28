@@ -18,7 +18,7 @@ from genome_spy.integrations.scanpy._style import (
     native_color,
     native_scheme,
 )
-from genome_spy.integrations.scanpy._grouped_chart import (
+from genome_spy.integrations.scanpy._expression.grouped_chart import (
     coordinate,
     index_scales,
     _slot_labels,

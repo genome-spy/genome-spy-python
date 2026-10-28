@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Literal, Self
 
-from genome_spy.integrations.scanpy._grouped_builder import _GroupedPlot
+from genome_spy.integrations.scanpy._expression.grouped_builder import _GroupedPlot
 from genome_spy.integrations.scanpy._guards import (
     _check_grid_zoom,
     _check_kwargs,
@@ -123,7 +123,7 @@ class MatrixPlot(_GroupedPlot):
         _check_grid_zoom(zoom, context=context)
         _require_scanpy(context)
 
-        from genome_spy.integrations.scanpy._grouped_data import (
+        from genome_spy.integrations.scanpy._expression.grouped_data import (
             grouped_expression,
             matrixplot_statistics,
         )
@@ -258,7 +258,9 @@ class MatrixPlot(_GroupedPlot):
         Example:
             >>> combined = plot.to_chart() | another_chart
         """
-        from genome_spy.integrations.scanpy._matrixplot_chart import build_matrixplot
+        from genome_spy.integrations.scanpy._expression.matrixplot_chart import (
+            build_matrixplot,
+        )
 
         colors, groups, _ = self._displayed()
         return build_matrixplot(

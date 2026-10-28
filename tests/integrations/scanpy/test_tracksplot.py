@@ -289,7 +289,7 @@ def test_resource_guard_and_backed_rejection_precede_expression_access(
     adata, monkeypatch, tmp_path
 ):
     import anndata as ad
-    from genome_spy.integrations.scanpy import _grouped_data
+    from genome_spy.integrations.scanpy._expression import grouped_data as _grouped_data
 
     monkeypatch.setattr(
         sc.get, "obs_df", lambda *a, **k: pytest.fail("Read expression")

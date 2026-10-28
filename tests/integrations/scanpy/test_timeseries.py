@@ -9,7 +9,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._timeseries_data import prepare_timeseries
+from genome_spy.integrations.scanpy._timeseries.data import prepare_timeseries
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
 
@@ -83,7 +83,7 @@ def test_profiles_match_scanpy_positions_limits_colors_and_draw_order(
 
 def test_forwarded_defaults_match_the_pinned_subplot_signature():
     import scanpy as sc
-    from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+    from genome_spy.integrations.scanpy._timeseries.chart import build_timeseries
 
     native = inspect.signature(gsc.pl.timeseries).parameters
     assert native["X"].kind == inspect.Parameter.POSITIONAL_OR_KEYWORD

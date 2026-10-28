@@ -220,7 +220,22 @@ def test_shared_display_validation_precedes_optional_imports(
 
 @pytest.mark.parametrize(
     "namespace",
-    ["genome_spy", "genome_spy.integrations", "genome_spy.integrations.scanpy"],
+    [
+        "genome_spy",
+        "genome_spy.integrations",
+        "genome_spy.integrations.scanpy",
+        *[
+            f"genome_spy.integrations.scanpy.{family}"
+            for family in (
+                "_embedding",
+                "_expression",
+                "_paga",
+                "_timeseries",
+                "_qc",
+                "_ranking",
+            )
+        ],
+    ],
 )
 def test_namespace_import_keeps_optional_stack_unloaded(namespace: str) -> None:
     subprocess.run(

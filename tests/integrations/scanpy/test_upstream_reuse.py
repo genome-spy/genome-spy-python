@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._grouped_data import (
+from genome_spy.integrations.scanpy._expression.grouped_data import (
     expression_fractions,
     group_means,
     scale_values,

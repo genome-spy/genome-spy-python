@@ -275,7 +275,7 @@ def _node_colors(
     palette: Any,
 ) -> Any:
     """Return per-group color values from a stored color key or supplied CSS colors."""
-    from genome_spy.integrations.scanpy._grouped_data import (
+    from genome_spy.integrations.scanpy._expression.grouped_data import (
         grouped_expression,
         group_means,
     )

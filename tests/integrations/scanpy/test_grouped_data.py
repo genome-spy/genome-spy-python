@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from scipy import sparse
 
-from genome_spy.integrations.scanpy._grouped_data import (
+from genome_spy.integrations.scanpy._expression.grouped_data import (
     expression_fractions,
     grouped_expression,
     group_means,

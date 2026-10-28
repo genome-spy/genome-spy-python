@@ -15,9 +15,9 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     profile_segments,
     series_focus,
 )
-from genome_spy.integrations.scanpy._grouped_chart import _slot_labels
-from genome_spy.integrations.scanpy._matrix_chart import matrix_tiles
-from genome_spy.integrations.scanpy._paga_path_data import (
+from genome_spy.integrations.scanpy._expression.grouped_chart import _slot_labels
+from genome_spy.integrations.scanpy._expression.matrix_chart import matrix_tiles
+from genome_spy.integrations.scanpy._paga.path_data import (
     CONTEXT,
     PagaPathData,
     path_line_values,

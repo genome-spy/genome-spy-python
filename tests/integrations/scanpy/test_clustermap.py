@@ -11,7 +11,9 @@ from scipy import sparse
 from scipy.cluster import hierarchy
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._clustermap_data import prepare_clustermap
+from genome_spy.integrations.scanpy._expression.clustermap_data import (
+    prepare_clustermap,
+)
 from tests.integrations.scanpy.clustermap_fixture import (
     make_cluster_adata,
     clustermap_cases,

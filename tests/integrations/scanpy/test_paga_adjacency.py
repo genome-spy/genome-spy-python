@@ -7,7 +7,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._paga_data import adjacency_values, adjacency_points
+from genome_spy.integrations.scanpy._paga.data import adjacency_values, adjacency_points
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.paga_fixture import make_adjacency
 

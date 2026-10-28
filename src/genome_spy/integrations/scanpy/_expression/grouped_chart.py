@@ -10,7 +10,7 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
-from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._grid_interactions import index_offset
 from genome_spy.integrations.scanpy._data import figsize_pixels, number
 from genome_spy.integrations.scanpy._style import (

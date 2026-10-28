@@ -14,7 +14,7 @@ from genome_spy.integrations.scanpy._data import (
     require_resident_expression,
     resolve_use_raw,
 )
-from genome_spy.integrations.scanpy._embedding_data import (
+from genome_spy.integrations.scanpy._embedding.data import (
     Panel,
     PreparedEmbedding,
     _axis_labels,

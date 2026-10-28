@@ -10,8 +10,8 @@ import genome_spy as gs
 from genome_spy.schema.core import LegendConfig
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import coordinate_domain
-from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
-from genome_spy.integrations.scanpy._embedding_interactions import (
+from genome_spy.integrations.scanpy._embedding.data import Panel, PreparedEmbedding
+from genome_spy.integrations.scanpy._embedding.interactions import (
     brush_owner,
     point_hover,
     validate_brush,

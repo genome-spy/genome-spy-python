@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._ranked_data import ranked_features
+from genome_spy.integrations.scanpy._ranking.data import ranked_features
 from tests.integrations.scanpy.helpers import units
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
 

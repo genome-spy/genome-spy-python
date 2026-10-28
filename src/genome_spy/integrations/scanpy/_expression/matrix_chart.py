@@ -23,7 +23,7 @@ from genome_spy.integrations.scanpy._data import (
     number,
     numeric_values,
 )
-from genome_spy.integrations.scanpy._grouped_chart import (
+from genome_spy.integrations.scanpy._expression.grouped_chart import (
     coordinate,
     index_scales,
     _slot_labels,

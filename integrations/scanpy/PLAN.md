@@ -111,7 +111,7 @@ Prefer public Scanpy computations over reproducing their algorithms; guard
 unwanted analysis/mutation at the call boundary and honor their stored results.
 The [source map](README.md#scanpy-integration-workspace) identifies shared owners:
 data validation/source selection in `_data`, native presentation in `_style`,
-grouped extraction/statistics and layout in `_grouped_data`/`_grouped_chart`,
+grouped extraction/statistics and layout in `_expression.grouped_data`/`_expression.grouped_chart`,
 and tree preparation/rendering in the dendrogram modules. Shared option/dependency
 guards live in `_guards`; display handling stays in `pl.py`. Add capabilities
 to these helpers when semantics match; keep genuine plot-specific differences
@@ -1069,7 +1069,7 @@ account of the unchanged workload; measure constructor retention/render snapshot
 M13.b adds `MatrixPlot` over the existing one-pass matrix summaries and native
 tile renderer. Supplied `values_df` stays authoritative and is never read back
 from expression or scaled. Both builders share concrete group-order/tree/totals
-state in `_grouped_builder`, native totals tracks in `_grouped_chart`, and option
+state in `_expression.grouped_builder`, native totals tracks in `_expression.grouped_chart`, and option
 guards in `_guards`. Styles remain local to each family. Matrix chains cover
 scheme/edge styles, color-guide visibility/title/width, tree/totals replacement,
 sorting and transpose, with detached snapshots and the same native delivery.
@@ -1170,7 +1170,7 @@ Deliver in small increments, updating the current queue in STATUS after each:
 1. **M14.b.1 — cell heatmap and shared track helpers.** Replace heatmap's category
    strip, group/gene labels, marker brackets and attached tree overlays with
    native side views. Add cell-group and applicable marker-group gaps. Evolve
-   existing `_grouped_chart` label/bracket and `_dendrogram_chart` helpers so the
+   existing `_expression.grouped_chart` label/bracket and `_dendrogram_chart` helpers so the
    following families can reuse them. Keep tree computation in Python through
    stored/public Scanpy results. The released `transform_dendrogram` can lay out
    precomputed hierarchy where it matches the stored tree; it does not replace

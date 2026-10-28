@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from genome_spy.integrations.scanpy._data import numeric_values
-from genome_spy.integrations.scanpy._grouped_data import (
+from genome_spy.integrations.scanpy._expression.grouped_data import (
     MAX_HEATMAP_VALUES,
     grouped_expression,
 )

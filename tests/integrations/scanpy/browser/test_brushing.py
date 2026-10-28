@@ -14,7 +14,7 @@ import pytest
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from genome_spy._embed import bundled_module_url
-from genome_spy.integrations.scanpy._embedding_interactions import (
+from genome_spy.integrations.scanpy._embedding.interactions import (
     brush_count,
     brush_owner,
 )

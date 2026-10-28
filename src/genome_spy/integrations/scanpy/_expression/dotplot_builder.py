@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Literal, Self
 
-from genome_spy.integrations.scanpy._grouped_builder import _GroupedPlot
+from genome_spy.integrations.scanpy._expression.grouped_builder import _GroupedPlot
 from genome_spy.integrations.scanpy._guards import (
     _check_grid_zoom,
     _check_kwargs,
@@ -131,7 +131,7 @@ class DotPlot(_GroupedPlot):
         _check_grid_zoom(zoom, context=context)
         _require_scanpy(context)
 
-        from genome_spy.integrations.scanpy._grouped_data import (
+        from genome_spy.integrations.scanpy._expression.grouped_data import (
             dotplot_summaries,
             grouped_expression,
         )
@@ -315,8 +315,10 @@ class DotPlot(_GroupedPlot):
         Example:
             >>> combined = plot.to_chart() | another_chart
         """
-        from genome_spy.integrations.scanpy._dotplot_chart import build_dotplot
-        from genome_spy.integrations.scanpy._grouped_data import scale_values
+        from genome_spy.integrations.scanpy._expression.dotplot_chart import (
+            build_dotplot,
+        )
+        from genome_spy.integrations.scanpy._expression.grouped_data import scale_values
 
         colors, groups, slots = self._displayed()
         fractions = self._fractions.loc[self._order].iloc[:, slots]

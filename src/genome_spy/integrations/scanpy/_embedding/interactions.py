@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import genome_spy as gs
 
-from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
+from genome_spy.integrations.scanpy._embedding.data import Panel, PreparedEmbedding
 from genome_spy.integrations.scanpy._style import EmbeddingStyle
 
 

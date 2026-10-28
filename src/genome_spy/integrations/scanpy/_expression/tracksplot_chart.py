@@ -11,8 +11,11 @@ from genome_spy.integrations.scanpy._data import (
 )
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
-from genome_spy.integrations.scanpy._grouped_data import FeatureGroup, HeatmapData
-from genome_spy.integrations.scanpy._grouped_chart import _category_strip
+from genome_spy.integrations.scanpy._expression.grouped_data import (
+    FeatureGroup,
+    HeatmapData,
+)
+from genome_spy.integrations.scanpy._expression.grouped_chart import _category_strip
 from genome_spy.integrations.scanpy._style import FONT
 
 

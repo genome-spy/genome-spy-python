@@ -8,7 +8,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._timeseries_data import prepare_sim
+from genome_spy.integrations.scanpy._timeseries.data import prepare_sim
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.sim_fixture import make_sim, sim_cases
 

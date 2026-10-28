@@ -181,7 +181,7 @@ def test_threshold_slider_updates_pair_colors_and_rule_with_independent_batches(
     page, tmp_path
 ):
     from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
-    from genome_spy.integrations.scanpy._scrublet_data import prepare_scrublet
+    from genome_spy.integrations.scanpy._qc.scrublet_data import prepare_scrublet
 
     a = make_scrublet(True)
     table, _ = prepare_scrublet(a)

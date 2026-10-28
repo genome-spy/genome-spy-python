@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from genome_spy.integrations.scanpy._data import numeric_values
-from genome_spy.integrations.scanpy._embedding_data import (
+from genome_spy.integrations.scanpy._embedding.data import (
     Panel,
     PreparedEmbedding,
     _axis_labels,

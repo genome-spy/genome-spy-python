@@ -12,7 +12,7 @@ import pandas as pd
 from scipy.cluster import hierarchy
 
 from genome_spy.integrations.scanpy._data import require_resident_expression
-from genome_spy.integrations.scanpy._grouped_data import (
+from genome_spy.integrations.scanpy._expression.grouped_data import (
     FeatureGroup,
     _categories,
 )

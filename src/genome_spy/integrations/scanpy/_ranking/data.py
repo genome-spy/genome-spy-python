@@ -232,7 +232,7 @@ def ranked_statistic(
     table: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Return stored statistic colors for every group and requested gene slot."""
-    from genome_spy.integrations.scanpy._grouped_data import _feature_slots
+    from genome_spy.integrations.scanpy._expression.grouped_data import _feature_slots
 
     options = {
         "scores",

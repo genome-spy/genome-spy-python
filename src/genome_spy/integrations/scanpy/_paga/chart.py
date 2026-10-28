@@ -36,8 +36,8 @@ def build_paga_adjacency(
     labels: list[str] | None = None,
 ) -> gs.TopLevelSpec:
     """Render stored adjacency with shared tiles or labeled connectivity points."""
-    from genome_spy.integrations.scanpy._matrix_chart import build_matrix
-    from genome_spy.integrations.scanpy._paga_data import adjacency_points
+    from genome_spy.integrations.scanpy._expression.matrix_chart import build_matrix
+    from genome_spy.integrations.scanpy._paga.data import adjacency_points
 
     context = "gsc.pl.paga_adjacency"
     if not as_heatmap:
@@ -113,7 +113,9 @@ def build_paga_adjacency(
                 nice=False,
             )
         else:
-            from genome_spy.integrations.scanpy._grouped_chart import coordinate
+            from genome_spy.integrations.scanpy._expression.grouped_chart import (
+                coordinate,
+            )
 
             x = coordinate(gs.X, "_x", len(values), 0)
         y = gs.Y("_y:Q").scale(
@@ -152,7 +154,9 @@ def build_paga_adjacency(
             )
         )
         if labels is not None:
-            from genome_spy.integrations.scanpy._grouped_chart import _slot_labels
+            from genome_spy.integrations.scanpy._expression.grouped_chart import (
+                _slot_labels,
+            )
 
             source_labels = _slot_labels(
                 labels, x.axis(None), horizontal=True

@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-27. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-28. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -11,6 +11,10 @@ were preserved; evidence commit IDs below refer to the cleaned history. Both
 workflow tests and Ruff checks pass. Local notebook edits remain unchanged.
 
 ## Current position and next work
+
+**Full-suite validation:** 3,757 checks pass and 16 existing expected failures
+remain, with no skipped tests. The [module-reorganization checkpoint](#implementation-folders-by-plot-family)
+records the working-tree validation and its limits.
 
 The queue and callable inventory below own current progress. Workspace overviews
 link here instead of maintaining separate counts or feature queues. Repository
@@ -1188,7 +1192,7 @@ not fresh-clone dependencies or release artifacts.
   demonstrates the reviewed native behavior. A maintainer's request to split the
   selection foundation and legend UI into stacked PRs remains open. Python
   runtime/notebook adoption still waits for a published Core release.
-- **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
+- **Legend finding fixed in `4babc9c`:** [the shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding/chart.py)
   now retains single-panel typography when applying final native guide settings.
   One small helper supplies the existing font/spacing configuration at both
   composition stages. Previously `legend_fontsize=8` and `20` both rendered
@@ -1345,7 +1349,7 @@ local notebooks are unchanged.
 
 ## M14.b.1 native heatmap tracks and gaps
 
-Closed for the heatmap migration in `4422f8a`. The [chart](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py)
+Closed for the heatmap migration in `4422f8a`. The [chart](../../src/genome_spy/integrations/scanpy/_expression/heatmap_chart.py)
 uses `gs.surround`: tiles/fitted values own the center, while bands, labels,
 brackets and tree branches have their own clipped side views. Shared authoritative
 index scales own the final domains, navigation and gaps. Cell-group cuts use final
@@ -1402,7 +1406,7 @@ document becomes eligible for removal from this increment.
 Closed (2026-10-23). `heatmap` and `rank_genes_groups_heatmap` expose keyword-only
 `group_gap=4` in CSS pixels. Zero removes the spaces; finite nonnegative widths
 apply to both cell groups and partitioned marker blocks. The existing
-[`index_scales`](../../src/genome_spy/integrations/scanpy/_grouped_chart.py)
+[`index_scales`](../../src/genome_spy/integrations/scanpy/_expression/grouped_chart.py)
 helper passes the width to native scale gaps, keeping category bands, labels,
 brackets and trees aligned without extra layers or data copies.
 This checkpoint's four-pixel default was superseded by the 2026-10-25
@@ -1424,7 +1428,7 @@ queue owns next work. Clearance: retain.
 ## M14.b.2 native grouped layout
 
 Closed for native WebGL/notebook/HTML layout. Dotplot and matrixplot now use the
-existing [`finish_grouped_chart`](../../src/genome_spy/integrations/scanpy/_grouped_chart.py)
+existing [`finish_grouped_chart`](../../src/genome_spy/integrations/scanpy/_expression/grouped_chart.py)
 to place the prepared center, labels, marker brackets and stored tree inside
 `gs.surround`. The heatmap's shared label, tree and feature-partition helpers
 serve both families; ranked variants inherit their parent implementation.
@@ -2225,7 +2229,7 @@ document is eligible for removal.
 
 ## M07.d embedding point outlines
 
-Closed for the two-marker native increment. The [shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
+Closed for the two-marker native increment. The [shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding/chart.py)
 adds opaque outer/inner point layers behind the existing foreground. All shared
 embedding entry points and PCA overview inherit it; scatter retains its separate
 Scanpy signature. Public names/defaults stay `add_outline=False`,
@@ -2377,14 +2381,14 @@ no plan is eligible for removal.
 
 Closed for the shared embedding entry points and PCA overview's embedding panel.
 `edges=True` reads saved connectivities once; the existing
-[embedding preparation](../../src/genome_spy/integrations/scanpy/_embedding_data.py)
+[embedding preparation](../../src/genome_spy/integrations/scanpy/_embedding/data.py)
 uses NetworkX's undirected conversion, as Scanpy does. Default/custom neighbor
 keys, current-over-legacy storage, asymmetric entries, negative weights and
 explicit sparse zeros retain their upstream meaning. Stable cell IDs connect
 each edge to its endpoints. No neighbors, embedding or expression analysis is
 run, no matrix is densified, and source arrays/metadata are left intact.
 
-The [shared renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
+The [shared renderer](../../src/genome_spy/integrations/scanpy/_embedding/chart.py)
 draws native rules beneath points and outlines, with two native lookups into
 the existing cell table. Multi-panel charts serialize one cell table and one
 edge list. Endpoint padding matches Scanpy's initial limits; zoom, point hover,
@@ -2447,7 +2451,7 @@ Scope and clearance remain unchanged; the current queue owns next work.
 
 Closed for shared embeddings, PCA overview's embedding panel and scatter.
 `marker="s"` uses one native square encoding in the
-[shared renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py);
+[shared renderer](../../src/genome_spy/integrations/scanpy/_embedding/chart.py);
 missing-value points, outlines and legend symbols inherit it. The existing
 size conversion matches Scanpy's unit-width square path. Scalar/per-panel
 marker choices reuse each entry point's current broadcasting. Source data,
@@ -2777,8 +2781,8 @@ remains M14; the QC family is not closed. Clearance: retain; no working document
 
 Closed for the stored-statistic preview. `highly_variable_genes` and the legacy
 `filter_genes_dispersion` share a thin metadata preparation function in
-[_scatter_data.py](../../src/genome_spy/integrations/scanpy/_scatter_data.py)
-and a dedicated [_hvg_chart.py](../../src/genome_spy/integrations/scanpy/_hvg_chart.py).
+[_embedding/scatter_data.py](../../src/genome_spy/integrations/scanpy/_embedding/scatter_data.py)
+and a dedicated [_qc/hvg_chart.py](../../src/genome_spy/integrations/scanpy/_qc/hvg_chart.py).
 They reuse numeric checks, point IDs, coordinate limits, font/point units and
 common optional-dependency/display/save handling. No new data module or adapter
 framework is introduced. The adapter reads three plotted vectors and a boolean
@@ -2911,7 +2915,7 @@ not rebuilt for this reorganization; no working plan is newly eligible to clear.
 
 ## M02.a/b preparation and statistics
 
-Verified scope: [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py)
+Verified scope: [_expression/grouped_data.py](../../src/genome_spy/integrations/scanpy/_expression/grouped_data.py)
 reuses public `sc.get.obs_df` for selected expression/metadata, raw/layer and symbol
 lookup. AnnData categorization touches only the detached table. Values retain
 observation order, repeated feature slots, grouping/category order and bracket
@@ -2951,8 +2955,8 @@ checks; the chart delivery below supplies separate browser/workflow evidence.
 ## M02.c/d plain dotplot preview
 
 Runtime: [public callable](../../src/genome_spy/integrations/scanpy/pl.py),
-[pure displayed statistics](../../src/genome_spy/integrations/scanpy/_grouped_data.py),
-[native chart](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py), and
+[pure displayed statistics](../../src/genome_spy/integrations/scanpy/_expression/grouped_data.py),
+[native chart](../../src/genome_spy/integrations/scanpy/_expression/dotplot_chart.py), and
 [shared color validation](../../src/genome_spy/integrations/scanpy/_style.py).
 Chart construction takes detached tables, not AnnData. It uses released points,
 rules and text; no Core patches, custom polygon recipes or benchmark imports.
@@ -3047,9 +3051,9 @@ there is no per-slice working plan to clear and no research artifacts are delete
 ## M03.a–c plain matrixplot preview
 
 Runtime: [public callable](../../src/genome_spy/integrations/scanpy/pl.py),
-[shared statistics](../../src/genome_spy/integrations/scanpy/_grouped_data.py),
-[shared grouped layout](../../src/genome_spy/integrations/scanpy/_grouped_chart.py)
-and [native tile chart](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py).
+[shared statistics](../../src/genome_spy/integrations/scanpy/_expression/grouped_data.py),
+[shared grouped layout](../../src/genome_spy/integrations/scanpy/_expression/grouped_chart.py)
+and [native tile chart](../../src/genome_spy/integrations/scanpy/_expression/matrixplot_chart.py).
 No family-specific data module or adapter framework was added. Dotplot now uses
 that same native slot/label/bracket/guide layout; its serialized hover-case spec
 was checked against the previous implementation and is unchanged.
@@ -3104,7 +3108,7 @@ were not rerun for this slice.
 
 Runtime: [Scanpy delegation/results/permutations](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py),
 [native tree rules](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py),
-[correlation tiles](../../src/genome_spy/integrations/scanpy/_correlation_chart.py)
+[correlation tiles](../../src/genome_spy/integrations/scanpy/_expression/correlation_chart.py)
 and [public entry points](../../src/genome_spy/integrations/scanpy/pl.py).
 Dotplot and matrixplot use one leaf and matching marker-block permutation.
 Native formula transforms project
@@ -3201,8 +3205,8 @@ and group gaps. [M14.b.1](#m14b1-native-heatmap-tracks-and-gaps) verifies that m
 centered group labels/tree leaves deliberately replace the old half-row placement.
 
 Runtime: [public heatmap](../../src/genome_spy/integrations/scanpy/pl.py),
-[shared data preparation](../../src/genome_spy/integrations/scanpy/_grouped_data.py)
-and [native chart](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py).
+[shared data preparation](../../src/genome_spy/integrations/scanpy/_expression/grouped_data.py)
+and [native chart](../../src/genome_spy/integrations/scanpy/_expression/heatmap_chart.py).
 Reuses the public Scanpy getter, source/storage validation, min–max operation,
 palettes, marker-block permutations, labels/brackets and M04 rule branches.
 No separate data module, dependency, upstream plotting or Core patch was added.
@@ -3405,8 +3409,8 @@ and four charts were rerun and inspected. No clearance changed.
 
 ## M05.c — clustermap preview
 
-Runtime: [bounded preparation](../../src/genome_spy/integrations/scanpy/_clustermap_data.py)
-and [chart composition](../../src/genome_spy/integrations/scanpy/_clustermap_chart.py).
+Runtime: [bounded preparation](../../src/genome_spy/integrations/scanpy/_expression/clustermap_data.py)
+and [chart composition](../../src/genome_spy/integrations/scanpy/_expression/clustermap_chart.py).
 The public function keeps Scanpy 1.11.5's signature and accepts an explicit
 subset of its forwarded Seaborn options. Public SciPy `linkage` and
 `dendrogram(no_plot=True)` reproduce the actual row/column computations;
@@ -3540,7 +3544,7 @@ reads ten PBMC marker genes with `sc.get.obs_df` and stably sorts by the stored
 S-phase score; this ordering is not measured time or inferred pseudotime.
 
 Reuse: `_data.matrix_array` checks resident shape without densifying other
-sources; `_matrix_chart` transposes profiles and uses its existing numeric
+sources; `_expression.matrix_chart` transposes profiles and uses its existing numeric
 validation, color bounds, tile table, side labels and guide. Shared grid helpers
 provide y-only/xy zoom and fitted values. Native quantitative bounds preserve
 center cropping, first-variable-at-bottom order and singleton limits that index
@@ -3602,9 +3606,9 @@ is not a dependency of these two helpers. The
 preserves `X, **kwargs` and the forwarded defaults while adding native delivery,
 dimensions, hover and both-axis navigation. No time ordering or analysis runs.
 
-Reuse: [pure profile preparation](../../src/genome_spy/integrations/scanpy/_timeseries_data.py)
+Reuse: [pure profile preparation](../../src/genome_spy/integrations/scanpy/_timeseries/data.py)
 uses existing resident/numeric validation, coordinate margins, CSS colors and
-continuous bounds. The [chart module](../../src/genome_spy/integrations/scanpy/_timeseries_chart.py)
+continuous bounds. The [chart module](../../src/genome_spy/integrations/scanpy/_timeseries/chart.py)
 uses the shared marker widths, point units, schemes and zoom helper. Dashed
 vertical rules now have one shared native helper, also used by the heatmap.
 The default palette comes from public `sc.pl.palettes.vega_10`; no private
@@ -3709,7 +3713,7 @@ The bounded `sim` preview is closed on 2026-10-22. Its
 preserves Scanpy 1.11.5's signature/defaults and adds native hover, zoom, fitted
 heatmap values and dimensions. The implementation lives in
 [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) and the existing
-[_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py),
+[_timeseries/data.py](../../src/genome_spy/integrations/scanpy/_timeseries/data.py),
 with no new preparation or renderer module. It reads resident dense X and names,
 chooses `tmax_realization`, then `uns['tmax_write']`, then `n_obs`, and preserves
 all rows including partial final realizations. Correcting the earlier plan:
@@ -3775,7 +3779,7 @@ live plan and ledger remain **retain**; no document is eligible for clearance.
 ## M11.b stored DPT groups and pseudotime
 
 Implemented on 2026-10-22 through the existing
-[_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py)
+[_timeseries/data.py](../../src/genome_spy/integrations/scanpy/_timeseries/data.py)
 and [public plotting module](../../src/genome_spy/integrations/scanpy/pl.py), with
 no new production module or renderer. The
 [contract](../../docs/integrations/scanpy/supported.md#inspect-stored-dpt-groups-and-pseudotime)
@@ -3855,7 +3859,7 @@ parent-reference gate, next slice and clearance remain unchanged.
 
 Closed for the resident dense-X preview on 2026-10-22. The
 [public entry](../../src/genome_spy/integrations/scanpy/pl.py) and existing
-[_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py)
+[_timeseries/data.py](../../src/genome_spy/integrations/scanpy/_timeseries/data.py)
 preserve Scanpy 1.11.5's signature/defaults, adding native hover, navigation,
 fitted heatmap values and dimensions. No new production module is needed.
 The [contract](../../docs/integrations/scanpy/supported.md#plot-expression-in-stored-dpt-order)
@@ -3921,7 +3925,7 @@ Clearance: **retain**; no live plan is eligible for removal.
 ## M11.c stored undirected PAGA graphs
 
 `gsc.pl.paga` now renders stored undirected group connectivity with native rules,
-points and text. [Data preparation](../../src/genome_spy/integrations/scanpy/_paga_data.py)
+points and text. [Data preparation](../../src/genome_spy/integrations/scanpy/_paga/data.py)
 reads sparse graph copies, categorical metadata and stored group sizes. It reuses
 public `sc.pl.paga(plot=False)` on metadata-only AnnData when positions are absent;
 no private layout code, expression copy/access, Matplotlib figures, artist
@@ -3929,7 +3933,7 @@ recovery or PAGA analysis is involved. Supplied coordinates skip layout. None
 recomputes layout even with cached positions, matching Scanpy. add_pos=True writes
 successful coordinates only after chart preparation; plot=False creates no chart.
 
-[Chart construction](../../src/genome_spy/integrations/scanpy/_paga_chart.py) reuses
+[Chart construction](../../src/genome_spy/integrations/scanpy/_paga/chart.py) reuses
 shared numeric validation, palettes/CSS colors, coordinate domains, point units,
 navigation and delivery. Size scales are independent between edge widths and node
 areas, while coordinates are shared. Group nodes use group IDs/counts, without an
@@ -4015,7 +4019,7 @@ Scope, next work and clearance remain unchanged.
 ### PAGA numeric, gene and degree colors
 
 Closed (2026-10-23) for single-key numeric observation, gene and solid/dashed degree
-colors. [`_paga_data`](../../src/genome_spy/integrations/scanpy/_paga_data.py)
+colors. [`_paga.data`](../../src/genome_spy/integrations/scanpy/_paga/data.py)
 reuses the grouped public getter and group-mean helpers. Observation means skip
 missing values; gene means retain Scanpy's missing-value propagation. Gene colors
 use raw when present by default, otherwise X; False chooses X. Only one gene
@@ -4024,7 +4028,7 @@ thresholded NetworkX graphs, preserving weights/order for CSR/CSC and the shared
 LIL conversion. Weighted degrees normalize to 0–1; missing dashed graphs and
 equal-degree normalization error explicitly instead of creating substitute values.
 
-[`_paga_chart`](../../src/genome_spy/integrations/scanpy/_paga_chart.py) uses shared
+[`_paga.chart`](../../src/genome_spy/integrations/scanpy/_paga/chart.py) uses shared
 color bounds and native fill/stroke scales and legends. Finite nodes keep the
 existing size/position/edge mapping; missing means omit point paint, leaving
 labels and edges intact. Hover adds the plotted numeric value. Public Scanpy
@@ -4073,7 +4077,7 @@ Implemented (2026-10-23); semantic, explicitly subsetted reference, complete-cha
 interaction, workflow and resource checks are verified. The direct disconnected
 parent-entry comparison remains blocked by **C15**, so this increment is not closed.
 
-[`_paga_data`](../../src/genome_spy/integrations/scanpy/_paga_data.py) uses
+[`_paga.data`](../../src/genome_spy/integrations/scanpy/_paga/data.py) uses
 NetworkX's connected components on the existing thresholded solid graph. Select
 the most nodes, choosing the first component in original group order on ties.
 The existing node table keeps original IDs, labels and coordinates; colors and
@@ -4221,7 +4225,7 @@ results remain under uns['paga']; callers assign their sparse matrices explicitl
 to the legacy keys, as shown in the expression notebook. There is no hidden
 fallback, PAGA computation, expression access or mutation in the plotting call.
 
-[`adjacency_values`](../../src/genome_spy/integrations/scanpy/_paga_data.py)
+[`adjacency_values`](../../src/genome_spy/integrations/scanpy/_paga/data.py)
 validates matching nonempty square resident sparse matrices/arrays before loading
 up to 250,000 adjacency values. The tree stays sparse; only nonzero entries
 become points. Original numeric indices/order, asymmetric entries, diagonal
@@ -4229,7 +4233,7 @@ entries, negative tree weights and missing adjacency values are preserved.
 Scanpy's tree placement is x=row, y=column, even though heatmap tiles use
 x=column, y=row. This difference is intentional and tested with asymmetric data.
 
-[`build_paga_adjacency`](../../src/genome_spy/integrations/scanpy/_paga_chart.py)
+[`build_paga_adjacency`](../../src/genome_spy/integrations/scanpy/_paga/chart.py)
 adds fixed-pixel native black points to the existing numeric matrix renderer's
 center. That renderer now accepts an optional native overlay; its default path
 is unchanged. Tiles, color bounds/schemes, native colorbar, indices, hover,
@@ -4347,14 +4351,14 @@ and the integration roadmap remain open.
 Implemented (2026-10-23); native semantics/chart/workflow/interaction/resource
 checks verified, **C16 direct default return_data gate remains blocked**. The
 native entry reads stored categorical groups and DPT pseudotime. Its pure
-[preparation](../../src/genome_spy/integrations/scanpy/_paga_path_data.py) reuses
+[preparation](../../src/genome_spy/integrations/scanpy/_paga/path_data.py) reuses
 shared grouped_expression/public Scanpy obs_df access, resident-expression guards
 and numeric validation. It preserves supplied group names/indices/repeats,
 within-group NumPy sort order, raw/X fallback, cumulative full-window averages,
 then optional per-key normalization. Only selected genes are densified; a
 250,000 selected cell–key/annotation value guard precedes expression reads.
 
-The [renderer](../../src/genome_spy/integrations/scanpy/_paga_path_chart.py) reuses
+The [renderer](../../src/genome_spy/integrations/scanpy/_paga/path_chart.py) reuses
 matrix_tiles, fitted values, slot labels, shared palette/bounds and zoom helpers.
 Native surround holds contiguous original group bands and smoothed numeric
 annotation tracks. Their full-width alignment matches upstream's separate image
@@ -4466,13 +4470,13 @@ Clearance: **retain**; full M11.d remains open.
 Implemented (2026-10-23); native semantic/chart/workflow/interaction/resource
 checks verified, **C16 direct default return_data gate remains blocked**. The
 [public function](../../src/genome_spy/integrations/scanpy/pl.py) keeps its pinned
-signature. [Preparation](../../src/genome_spy/integrations/scanpy/_paga_path_data.py)
+signature. [Preparation](../../src/genome_spy/integrations/scanpy/_paga/path_data.py)
 reuses the same selected raw/X/obs columns, ordered/repeated groups, full-window
 averages and per-key normalization. A pure crop helper applies Python slice
 bounds afterward; displayed sample coordinates restart at zero and return_data
 remains uncropped. Single keys, one sample and empty crops are valid.
 
-The [renderer](../../src/genome_spy/integrations/scanpy/_paga_path_chart.py) reuses
+The [renderer](../../src/genome_spy/integrations/scanpy/_paga/path_chart.py) reuses
 numeric bounds, font and zoom helpers with native window/lead, filters and
 round-cap rules. Filtering follows lead so missing rows never become bridges.
 Key order controls draw order and native category10 colors. The built-in left
@@ -4515,7 +4519,7 @@ Clearance: **retain**; the full path family and M11.d remain open.
 ## M13.a native DotPlot builder
 
 The bounded builder preview is **Closed**. The
-[builder](../../src/genome_spy/integrations/scanpy/_dotplot_builder.py) keeps
+[builder](../../src/genome_spy/integrations/scanpy/_expression/dotplot_builder.py) keeps
 detached group summaries and small explicit chain state; functional `dotplot`
 delegates the same path. Both reuse grouped expression/statistics, stored/public
 Scanpy tree preparation, marker permutations, native grouped layout and the
@@ -4596,7 +4600,7 @@ M13. Clearance: **retain**.
 ## M13.b native MatrixPlot builder
 
 The bounded preview is **Closed**. The
-[builder](../../src/genome_spy/integrations/scanpy/_matrixplot_builder.py) and
+[builder](../../src/genome_spy/integrations/scanpy/_expression/matrixplot_builder.py) and
 functional `matrixplot` share selected-expression extraction, one-pass means and
 scaling, authoritative supplied values and the existing native tile renderer.
 Construction snapshots means and counts once. Supplied `values_df` validates
@@ -4611,8 +4615,8 @@ Ruff formatting/lint and mypy pass. Browser/notebook runs were not repeated for
 this removal of unused code; rendering and examples are unchanged.
 
 DotPlot and MatrixPlot share their concrete ordering/tree/totals/transpose state
-in [`_grouped_builder.py`](../../src/genome_spy/integrations/scanpy/_grouped_builder.py).
-Both import guards from `_guards` and use native totals tracks in `_grouped_chart`.
+in [`_grouped_builder.py`](../../src/genome_spy/integrations/scanpy/_expression/grouped_builder.py).
+Both import guards from `_guards` and use native totals tracks in `_expression.grouped_chart`.
 There is no method dispatcher, placeholder rendering base or private spec rewrite.
 Styles and statistics stay in their family modules. Matrix styles cover native
 schemes and CSS edge color/width; native color guides support visibility, title
@@ -4718,7 +4722,7 @@ custom rendering/interaction workarounds. Shared expression access and ordering,
 palette resolution, tree geometry, numeric validation and native delivery remain
 the existing helpers' responsibility. One metadata row per cell avoids repeating
 it per gene. No new data abstraction or adapter framework is needed. The small
-category-strip helper now lives in `_grouped_chart`, shared directly by heatmap
+category-strip helper now lives in `_expression.grouped_chart`, shared directly by heatmap
 and tracksplot instead of importing another plot's renderer. Its native definition
 is unchanged. The browser regression waits for wheel animation to settle before
 checking that panning preserves the domain span; its strict assertion is retained.
@@ -5247,3 +5251,24 @@ one existing upstream expected failure. Ruff, formatting and full source mypy
 pass. Browser tests, the full suite and resource benchmarks were not rerun. No
 plan is cleared; unrelated work stays unstaged and generated evidence stays
 temporary.
+
+### Implementation folders by plot family
+
+Moved 36 existing runtime modules into six private packages: `_embedding`,
+`_expression`, `_paga`, `_timeseries`, `_qc` and `_ranking`. Their initializers
+are empty. Shared validation, styles, labels, grid interactions and dendrogram
+helpers stay at the root. Public signatures and `gsc.pl` are unchanged; only
+module locations/imports and source-map links changed. Existing pending source
+and documentation changes remain separate from the relocation commit.
+
+Verification of the working tree: all 3,773 tests completed, with
+3,757 passed, 16 existing expected failures and 0 skipped. This includes the
+browser suite and optional web tests using a temporary aiohttp overlay. All
+39 affected runtime syntax trees match their pre-move versions apart from
+relocated imports. The wheel includes all relocated modules; public and family
+imports keep the scientific stack unloaded. The proposed relocation commit also
+imports every runtime module and builds five representative plot families
+without pending feature code. All source-map links resolve. Lint, changed-Python
+formatting and full source mypy pass. Global formatting still flags two pending
+notebooks untouched by this task. No artifacts or notebook outputs were staged.
+No plan is cleared; remaining publication work stays in the current queue.

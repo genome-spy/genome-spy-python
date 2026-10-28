@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._paga_path_data import prepare_paga_path
+from genome_spy.integrations.scanpy._paga.path_data import prepare_paga_path
 from tests.integrations.scanpy.paga_path_fixture import make_path, path_cases
 from tests.integrations.scanpy.helpers import leaf_marks
 

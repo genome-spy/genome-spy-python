@@ -26,7 +26,7 @@ from genome_spy.integrations.scanpy._style import (
     zoom_point_size,
     color_bounds,
 )
-from genome_spy.integrations.scanpy._timeseries_data import CONTEXT, prepare_timeseries
+from genome_spy.integrations.scanpy._timeseries.data import CONTEXT, prepare_timeseries
 
 
 def _series_legend(

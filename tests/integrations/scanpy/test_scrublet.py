@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._scrublet_data import prepare_scrublet
+from genome_spy.integrations.scanpy._qc.scrublet_data import prepare_scrublet
 from tests.integrations.scanpy.helpers import units, leaf_marks
 from tests.integrations.scanpy.scrublet_fixture import make_scrublet
 

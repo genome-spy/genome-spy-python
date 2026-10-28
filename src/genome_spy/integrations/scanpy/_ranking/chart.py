@@ -2,7 +2,7 @@
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._data import number
-from genome_spy.integrations.scanpy._ranked_data import RankPanel
+from genome_spy.integrations.scanpy._ranking.data import RankPanel
 from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS, native_color
 
 

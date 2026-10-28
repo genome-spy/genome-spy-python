@@ -7,7 +7,7 @@ from scipy import sparse
 import scanpy as sc
 
 from genome_spy.integrations.scanpy._data import require_resident_expression
-from genome_spy.integrations.scanpy._embedding_data import point_ids
+from genome_spy.integrations.scanpy._embedding.data import point_ids
 
 
 def prepare_highest_expression(

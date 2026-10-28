@@ -7,8 +7,8 @@ from numbers import Integral
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
-from genome_spy.integrations.scanpy._dotplot_builder import DotPlot
-from genome_spy.integrations.scanpy._matrixplot_builder import MatrixPlot
+from genome_spy.integrations.scanpy._expression.dotplot_builder import DotPlot
+from genome_spy.integrations.scanpy._expression.matrixplot_builder import MatrixPlot
 from genome_spy.integrations.scanpy._guards import (
     _check_grid_zoom,
     _check_kwargs,
@@ -237,8 +237,8 @@ def _embedding(
         edges=edges,
     )
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._embedding_data import prepare_embedding
-    from genome_spy.integrations.scanpy._embedding_chart import build_embedding
+    from genome_spy.integrations.scanpy._embedding.data import prepare_embedding
+    from genome_spy.integrations.scanpy._embedding.chart import build_embedding
     from genome_spy.integrations.scanpy._style import embedding_style
 
     # Read existing coordinates and colors without running analysis.
@@ -405,8 +405,8 @@ def scatter(
     )
     sc = _prepare_plot(show, save, context=context)
     from dataclasses import replace
-    from genome_spy.integrations.scanpy._scatter_data import prepare_scatter
-    from genome_spy.integrations.scanpy._embedding_chart import build_embedding
+    from genome_spy.integrations.scanpy._embedding.scatter_data import prepare_scatter
+    from genome_spy.integrations.scanpy._embedding.chart import build_embedding
     from genome_spy.integrations.scanpy._style import embedding_style
 
     prepared = prepare_scatter(
@@ -577,8 +577,8 @@ def embedding_density(
     bg = number(bg_dotsize, "bg_dotsize", context=context)
     fg = number(fg_dotsize, "fg_dotsize", context=context)
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._embedding_density_data import prepare_density
-    from genome_spy.integrations.scanpy._embedding_chart import build_embedding
+    from genome_spy.integrations.scanpy._embedding.density_data import prepare_density
+    from genome_spy.integrations.scanpy._embedding.chart import build_embedding
     from genome_spy.integrations.scanpy._style import embedding_style
 
     basis = "draw_graph_fa" if basis.lower() == "fa" else basis.lower()
@@ -708,8 +708,8 @@ def scrublet_score_distribution(
             f"{context}: nondefault figsize cannot be combined with width or height."
         )
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._scrublet_data import prepare_scrublet
-    from genome_spy.integrations.scanpy._scrublet_chart import build_scrublet
+    from genome_spy.integrations.scanpy._qc.scrublet_data import prepare_scrublet
+    from genome_spy.integrations.scanpy._qc.scrublet_chart import build_scrublet
 
     bins, thresholds = prepare_scrublet(adata)
     chart = build_scrublet(
@@ -789,10 +789,10 @@ def highest_expr_genes(
         if value is not None and not isinstance(value, str):
             raise TypeError(f"{context}: {name} must be a string or None.")
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._highest_expr_data import (
+    from genome_spy.integrations.scanpy._qc.highest_expr_data import (
         prepare_highest_expression,
     )
-    from genome_spy.integrations.scanpy._highest_expr_chart import (
+    from genome_spy.integrations.scanpy._qc.highest_expr_chart import (
         build_highest_expression,
     )
 
@@ -872,8 +872,10 @@ def highly_variable_genes(
             f"{context}: threshold_slider requires linear axes (log=False)."
         )
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._scatter_data import prepare_variable_genes
-    from genome_spy.integrations.scanpy._hvg_chart import build_variable_genes
+    from genome_spy.integrations.scanpy._embedding.scatter_data import (
+        prepare_variable_genes,
+    )
+    from genome_spy.integrations.scanpy._qc.hvg_chart import build_variable_genes
 
     table, statistic = prepare_variable_genes(adata_or_result, highly_variable_genes)
     chart = build_variable_genes(
@@ -1581,9 +1583,13 @@ def tracksplot(
     import numpy as np
     import pandas as pd
     from anndata import AnnData
-    from genome_spy.integrations.scanpy._grouped_data import ordered_cell_expression
+    from genome_spy.integrations.scanpy._expression.grouped_data import (
+        ordered_cell_expression,
+    )
     from genome_spy.integrations.scanpy._style import _palette
-    from genome_spy.integrations.scanpy._tracksplot_chart import build_tracksplot
+    from genome_spy.integrations.scanpy._expression.tracksplot_chart import (
+        build_tracksplot,
+    )
 
     # Tracks require one explicit categorical column, unlike heatmap's numeric bins.
     if not isinstance(adata, AnnData):
@@ -1756,10 +1762,10 @@ def heatmap(
     sc = _prepare_plot(show, save, context=context)
     import numpy as np
     import pandas as pd
-    from genome_spy.integrations.scanpy._grouped_data import (
+    from genome_spy.integrations.scanpy._expression.grouped_data import (
         ordered_cell_expression,
     )
-    from genome_spy.integrations.scanpy._heatmap_chart import build_heatmap
+    from genome_spy.integrations.scanpy._expression.heatmap_chart import build_heatmap
     from genome_spy.integrations.scanpy._style import _palette
 
     # Reuse expression access without replacing cells with group means.
@@ -1928,8 +1934,12 @@ def clustermap(
         if not isinstance(option, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._clustermap_data import prepare_clustermap
-    from genome_spy.integrations.scanpy._clustermap_chart import build_clustermap
+    from genome_spy.integrations.scanpy._expression.clustermap_data import (
+        prepare_clustermap,
+    )
+    from genome_spy.integrations.scanpy._expression.clustermap_chart import (
+        build_clustermap,
+    )
 
     data = prepare_clustermap(
         adata,
@@ -2016,7 +2026,7 @@ def matrix(
             raise TypeError(f"{context}: {name} must be boolean.")
     _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._matrix_chart import build_matrix
+    from genome_spy.integrations.scanpy._expression.matrix_chart import build_matrix
 
     chart = build_matrix(
         matrix,
@@ -2150,7 +2160,7 @@ def paga_compare(
     from anndata import AnnData
     import genome_spy as gs
     import pandas as pd
-    from genome_spy.integrations.scanpy._embedding_data import (
+    from genome_spy.integrations.scanpy._embedding.data import (
         embedding_key,
         dimensions_for,
     )
@@ -2409,11 +2419,11 @@ def paga_path(
         raise TypeError(f"{context}: title must be a string or None.")
     if as_heatmap and not isinstance(color_maps_annotations, Mapping):
         raise TypeError(f"{context}: color_maps_annotations must be a mapping.")
-    from genome_spy.integrations.scanpy._paga_path_data import (
+    from genome_spy.integrations.scanpy._paga.path_data import (
         prepare_paga_path,
         running_average,
     )
-    from genome_spy.integrations.scanpy._paga_path_chart import (
+    from genome_spy.integrations.scanpy._paga.path_chart import (
         build_paga_path,
         build_paga_path_lines,
     )
@@ -2557,12 +2567,12 @@ def paga_adjacency(
         raise NotImplementedError(f"{context}: show_values requires as_heatmap=True.")
     _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._paga_data import adjacency_values
-    from genome_spy.integrations.scanpy._paga_chart import build_paga_adjacency
+    from genome_spy.integrations.scanpy._paga.data import adjacency_values
+    from genome_spy.integrations.scanpy._paga.chart import build_paga_adjacency
 
     values, points = adjacency_values(adata, adjacency, adjacency_tree)
     if labels is not None:
-        from genome_spy.integrations.scanpy._matrix_chart import _labels
+        from genome_spy.integrations.scanpy._expression.matrix_chart import _labels
 
         labels = _labels(labels, len(values), "labels", context=context)
     chart = build_paga_adjacency(
@@ -2763,7 +2773,7 @@ def paga(
 
     # Finish option checks before reading graphs or choosing a layout.
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._paga_data import (
+    from genome_spy.integrations.scanpy._paga.data import (
         prepare_paga,
         paga_nodes,
         paga_edges,
@@ -2789,7 +2799,7 @@ def paga(
             adata.uns["paga"]["pos"] = positions.copy()
         return None
 
-    from genome_spy.integrations.scanpy._paga_chart import build_paga
+    from genome_spy.integrations.scanpy._paga.chart import build_paga
     from genome_spy.integrations.scanpy._style import native_scheme
     import pandas as pd
 
@@ -2933,7 +2943,7 @@ def dpt_timeseries(
     if show_values and not as_heatmap:
         raise NotImplementedError(f"{context}: show_values requires heatmap output.")
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._timeseries_data import prepare_dpt_timeseries
+    from genome_spy.integrations.scanpy._timeseries.data import prepare_dpt_timeseries
 
     values, highlights = prepare_dpt_timeseries(adata)
     if adata.n_vars > 100:
@@ -2951,7 +2961,7 @@ def dpt_timeseries(
         context=context,
     )
     if as_heatmap:
-        from genome_spy.integrations.scanpy._matrix_chart import (
+        from genome_spy.integrations.scanpy._expression.matrix_chart import (
             build_timeseries_heatmap,
         )
 
@@ -2959,7 +2969,7 @@ def dpt_timeseries(
             values, color_map=color_map, zoom=zoom, show_values=show_values, **options
         )
     else:
-        from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+        from genome_spy.integrations.scanpy._timeseries.chart import build_timeseries
 
         chart = build_timeseries(
             values,
@@ -3031,8 +3041,8 @@ def dpt_groups_pseudotime(
     )
     sc = _prepare_plot(show, save, context=context)
     import genome_spy as gs
-    from genome_spy.integrations.scanpy._timeseries_data import prepare_dpt_groups
-    from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+    from genome_spy.integrations.scanpy._timeseries.data import prepare_dpt_groups
+    from genome_spy.integrations.scanpy._timeseries.chart import build_timeseries
 
     groups, order, pseudotime, highlights = prepare_dpt_groups(adata)
     options = dict(
@@ -3163,12 +3173,12 @@ def sim(
             f"{context}: connect requires point output (as_heatmap=False)."
         )
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._timeseries_data import prepare_sim
+    from genome_spy.integrations.scanpy._timeseries.data import prepare_sim
 
     values, highlights, ticks = prepare_sim(adata, tmax_realization, shuffle)
     realization_length = highlights[0] if highlights else adata.n_obs
     if as_heatmap and not shuffle:
-        from genome_spy.integrations.scanpy._matrix_chart import (
+        from genome_spy.integrations.scanpy._expression.matrix_chart import (
             build_timeseries_heatmap,
         )
 
@@ -3190,7 +3200,7 @@ def sim(
             realization_length=realization_length,
         )
     else:
-        from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+        from genome_spy.integrations.scanpy._timeseries.chart import build_timeseries
 
         chart = build_timeseries(
             values,
@@ -3423,7 +3433,7 @@ def _timeseries_plot(
         context=context,
     )
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+    from genome_spy.integrations.scanpy._timeseries.chart import build_timeseries
 
     chart = build_timeseries(
         X,
@@ -3495,7 +3505,9 @@ def timeseries_as_heatmap(
             raise TypeError(f"{context}: {name} must be boolean.")
     _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._matrix_chart import build_timeseries_heatmap
+    from genome_spy.integrations.scanpy._expression.matrix_chart import (
+        build_timeseries_heatmap,
+    )
 
     chart = build_timeseries_heatmap(
         X,
@@ -3678,7 +3690,7 @@ def correlation_matrix(
         )
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
-    from genome_spy.integrations.scanpy._correlation_chart import (
+    from genome_spy.integrations.scanpy._expression.correlation_chart import (
         build_correlation_matrix,
     )
 
@@ -3761,8 +3773,8 @@ def ranking(
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     sc = _prepare_plot(show, False, context=context)
-    from genome_spy.integrations.scanpy._ranked_data import attribute_rank_panels
-    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+    from genome_spy.integrations.scanpy._ranking.data import attribute_rank_panels
+    from genome_spy.integrations.scanpy._ranking.chart import build_ranking
 
     panels = attribute_rank_panels(
         adata,
@@ -3836,11 +3848,11 @@ def pca_loadings(
             raise TypeError(f"{context}: {name} must be boolean.")
     sc = _prepare_plot(show, save, context=context)
     from anndata import AnnData
-    from genome_spy.integrations.scanpy._ranked_data import (
+    from genome_spy.integrations.scanpy._ranking.data import (
         _count,
         attribute_rank_panels,
     )
-    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+    from genome_spy.integrations.scanpy._ranking.chart import build_ranking
 
     if not isinstance(adata, AnnData):
         raise TypeError(f"{context}: expected AnnData.")
@@ -3952,11 +3964,11 @@ def pca_variance_ratio(
     sc = _prepare_plot(show, save, context=context)
     import numpy as np
     from anndata import AnnData
-    from genome_spy.integrations.scanpy._ranked_data import (
+    from genome_spy.integrations.scanpy._ranking.data import (
         _count,
         attribute_rank_panels,
     )
-    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+    from genome_spy.integrations.scanpy._ranking.chart import build_ranking
 
     if not isinstance(adata, AnnData):
         raise TypeError(f"{context}: expected AnnData.")
@@ -4124,8 +4136,8 @@ def rank_genes_groups(
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     sc = _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._ranked_data import _count, gene_rank_panels
-    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+    from genome_spy.integrations.scanpy._ranking.data import _count, gene_rank_panels
+    from genome_spy.integrations.scanpy._ranking.chart import build_ranking
 
     columns = _count(kwds.get("n_panels_per_row", ncols), "ncols", context=context)
     panels = gene_rank_panels(
@@ -4171,7 +4183,7 @@ def _ranked_expression(
     if "dot_color_df" in kwds or "values_df" in kwds:
         raise TypeError(f"{context}: use the parent plot for supplied summary tables.")
     _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._ranked_data import (
+    from genome_spy.integrations.scanpy._ranking.data import (
         _ranking_table,
         ranked_features,
         ranked_statistic,

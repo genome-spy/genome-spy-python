@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._ranked_data import ranked_statistic
+from genome_spy.integrations.scanpy._ranking.data import ranked_statistic
 from tests.integrations.scanpy.helpers import points
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
 
