@@ -17,7 +17,7 @@ Use these locations for each integration:
   evidence, and plan clearance decisions.
 - `integrations/<library>/notebooks/`: canonical runnable upstream workflows.
 - `tests/integrations/<library>/`: semantics, reference fixtures, browser checks,
-  explicit reference generation, and benchmarks.
+  explicit reference generation, and deterministic allocation checks.
 - `docs/integrations/<library>/`: user-facing documentation.
 
 Use `genome_spy.integrations.<library>` consistently in code and examples.

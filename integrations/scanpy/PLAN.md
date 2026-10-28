@@ -193,6 +193,177 @@ also requires all remaining parameter and method rows to be resolved.
    calls, provenance, support docs, tests, Ruff, and typing. Fresh-clone validation
    cannot import ignored local research. Update STATUS and clearance decisions.
 
+## Test cleanup and CI selection
+
+This cleanup covers the whole Scanpy suite, not just its slowest tests. Reduce
+repeated work and maintenance while retaining distinct supported behavior and
+regressions. The collection below is an audit baseline, not a target test count.
+Implementation and current verification belong in
+[STATUS](STATUS.md#test-cleanup-audit). The cleanup is implemented and locally
+verified; updated hosted CI remains the clearance gate.
+
+### Audit baseline (2026-10-28)
+
+| Code | Files | Lines | Collected cases |
+| --- | ---: | ---: | ---: |
+| Python tests, including workflows | 46 | 14,026 | 2,385 |
+| Browser tests and their fixtures | 43 | 11,525 | 634 |
+| Small synthetic data fixtures | 21 | 1,290 | — |
+| Reference generators | 11 | 1,209 | — |
+| Local benchmark scripts | 7 | 1,237 | — |
+| Shared helpers and package initializer | 2 | 132 | — |
+
+There are 690 test functions expanding to 3,019 cases. Inventory includes every
+Python file, collected case, parameter grid and test-module import. Assertions in
+high-repeat areas were inspected; deletion still requires checking each affected
+behavior. Before cleanup, CI repeated all Python cases in four environments and all
+634 browser cases on three Python versions, plus a latest-version browser subset
+and both long notebook renders in each pinned environment.
+
+A previous clean run spent 154.5 seconds in the expression notebook test and
+12.9 seconds in the UMAP notebook test. These two tests contain 900 lines. The
+four initial hosted Python checks each took roughly 16–18 minutes. These are
+observations from those runs, not portable timing limits.
+
+### Keep, reduce or remove
+
+| Area | Decision and retained coverage |
+| --- | --- |
+| Public API and display (`test_contract`, signature tests) | Keep every entry point covered. Test shared show/autoshow/save behavior at its owner, then one routing case per entry point. Remove duplicate full truth tables from family tests after tracing exceptions. |
+| AnnData access (`test_grouped_data`, UMAP/scatter, upstream reuse) | Keep source precedence, symbols, masks, categories, missing values, duplicates, views/backed data, stable IDs and selected-column allocation. Small synthetic inputs make these independently checkable; retain them. |
+| Embeddings and PCA | Test shared colors, outlines, bounds and legends at their owner; keep wrapper-specific basis, component, default and forwarding checks. Do not repeat every shared option through every alias. Keep tie order checked against local Scanpy. |
+| Expression families/builders/trees | Keep mean/fraction denominators, log/scale order, supplied tables, grouping, linkage/cache behavior and detached builder state. Keep a rendered example per distinct mark/layout, not per storage format. |
+| PAGA/path/adjacency | Separate sparse-format handling from graph/profile semantics. Keep real CSC/LIL, orientation, cache, degree, filtered-path, dense/raw allocation and return-data regressions. Avoid rerendering Scanpy for every format. |
+| Timeseries, simulation and DPT | Test shared profile validation once, then wrapper metadata/order/default differences. Keep filtered-view and no-hidden-analysis cases. Separate numerical equivalence from expensive rendered comparisons. |
+| QC (`highest_expr`, HVG, Scrublet) | Keep normalization denominators, bin edges/density, stored flags/cutoffs, source access and nonmutation. Keep one observed slider interaction for each distinct dataflow. |
+| Selection, EmbeddingSummary and linked tracks | Keep brush boundaries, stable membership, clearing/counts, snapshots, group means, histograms and source reuse. Verify linked views in a browser; plain spec assertions cannot establish interaction behavior. |
+| Shared grid/presentation/colorbar checks | Test shared options centrally. Keep family wiring and real layout regressions; reduce unrelated option cross-products. |
+| Workflows and docs | Keep each workflow runnable, clean notebook checks and representative outputs. Remove repeated per-plot specifications and statistical assertions from the 900-line workflow tests. Keep guide execution with prepared inputs and browser layout checks in deeper validation. |
+| Core capability reproducers | Move pure native capability probes out of integration acceptance into an explicitly selected Core-upgrade check. Unsupported triangle geometry is not a release requirement for supported marker shapes. Retain a passing/failing reproducer where it guards a documented limitation. |
+| Benchmarks | Remove all seven `benchmark*.py` scripts after accounting for their assertions below. They are manual tools, not CI jobs, and contain no calibrated performance pass/fail limits. Do not replace them with a benchmark framework. |
+| Reference generators and JSON | Retain independent expected values and the renderers needed to reproduce visual comparisons. Ten families are called by `reference_images`; grouped generation supplies numeric expectations. Remove unused metadata/exports and identical export boilerplate after tracing consumers. Keep family-specific artist extraction separate. |
+
+The seven benchmark scripts cover embeddings, grouped expression, clustermap,
+rank labels, highest expression, HVG and Scrublet. Their useful allocation and
+no-expression/no-analysis checks overlap existing tests in the corresponding
+families. Before removing a script, identify the protecting test; transfer any
+unique invariant into a small deterministic regression. Timing/heap observations
+are local historical evidence, not release contracts. Remove obsolete benchmark
+commands and update README, fixture notes and compatibility/status records.
+
+Do not delete reference renderers as if they were generated results. They create
+fresh Scanpy images outside Git for browser comparison. Synthetic fixture
+functions create small, deliberate counterexamples; they are not downloaded
+analysis data. Keep their distinctions rather than inventing a universal fixture
+factory. Do not regenerate frozen expectations merely to accommodate cleanup.
+
+### Concrete reductions
+
+- The shared display test currently builds charts for 38 functions × four display
+  modes: 152 cases. Keep the full setting behavior at the shared owner, one
+  forwarding check for each function, and separate actual exceptions such as
+  ranking. Keep fast validation-before-import checks for every public entry.
+- PAGA adjacency repeats five heatmap and ten stripplot cases over six formats:
+  90 live upstream comparisons. Run the 15 semantic cases once on a canonical
+  format; use a focused six-format test for conversion/orientation, alongside
+  the independent CSC/LIL regressions. Storage and missingness must still combine
+  where a known bug depends on both.
+- The 35 embedding colorbar cases cross seven wrappers with five positions.
+  Check the five positions on shared rendering and wrapper forwarding separately.
+- Timeseries duplicates 28 rejection cases through two calls. Keep shared input
+  failures at the shared validator, with thin checks for each entry's context and
+  its distinct defaults. Preserve tests that establish different accepted inputs.
+- Browser heatmaps cross orientation, tree, feature brackets and gaps in 24
+  navigation cases. Retain a compact explicit list exercising each branch and
+  the combinations that matter, such as gaps with trees and swapped navigation.
+- Use one Chromium browser per test session with a fresh context/page per test.
+  Preserve device scale, viewport and error checks. The current fixture launches
+  a browser for every case. Keep failed-test cleanup reliable and avoid shared
+  page state.
+- Move reused render/hover/SVG helpers out of test modules into small test support
+  modules. There are 111 imports from test modules across 41 non-benchmark files.
+  Keep plot-specific assertions beside their tests. Do not build a fixture registry.
+
+A case is removed only when an identified retained case protects the same
+behavior, or when its requirement is deliberately retired and documented. Do
+not substitute random sampling, arbitrary quotas, large expected failures or
+weaker numeric/image tolerances for this review.
+
+### Selection flags and job responsibilities
+
+Use three standard pytest markers, with strict marker checking. No new runner,
+custom command flags, path-change classifier or automatic test picker is needed.
+Keep local pytest's unfiltered behavior available.
+
+| Marker/selection | Meaning |
+| --- | --- |
+| Unmarked Python cases | Fast contract, preparation, geometry/spec and regression checks. Includes frozen numeric fixtures and deterministic allocation checks. |
+| `reference` | Live upstream plotting/artist extraction and registered pixel comparisons. A frozen numerical assertion alone is not expensive reference work. |
+| `workflow` | Executing full notebooks, tutorial preparation or downloaded real-data workflows. |
+| `smoke` in `browser/` | A small explicitly marked set of observed native interactions and layout checks for every distinct renderer/dataflow. |
+
+Some reference tests currently mix live plotting and fast invariant checks. Split
+these before marking; do not make critical source or allocation checks disappear
+from the PR job. Preserve the recent direct tie-order comparisons in reference
+checks and basic independent ordering checks in the fast suite.
+
+Commands after marker assignment (implementation evidence is in STATUS):
+
+```sh
+# PR: all fast Python checks.
+uv run pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -m 'not reference and not workflow'
+# PR: observed interactions and representative layouts.
+uv run pytest tests/integrations/scanpy/browser -m smoke
+# Deep verification: full Python and browser suites, including marked cases.
+uv run pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
+uv run pytest tests/integrations/scanpy/browser
+# Workflows only; their shared owners retain the detailed behavior checks.
+uv run pytest tests/integrations/scanpy/test_notebooks.py -m workflow
+```
+
+| When | Scanpy jobs |
+| --- | --- |
+| Every PR | Fast Python checks on pinned 1.11.5/Python 3.11 and current 1.12.4/Python 3.12. Browser smoke once on the pinned stack. No full notebook renders, reference generation or timing benchmarks. |
+| Main and explicit full dispatch | Full Python checks on supported Python 3.11–3.13 with pinned Scanpy, plus current 1.12.4 compatibility. Full browser/reference comparisons once on the pinned stack; current-version interaction subset. Both workflows once. |
+| Release (`workflow_call`) | Require the full checks above before building/publishing. Release must explicitly request full mode so the cheaper PR defaults cannot weaken it. |
+
+Base Linux/Windows jobs continue without Scanpy. Move lightweight import and
+missing-extra checks into a dependency-free test module; avoid collecting the
+whole scientific suite there. Existing base notebook-rendering and codegen jobs
+keep their separate responsibilities.
+
+Add one boolean workflow input, `full_scanpy`, to dispatch/reusable CI. Main uses
+full mode. Regular PRs use the shorter selection. Label/input handling must not
+prevent a contributor from running all tests locally. Do not duplicate browser
+rendering across Python versions when the JavaScript bundle and pinned reference
+stack are identical. Proposed performance goals are under five minutes each for
+the warm fast and smoke jobs; measure before treating those goals as achieved.
+
+### Implementation and clearance
+
+1. Account for and remove the seven manual benchmark programs and stale commands.
+2. Reduce repeated grids and notebook assertions, and detach shared test helpers.
+   Preserve known regressions and independent data calculations before deletion.
+3. Split fast/reference/workflow checks and assign browser smoke cases. Cover
+   categorical/continuous embeddings, brush clearing/count/Python membership,
+   linked means/histograms/tracks, grid zoom/value labels, gaps/trees/labels,
+   graph hover/legend, QC sliders, profile focus and offline delivery. This list
+   defines behaviors, not a separate smoke framework.
+4. Implement the marker and CI selections, retaining full release gates and
+   version-boundary checks. Run each selection separately, then all retained
+   checks once. Browser context isolation must pass sequentially after reuse.
+5. Update contributor commands and retained evidence. Record before/after source
+   size, collection counts and measured durations in STATUS; keep detailed
+   inventories, timing logs, images and temporary JSON outside Git.
+
+Finish when every removed check has a retained owner or documented retirement,
+all supported plotting entries remain covered, dependency-free checks run in the
+base jobs, normal PRs avoid full workflows/reference matrices, and the full
+release path passes. Documentation must describe the jobs that actually exist.
+Do not close this work after adding markers alone. Keep this section in the live
+plan until verified; then reduce it to maintained testing commands and a short
+completion record in STATUS.
+
 ## Milestone order
 
 Current states and evidence live only in [STATUS.md](STATUS.md#milestones).

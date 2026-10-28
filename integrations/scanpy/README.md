@@ -201,63 +201,55 @@ independently. The docs dependency group includes Scanpy's existing PAGA extra.
 
 ## Validation
 
-[Validation sources](../../tests/integrations/scanpy/) contain the tests,
-reference contracts, temporary reference images, explicit reference generators,
-and resource benchmarks.
-They are development code and are not shipped as part of the Python package.
+Tests live under `tests/integrations/scanpy/`. Ordinary PRs run fast Python checks
+against Scanpy 1.11.5 and 1.12.4, plus observed browser smoke checks once. Main,
+full manual runs and releases also run upstream comparisons, every browser check
+and both workflow notebooks. Release CI explicitly enables `full_scanpy`.
 
 ```sh
+uv sync --dev --extra scanpy --group scanpy-test
+# Fast checks, including numeric fixtures and allocation regressions.
+uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -m 'not reference and not workflow'
+# Representative gestures, linked views, tooltips and layout.
+uv run --no-sync python -m playwright install chromium
+uv run --no-sync pytest tests/integrations/scanpy/browser -m smoke
+# Full verification, including every marked check.
 uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
 uv run --no-sync pytest tests/integrations/scanpy/browser
+# Complete notebook execution only.
+uv run --no-sync pytest tests/integrations/scanpy/test_notebooks.py -m workflow
 ```
 
-The former `tools/scanpy_reference.py` is now
-[generate_references.py](../../tests/integrations/scanpy/generate_references.py).
-Browser fixtures regenerate images in temporary directories without changing the
-tracked JSON. No generated PNGs are committed. Explicit refresh commands write
-images to ignored `tmp/scanpy-references/<family>/` and update text metadata.
-The generator explicitly runs pinned Scanpy plotting on small synthetic test
-fixtures and records signatures, figures, domains, colors, draw order, and point
-footprints.
-Inspecting Matplotlib artists is confined to this reference-generation step;
-production plotting never recovers input data from rendered artists. Ordinary
-semantic tests compare frozen numerical results; visual tests render fresh
-upstream images in temporary directories.
+Markers use ordinary pytest selection: `reference` means live upstream plotting
+or visual comparison; `workflow` means complete notebook execution; `smoke`
+selects observed browser behavior. Unfiltered pytest still runs all tests. The
+[cleanup record](PLAN.md#test-cleanup-and-ci-selection) explains the reductions.
+Base Linux/Windows CI tests lightweight imports and missing-extra errors without
+collecting the scientific suite.
+
+Small synthetic fixtures isolate missing values, duplicate labels/coordinates,
+raw/layer differences, sparse allocation and exact boundaries. Independent hand
+calculations and frozen numeric fixtures protect data semantics. Reference
+renderers provide fresh pinned Scanpy figures for full browser comparisons;
+they are test inputs, not production data preparation.
+
+Reference regeneration is an explicit compatibility update. For example:
 
 ```sh
-uv run --no-sync python -m tests.integrations.scanpy.generate_references --help
+uv run --no-sync python -m tests.integrations.scanpy.generate_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_grouped_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_dotplot_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_matrixplot_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_dendrogram_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_heatmap_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_matrix_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_clustermap_references
-uv run --no-sync python -m tests.integrations.scanpy.generate_scatter_references
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot dotplot --browser --output /tmp/dotplot.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --browser --output /tmp/matrixplot.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --dendrogram --browser --output /tmp/trees.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot heatmap --browser --output /tmp/heatmap.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark --help
-uv run --no-sync python -m tests.integrations.scanpy.benchmark --plot pca --cells 20000 --panels 8 --browser --output /tmp/scanpy-pca.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark --plot scatter --cells 20000 --panels 8 --browser --output /tmp/scanpy-scatter.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark --plot scatter-genes --cells 20000 --panels 8 --browser --output /tmp/scanpy-scatter-genes.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_ranked --output /tmp/scanpy-rank-labels.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --ranked --plot dotplot --browser --output /tmp/scanpy-ranked-dotplot.json
 ```
 
-Run resource workloads sequentially in fresh processes. `--ranked` also works with
-`--plot matrixplot` and `--plot heatmap`: dot/matrix colors use stored scores,
-while heatmaps retain cell expression. Sparse-allocation guards check selected
-columns or rows; statistic-colored matrixplots only validate features on zero
-rows. Reports record their allocation/timing scopes, including optional imports,
-JSON dispatch, pointer pauses and garbage collection. Keep screenshots temporary;
-retained resource metadata is a local observation, not a portable timing limit.
+The other `generate_*_references.py` modules refresh their named family. Inspect
+changes against upstream behavior before accepting them. Tests generate images
+only in temporary directories and never refresh tracked JSON. Renderers may
+inspect Matplotlib artists; production plotting does not.
 
-Reference regeneration is a deliberate compatibility update, not a prerequisite
-for using the integration. Notebook examples use real packaged data; synthetic
-fixtures remain useful for independently checking missing values, duplicate
-labels/coordinates, raw/layer differences, sparse allocation, and exact edges.
+The seven manual timing/report programs have been removed. Their useful source
+and allocation checks remain in deterministic regressions for embeddings, grouped
+expression, clustermap, rankings and QC. No timing thresholds or new benchmark
+framework replace them. Generated media, reports, logs and notebook outputs stay
+outside Git.
 
 The expression workflow also includes PAGA path heatmaps and lines. Scanpy
 explicitly computes pseudotime; both plots reuse the same ordered, smoothed

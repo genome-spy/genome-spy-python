@@ -33,10 +33,12 @@ states below describe coverage; they do not require a preview release label.
 
 ### Current work queue
 
-1. Complete hosted CI for [PR #20](https://github.com/genome-spy/genome-spy-python/pull/20).
-   The approved branch is pushed and the PR is open. The first run passed codegen
-   and notebook rendering; dependency guards and platform-dependent tie assertions
-   are corrected below. Merge and publication still require approval.
+1. Complete the [test cleanup and CI selection](PLAN.md#test-cleanup-and-ci-selection)
+   before publication. Test cleanup is implemented and locally verified in
+   `87ce75d`; fast/full CI selections and release gating are configured below.
+   [PR #20](https://github.com/genome-spy/genome-spy-python/pull/20) remains open.
+   Verify the updated hosted selections before closing this maintenance slice.
+   Merge and publication still require approval.
 2. Keep future version expansions behind compatibility checks; maintain the
    parameter contracts and recheck the upstream PAGA tree-layout issue.
 3. Classify known limitations below. Fix, reject or document user-visible cases
@@ -58,6 +60,84 @@ larger inputs without an adapter-imposed threshold. Shape, source and storage
 checks remain. Large-input tests check selected-column allocation and real
 clustering beyond the former distance threshold. Relevant tests passed on both
 Scanpy versions: 782 passed and one existing expected failure each.
+
+## Test cleanup audit
+
+At audit start the suite had 130 Python files and 29,419 lines: 526 Python test
+functions expanded to 2,385 cases, and 164 browser functions expanded to 634. The 21 small data
+fixtures and 11 reference generators are reproduction inputs. Seven manual
+benchmark scripts contain 1,237 lines and do not run in CI. Reference images are
+rendered on demand for ten families; grouped expectations have a separate numeric
+generator. The planned cleanup distinguishes these uses rather than deleting
+all data-generation code.
+
+The audit found large repeated option grids, two workflow tests containing 900
+lines, and 111 test-module imports across 41 non-benchmark files. The cleanup
+removes all seven benchmark programs and test-module helper imports; shared
+rendering, gestures and fixture inputs have explicit support modules. Display,
+colorbar, sparse adjacency/path, timeseries rejection and heatmap navigation
+matrices now test independent axes separately. The CSC/LIL, filtered-view,
+dense/raw allocation, tie-order and observed interaction regressions remain.
+
+The benchmark invariants retain these owners: embedding access in `test_umap` and
+`test_scatter`; grouped preparation in `test_grouped_data` and `test_heatmap`;
+clustering access in `test_clustermap`; metadata-only rankings/PCA in `test_ranked`,
+`test_pca_loadings` and `test_pca_variance_ratio`; one-column normalization access
+in `test_highest_expr`; metadata-only HVG/Scrublet in `test_hvg` and `test_scrublet`.
+Corresponding browser tests retain paint, hover, navigation and slider checks.
+Timing/heap reports are retired as acceptance inputs, with no replacement timing
+thresholds. Detailed collection data remains temporary, outside Git.
+
+`reference`, `workflow` and `smoke` are strict pytest markers. PR jobs select fast
+checks on both Scanpy versions and browser smoke once. Main, full dispatch and
+release include the complete retained checks; release explicitly sets
+`full_scanpy: true`. Browser checks reuse Chromium with isolated contexts.
+Local verification is complete; hosted CI selection verification remains open.
+
+| Measure | Before | After |
+| --- | ---: | ---: |
+| Integration Python files / lines | 130 / 29,419 | 127 / 27,575 |
+| Integration collected cases | 3,019 | 2,703 |
+| Dependency-free cases moved into base CI | — | 12 |
+| Net case combinations removed, excluding relocation | — | 304 |
+| Workflow test lines | 900 | 136 |
+| Manual benchmark programs | 7 | 0 |
+| Imports from other integration test modules | 111 | 0 |
+| Normal PR Scanpy case executions | 11,504 | 3,584 |
+
+Current selections contain 1,764 fast Python cases, 321 reference cases, two
+workflows, 56 browser smoke cases and 616 full browser cases. The 12 relocated
+import/extra checks are retained, not counted as deleted coverage. The normal PR
+reduction is about 69%; full releases retain version and reference checks.
+
+Validation covered every retained case across selections and focused reruns:
+
+- Scanpy 1.11.5 Python: 2,085 passed, two existing expected failures.
+- Scanpy 1.12.4 Python: 2,082 passed, five existing expected failures, including
+  the three upstream automatic-tree-layout checks retained in the fast suite.
+- Scanpy 1.11.5 browser: 602 passed, 14 existing expected failures. The full
+  reference/non-smoke selection took 27m24s; smoke took 4m02s.
+- Scanpy 1.12.4 interaction selection: 59 passed, three existing expected failures.
+- Affected docs browser checks: 42 passed. Base-only suite: 407 passed, nine
+  optional skips and 327 deselected docs/codegen checks; final collection passed.
+- Initial fast selections (1,736 cases, before final storage/source additions)
+  took 4m52s and 4m27s respectively. The final additional and strengthened
+  regressions passed on both versions. These are local observations, not CI limits.
+- Ruff lint/format, lock consistency, CI/release YAML checks and actionlint passed.
+  Frozen input sources and numerical/API JSON were not regenerated or changed.
+
+Reusing Playwright exposed a nested-event-loop conflict in the async widget
+brushing test under the current stack. It now uses the same synchronous API and
+isolated page fixture as the other checks; drag/count/trait/offline assertions
+are unchanged. No loop patch, new dependency or production change was introduced.
+The 42 affected docs checks use the detached helpers too, with an explicit
+missing-Scanpy guard where a test previously relied on an import side effect.
+
+Both notebook workflows ran on both Scanpy versions. The long JupyterLab render
+commands remain in full CI; they were not repeated locally because their notebook,
+widget and rendering sources did not change. Generated images, reports and logs
+remain temporary. Keep this maintenance slice open until the hosted configuration
+passes; then retain commands in README and shorten the completed working plan.
 
 ## Milestones
 
@@ -287,9 +367,10 @@ committed release candidate.
 
 Runtime source, test code, deliberate numeric/API fixtures and maintained user
 contracts are release inputs. Screenshots, overlays, videos, chart exports,
-benchmark observations and execution outputs belong outside Git. Benchmark scripts
-remain available under `tests/integrations/scanpy/`; their results are local evidence,
-not tracked baselines or portable performance promises.
+benchmark observations and execution outputs belong outside Git. The manual
+benchmark scripts were retired during test cleanup; their useful source/allocation
+invariants remain in deterministic tests. Historical timing results are local
+evidence, not tracked baselines or portable performance promises.
 
 Publication cleanup removed 11 unused benchmark reports and their 12 historical
 paths from the unpublished branch under the user's earlier history-cleanup

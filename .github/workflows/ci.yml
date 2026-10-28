@@ -4,8 +4,18 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      full_scanpy:
+        description: Run all Scanpy references, browsers and workflows
+        type: boolean
+        default: false
   # Reused by the release workflow as a pre-publish gate.
   workflow_call:
+    inputs:
+      full_scanpy:
+        type: boolean
+        default: false
 
 jobs:
   test:
@@ -34,7 +44,7 @@ jobs:
         run: uv run mypy src/
       - name: Run package tests
         run: >-
-          uv run pytest tests/ -x
+          uv run pytest tests/ -x --ignore=tests/integrations/scanpy
           -m "not docs and not codegen"
           --durations=10
       - run: node --test tests/*.test.mjs
@@ -77,30 +87,55 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.11", "3.12", "3.13"]
+        python: ${{ fromJSON((github.ref == 'refs/heads/main' || inputs.full_scanpy) && '["3.11", "3.12", "3.13"]' || '["3.11"]') }}
     env:
       MPLBACKEND: Agg
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v9.0.0
         with:
+          enable-cache: true
           python-version: ${{ matrix.python }}
       - run: uv sync --locked --dev --extra scanpy --group scanpy-test
-      - run: uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -q
-      - run: uv run --no-sync python -m playwright install --with-deps chromium
-      - run: uv run --no-sync pytest tests/integrations/scanpy/browser -q --basetemp="${{ runner.temp }}/scanpy-browser"
-      - run: uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_umap.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/umap-notebook.png"
-      - run: uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_expression.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/expression-notebook.png"
+      - name: Fast Scanpy checks
+        if: github.ref != 'refs/heads/main' && !inputs.full_scanpy
+        run: >-
+          uv run --no-sync pytest tests/integrations/scanpy
+          --ignore=tests/integrations/scanpy/browser
+          -m "not reference and not workflow" -q --durations=10
+      - name: Full Scanpy checks
+        if: github.ref == 'refs/heads/main' || inputs.full_scanpy
+        run: >-
+          uv run --no-sync pytest tests/integrations/scanpy
+          --ignore=tests/integrations/scanpy/browser -q --durations=10
+      # The renderer is JavaScript; repeat it once, rather than for each Python.
+      - if: matrix.python == '3.11'
+        run: uv run --no-sync python -m playwright install --with-deps chromium
+      - name: Browser smoke checks
+        if: matrix.python == '3.11' && github.ref != 'refs/heads/main' && !inputs.full_scanpy
+        run: >-
+          uv run --no-sync pytest tests/integrations/scanpy/browser -m smoke -q
+          --basetemp="${{ runner.temp }}/scanpy-browser"
+      - name: Full browser checks
+        if: matrix.python == '3.11' && (github.ref == 'refs/heads/main' || inputs.full_scanpy)
+        run: >-
+          uv run --no-sync pytest tests/integrations/scanpy/browser -q
+          --basetemp="${{ runner.temp }}/scanpy-browser"
+      - name: Render the workflow notebooks in JupyterLab
+        if: matrix.python == '3.11' && (github.ref == 'refs/heads/main' || inputs.full_scanpy)
+        run: |
+          uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_umap.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/umap-notebook.png"
+          uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_expression.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/expression-notebook.png"
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: always() && matrix.python == '3.11'
         with:
-          name: scanpy-browser-${{ matrix.python }}
+          name: scanpy-browser
           path: ${{ runner.temp }}/scanpy-browser
           if-no-files-found: ignore
 
   scanpy-compatibility:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       MPLBACKEND: Agg
     steps:
@@ -113,12 +148,21 @@ jobs:
           uv venv --python 3.12 "$RUNNER_TEMP/scanpy-compat"
           uv pip install --python "$RUNNER_TEMP/scanpy-compat/bin/python" \
             -e '.[scanpy]' 'scanpy==1.12.4' pytest pillow playwright pyarrow
-      - name: Check data semantics and workflows
+      - name: Fast compatibility checks
+        if: github.ref != 'refs/heads/main' && !inputs.full_scanpy
+        run: >-
+          "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
+          tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
+          -m "not reference and not workflow" -q --durations=10
+      - name: Full compatibility checks
+        if: github.ref == 'refs/heads/main' || inputs.full_scanpy
         run: >-
           "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
           tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -q
-      - run: '"$RUNNER_TEMP/scanpy-compat/bin/python" -m playwright install --with-deps chromium'
+      - if: github.ref == 'refs/heads/main' || inputs.full_scanpy
+        run: '"$RUNNER_TEMP/scanpy-compat/bin/python" -m playwright install --with-deps chromium'
       - name: Check native interactions with current Scanpy
+        if: github.ref == 'refs/heads/main' || inputs.full_scanpy
         run: >-
           "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
           tests/integrations/scanpy/browser/test_grid_interactions.py

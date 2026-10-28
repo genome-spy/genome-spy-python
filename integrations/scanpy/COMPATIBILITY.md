@@ -2008,22 +2008,17 @@ allocation and mutation behavior. Browser checks measure actual marker footprint
 retain temporary registered overlays and complete-chart captures, and exercise
 hover, navigation and offline delivery.
 
-### Resource baseline
+### Resource checks
 
-The explicit benchmark is reproducible without local research directories:
+Deterministic tests verify selected-column access, metadata-only preparation,
+nonmutation and sparse allocation. They cover embeddings, grouped expression,
+clustermap, rankings, PAGA paths and QC without hardware-dependent timing limits.
+The former manual benchmark/report programs were removed during test cleanup.
+Use Arrow for large notebook payloads; validated JSON export can be expensive.
 
-```sh
-uv run --no-sync python -m tests.integrations.scanpy.benchmark --cells 100000 --panels 8 --output /tmp/umap-memory.json
-uv run --no-sync python -m tests.integrations.scanpy.benchmark --cells 10000 --panels 8 --browser --output /tmp/umap-browser.json
-```
-
-Benchmark output records versions, source dimensions, payloads, hardware,
-viewport, timing definitions and memory use. Write it to a temporary directory;
-these observations are not reference fixtures or portable timing limits.
-Use Arrow for large notebook payloads. Validated JSON export can be expensive.
-Semantic tests separately verify selected-column access and sparse allocation.
-
-The [self-contained UMAP notebook](notebooks/scanpy_umap.ipynb)
-demonstrates the native widget and its live Python connection. CI runs semantic
-and browser checks with the pinned stack on Python 3.11, 3.12, and 3.13, and
-renders both workflow notebooks through JupyterLab. Local validation used Python 3.11.
+The [self-contained UMAP notebook](notebooks/scanpy_umap.ipynb) demonstrates the
+native widget and its live Python connection. PR CI runs fast preparation checks
+on both tested Scanpy versions and representative browser interactions once.
+Main/full/release runs add reference comparisons, the supported Python matrix,
+the complete browser suite and both JupyterLab workflow renders. See the
+[validation commands](README.md#validation).
