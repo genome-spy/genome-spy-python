@@ -5193,3 +5193,14 @@ after extraction. All 79 sampled complete chart specs match exactly, and all
 166 targeted Python tests pass. Ruff, formatting and full source mypy pass.
 Browser tests, the full suite and resource benchmarks were not rerun. No plan is
 cleared; unrelated work stays unstaged and generated evidence stays temporary.
+
+### Variable-gene slider setup
+
+A small local helper now validates normalized scores and creates the optional
+native cutoff slider. Point preparation, cutoff counting and layout remain
+separate. All 24 sampled complete chart specs match exactly, including previews,
+zoom and both statistic families. All 61 targeted Python and three slider browser
+tests pass, along with Ruff, formatting and full source mypy. Python tests retain
+five existing deprecation warnings. The full suite and resource benchmarks were
+not rerun. No plan is cleared; unrelated work stays unstaged and evidence stays
+temporary.

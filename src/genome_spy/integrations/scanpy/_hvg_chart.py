@@ -43,6 +43,26 @@ def _cutoff_count(source: gs.Chart, width: float) -> gs.Chart:
     )
 
 
+def _cutoff_parameter(scores: np.ndarray) -> gs.Parameter:
+    """Return a native preview slider for varying normalized scores."""
+    if len(scores) < 2 or scores.min() == scores.max():
+        raise ValueError(
+            "gsc.pl.highly_variable_genes: threshold_slider needs a varying normalized score."
+        )
+    minimum, maximum = scores.min(), scores.max()
+    initial = float(f"{np.median(scores):.3g}")
+    initial = float(np.clip(initial, minimum, maximum))
+    return gs.param(
+        "hvg_cutoff",
+        value=initial,
+        bind=gs.binding_range(
+            min=float(minimum),
+            max=float(maximum),
+            name="Preview score cutoff: ",
+        ),
+    )
+
+
 def build_variable_genes(
     table: pd.DataFrame,
     statistic: str,
@@ -61,25 +81,12 @@ def build_variable_genes(
         log_domains = _log_domains(table, statistic)
 
     # The optional cutoff previews a choice without changing saved selections.
-    cutoff = None
     normalized = f"{statistic}_norm"
-    if threshold_slider:
-        scores = table[normalized].dropna().to_numpy()
-        if len(scores) < 2 or scores.min() == scores.max():
-            raise ValueError(
-                "gsc.pl.highly_variable_genes: threshold_slider needs a varying normalized score."
-            )
-        initial = float(f"{np.median(scores):.3g}")
-        initial = float(np.clip(initial, scores.min(), scores.max()))
-        cutoff = gs.param(
-            "hvg_cutoff",
-            value=initial,
-            bind=gs.binding_range(
-                min=float(scores.min()),
-                max=float(scores.max()),
-                name="Preview score cutoff: ",
-            ),
-        )
+    cutoff = (
+        _cutoff_parameter(table[normalized].dropna().to_numpy())
+        if threshold_slider
+        else None
+    )
     statuses = (
         ["Above cutoff", "Below cutoff"]
         if threshold_slider
