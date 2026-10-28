@@ -12,7 +12,7 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
     with_values,
 )
-from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._data import figsize_pixels, number
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_chart import (
@@ -70,18 +70,12 @@ def build_heatmap(
     show_gene_labels = genes <= 50 if show_gene_labels is None else show_gene_labels
     categorical = len(prepared.intervals) > 1
     if figsize is not None:
-        if width is not None or height is not None:
-            raise TypeError(
-                f"{context}: figsize cannot be combined with width or height."
-            )
-        if len(figsize) != 2:
-            raise ValueError(f"{context}: figsize needs width and height in inches.")
-        width = number(figsize[0], "figsize width", context=context) * 100
-        height = number(figsize[1], "figsize height", context=context) * 100
+        width, height = figsize_pixels(figsize, width, height, context=context)
         if swap_axes:
             height -= (80 if tree else 0) + (13 if categorical else 0)
         else:
             width -= (100 if tree else 0) + (20 if categorical else 0)
+
     # Default size depends on gene labels; cell count never changes the values.
     default_width = genes * 30 if show_gene_labels else 800
     default_height = 600

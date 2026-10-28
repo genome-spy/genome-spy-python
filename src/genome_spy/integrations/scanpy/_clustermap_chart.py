@@ -7,7 +7,7 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._clustermap_data import ClusteredMatrix, CONTEXT
-from genome_spy.integrations.scanpy._data import number, numeric_values
+from genome_spy.integrations.scanpy._data import figsize_pixels, number, numeric_values
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_chart import (
     coordinate,
@@ -187,16 +187,9 @@ def build_clustermap(
             f"{CONTEXT}: tree and color ratios leave no room for the matrix."
         )
     if figsize is not None:
-        if width is not None or height is not None:
-            raise TypeError(
-                f"{CONTEXT}: figsize cannot be combined with width or height."
-            )
-        if len(figsize) != 2:
-            raise ValueError(f"{CONTEXT}: figsize needs width and height in inches.")
-        width, height = [
-            number(v, "figsize", context=CONTEXT) * 100 * fraction
-            for v, fraction in zip(figsize, fractions, strict=True)
-        ]
+        width, height = figsize_pixels(figsize, width, height, context=CONTEXT)
+        width *= fractions[0]
+        height *= fractions[1]
     width = number(
         1000 * fractions[0] if width is None else width, "width", context=CONTEXT
     )

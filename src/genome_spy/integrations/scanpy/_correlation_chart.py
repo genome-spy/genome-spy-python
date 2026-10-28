@@ -8,7 +8,7 @@ import genome_spy as gs
 from genome_spy.schema.core import SchemeParams
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
-from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._data import figsize_pixels, number
 from genome_spy.integrations.scanpy._grid_interactions import with_values
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
@@ -48,16 +48,9 @@ def build_correlation_matrix(
     context = "gsc.pl.correlation_matrix"
     n = len(tree.order)
     if figsize is not None:
-        if width is not None or height is not None:
-            raise TypeError(
-                f"{context}: figsize cannot be combined with width or height."
-            )
-        if len(figsize) != 2:
-            raise ValueError(f"{context}: figsize needs width and height in inches.")
-        width = number(figsize[0], "figsize width", context=context) * 100 - (
-            180 if dendrogram else 0
-        )
-        height = number(figsize[1], "figsize height", context=context) * 100 - 20
+        width, height = figsize_pixels(figsize, width, height, context=context)
+        width -= 180 if dendrogram else 0
+        height -= 20
     width = number(n * 60 if width is None else width, "width", context=context)
     height = number(n * 60 if height is None else height, "height", context=context)
     if not width or not height:

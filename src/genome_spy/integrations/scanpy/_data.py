@@ -42,6 +42,24 @@ def number(value: Any, name: str, *, context: str, minimum: float = 0) -> float:
     return float(value)
 
 
+def figsize_pixels(
+    figsize: tuple[float, float],
+    width: float | None,
+    height: float | None,
+    *,
+    context: str,
+) -> tuple[float, float]:
+    """Return pixels from an inch-based figsize, rejecting width/height overrides."""
+    if width is not None or height is not None:
+        raise TypeError(f"{context}: figsize cannot be combined with width or height.")
+    if len(figsize) != 2:
+        raise ValueError(f"{context}: figsize needs width and height in inches.")
+    return (
+        number(figsize[0], "figsize width", context=context) * 100,
+        number(figsize[1], "figsize height", context=context) * 100,
+    )
+
+
 def numeric_values(table: pd.DataFrame, *, context: str) -> np.ndarray:
     """Return a table's numeric values, allowing missing values but not infinity.
 

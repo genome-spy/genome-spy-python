@@ -4,7 +4,11 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._data import coordinate_domain, number
+from genome_spy.integrations.scanpy._data import (
+    coordinate_domain,
+    figsize_pixels,
+    number,
+)
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup, HeatmapData
@@ -39,16 +43,8 @@ def build_tracksplot(
     values = prepared.values
     cells, genes = values.shape
     if figsize is not None:
-        if width is not None or height is not None:
-            raise TypeError(
-                f"{context}: figsize cannot be combined with width or height."
-            )
-        if len(figsize) != 2:
-            raise ValueError(f"{context}: figsize needs width and height in inches.")
-        width = number(figsize[0], "figsize width", context=context) * 100
-        height = number(figsize[1], "figsize height", context=context) * 100 - (
-            (100 if tree else 0) + 24 + spacing * (genes + int(tree is not None))
-        )
+        width, height = figsize_pixels(figsize, width, height, context=context)
+        height -= (100 if tree else 0) + 24 + spacing * (genes + int(tree is not None))
     width = number(1200 if width is None else width, "width", context=context)
     height = number(genes * 25 if height is None else height, "height", context=context)
     if not width or not height:

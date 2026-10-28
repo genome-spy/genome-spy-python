@@ -5051,3 +5051,13 @@ and seven focused browser checks pass. Ruff, formatting and full source mypy
 pass. The full suite and resource benchmarks were not rerun. Evidence stays
 temporary; no plan is cleared. Other pending ranking edits remain outside this
 focused commit.
+
+### Shared figure-size conversion
+
+Heatmap, tracksplot, clustermap, correlation-matrix and grouped-plot layout now
+share the figsize conflict checks and inch-to-pixel conversion. Each caller keeps
+its existing tree, annotation, legend and spacing deductions. Default dimensions
+are unchanged. All 36 complete chart specs match exactly; 409 Python and 30
+browser checks pass. Ruff, formatting and full source mypy pass. The full suite
+and resource benchmarks were not rerun. Evidence stays temporary; no plan is
+cleared. Other pending changes remain outside this focused commit.

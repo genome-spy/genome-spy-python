@@ -12,7 +12,7 @@ import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._grid_interactions import index_offset
-from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._data import figsize_pixels, number
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
     POINTS_TO_PIXELS as _PT,
@@ -238,17 +238,10 @@ def plot_dimensions(
     Convert figsize to pixels while reserving space for guides.
     """
     if figsize is not None:
-        if width is not None or height is not None:
-            raise TypeError(
-                f"{context}: figsize cannot be combined with width or height."
-            )
-        if len(figsize) != 2:
-            raise ValueError(f"{context}: figsize needs (width, height) inches.")
+        width, height = figsize_pixels(figsize, width, height, context=context)
+
         # The overall figure width also includes space for the guides.
-        width = (
-            number(figsize[0], "figsize width", context=context) * 100 - legend_width
-        )
-        height = number(figsize[1], "figsize height", context=context) * 100
+        width -= legend_width
     width = (
         columns * (35 if swap_axes else 37)
         if width is None
