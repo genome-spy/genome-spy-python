@@ -5172,3 +5172,14 @@ specs match exactly. All 127 targeted Python and two PCA overview browser tests
 pass, along with Ruff, formatting and full source mypy. The full suite and
 resource benchmarks were not rerun. No plan is cleared; unrelated work remains
 unstaged. Generated evidence stays in temporary directories.
+
+### Dendrogram endpoint construction
+
+The shared tree renderer now reads each parent once, then emits its two child
+links in a short loop. Leaf mapping and native chart construction stay separate
+and unchanged; no helper or public option was added. All 49 sampled complete
+chart specs match exactly. All 149 targeted Python and 20 browser checks
+pass, along with Ruff, formatting and full source mypy. The Python tests retain
+four existing fixture warnings. The full suite and resource benchmarks were not
+rerun. No plan is cleared; unrelated work remains unstaged. Generated evidence
+stays in temporary directories.

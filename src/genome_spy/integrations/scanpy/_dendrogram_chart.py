@@ -21,17 +21,21 @@ def tree_records(
     tree: TreeData, leaf_positions: list[float] | None = None
 ) -> list[dict[str, float]]:
     """Return parent-to-child endpoint rows from stored tree coordinates."""
+
     # Start at each parent so native elbows retain its stored merge height.
-    records = [
-        {
-            "leaf": float((leaves[1] + leaves[2]) / 20),
-            "leaf2": float(leaves[child] / 10),
-            "distance": float(distances[1]),
-            "distance2": float(distances[child]),
-        }
-        for leaves, distances in zip(tree.icoord, tree.dcoord, strict=True)
-        for child in (0, 3)
-    ]
+    records = []
+    for leaves, distances in zip(tree.icoord, tree.dcoord, strict=True):
+        parent_leaf = float((leaves[1] + leaves[2]) / 20)
+        parent_distance = float(distances[1])
+        for child in (0, 3):
+            records.append(
+                {
+                    "leaf": parent_leaf,
+                    "leaf2": float(leaves[child] / 10),
+                    "distance": parent_distance,
+                    "distance2": float(distances[child]),
+                }
+            )
     if leaf_positions is not None:
         if len(leaf_positions) != len(tree.order):
             raise ValueError("Tree leaf positions must match the number of groups.")
@@ -81,6 +85,7 @@ def tree_track(
             record[field] = float(np.floor(record[field]))
     axis = "x" if horizontal else "y"
     leaf = (gs.X if horizontal else gs.Y)("leaf:I", band=0.5).axis(None)
+
     # Fit visible branches, retaining zero at the matrix edge and 5% root headroom.
     distance = (
         (gs.Y if horizontal else gs.X)("distance:Q")
@@ -143,6 +148,7 @@ def build_dendrogram(
     n = len(tree.order)
     margin = (n - 1) * 0.05
     domain = [0.5 - margin, n - 0.5 + margin]
+
     # The orientation decides which axis holds the leaves and which holds distance.
     horizontal = orientation in ("top", "bottom")
     leaf = (
@@ -168,6 +174,7 @@ def build_dendrogram(
         links = links.encode(y=leaf, y2="leaf2:Q", x=distance, x2="distance2:Q")
     layers = [links]
     padding = {"left": 10.0, "right": 10.0, "top": 10.0, "bottom": 10.0}
+
     # Put labels on the leaf side and reserve room for their full length.
     if not remove_labels:
         labels = gs.Chart(
