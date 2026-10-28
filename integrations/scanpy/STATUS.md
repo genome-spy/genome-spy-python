@@ -5225,3 +5225,14 @@ report 129 passed and one existing upstream expected failure. Ruff, formatting
 and full source mypy pass. Browser tests, the full suite and resource benchmarks
 were not rerun. No plan is cleared; unrelated work stays unstaged and generated
 evidence stays temporary.
+
+### Embedding category-label anchors
+
+Category labels now use a short loop with one membership mask per category;
+empty categories are skipped explicitly. Median anchors and native label
+placement are unchanged; no helper or shared policy was added. All 16 sampled
+complete chart specs match exactly, including masked groups and repeated
+coordinate dimensions. Targeted checks report 315 Python passes and two
+browser passes. Ruff, formatting and full source mypy pass. The full suite and
+resource benchmarks were not rerun. No plan is cleared; unrelated work stays
+unstaged and generated evidence stays temporary.

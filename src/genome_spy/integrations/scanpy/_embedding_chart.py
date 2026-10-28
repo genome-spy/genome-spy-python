@@ -332,19 +332,18 @@ def _panel(
         layers.append(colored)
     # Keep group medians as anchors while native layout separates their labels.
     if panel.categorical and style.legend_loc == "on data":
-        labels = [
-            {
-                "label": label,
-                "x": float(
-                    table.loc[table[f"_color_{index}"] == label, x_field].median()
-                ),
-                "y": float(
-                    table.loc[table[f"_color_{index}"] == label, y_field].median()
-                ),
-            }
-            for label in panel.legend_values
-            if (table[f"_color_{index}"] == label).any()
-        ]
+        labels = []
+        for label in panel.legend_values:
+            members = table[f"_color_{index}"] == label
+            if not members.any():
+                continue
+            labels.append(
+                {
+                    "label": label,
+                    "x": float(table.loc[members, x_field].median()),
+                    "y": float(table.loc[members, y_field].median()),
+                }
+            )
         layers.append(
             displaced_labels(
                 gs.Chart(labels),
