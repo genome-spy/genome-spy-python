@@ -5141,3 +5141,14 @@ specs match exactly; 157 Python and 11 browser checks pass, with the existing
 upstream component expected failure. Ruff, formatting and full source mypy pass.
 The full suite and resource benchmarks were not rerun. Evidence stays temporary;
 no plan is cleared. Other pending API work remains outside this focused commit.
+
+### Heatmap marker-label construction
+
+Swapped heatmap marker strips now choose one label per block before emitting
+its slot rows. This replaces a nested comprehension while retaining Scanpy's
+fallback to group colors in display order. Existing side-track renderers remain
+in use; no helper or public option was added. All 32 complete chart specs match
+exactly, including matched, unmatched, excess and subset marker blocks. All 119
+Python and 44 browser checks pass. Ruff, formatting and full source mypy pass.
+The full suite and resource benchmarks were not rerun. Evidence stays temporary;
+no plan is cleared. Other pending heatmap changes remain outside this commit.

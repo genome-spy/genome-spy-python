@@ -236,16 +236,16 @@ def build_heatmap(
     # Preserve Scanpy's colored marker strip for swapped heatmaps.
     if feature_groups and swap_axes:
         matched = {group.label for group in feature_groups}.issubset(group_labels)
-        marker_rows = [
-            {
-                "slot": slot,
-                "label": group.label
-                if matched
-                else group_labels[min(i, len(group_labels) - 1)],
-            }
-            for i, group in enumerate(feature_groups)
-            for slot in range(group.start, group.end + 1)
-        ]
+        marker_rows: list[dict[str, int | str]] = []
+        for i, group in enumerate(feature_groups):
+            # If marker labels do not match the groups, Scanpy colors the blocks in order.
+            label = (
+                group.label if matched else group_labels[min(i, len(group_labels) - 1)]
+            )
+            marker_rows.extend(
+                {"slot": slot, "label": label}
+                for slot in range(group.start, group.end + 1)
+            )
         sides["right"] = [
             gs.Chart(marker_rows)
             .mark_rect(clip=True, tooltip=None)
