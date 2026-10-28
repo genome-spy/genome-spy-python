@@ -5093,3 +5093,17 @@ values and draw order are unchanged; no helper or public option was added.
 All 60 complete chart specs match exactly; 164 Python and 31 browser checks pass.
 Ruff, formatting and full source mypy pass. The full suite and resource benchmarks
 were not rerun. Evidence stays temporary; no plan is cleared.
+
+### Scatter panel appearance and remaining readability targets
+
+Scatter marker/title validation now has a small local helper, shortening the
+main preparation flow by 24 lines. This also commits the earlier category-color
+helper and plain conditional branches. Expression access, palette reuse, group
+order and native embedding rendering are unchanged. All 40 complete chart specs
+match exactly; 120 Python and 19 browser checks pass. Ruff, formatting and full
+source mypy pass. The full suite and resource benchmarks were not rerun.
+
+Remaining worthwhile review targets are PAGA orchestration in pl.py, time-series
+legend/interaction setup, heatmap layout/side tracks, and linked-summary assembly.
+These files are partly simplified already; function length alone is not a reason
+to split native chart declarations. Evidence stays temporary; no plan is cleared.

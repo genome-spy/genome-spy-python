@@ -40,6 +40,7 @@ def prepare_variable_genes(result: Any, selected: bool) -> tuple[pd.DataFrame, s
     from anndata import AnnData
 
     context = "gsc.pl.highly_variable_genes"
+
     # Scanpy infers variance results differently for AnnData, tables and records.
     if isinstance(result, AnnData):
         metadata = result.uns.get("hvg", {})
@@ -69,6 +70,7 @@ def prepare_variable_genes(result: Any, selected: bool) -> tuple[pd.DataFrame, s
         raise TypeError(f"{context}: {flag} must contain nonmissing boolean values.")
     if result.index.hasnans:
         raise ValueError(f"{context}: gene labels must be nonmissing.")
+
     # Copy only the plotted metadata; no expression vector is needed.
     table = result[columns[:3]].reset_index(drop=True).copy()
     numeric_values(table, context=context)
@@ -195,6 +197,77 @@ def _palette_at(palette: Any, index: int) -> Any:
     return palette
 
 
+def _category_paint(
+    adata: Any,
+    key: str,
+    values: pd.Categorical,
+    *,
+    groups: Any,
+    palette: Any,
+    index: int,
+) -> tuple[ColorData, np.ndarray]:
+    """Return category colors and draw order for a scatter panel.
+
+    Reuse shared palettes, then paint gray points before the requested groups.
+    """
+    import scanpy as sc
+
+    if groups is None:
+        visible = list(values.categories)
+    elif isinstance(groups, str):
+        visible = [groups]
+    else:
+        visible = list(groups)
+    if any(value not in values.categories for value in visible):
+        raise ValueError(f"{_CONTEXT}: groups contains an unknown category.")
+    if groups is None:
+        visible = [
+            value for value in visible if value not in sc.settings.categories_to_ignore
+        ]
+    colors = categorical_colors(
+        adata,
+        key,
+        values,
+        palette=_palette_at(palette, index),
+        groups=visible,
+        mask=None,
+        na_color="lightgrey",
+        na_in_legend=False,
+    )
+
+    # Scanpy paints gray points first, then whole groups in the requested order.
+    labels_in_order = tuple(str(value) for value in visible)
+    colors = replace(colors, legend_values=labels_in_order)
+    ranks = {value: i + 1 for i, value in enumerate(labels_in_order)}
+    order = np.argsort([ranks.get(value, 0) for value in colors.values], kind="stable")
+    return colors, order
+
+
+def _panel_appearance(
+    marker: Any, title: Any, count: int
+) -> tuple[list[str], list[Any] | None]:
+    """Return checked markers and optional titles for the requested panel count."""
+    markers = [marker] * count if isinstance(marker, str) else list(marker)
+    if len(markers) == 1:
+        markers *= count
+    if len(markers) != count or any(
+        not isinstance(value, str) or value not in EMBEDDING_MARKERS
+        for value in markers
+    ):
+        raise NotImplementedError(
+            f"{_CONTEXT}: marker requires {tuple(EMBEDDING_MARKERS)}, once or per panel."
+        )
+    if isinstance(title, str):
+        titles = [title]
+    elif title is not None:
+        titles = list(title)
+    else:
+        titles = None
+    if titles is not None and len(titles) < count:
+        raise ValueError(f"{_CONTEXT}: title needs one entry per color panel.")
+    return markers, titles
+
+
 def prepare_scatter(
     adata: Any,
     *,
@@ -214,7 +287,6 @@ def prepare_scatter(
 ) -> PreparedEmbedding:
     """Return detached points and panel settings using scatter's distinct lookup rules."""
     from anndata import AnnData
-    import scanpy as sc
 
     if not isinstance(adata, AnnData):
         raise TypeError(f"{_CONTEXT}: expected AnnData.")
@@ -222,20 +294,22 @@ def prepare_scatter(
         raise NotImplementedError(
             f"{_CONTEXT}: stored highlights are not supported yet."
         )
+
+    # Resolve observation versus gene lookup before reading values.
     requested_raw = use_raw
     use_raw = resolve_use_raw(adata, use_raw, None, context=_CONTEXT)
-    keys = (
-        ["grey"]
-        if color is None
-        else [color]
-        if isinstance(color, str)
-        else list(color)
-    )
+    if color is None:
+        keys = ["grey"]
+    elif isinstance(color, str):
+        keys = [color]
+    else:
+        keys = list(color)
     if not keys or any(not isinstance(key, str) for key in keys):
         raise TypeError(
             f"{_CONTEXT}: color must contain annotation keys or CSS color strings."
         )
     axis = "obs" if basis is not None else _orientation(adata, x, y, keys, use_raw)
+
     # Scanpy drops raw when choosing variable orientation; no transpose is needed here.
     if axis == "var":
         use_raw = requested_raw is True
@@ -270,28 +344,14 @@ def prepare_scatter(
     if not np.isfinite(numeric_values(table, context=_CONTEXT)).all():
         raise ValueError(f"{_CONTEXT}: coordinates must be finite.")
     table = pd.concat([table, point_ids(names)], axis=1)
+
+    # Validate per-panel appearance after the shared coordinates are ready.
     areas = _sizes(size, len(names))
     if areas.ndim:
         raise NotImplementedError(f"{_CONTEXT}: size currently supports a scalar only.")
-    markers = [marker] * len(keys) if isinstance(marker, str) else list(marker)
-    if len(markers) == 1:
-        markers *= len(keys)
-    if len(markers) != len(keys) or any(
-        not isinstance(value, str) or value not in EMBEDDING_MARKERS
-        for value in markers
-    ):
-        raise NotImplementedError(
-            f"{_CONTEXT}: marker requires {tuple(EMBEDDING_MARKERS)}, once or per panel."
-        )
-    titles = (
-        [title]
-        if isinstance(title, str)
-        else list(title)
-        if title is not None
-        else None
-    )
-    if titles is not None and len(titles) < len(keys):
-        raise ValueError(f"{_CONTEXT}: title needs one entry per color panel.")
+    markers, titles = _panel_appearance(marker, title, len(keys))
+
+    # Constant colors, categories and numeric values have different lookup rules.
     panels = []
     categorical_index = 0
     for index, key in enumerate(keys):
@@ -312,41 +372,15 @@ def prepare_scatter(
                 else _categorical(values)
             )
             if categorical is not None:
-                visible = (
-                    list(categorical.categories)
-                    if groups is None
-                    else [groups]
-                    if isinstance(groups, str)
-                    else list(groups)
-                )
-                if any(value not in categorical.categories for value in visible):
-                    raise ValueError(
-                        f"{_CONTEXT}: groups contains an unknown category."
-                    )
-                if groups is None:
-                    visible = [
-                        value
-                        for value in visible
-                        if value not in sc.settings.categories_to_ignore
-                    ]
-                colors = categorical_colors(
+                colors, order = _category_paint(
                     adata,
                     key,
                     categorical,
-                    palette=_palette_at(palette, categorical_index),
-                    groups=visible,
-                    mask=None,
-                    na_color="lightgrey",
-                    na_in_legend=False,
+                    groups=groups,
+                    palette=palette,
+                    index=categorical_index,
                 )
                 categorical_index += 1
-                # Scanpy paints gray points first, then whole groups in the requested order.
-                labels_in_order = tuple(str(value) for value in visible)
-                colors = replace(colors, legend_values=labels_in_order)
-                ranks = {value: i + 1 for i, value in enumerate(labels_in_order)}
-                order = np.argsort(
-                    [ranks.get(value, 0) for value in colors.values], kind="stable"
-                )
             else:
                 colors = continuous_colors(
                     values,
@@ -358,16 +392,16 @@ def prepare_scatter(
                     count=len(keys),
                     colorbar=True,
                 )
+
                 # Pinned scatter does not forward sort_order to its plotting helper.
                 order = np.argsort(colors.values)
         panel_values(table, index, colors, order, areas)
-        heading = (
-            titles[index]
-            if titles is not None
-            else ""
-            if flat
-            else key.replace("_", " ")
-        )
+        if titles is not None:
+            heading = titles[index]
+        elif flat:
+            heading = ""
+        else:
+            heading = key.replace("_", " ")
         panels.append(
             Panel(
                 key=None if flat else key,
