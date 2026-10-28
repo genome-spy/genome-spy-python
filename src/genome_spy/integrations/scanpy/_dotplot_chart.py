@@ -81,7 +81,7 @@ def dot_size_scale(
     ticks = np.arange(high, low, -step)[::-1]
     ticks = np.round(ticks * 100, 10) / 100
     # Use the same percentage-to-area lookup for dots and legend symbols.
-    domain = np.unique(np.concatenate([fractions[np.isfinite(fractions)], ticks]))
+    domain = np.unique(np.concatenate([valid, ticks]))
     areas = smallest + ((np.clip(domain, low, high) - low) / difference) ** exponent * (
         largest - smallest
     )
@@ -180,8 +180,9 @@ def build_dotplot(
     low, high, constant_color = color_bounds(
         values, vmin, vmax, context="gsc.pl.dotplot"
     )
+    fraction_values = fractions.to_numpy(dtype=float, na_value=np.nan)
     domain, areas, ticks = dot_size_scale(
-        fractions.to_numpy(dtype=float, na_value=np.nan),
+        fraction_values,
         dot_min,
         dot_max,
         smallest_dot,
@@ -189,7 +190,7 @@ def build_dotplot(
         size_exponent,
     )
     table = summary_records(colors, swap_axes=swap_axes, context="gsc.pl.dotplot")
-    table["_percent"] = fractions.to_numpy(dtype=float, na_value=np.nan).ravel() * 100
+    table["_percent"] = fraction_values.ravel() * 100
     if constant_color:
         # Scanpy freezes dot colors before its colorbar expands constant bounds.
         table["_paint"] = low

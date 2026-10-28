@@ -5084,3 +5084,12 @@ exactly; 541 Python and 15 browser checks pass, with the existing upstream path
 return-data expected failure. Ruff, formatting and full source mypy pass. The
 full suite and resource benchmarks were not rerun. Evidence stays temporary;
 no plan is cleared. Other pending changes remain outside this focused commit.
+
+### Reuse dotplot fraction arrays
+
+Dot sizing and chart records reuse one numeric fraction array, and the size
+scale reuses its already-selected finite values. Clipping, tick bins, percent
+values and draw order are unchanged; no helper or public option was added.
+All 60 complete chart specs match exactly; 164 Python and 31 browser checks pass.
+Ruff, formatting and full source mypy pass. The full suite and resource benchmarks
+were not rerun. Evidence stays temporary; no plan is cleared.
