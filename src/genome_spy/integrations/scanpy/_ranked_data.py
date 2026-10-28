@@ -36,6 +36,20 @@ def _count(value: Any, name: str, *, context: str, negative: bool = False) -> in
     return int(value)
 
 
+def _check_ranking_field(result: Mapping[str, Any], name: str, *, context: str) -> None:
+    """Check a stored field against the ranking's gene-name rows and groups."""
+    field = result.get(name)
+    names = result["names"]
+    if (
+        not isinstance(field, np.ndarray)
+        or field.shape != names.shape
+        or set(field.dtype.names or ()) != set(names.dtype.names)
+    ):
+        raise ValueError(
+            f"{context}: stored {name} must match the ranking names and groups."
+        )
+
+
 def stored_ranking(
     adata: Any, key: str | None, groups: Any, *, context: str
 ) -> tuple[Mapping[str, Any], list[str]]:
@@ -75,15 +89,7 @@ def stored_ranking(
         raise ValueError(
             f"{context}: ranking names must be a nonempty structured array."
         )
-    scores = result.get("scores")
-    if (
-        not isinstance(scores, np.ndarray)
-        or scores.shape != names.shape
-        or set(scores.dtype.names or ()) != set(names.dtype.names)
-    ):
-        raise ValueError(
-            f"{context}: stored scores must match the ranking names and groups."
-        )
+    _check_ranking_field(result, "scores", context=context)
     if groups is None:
         chosen = list(names.dtype.names)
     else:
@@ -133,15 +139,7 @@ def _ranking_table(
             )
     fields = [] if method == "logreg" else ["logfoldchanges", "pvals", "pvals_adj"]
     for name in fields:
-        field = result.get(name)
-        if (
-            not isinstance(field, np.ndarray)
-            or field.shape != result["names"].shape
-            or set(field.dtype.names or ()) != set(result["names"].dtype.names)
-        ):
-            raise ValueError(
-                f"{context}: stored {name} must match the ranking names and groups."
-            )
+        _check_ranking_field(result, name, context=context)
     table = rank_genes_groups_df(
         adata,
         chosen,

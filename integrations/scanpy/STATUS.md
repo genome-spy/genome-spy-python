@@ -5041,3 +5041,13 @@ match exactly; 155 Python and 53 browser checks pass, with one existing upstream
 component expected failure. Ruff, formatting and full source mypy pass. The full
 suite and resource benchmarks were not rerun. Evidence stays temporary; no plan
 is cleared. Other pending PAGA edits are outside this focused commit.
+
+### Shared ranking-field validation
+
+Stored ranking scores and expression-color statistics now use one local check
+for array shape and group names. Existing errors, validation order and Scanpy
+getter calls are unchanged. All 46 complete chart specs match exactly; 167 Python
+and seven focused browser checks pass. Ruff, formatting and full source mypy
+pass. The full suite and resource benchmarks were not rerun. Evidence stays
+temporary; no plan is cleared. Other pending ranking edits remain outside this
+focused commit.
