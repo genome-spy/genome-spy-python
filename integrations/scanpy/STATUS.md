@@ -2,8 +2,8 @@
 
 Updated: 2026-10-29. [PLAN.md](PLAN.md) owns scope and acceptance criteria;
 [README.md](README.md) maps the source files; [COMPATIBILITY.md](COMPATIBILITY.md)
-records detailed parameter contracts. This ledger describes the integration
-branch, rather than the published 0.7.0 package.
+records detailed parameter contracts. This ledger describes the 0.8.0 release candidate.
+Publication is gated by the full release workflow.
 The short [future-work handoff](FUTURE.md) summarizes remaining coverage and the
 planned adoption of interactive legends and PAGA rule outlines.
 
@@ -33,12 +33,14 @@ states below describe coverage; they do not require a preview release label.
 
 ### Current work queue
 
-1. Complete the [test cleanup and CI selection](PLAN.md#test-cleanup-and-ci-selection)
-   before publication. The initial CI-selection cleanup is followed by a deeper file, fixture and
-   duplicate-coverage cleanup; current verification is recorded below.
+1. Prepare 0.8.0 for publication. The test cleanup and CI selections are
+   implemented; all six hosted PR checks passed at `45e07bf`. The latest UMAP
+   guide passed desktop/mobile browser checks, lint and the strict docs build.
    [PR #20](https://github.com/genome-spy/genome-spy-python/pull/20) remains open.
-   Verify the updated hosted selections before closing this maintenance slice.
-   Merge and publication still require approval.
+   Run the [Release workflow](https://github.com/genome-spy/genome-spy-python/actions/workflows/release.yml)
+   on the final candidate with `target=none` before squash merging and publishing.
+   This runs all Scanpy selections and builds/checks distributions without a
+   PyPI upload. The user authorized merge and publication after successful CI.
 2. Keep future version expansions behind compatibility checks; maintain the
    parameter contracts and recheck the upstream PAGA tree-layout issue.
 3. Classify known limitations below. Fix, reject or document user-visible cases
@@ -470,8 +472,8 @@ clean notebooks and absence of those caches; the source archive is 20 MB.
 Outgoing history has no generated test media/reports, and 119 historical notebook
 versions contain no outputs or widget state. Evidence and the draft PR body stay
 outside Git. PR #20 is now open; hosted codegen and notebook-rendering checks
-passed. The remaining CI jobs and complete browser matrix remain release gates;
-no merge to main or publication has occurred. The unrelated
+passed. The subsequent hosted PR checks all passed; the final candidate must still pass
+the full release workflow before merging and publication. The unrelated
 `notebooks/select_genes.ipynb` metadata edit remains unstaged.
 
 The active PLAN, concise STATUS, source map and detailed compatibility contract
