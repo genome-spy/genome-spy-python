@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-29
+
+### Added
+
+- Optional Scanpy plotting integration through
+  `import genome_spy.integrations.scanpy as gsc`, preserving supported plotting
+  names and arguments while Scanpy continues to own analysis.
+- Interactive embeddings, PCA diagnostics, dotplots, matrixplots, heatmaps,
+  clustermaps, expression tracks, ranked-gene summaries, quality checks,
+  time-series, DPT and PAGA plots. Unsupported plots and options fail explicitly.
+- `EmbeddingSummary` for linked cell selections, expression summaries,
+  histograms and marker tracks, with optional cell counts and selection retrieval
+  in Python.
+- Scanpy guides with live examples, downloadable notebooks, installation and
+  export instructions, and documented coverage limits.
+
+### Changed
+
+- Support Scanpy >=1.11.5,<1.13, tested with 1.11.5 and 1.12.4, while keeping
+  the reference environment pinned independently.
+
+### Fixed
+
+- Follow Scanpy 1.12's swapped-dotplot scaling and report its unavailable
+  automatic PAGA tree layouts without substituting another layout.
+
 ## [0.7.0] - 2026-10-20
 
 ### Added
@@ -181,6 +207,7 @@ First public alpha release, targeting GenomeSpy Core 0.87.0.
 - Packaged example datasets, documentation, tutorials, and an interactive
   visualization gallery.
 
+[0.8.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.4.0...v0.5.0

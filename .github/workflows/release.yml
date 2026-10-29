@@ -23,6 +23,8 @@ concurrency:
 jobs:
   check:
     uses: ./.github/workflows/ci.yml
+    with:
+      full_scanpy: true
 
   build:
     needs: check

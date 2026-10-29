@@ -1,0 +1,188 @@
+"""Ordered PAGA path profiles from stored groups and pseudotime, without analysis."""
+
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from numbers import Integral
+from typing import Any
+
+import numpy as np
+import pandas as pd
+
+from genome_spy.integrations.scanpy._data import numeric_values
+from genome_spy.integrations.scanpy._expression.grouped_data import (
+    grouped_expression,
+)
+
+CONTEXT = "gsc.pl.paga_path"
+
+
+@dataclass(frozen=True, slots=True)
+class PagaPathData:
+    values: pd.DataFrame
+    groups: np.ndarray
+    annotations: pd.DataFrame
+    boundaries: np.ndarray
+    node_names: tuple[str, ...]
+    group_key: str
+
+
+def running_average(values: np.ndarray, window: int) -> np.ndarray:
+    """Return full-window averages along rows, preserving Scanpy's cumulative missing-value behavior."""
+    summed = np.cumsum(values, axis=0, dtype=float)
+    summed[window:] -= summed[:-window]
+    return summed[window - 1 :] / window
+
+
+def path_line_values(
+    values: pd.DataFrame, xlim: tuple[int | None, int | None]
+) -> pd.DataFrame:
+    """Crop prepared profiles by sample position; leave full values for return_data."""
+    if (
+        not isinstance(xlim, (tuple, list))
+        or len(xlim) != 2
+        or any(
+            bound is not None
+            and (isinstance(bound, bool) or not isinstance(bound, Integral))
+            for bound in xlim
+        )
+    ):
+        raise TypeError(f"{CONTEXT}: xlim needs two integer or None slice bounds.")
+    return values.iloc[slice(*xlim)]
+
+
+def _node_indices(nodes: Sequence[str | int], categories: pd.Index) -> np.ndarray:
+    """Resolve path node names or integer positions, retaining their order and repeats."""
+    indices: np.ndarray
+    if all(isinstance(node, str) for node in nodes):
+        indices = categories.get_indexer(nodes)
+    elif all(
+        isinstance(node, Integral) and not isinstance(node, bool) for node in nodes
+    ):
+        indices = np.asarray(nodes, dtype=int)
+    else:
+        raise TypeError(
+            f"{CONTEXT}: nodes must be all group names or all integer indices."
+        )
+    if np.any((indices < 0) | (indices >= len(categories))):
+        raise ValueError(f"{CONTEXT}: each node must identify an existing group.")
+    return indices
+
+
+def prepare_paga_path(
+    adata: Any,
+    nodes: Sequence[str | int],
+    keys: Sequence[str],
+    *,
+    use_raw: bool,
+    annotations: Sequence[str],
+    n_avg: int,
+    groups_key: str | None,
+    normalize_to_zero_one: bool,
+    as_heatmap: bool = True,
+) -> PagaPathData:
+    """Return detached profiles, original group bands and smoothed annotations in supplied path order."""
+    from anndata import AnnData
+
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{CONTEXT}: adata must be AnnData.")
+    for name, entries in (
+        ("nodes", nodes),
+        ("keys", keys),
+        ("annotations", annotations),
+    ):
+        if isinstance(entries, str) or not isinstance(
+            entries, (Sequence, np.ndarray, pd.Index)
+        ):
+            raise TypeError(f"{CONTEXT}: {name} must be a sequence.")
+    if not len(nodes) or not len(keys) or not all(isinstance(key, str) for key in keys):
+        raise ValueError(f"{CONTEXT}: provide nonempty nodes and string keys.")
+
+    # Use the saved group definition unless the caller supplies one.
+    if groups_key is None:
+        stored = adata.uns.get("paga", {})
+        groups_key = stored.get("groups") if isinstance(stored, Mapping) else None
+    if not isinstance(groups_key, str) or groups_key not in adata.obs:
+        raise ValueError(f"{CONTEXT}: stored PAGA groups or groups_key are required.")
+    groups = adata.obs[groups_key]
+    if not isinstance(groups.dtype, pd.CategoricalDtype):
+        raise TypeError(f"{CONTEXT}: groups_key must be categorical.")
+    if "dpt_pseudotime" not in adata.obs:
+        raise ValueError(
+            f"{CONTEXT}: stored dpt_pseudotime is required; run sc.tl.dpt explicitly."
+        )
+    pseudotime = numeric_values(adata.obs[["dpt_pseudotime"]], context=CONTEXT).ravel()
+    categories = groups.cat.categories
+    indices = _node_indices(nodes, categories)
+
+    # Each occurrence of a node retains its cells, ordered only within that group.
+    ordered = []
+    codes = groups.cat.codes.to_numpy()
+    for index in indices:
+        positions = np.flatnonzero(codes == index)
+        if not len(positions):
+            raise ValueError(
+                f"{CONTEXT}: node {categories[index]!r} contains no cells."
+            )
+        ordered.append(positions[np.argsort(pseudotime[positions])])
+    order = np.concatenate(ordered)
+    if (
+        isinstance(n_avg, bool)
+        or not isinstance(n_avg, Integral)
+        or not 1 <= n_avg <= len(order)
+    ):
+        raise ValueError(
+            f"{CONTEXT}: n_avg must be an integer between 1 and the path cell count."
+        )
+    if as_heatmap and (len(keys) < 2 or len(order) - n_avg + 1 < 2):
+        raise NotImplementedError(
+            f"{CONTEXT}: this preview requires at least two keys and two smoothed cells."
+        )
+    if as_heatmap and len(annotations) > 1:
+        raise NotImplementedError(
+            f"{CONTEXT}: multiple annotation tracks are not supported yet."
+        )
+    for name in annotations:
+        if not isinstance(name, str) or name not in adata.obs:
+            raise ValueError(
+                f"{CONTEXT}: each annotation must name an observation column."
+            )
+        if as_heatmap and isinstance(adata.obs[name].dtype, pd.CategoricalDtype):
+            raise NotImplementedError(
+                f"{CONTEXT}: categorical annotation tracks are not supported yet."
+            )
+    if len(set(annotations)) != len(annotations):
+        raise ValueError(f"{CONTEXT}: annotations must name distinct columns.")
+
+    # Select columns before path rows so AnnData cannot copy unrequested genes.
+    table = grouped_expression(
+        adata,
+        keys,
+        groups_key,
+        use_raw=use_raw and adata.raw is not None,
+        observation_positions=order,
+    ).values
+    values = numeric_values(table, context=CONTEXT)
+    annotation_table = adata.obs.loc[:, list(annotations)].iloc[order].copy()
+    for name in annotation_table:
+        if isinstance(annotation_table[name].dtype, pd.CategoricalDtype):
+            annotation_table[name] = annotation_table[name].cat.codes
+    annotation_values = numeric_values(annotation_table, context=CONTEXT)
+    if n_avg > 1:
+        values = running_average(values, n_avg)
+        annotation_values = running_average(annotation_values, n_avg)
+    if normalize_to_zero_one:
+        values = values - values.min(axis=0)
+        maximum = values.max(axis=0)
+        if np.any(maximum == 0):
+            raise ValueError(
+                f"{CONTEXT}: normalize_to_zero_one requires nonconstant profiles."
+            )
+        values = values / maximum
+    return PagaPathData(
+        pd.DataFrame(values, columns=list(keys)),
+        codes[order],
+        pd.DataFrame(annotation_values, columns=list(annotations)),
+        np.r_[0, np.cumsum([len(part) for part in ordered])],
+        tuple(str(categories[index]) for index in indices),
+        groups_key,
+    )

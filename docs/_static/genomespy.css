@@ -440,6 +440,11 @@ p.lead {
   margin: 1.25rem 0 0.5rem;
 }
 
+/* Keep native chart bounds reachable when wider than the article. */
+.gs-doc-embed.genome-spy .canvas-wrapper {
+  overflow-x: auto;
+}
+
 /* Match Furo's selected theme instead of the operating system's preference. */
 body[data-theme="dark"] .gs-doc-embed {
   color-scheme: dark;

@@ -10,7 +10,9 @@ before app-specific concepts. Notebook rendering is first-class; prefer `anywidg
 | Path | Purpose |
 | --- | --- |
 | `src/genome_spy/` | Installable library |
+| `src/genome_spy/integrations/<library>/` | Optional integration implementations |
 | `tests/` | pytest suite |
+| `integrations/` | Tracked integration plans and per-library workflow notebooks |
 | `scripts/` | Helpers run via `uv run` |
 | `plans/` | Plans, context, and implementation notes |
 | `material/` | Local reference documents; not committed |
@@ -19,12 +21,25 @@ before app-specific concepts. Notebook rendering is first-class; prefer `anywidg
 ## Working rules
 
 - Think before coding: state assumptions and tradeoffs; push back when warranted.
-- Solve the current problem with minimal code. Avoid speculative features and
-  premature abstractions; duplicate a little first. If 200 lines could be 50,
-  rewrite them.
+- Apply YAGNI and the [Ponytail rules](https://github.com/DietrichGebert/ponytail/blob/main/.agents/rules/ponytail.md):
+  complete the task with the least new code. Avoid unrequested features,
+  wrappers, conversions, options, and speculative abstractions. If 200 lines
+  could be 50, rewrite them.
+- Prefer existing repository code, then standard-library/platform features,
+  then installed dependencies, then minimal new code. Do not add a dependency
+  for a few lines of functionality.
+- Before editing, trace affected callers, tests, fixtures, configuration, and
+  exports. Fix shared root causes once and complete every affected part.
 - Make surgical changes: match existing style, remove imports/variables orphaned
-  by your edits, and leave unrelated code alone.
+  by your edits, preserve existing layers and native value forms, and leave
+  unrelated code alone. Keep validation and error handling when moving code.
+- Prefer equally small solutions that handle edge cases. Preserve security,
+  accessibility, trust-boundary checks, and required hardware calibration.
+- Keep comments to one-line explanations of why. Document deliberate shortcuts
+  as `shortcut: <the limit>, <when to upgrade>`.
 - Set verifiable goals and give a brief plan for multi-step work.
+- When work requires an upstream GenomeSpy PR, use
+  [contribute-genomespy](.agents/skills/contribute-genomespy/SKILL.md).
 - Keep core logic pure Python; isolate I/O and integration at the edges.
 - Follow the linked [language, docstring, formatting, and gallery standards](docs/contributing/standards.md).
   Read the relevant sections before Python or gallery edits; they are requirements.
@@ -35,9 +50,17 @@ Use pytest. Add or update tests for behavior changes, with fixed seeds for rando
 behavior. Keep tests small and focused on one behavior. Apply the "Suspicious
 Check": tighten any test that could pass for the wrong reason.
 
+Never commit or push generated test artifacts, including reference images,
+screenshots, overlays, recordings and chart exports. Generate them in temporary
+directories or ignored local caches; track test source, generators and deliberate
+text fixtures. Keep committed notebooks free of execution outputs and widget
+state. Check outgoing commit history before pushing: deleting artifacts from the
+current tree does not remove old blobs.
+
 Use `uv` for environments and dependencies. Before handoff, run targeted tests for
 changed behavior and lint. Format before finalizing non-trivial edits; type-check
-when public Python code changes. Report anything you could not validate locally.
+when public Python code changes. End the handoff with any skipped or unvalidated
+work and material risks.
 Ruff is the formatting/lint authority; fix issues rather than suppressing them by
 default.
 
@@ -58,8 +81,21 @@ explicitly asked.
 
 | Document | Read when |
 | --- | --- |
-| `plans/implementation_plan.md` | Starting implementation; understand phases and open questions |
-| `plans/deferred.md` | Adding scope; avoid intentionally deferred work |
-| `plans/architecture.md` | Changing public API shape, schema strategy, or notebook integration |
-| `plans/tmp_repo_index.md` | Using `tmp/` repos for wrapper/widget design |
-| `plans/project_bootstrap.md` | Updating or extending the initial scaffold |
+| `integrations/README.md` | Integration layout, plan lifecycle, and clearance rules |
+| `integrations/<library>/STATUS.md` | Current implementation, next slice, blockers, and retained evidence |
+| `integrations/<library>/PLAN.md` | Planning or extending a library integration; update status with implementation |
+| `plans/` | Optional ignored local context; may be absent. Tracked integration plans and status own current scope and delivery. |
+
+## GitHub review evidence
+
+- For PR/issue screenshots and recordings, use the authenticated GitHub CLI's
+  native `--attach` support; it does not require a browser login. Check
+  `gh pr comment --help` before assuming the installed CLI supports uploads.
+- The default `gh` on this machine is older. A working official CLI is cached at
+  `tmp/github-cli-2.103.2/gh_2.103.2_macOS_arm64/bin/gh` in this repository. Use
+  that binary when present, or a newer official CLI with `--attach` support.
+- Write multiline comment text to a temporary file, then run the capable binary:
+  `gh pr comment NUMBER --repo OWNER/REPO --body-file /private/tmp/comment.md --attach /absolute/demo.webm`.
+  The upload becomes a playable GitHub attachment. Verify the posted comment
+  contains its `github.com/user-attachments/assets/` URL. Keep media out of Git,
+  reuse configured CLI authentication, and never print tokens.

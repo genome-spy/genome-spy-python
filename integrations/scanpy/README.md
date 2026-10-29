@@ -1,0 +1,267 @@
+# Scanpy integration workspace
+
+Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
+[current compatibility guide](../../docs/integrations/scanpy/supported.md).
+The [detailed compatibility reference](COMPATIBILITY.md) retains parameter-level
+contracts, computation reuse decisions and validation evidence for development.
+See [remaining coverage](FUTURE.md) for the short post-release handoff.
+Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
+`gsc.pl.scatter(...)`, `gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
+`gsc.pl.correlation_matrix(...)` or `gsc.pl.clustermap(...)`.
+Stored doublet-score QC uses `gsc.pl.scrublet_score_distribution(...)`.
+Stored embedding density uses `gsc.pl.embedding_density(...)` after explicit
+`sc.tl.embedding_density(...)` preparation.
+Highest-expression QC uses `gsc.pl.highest_expr_genes(...)` on count data.
+Stored rankings add `gsc.pl.rank_genes_groups(...)`, `gsc.pl.ranking(...)`, and
+the ranked dotplot/matrixplot/heatmap wrappers.
+`gsc.pl.DotPlot(...)` chains tree/totals, axes, dot styles and native guides on
+the existing dotplot path. Use `.to_chart()` for native composition and saving.
+`gsc.pl.pca_loadings(...)` and `gsc.pl.pca_variance_ratio(...)` reuse the ranking
+panels for stored PCA results.
+`gsc.pl.pca_overview(...)` composes these diagnostics with the existing PCA scatter.
+`gsc.pl.highly_variable_genes(...)` and the legacy `filter_genes_dispersion(...)`
+show stored gene-selection diagnostics without rerunning analysis.
+Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
+
+The focused [UMAP](guides/umap.ipynb), [expression](guides/expression.ipynb),
+[tracks](guides/tracks.ipynb),
+[PCA](guides/pca.ipynb) and [ranked-gene](guides/ranked.ipynb)
+guide notebooks each supply their rendered page and notebook download.
+The [save/export notebook](guides/export.ipynb) demonstrates native image buttons,
+interactive HTML and JSON saving; the page links the shared export user guide.
+The longer notebooks under `notebooks/` remain the development workflows. Documentation builds execute only
+the guide's page examples; `jupyter-only` cells are shown without running them.
+`gsc.pl.sim(...)` displays stored simulation realizations using the time-series
+point and heatmap renderers; it never runs simulation.
+`gsc.pl.dpt_groups_pseudotime(...)` reuses the point renderer for stored DPT
+metadata, after explicit Scanpy preparation in the expression notebook.
+`gsc.pl.dpt_timeseries(...)` applies saved DPT row indices to X and reuses the
+heatmap/point renderers for expression profiles.
+`gsc.pl.paga(...)` renders stored undirected group connectivity with native graph
+marks. `gsc.pl.paga_compare(...)` composes it with stored embedding points
+and shared coordinates, using explicit normal on-data labels. Its palette applies
+to both panels; separate comparisons compose with independent navigation. Scanpy computes PAGA explicitly; its public no-plot API supplies missing
+layout coordinates without reading expression or creating figures.
+`gsc.pl.paga_adjacency(...)` reads explicitly assigned top-level adjacency/tree
+matrices, showing native matrix tiles or connectivity strips with as_heatmap=False.
+
+When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)
+and inspect recent commits and uncommitted changes first. STATUS owns the active
+slice, completed increments and remaining gates; PLAN owns scope and acceptance.
+Preserve work already in progress instead of restarting it from an older chat
+summary. The source map below describes the working checkout, not release readiness.
+
+The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
+not in this workspace or the documentation:
+
+Private packages group related data, charts and builders: `_embedding/`,
+`_expression/`, `_paga/`, `_timeseries/`, `_qc/` and `_ranking/`.
+Their initializers are empty. Shared validation, styles, labels, grid interactions
+and dendrogram helpers stay at the package root. Families import those helpers
+directly; `pl.py` keeps the public plotting signatures and display handling.
+
+| Source | Responsibility |
+| --- | --- |
+| [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
+| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures, plot-specific validation and native display/save handling. |
+| [_guards.py](../../src/genome_spy/integrations/scanpy/_guards.py) | Shared option guards and lazy optional dependency/version checks used directly by plotting functions and builders. |
+| [_expression/grouped_builder.py](../../src/genome_spy/integrations/scanpy/_expression/grouped_builder.py) | Concrete group ordering, tree/totals replacement and axis state shared by DotPlot and MatrixPlot. |
+| [_expression/dotplot_builder.py](../../src/genome_spy/integrations/scanpy/_expression/dotplot_builder.py) | Mutable DotPlot chains over detached summaries, shared tree/layout helpers and the native dotplot renderer. |
+| [_expression/matrixplot_builder.py](../../src/genome_spy/integrations/scanpy/_expression/matrixplot_builder.py) | Mutable MatrixPlot styles/guides over detached means or supplied summaries and the native tile renderer. |
+| [_ranking/data.py](../../src/genome_spy/integrations/scanpy/_ranking/data.py) | Stored ranking checks, public Scanpy result selection, statistic color tables and detached rank-label positions. No expression access or analysis. |
+| [_ranking/chart.py](../../src/genome_spy/integrations/scanpy/_ranking/chart.py) | Native score labels, axes and multi-panel layout shared by ranking, PCA loadings/variance and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |
+| [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared scalar/numeric-table validation, raw/layer resolution and resident-expression checks; reused by preparation and chart modules. |
+| [_expression/grouped_data.py](../../src/genome_spy/integrations/scanpy/_expression/grouped_data.py) | Selected values, feature slots/brackets, group counts and summaries. Shared scale_values serves cells and group means; heatmap adds cell permutations/group spans. No chart authoring or fixed size caps. |
+| [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) | Shared schemes, CSS colors, continuous color bounds, fonts and point units for every plot; categorical/continuous preparation and explicit embedding style settings live here too. |
+| [_dendrogram_data.py](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py) | Read stored Scanpy results, delegate missing trees to sc.tl.dendrogram and share leaf/marker permutations. |
+| [_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py) | Shared native orthogonal links from stored branches, including gapped side tracks; no clustering. |
+| [_expression/correlation_chart.py](../../src/genome_spy/integrations/scanpy/_expression/correlation_chart.py) | Native correlation tiles, numbers, labels, hover and optional tree. |
+| [_expression/grouped_chart.py](../../src/genome_spy/integrations/scanpy/_expression/grouped_chart.py) | Dotplot/matrixplot share index slots, labels, brackets, sizing, guides, native totals and attached-tree layout; correlation reuses index coordinates. |
+| [_expression/matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_expression/matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
+| [_expression/matrix_chart.py](../../src/genome_spy/integrations/scanpy/_expression/matrix_chart.py) | Supplied numeric matrix and time-series heatmap tiles, axes, labels and color guide; shared numeric validation and grid interactions, without AnnData access. |
+| [_timeseries/data.py](../../src/genome_spy/integrations/scanpy/_timeseries/data.py) | Supplied-profile point order, color subsets, masks and bounds; shared numeric/color checks, without analysis or chart authoring. |
+| [_timeseries/chart.py](../../src/genome_spy/integrations/scanpy/_timeseries/chart.py) | Native time-series points, axes and guides using shared marker, zoom and dashed-highlight helpers. |
+| [_paga/data.py](../../src/genome_spy/integrations/scanpy/_paga/data.py) | Read stored sparse group graphs, delegate layouts to Scanpy's public no-plot API, and prepare node/edge tables with shared validation and colors. No PAGA analysis or expression access. |
+| [_paga/chart.py](../../src/genome_spy/integrations/scanpy/_paga/chart.py) | Native rules, points and labels with shared coordinate, unit and navigation helpers. No graph analysis or AnnData access. |
+| [_expression/clustermap_data.py](../../src/genome_spy/integrations/scanpy/_expression/clustermap_data.py) | Bounded full-subset access, Seaborn-compatible scaling and color tracks, public SciPy or supplied row/column linkage. |
+| [_expression/clustermap_chart.py](../../src/genome_spy/integrations/scanpy/_expression/clustermap_chart.py) | Shared matrix tiles, labels, fitted values and native surround tracks; aligned trees, color strips and a native observation-category legend. |
+| [_expression/heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_expression/heatmap_chart.py) | Cell tiles and native surround tracks with shared index gaps, category bands, centered labels and stored tree links; reuses grouped labels/brackets and fitted values, with optional aligned zoom (y-only by default). |
+| [_expression/tracksplot_chart.py](../../src/genome_spy/integrations/scanpy/_expression/tracksplot_chart.py) | Native per-cell bars, independent gene scales and shared x navigation; reuses grouped cell preparation, category strips, palettes and tree links. |
+| [_expression/dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_expression/dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
+| [_embedding/data.py](../../src/genome_spy/integrations/scanpy/_embedding/data.py) | Resolve stored bases, shared coordinate labels and selected expression/metadata; retain row identity, masks, sizes and draw order. |
+| [_embedding/density_data.py](../../src/genome_spy/integrations/scanpy/_embedding/density_data.py) | Read stored density metadata and group masks into the existing embedding table/panels; no KDE, expression access or independent renderer. |
+| [_embedding/scatter_data.py](../../src/genome_spy/integrations/scanpy/_embedding/scatter_data.py) | Scatter-specific cell/gene orientation, per-axis layers, selected public vectors and legacy basis/order rules; detached variable-gene QC metadata. Reuses shared numeric checks and embedding identities. |
+| [_qc/hvg_chart.py](../../src/genome_spy/integrations/scanpy/_qc/hvg_chart.py) | Native paired QC point panels, stored-statistic axis limits, shared bottom legend and optional hover/zoom; no analysis or expression access. |
+| [_embedding/chart.py](../../src/genome_spy/integrations/scanpy/_embedding/chart.py) | Native points, axes, legends, labels, and panel composition. |
+| [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py) | Shared index navigation/projection and native fitted values/contrast; no AnnData access. Dotplot highlighting uses a native ruler. |
+| [_embedding/interactions.py](../../src/genome_spy/integrations/scanpy/_embedding/interactions.py) | Optional hover, plain brush ownership, and count. |
+| [_embedding/selection.py](../../src/genome_spy/integrations/scanpy/_embedding/selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
+
+Scanpy owns analysis. UMAP's data module only resolves the inputs a plotting call
+needs: which raw/layer vector a gene refers to, which categories to display, and
+which existing coordinate columns to send. Expression access uses AnnData's
+public `obs_vector`; no upstream plotting or private plotting helpers run.
+`scanpy.get.obs_df` is not used for UMAP because its duplicate-label rejection and
+raw symbol lookup differ from UMAP's behavior. Grouped plots use that public
+getter directly, with only selected unique keys. Public AnnData string conversion
+operates on the detached table, preserving category order without mutating AnnData.
+Grouped statistics are independently tested before adding the dotplot chart.
+The [computation reuse audit](COMPATIBILITY.md#reusing-scanpy-computations)
+records which public methods are used and why aggregate/scale or plotting-class
+shortcuts would change semantics or ownership.
+
+There are no Matplotlib imports, figure creation, global style reads, or Python
+colormap sampling in the adapter. CSS palette values, including saved AnnData
+palettes and Scanpy's public default palette lists, go directly to native scales.
+GenomeSpy maps continuous values and draws the guides. Plotting retains source
+measurements; it does not compute embeddings, rankings, or new scientific results.
+
+The [status ledger](STATUS.md#public-callable-coverage) records available previews
+and remaining families. New chart families reuse compatible AnnData access, category/color handling, and
+plotting computations. A separate data module per family is optional: add one
+only when that family needs distinct preparation that merits its own module.
+Share common operations directly; there is no requirement to implement another
+family before extracting a useful shared helper. Reuse suitable public
+Scanpy/AnnData functions and existing library helpers first.
+
+Apply YAGNI to new functionality and abstractions: implement the current plot's
+needs with small functions, without building a general adapter framework. Keep
+shared functions focused on equivalent semantics, including raw/layer selection,
+ordering, thresholds, and normalization. Review basic plot reproduction before
+adding interactions.
+
+The shared helpers above have current callers; they are not a general adapter
+framework. Keep differing semantics explicit: UMAP and grouped expression use
+different lookups, dotplot and matrixplot scale at different stages, and their
+layouts differ from standalone trees/correlation matrices. Reuse those common
+parts directly when later families arrive. A chart module per family
+does not imply a separate validator, color system, data accessor or tree layout.
+Heatmap supplies an explicit observation permutation and unequal group centers
+to the shared tree renderer. Its native side tracks share gapped index scales;
+summary plots retain their equal-slot projection.
+
+## Plotting workflows
+
+Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
+
+- [UMAP](notebooks/scanpy_umap.ipynb): basic categorical/continuous plotting with
+  x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
+  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA scatter, stored loadings, variance ratios and their composed overview reuse embedding/ranking helpers. Cell/gene scatter examples read packaged observation and variable annotations without an embedding.
+- [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
+  matrixplot, individual-cell heatmap, supplied numeric matrix, aligned dendrograms, y-only zoom (both axes optional), fitted tile values and dot row/column highlighting using the core tutorial
+  dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python
+  from the dataset’s existing PCA representation. Clustermap then clusters all
+  700 individual cells and the same ten raw-snapshot marker genes using public
+  SciPy linkage, rather than reusing a group-profile tree.
+  A final section reads packaged logreg scores and explicitly computes a separate
+  ranking for statistic colors, reusing summaries, trees and interactions.
+  Variable-gene QC panels then inspect the packaged stored selection and statistics.
+  Supplied time-series heatmaps and point plots reuse the PBMC markers, explicitly
+  ordered by the stored S-phase score; neither chart infers time or pseudotime.
+  Two native time-series subplots compare stored phase and G2M-score colors,
+  reusing the same GNLY values with independent scales, guides and navigation.
+
+These adapt supported portions of the official core and advanced tutorials.
+Keep related examples together within each workflow, without placeholder cells
+for unimplemented plots.
+
+From the repository root:
+
+```sh
+uv sync --dev --extra scanpy --group scanpy-test
+uv run jupyter lab integrations/scanpy/notebooks/
+```
+
+## Documentation guides
+
+Focused, output-free notebooks in [guides/](guides/) supply both the live pages
+and their downloads. [PAGA](guides/paga.ipynb) covers networks, comparisons,
+adjacency and paths. [Profiles and simulations](guides/profiles.ipynb) covers
+supplied profiles, Krumsiek11 runs and DPT results, with native run/gene focus.
+Data checks use full Scanpy PBMC3k counts. Other Scanpy datasets belong in the
+relevant plotting guides, with one-line dataset loading. The UMAP guide also
+uses all 36,785 ovarian cortex cells from Expression Atlas E-MTAB-8381, with
+explicit Scanpy preparation and the same plotting API. Attribution
+and processing are recorded in each notebook and [third-party notices](../../THIRD_PARTY_NOTICES.md).
+
+Prepare their inputs explicitly before building the docs (Python 3.11+):
+
+```sh
+uv run integrations/scanpy/prepare_guide_data.py
+uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+```
+
+The preparation command runs the notebooks' analysis cells and caches AnnData
+under ignored `tmp/scanpy-guide-data/`. It reuses matching inputs and rejects
+stale or corrupted caches during page builds. Scanpy-version and preparation-code
+changes require preparation again. CI runs the same command before Sphinx.
+Ordinary Sphinx builds read those files without downloads, Scrublet, PAGA/layout,
+DPT or embedding analysis. Downloaded notebooks run the shown Scanpy steps
+independently. The docs dependency group includes Scanpy's existing PAGA extra.
+
+## Validation
+
+The suite has 18 Python test modules and 16 browser test modules, grouped by
+plot family and shared behavior. Classes keep distinct fixture setups local to
+their test section. The workflow notebook checks stay in their own module.
+
+Tests live under `tests/integrations/scanpy/`. Ordinary PRs run fast Python checks
+against Scanpy 1.11.5 and 1.12.4, plus observed browser smoke checks once. Main,
+full manual runs and releases also run upstream comparisons, every browser check
+and both workflow notebooks. Release CI explicitly enables `full_scanpy`.
+New PR updates cancel superseded PR runs; main and release checks are retained.
+
+```sh
+uv sync --dev --extra scanpy --group scanpy-test
+# Fast checks, including numeric fixtures and allocation regressions.
+uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -m 'not reference and not workflow'
+# Representative gestures, linked views, tooltips and layout.
+uv run --no-sync python -m playwright install chromium
+uv run --no-sync pytest tests/integrations/scanpy/browser -m smoke
+# Full verification, including every marked check.
+uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
+uv run --no-sync pytest tests/integrations/scanpy/browser
+# Complete notebook execution only.
+uv run --no-sync pytest tests/integrations/scanpy/test_notebooks.py -m workflow
+```
+
+Markers use ordinary pytest selection: `reference` means live upstream plotting
+or visual comparison; `workflow` means complete notebook execution; `smoke`
+selects observed browser behavior. Unfiltered pytest still runs all tests. The
+[cleanup record](PLAN.md#test-cleanup-and-ci-selection) explains the reductions.
+Base Linux/Windows CI tests lightweight imports and missing-extra errors without
+collecting the scientific suite.
+
+Small synthetic fixtures isolate missing values, duplicate labels/coordinates,
+raw/layer differences, sparse allocation and exact boundaries. Independent hand
+calculations and frozen numeric fixtures protect data semantics. Reference
+renderers provide fresh pinned Scanpy figures for full browser comparisons;
+they are test inputs, not production data preparation.
+
+Shared guards and display behavior are checked at their owner, with public
+routing checks. DotPlot and MatrixPlot share builder tests; their distinct data
+and styling regressions stay separate. Browser comparisons share plot-area
+capture without changing registration or pixel scale.
+
+Public signatures are compared directly with installed Scanpy. Only the four
+legacy aliases whose signatures are hidden in Scanpy 1.12 retain pinned parameter
+lists. Numerical JSON files keep deliberate expectations for values and geometry;
+compatibility changes require reviewing those expectations against upstream.
+
+One [image helper](../../tests/integrations/scanpy/browser/references.py) renders
+pinned Scanpy comparisons on demand in pytest's temporary directories. It does
+not regenerate tracked JSON or write reports. Family data fixtures share five
+small modules for embeddings, expression grids, profiles, QC and PAGA; ranked
+inputs remain separate. Reference rendering may inspect Matplotlib axes;
+production plotting does not.
+
+The seven manual timing/report programs have been removed. Their useful source
+and allocation checks remain in deterministic regressions for embeddings, grouped
+expression, clustermap, rankings and QC. No timing thresholds or new benchmark
+framework replace them. Generated media, reports, logs and notebook outputs stay
+outside Git.
+
+The expression workflow also includes PAGA path heatmaps and lines. Scanpy
+explicitly computes pseudotime; both plots reuse the same ordered, smoothed
+profiles. Native tiles/tracks or round-cap rules display the supplied group
+order, without inferring a trajectory. Lines include hover and optional zoom.

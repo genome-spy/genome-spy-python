@@ -1,6 +1,6 @@
 [project]
 name = "genome-spy-python"
-version = "0.7.0"
+version = "0.8.0"
 description = "genome-spy-python is a declarative genomics visualization library for Python, built on top of the genome-spy JSON specification."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -15,6 +15,7 @@ license-files = [
     "LICENSES/DATA-SOURCE-REPOSITORIES-MIT.txt",
     "LICENSES/GENOMESPY-MIT.txt",
     "LICENSES/LATO-OFL-1.1.txt",
+    "LICENSES/SCANPY-BSD-3-Clause.txt",
     "LICENSES/VEGA-LITE-BSD-3-Clause.txt",
     "LICENSES/VEGA-BSD-3-Clause.txt",
     "THIRD_PARTY_NOTICES.md",
@@ -50,10 +51,22 @@ Issues = "https://github.com/genome-spy/genome-spy-python/issues"
 [project.optional-dependencies]
 anndata = ["anndata>=0.11.0"]
 arrow = ["pyarrow>=18.0.0"]
+scanpy = ["scanpy[paga]>=1.11.5,<1.13"]
 
 [dependency-groups]
+scanpy-test = [
+    "scanpy[paga]==1.11.5",
+    "anndata==0.12.19",
+    "matplotlib==3.11.2",
+    "numpy==2.4.6",
+    "pandas==2.3.3",
+    "scipy==1.17.1",
+    "pillow==12.3.0",
+    "playwright==1.64.0",
+]
 docs = [
     "anndata>=0.11.0",
+    "scanpy[paga]==1.11.5",
     "furo>=2024.8.6",
     "sphinx>=7.3",
     "myst-parser>=3.0",
@@ -90,6 +103,22 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# Exclude local output even when building outside a normal Git checkout.
+[tool.hatch.build]
+exclude = [
+    "/tmp",
+    "/data",
+    "/plans",
+    "/material",
+    "/docs/_build",
+    "/docs/gallery",
+    "/docs/generated",
+    "/docs/_static/specs",
+    "/docs/_static/generated",
+    "/tests/**/*.png",
+    "/tests/**/*performance*.json",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/genome_spy"]
 artifacts = [
@@ -117,7 +146,11 @@ core-version = "1.2.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--strict-markers"
 markers = [
+    "reference: live upstream plotting and registered visual comparisons",
+    "workflow: complete notebooks and real-data preparation",
+    "smoke: representative observed browser interactions and layouts",
     "codegen: schema-generation tooling tests run by the dedicated codegen job",
     "docs: documentation and gallery tests excluded from package CI",
 ]

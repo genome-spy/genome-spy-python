@@ -1,0 +1,505 @@
+{
+  "scanpy": "1.11.5",
+  "entries": {
+    "DotPlot": {
+      "kind": "class"
+    },
+    "MatrixPlot": {
+      "kind": "class"
+    },
+    "StackedViolin": {
+      "kind": "class"
+    },
+    "clustermap": {
+      "kind": "function"
+    },
+    "correlation_matrix": {
+      "kind": "function"
+    },
+    "dendrogram": {
+      "kind": "function"
+    },
+    "diffmap": {
+      "kind": "function"
+    },
+    "dotplot": {
+      "kind": "function"
+    },
+    "dpt_groups_pseudotime": {
+      "kind": "function"
+    },
+    "dpt_timeseries": {
+      "kind": "function"
+    },
+    "draw_graph": {
+      "kind": "function"
+    },
+    "embedding": {
+      "kind": "function"
+    },
+    "embedding_density": {
+      "kind": "function"
+    },
+    "filter_genes_dispersion": {
+      "kind": "function"
+    },
+    "heatmap": {
+      "kind": "function"
+    },
+    "highest_expr_genes": {
+      "kind": "function"
+    },
+    "highly_variable_genes": {
+      "kind": "function"
+    },
+    "matrix": {
+      "kind": "function"
+    },
+    "matrixplot": {
+      "kind": "function"
+    },
+    "paga": {
+      "kind": "function"
+    },
+    "paga_adjacency": {
+      "kind": "function"
+    },
+    "paga_compare": {
+      "kind": "function"
+    },
+    "paga_path": {
+      "kind": "function"
+    },
+    "pca": {
+      "kind": "function"
+    },
+    "pca_loadings": {
+      "kind": "function"
+    },
+    "pca_overview": {
+      "kind": "function"
+    },
+    "pca_scatter": {
+      "kind": "function"
+    },
+    "pca_variance_ratio": {
+      "kind": "function"
+    },
+    "rank_genes_groups": {
+      "kind": "function"
+    },
+    "rank_genes_groups_dotplot": {
+      "kind": "function"
+    },
+    "rank_genes_groups_heatmap": {
+      "kind": "function"
+    },
+    "rank_genes_groups_matrixplot": {
+      "kind": "function"
+    },
+    "rank_genes_groups_stacked_violin": {
+      "kind": "function"
+    },
+    "rank_genes_groups_tracksplot": {
+      "kind": "function"
+    },
+    "rank_genes_groups_violin": {
+      "kind": "function"
+    },
+    "ranking": {
+      "kind": "function"
+    },
+    "scatter": {
+      "kind": "function"
+    },
+    "scrublet_score_distribution": {
+      "kind": "function"
+    },
+    "set_rcParams_defaults": {
+      "kind": "function"
+    },
+    "set_rcParams_scanpy": {
+      "kind": "function"
+    },
+    "sim": {
+      "kind": "function"
+    },
+    "spatial": {
+      "kind": "function"
+    },
+    "stacked_violin": {
+      "kind": "function"
+    },
+    "timeseries": {
+      "kind": "function"
+    },
+    "timeseries_as_heatmap": {
+      "kind": "function"
+    },
+    "timeseries_subplot": {
+      "kind": "function"
+    },
+    "tracksplot": {
+      "kind": "function"
+    },
+    "tsne": {
+      "kind": "function"
+    },
+    "umap": {
+      "kind": "function"
+    },
+    "violin": {
+      "kind": "function"
+    }
+  },
+  "legacy_parameters": {
+    "pca_scatter": [
+      {
+        "name": "adata",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null
+      },
+      {
+        "name": "color",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "mask_obs",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "gene_symbols",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "use_raw",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "sort_order",
+        "kind": "KEYWORD_ONLY",
+        "default": "True"
+      },
+      {
+        "name": "edges",
+        "kind": "KEYWORD_ONLY",
+        "default": "False"
+      },
+      {
+        "name": "edges_width",
+        "kind": "KEYWORD_ONLY",
+        "default": "0.1"
+      },
+      {
+        "name": "edges_color",
+        "kind": "KEYWORD_ONLY",
+        "default": "'grey'"
+      },
+      {
+        "name": "neighbors_key",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "arrows",
+        "kind": "KEYWORD_ONLY",
+        "default": "False"
+      },
+      {
+        "name": "arrows_kwds",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "groups",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "components",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "dimensions",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "layer",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "projection",
+        "kind": "KEYWORD_ONLY",
+        "default": "'2d'"
+      },
+      {
+        "name": "scale_factor",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "color_map",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "cmap",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "palette",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "na_color",
+        "kind": "KEYWORD_ONLY",
+        "default": "'lightgray'"
+      },
+      {
+        "name": "na_in_legend",
+        "kind": "KEYWORD_ONLY",
+        "default": "True"
+      },
+      {
+        "name": "size",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "frameon",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "legend_fontsize",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "legend_fontweight",
+        "kind": "KEYWORD_ONLY",
+        "default": "'bold'"
+      },
+      {
+        "name": "legend_loc",
+        "kind": "KEYWORD_ONLY",
+        "default": "'right margin'"
+      },
+      {
+        "name": "legend_fontoutline",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "colorbar_loc",
+        "kind": "KEYWORD_ONLY",
+        "default": "'right'"
+      },
+      {
+        "name": "vmax",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "vmin",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "vcenter",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "norm",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "add_outline",
+        "kind": "KEYWORD_ONLY",
+        "default": "False"
+      },
+      {
+        "name": "outline_width",
+        "kind": "KEYWORD_ONLY",
+        "default": "(0.3, 0.05)"
+      },
+      {
+        "name": "outline_color",
+        "kind": "KEYWORD_ONLY",
+        "default": "('black', 'white')"
+      },
+      {
+        "name": "ncols",
+        "kind": "KEYWORD_ONLY",
+        "default": "4"
+      },
+      {
+        "name": "hspace",
+        "kind": "KEYWORD_ONLY",
+        "default": "0.25"
+      },
+      {
+        "name": "wspace",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "title",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "show",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "save",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "ax",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "return_fig",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "marker",
+        "kind": "KEYWORD_ONLY",
+        "default": "'.'"
+      },
+      {
+        "name": "annotate_var_explained",
+        "kind": "KEYWORD_ONLY",
+        "default": "False"
+      },
+      {
+        "name": "kwargs",
+        "kind": "VAR_KEYWORD",
+        "default": null
+      }
+    ],
+    "timeseries": [
+      {
+        "name": "X",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null
+      },
+      {
+        "name": "kwargs",
+        "kind": "VAR_KEYWORD",
+        "default": null
+      }
+    ],
+    "timeseries_as_heatmap": [
+      {
+        "name": "X",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null
+      },
+      {
+        "name": "var_names",
+        "kind": "KEYWORD_ONLY",
+        "default": "()"
+      },
+      {
+        "name": "highlights_x",
+        "kind": "KEYWORD_ONLY",
+        "default": "()"
+      },
+      {
+        "name": "color_map",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      }
+    ],
+    "timeseries_subplot": [
+      {
+        "name": "X",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "default": null
+      },
+      {
+        "name": "time",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "color",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "var_names",
+        "kind": "KEYWORD_ONLY",
+        "default": "()"
+      },
+      {
+        "name": "highlights_x",
+        "kind": "KEYWORD_ONLY",
+        "default": "()"
+      },
+      {
+        "name": "xlabel",
+        "kind": "KEYWORD_ONLY",
+        "default": "''"
+      },
+      {
+        "name": "ylabel",
+        "kind": "KEYWORD_ONLY",
+        "default": "'gene expression'"
+      },
+      {
+        "name": "yticks",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "xlim",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "legend",
+        "kind": "KEYWORD_ONLY",
+        "default": "True"
+      },
+      {
+        "name": "palette",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "color_map",
+        "kind": "KEYWORD_ONLY",
+        "default": "'viridis'"
+      },
+      {
+        "name": "ax",
+        "kind": "KEYWORD_ONLY",
+        "default": "None"
+      },
+      {
+        "name": "marker",
+        "kind": "KEYWORD_ONLY",
+        "default": "'.'"
+      }
+    ]
+  }
+}

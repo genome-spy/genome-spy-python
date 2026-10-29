@@ -110,17 +110,32 @@ function fixture(datasets = []) {
   }
   return {
     model: new MockModel(values),
-    el: {
+    el: Object.assign(new EventTarget(), {
       textContent: "",
       style: {},
       replaceCount: 0,
       replaceChildren() {
         this.replaceCount += 1;
       },
-    },
+    }),
     controller: new AbortController(),
   };
 }
+
+test("chart mousedown stays inside the widget until disposal", async () => {
+  const f = fixture();
+  globalThis.__widgetEmbed = async () => apiFixture().api;
+  await renderChart({ ...f, signal: f.controller.signal });
+  let stopped = 0;
+  const event = new Event("mousedown", { bubbles: true, cancelable: true });
+  event.stopPropagation = () => { stopped += 1; };
+  f.el.dispatchEvent(event);
+  assert.equal(stopped, 1);
+  assert.equal(event.defaultPrevented, false);
+  f.controller.abort();
+  f.el.dispatchEvent(event);
+  assert.equal(stopped, 1);
+});
 
 test("embed attachment rejects distinct proxies for the same displayed widget", async () => {
   const first = fixture();

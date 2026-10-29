@@ -30,6 +30,13 @@ The project is under active development. The current focus is the reusable
 GenomeSpy Core grammar and notebook rendering; GenomeSpy App-specific features
 will come later.
 
+Optional library integrations keep upstream analysis workflows and replace
+supported plotting calls. The [integration workspace](integrations/README.md)
+links each implementation, tracked plan, workflow notebooks, tests, and user guide.
+The Scanpy integration is implemented in
+[`src/genome_spy/integrations/scanpy/`](src/genome_spy/integrations/scanpy/), exposed as
+`import genome_spy.integrations.scanpy as gsc` and `gsc.pl.umap(...)`.
+
 ## Installation
 
 The package requires Python 3.11 or newer.
@@ -38,6 +45,12 @@ From PyPI:
 
 ```bash
 pip install genome-spy-python
+```
+
+For Scanpy plotting:
+
+```bash
+pip install --upgrade 'genome-spy-python[scanpy]'
 ```
 
 From source:

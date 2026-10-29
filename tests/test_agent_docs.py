@@ -155,7 +155,7 @@ def test_authored_python_examples_execute_and_validate(
 
 
 def test_sphinx_html_build_includes_plain_agent_outputs(tmp_path: Path) -> None:
-    from sphinx.application import Sphinx
+    from sphinx.testing.util import SphinxTestApp
     import io
 
     source = tmp_path / "source"
@@ -169,17 +169,18 @@ def test_sphinx_html_build_includes_plain_agent_outputs(tmp_path: Path) -> None:
     )
     output = tmp_path / "html"
     warnings = io.StringIO()
-    app = Sphinx(
-        str(source),
-        str(source),
-        str(output),
-        str(tmp_path / "doctrees"),
-        "html",
+    app = SphinxTestApp(
+        srcdir=source,
+        builddir=tmp_path,
         status=io.StringIO(),
         warning=warnings,
         warningiserror=True,
     )
-    app.build()
+    # Sphinx registers global nodes and roles that later builds must not inherit.
+    try:
+        app.build()
+    finally:
+        app.cleanup()
     assert app.statuscode == 0, warnings.getvalue()
     assert (output / "index.html").is_file()
     assert (output / "llms.txt").is_file()

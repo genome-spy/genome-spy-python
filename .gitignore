@@ -54,6 +54,11 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Generated test images stay local or in temporary CI artifacts.
+/tests/**/*.png
+# Scanpy downloads this count dataset on first use; it is never vendored.
+**/data/pbmc3k_raw.h5ad
+
 # Translations
 *.mo
 *.pot
@@ -251,3 +256,6 @@ scripts/_fetch_reference.py
 
 # Local recording demos and working files
 /demos/
+
+# Generated Scanpy benchmark observations are not reference fixtures.
+tests/integrations/scanpy/fixtures/*performance*.json

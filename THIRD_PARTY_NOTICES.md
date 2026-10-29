@@ -108,6 +108,13 @@ selection, formatting and example contributions.
 
 ## PBMC marker expression
 
+The Scanpy documentation also displays `scanpy.datasets.pbmc68k_reduced()` from
+Scanpy 1.11.5. This packaged subset contains 700 cells from the
+[10x Genomics PBMC68k dataset](https://www.10xgenomics.com/datasets/fresh-68-k-pbm-cs-donor-a-1-standard-1-1-0),
+licensed CC BY 4.0. Credit 10x Genomics and Scanpy's preprocessing contributors;
+the examples retain the supplied UMAP coordinates, expression and annotations.
+The source H5AD is loaded from Scanpy and is not vendored in this repository.
+
 `pbmc_markers.json.gz` contains selected markers from 2,638 cells in Scanpy's processed
 PBMC3k fixture, obtained from [cellxgene revision
 68dfbcc](https://github.com/chanzuckerberg/cellxgene/blob/68dfbcc2eb675e96c6a5e2a6b7a0d3465ccf46bc/example-dataset/pbmc3k.h5ad).
@@ -118,6 +125,48 @@ cells while preserving within-group order, and adds marker means, a single-linka
 Euclidean group tree, and plotting coordinates. `tools/prepare_pbmc_gallery_data.py` reproduces these modifications;
 the source checksum is retained in the bundle. The CC BY 4.0 text is in
 `LICENSES/CC-BY-4.0.txt`.
+
+The Scanpy data-check guide uses the full raw PBMC3k counts loaded through
+`scanpy.datasets.pbmc3k()` (2,700 cells × 32,738 genes). Scanpy prepares the
+normalization, variable-gene statistics and Scrublet results explicitly.
+
+## Expression Atlas ovarian cortex example
+
+The UMAP guide uses the public [E-MTAB-8381 study](https://www.ebi.ac.uk/gxa/sc/experiments/E-MTAB-8381)
+from EMBL-EBI Single Cell Expression Atlas: 36,785 cells × 23,772 genes in the
+download accessed on 27 October 2026. Credit Wagner, Yoshihara, Douagi et al.,
+[Single-cell analysis of human ovarian cortex identifies distinct cell populations
+but no oogonial stem cells](https://doi.org/10.1038/s41467-020-14936-3),
+Nature Communications 11, 1147 (2020), and the Atlas contributors.
+The publication is CC BY 4.0; the public Atlas download is provided under the
+[EMBL-EBI terms of use](https://www.ebi.ac.uk/about/terms-of-use/), which impose
+no additional restrictions beyond those of the data owner and require attribution.
+
+Scanpy loads the study, normalizes/log-transforms counts, selects 2,000 variable
+genes for PCA, and computes neighbors and UMAP with seed 0. All Atlas cells are
+retained. The chart shows normalized VWF expression (ENSG00000110799), with the
+color range capped at the 99th percentile. This plotting example does not
+reproduce the paper's filtering, integration or biological analysis. Downloads and
+prepared H5AD files stay in ignored caches; no dataset is added to Git.
+
+## Scanpy simulation examples
+
+The profiles guide displays Scanpy 1.11.5's packaged `krumsiek11()` simulation
+(640 samples × 11 genes, four runs of 160 samples), based on
+[Krumsiek et al. (2011)](https://doi.org/10.1371/journal.pone.0022649).
+Credit the model authors and Scanpy's simulation contributors. The stored
+simulation is loaded without rerunning it; five genes are shown. Sample names
+are made unique and integer highlight keys are stored as strings for H5AD,
+without changing values or row order. Scanpy explicitly prepares neighbors,
+diffusion components and DPT annotations for the later examples.
+The source table is supplied by Scanpy and is not vendored here. Its repository's
+copyright notice and BSD-3-Clause terms are retained in
+`LICENSES/SCANPY-BSD-3-Clause.txt`, including in the published documentation.
+
+The PAGA guide reuses the PBMC68k subset credited above. Scanpy explicitly
+prepares PAGA, graph positions and pseudotime; supplied UMAP coordinates and
+expression snapshots are retained. No new biological trajectory is claimed
+by the example's chosen group order.
 
 ## Bundled TCGA example tables
 
