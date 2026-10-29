@@ -52,7 +52,9 @@ states below describe coverage; they do not require a preview release label.
 
 The working guide uses fixed gene lists, native brushing/counts, UMAP-linked
 histograms/means and PBMC3k tracks. Embedding and expression workflows remain
-separate; focused guides provide the user-facing pages and downloads.
+separate; focused guides provide the user-facing pages and downloads. The UMAP
+guide includes a nine-panel gene/annotation grid, with square panels and
+shared zoom built from the existing plots and native grid container.
 
 The prototype value and clustering-distance caps are removed. Heatmaps, tracks,
 linked summaries, ranked heatmaps, PAGA paths/adjacency and clustermaps accept

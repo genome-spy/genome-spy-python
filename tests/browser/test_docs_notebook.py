@@ -343,6 +343,16 @@ def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
     import genome_spy.integrations.scanpy as gsc
 
     specs = _render_guide(page, monkeypatch, "umap.ipynb")
+    # Every grid panel stays square, including the categorical panel with a legend.
+    grid = page.evaluate("""() => guideApis[13].debug.getViewRoot().getDescendants()
+        .filter(v => v.spec.mark?.type === 'point'
+            && v.spec.encoding?.x?.field?.startsWith('_coord_'))
+        .map(v => ({x:v.coords.x, y:v.coords.y, width:v.coords.width, height:v.coords.height}))
+    """)
+    assert len(grid) == 9
+    assert all(abs(p["width"] - p["height"]) < 0.1 for p in grid)
+    assert len({round(p["x"]) for p in grid}) == 3
+    assert len({round(p["y"]) for p in grid}) == 3
     width = page.viewport_size["width"]
     page.evaluate("""() => {
         window.points = index => guideApis[index].debug.getViewRoot()
@@ -446,7 +456,7 @@ def test_prepared_embedding_guide_hover_and_zoom(monkeypatch, page, index, label
     from tests.integrations.scanpy.browser.interactions import hover_at
 
     specs = _render_guide(page, monkeypatch, "umap.ipynb")
-    assert len(specs) == 13
+    assert len(specs) == 14
     page.evaluate("i => {window.api = guideApis[i];}", index)
     bounds = page.evaluate("""() => {
         window.embedding = api.debug.getViewRoot().getDescendants()
