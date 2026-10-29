@@ -9,7 +9,7 @@ import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.interactions import move_to
+from tests.integrations.scanpy.browser.interactions import move_to, wait_for_navigation
 from tests.integrations.scanpy.browser.rendering import (
     assert_complete_chart,
     panel_image,
@@ -248,11 +248,16 @@ class TestUmap:
             "before => ['umap-x-0', 'umap-y-1'].every((name, i) => {\n            const domain = api.getScaleResolutionByName(name).getDomain();\n            return domain[1] - domain[0] < before[i][1] - before[i][0];\n        })",
             arg=domains,
         )
+        # Finish the wheel gesture before issuing a separate reset action.
+        wait_for_navigation(page, "umap", scale_names=["umap-x-0", "umap-y-1"])
         assert page.locator("canvas").first.screenshot() != before
         page.evaluate("api.getScaleResolutionByName('umap-x-0').resetZoom()")
         page.evaluate("api.getScaleResolutionByName('umap-y-1').resetZoom()")
         page.wait_for_function(
-            "() => Math.abs(api.getScaleResolutionByName('umap-x-0').getDomain()[0] + 2.2) < 1e-6"
+            """before => ['umap-x-0', 'umap-y-1'].every((name, i) =>
+                api.getScaleResolutionByName(name).getDomain().every(
+                    (value, j) => Math.abs(value - before[i][j]) < 1e-6))""",
+            arg=domains,
         )
         output = tmp_path / "umap.html"
         chart.save(output, inline=True, controls=False)

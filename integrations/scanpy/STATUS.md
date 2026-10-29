@@ -140,6 +140,14 @@ on both Scanpy versions. Collection, lint, format and workflow lint passed.
 Workflows and unselected browser parameter combinations are unchanged and are
 not rerun in this pass.
 
+The first hosted layout run passed Python compatibility and the other jobs but
+failed one UMAP smoke check: it reset the scales while wheel motion was still
+running. A local probe confirmed that remaining wheel frames overwrote the reset.
+The check now waits for completed navigation through the shared helper, then
+verifies both axes against their captured initial domains. Three fresh browser
+runs passed, and all 65 UMAP/shared-helper grid checks passed.
+No Core bundle, timeout or visual tolerance was changed.
+
 The refreshed hosted run remains the clearance gate. Keep this maintenance slice
 open until its configured jobs pass. Generated images, reports, inventories, logs
 and notebook outputs stay outside Git.
