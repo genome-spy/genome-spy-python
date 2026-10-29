@@ -201,6 +201,10 @@ independently. The docs dependency group includes Scanpy's existing PAGA extra.
 
 ## Validation
 
+The suite has 18 Python test modules and 16 browser test modules, grouped by
+plot family and shared behavior. Classes keep distinct fixture setups local to
+their test section. The workflow notebook checks stay in their own module.
+
 Tests live under `tests/integrations/scanpy/`. Ordinary PRs run fast Python checks
 against Scanpy 1.11.5 and 1.12.4, plus observed browser smoke checks once. Main,
 full manual runs and releases also run upstream comparisons, every browser check

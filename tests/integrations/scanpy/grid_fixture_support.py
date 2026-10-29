@@ -5,9 +5,11 @@ import warnings
 import numpy as np
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.expression_fixtures import make_cluster_adata
-from tests.integrations.scanpy.expression_fixtures import make_tree_adata
-from tests.integrations.scanpy.expression_fixtures import make_heatmap_adata
+from tests.integrations.scanpy.expression_fixtures import (
+    make_cluster_adata,
+    make_heatmap_adata,
+    make_tree_adata,
+)
 
 FAMILIES = ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
 

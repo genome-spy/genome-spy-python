@@ -69,13 +69,13 @@ The deeper pass also reduces the maintained file and reference footprint:
 
 | Measure | Before deeper cleanup | After |
 | --- | ---: | ---: |
-| Integration test/support/fixture files | 140 | 106 |
-| Python files | 127 | 93 |
-| Python lines | 27,586 | 25,369 |
+| Integration test/support/fixture files | 140 | 61 |
+| Python files | 127 | 48 |
+| Python lines | 27,586 | 25,744 |
 | JSON fixture lines | 18,504 | 13,574 |
 | Separate reference generators | 11 | 0 |
 | Image-only reference helpers | 0 | 1 |
-| Total PR files | 252 | 218 |
+| Total PR files | 252 | 173 |
 
 Twenty-three tiny data/fixture modules are consolidated into five family modules;
 ranked inputs remain separate. PCA diagnostics and shared grid options each have
@@ -104,6 +104,13 @@ Fifty-one repeated generic-option cases are removed; shared guards and distinct
 plot-specific errors remain. Sixteen plot-area captures across fourteen browser
 files share one helper with the same crop and pixel scale.
 
+The file-layout pass reduces Scanpy test files from 79 to 34: eighteen Python
+modules and sixteen browser modules. The files follow plot families and shared
+behavior. Pytest classes keep each section's fixtures separate; 540 regrouped
+test functions and all 2,572 collected cases are preserved. Shared imports are
+combined, helper/fixture names stay distinct, and CI paths and documentation
+links follow the new files. This is a file-layout reduction, not removed coverage.
+
 Current collection: 1,641 fast Python cases, 321 live-reference cases, two
 workflows and 608 browser cases, including 56 smoke cases. The new collection
 still exercises the complete retained suite when markers are not filtered.
@@ -111,7 +118,7 @@ PR jobs run fast checks on both Scanpy versions and browser smoke once. Main,
 full dispatch and release run the full selections; release sets `full_scanpy`.
 Base jobs test lightweight imports and missing extras without the scientific suite.
 
-Current follow-up validation:
+Previous reduction validation:
 
 - Scanpy 1.11.5 non-workflow Python suite: 1,960 passed, two existing expected
   failures. Scanpy 1.12.4: 1,957 passed, five existing expected failures.
@@ -125,6 +132,13 @@ Current follow-up validation:
 - Workflows, base-only tests and the remaining browser checks were not rerun in
   this follow-up. Both workflows and 407 base checks passed in the preceding pass.
   All 123 reference exports previously matched their old pixels exactly.
+
+File-layout verification reruns both Python suites and one browser case per
+section plus every smoke test. The naming collision found in the moved Matrixplot
+helper was corrected and its complete 162-case grouped-expression module passed
+on both Scanpy versions. Collection, lint, format and workflow lint passed.
+Workflows and unselected browser parameter combinations are unchanged and are
+not rerun in this pass.
 
 The refreshed hosted run remains the clearance gate. Keep this maintenance slice
 open until its configured jobs pass. Generated images, reports, inventories, logs
@@ -323,14 +337,14 @@ affected slice.
 | C08 | Native index slots plus label views retain repeated names; Core 1.2 axes lack arbitrary index-to-name mapping | Grouped grids, ranked plots and named PAGA connectivity strips | Shared slots and views align on zoom; named PAGA strips collect their key after the full axis. Recheck native axis name mapping before removing label views. |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |
 | C10 | Heatmap/clustermap bands and native gap navigation verified in their own viewports. | Closed for M05.f native WebGL/notebook/HTML scope | Native clipped rects use the released Core; no patched bundle or custom listeners. C12 remains independent. |
-| C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | The native column-clipping regression is retained with the other [guide checks](../../tests/integrations/scanpy/browser/test_colorbar.py), strictly xfailed on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
+| C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | The native column-clipping regression is retained with the other [guide checks](../../tests/integrations/scanpy/browser/test_embedding_style.py), strictly xfailed on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
 | C12 | Core 1.2 SVG export bends `linkShape="line"` control points. | Upstream straight-link export; adapter trees now use verified orthogonal links. | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) still strictly xfails. No local bundle patch; recheck on a released fix. The [orthogonal renderer](#verification) passes complete-path SVG checks independently. |
 | C13 | A viewport containing only zero-height merges gives a degenerate `[0, 0]` height domain, centering zero in the track. | Native fitting of tied subtrees within larger trees | Minimal native regression in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) strictly xfails on Core 1.2.0. Whole zero-height trees retain their previous nonzero range. Recheck a released native solution; no custom browser logic or patched bundle. |
 | C14 | Native equilateral triangles differ from Scanpy's equal-width/height triangles; uniform sizing cannot match both dimensions. | Triangular markers in M07.d | The native SVG/WebGL investigation found mismatched bounds in all four orientations, with/without strokes. Its experimental probes were retired; unsupported triangles remain explicitly rejected. Recheck a released matching shape or native aspect control, including guides and outlines, before enabling support; no custom geometry. |
 | C15 | Scanpy 1.11.5's disconnected single_component=True call subsets colors but retains full coordinates and raises a shape error. | M11.c direct parent-reference gate | [Strict expected-failure check](../../tests/integrations/scanpy/test_paga.py) detects a fixed upstream entry. Intended native filtering is independently checked against explicitly subsetted public Scanpy inputs; recheck a compatible release before closing this gate. |
 | C16 | Scanpy 1.11.5 paga_path return_data calls .T on an unsmoothed annotation list | Default return_data parent-reference gate; heatmap/other return_data cases verified independently | Strict expected-failure check verifies the exact exception and asserts returned values if fixed; native chart/table return contract is explicit. |
 | C17 | Core 1.2 rule/link marks have one paint and no independent edge border. Audited 2026-10-25 against the installed schema/API and official [rule](https://genomespy.app/docs/grammar/mark/rule/) and [link](https://genomespy.app/docs/grammar/mark/link/) channels. Both Python mark methods reject stroke/strokeWidth. | White borders separating overlapping PAGA edges, M11.c/M14 styling | Recheck a released native outline capability with crossing, width, zoom, hover and export cases. No extra edge layers or custom geometry. PAGA charts and the expression notebook remain unchanged; notebook rerun was conditional on native support. |
-| C18 | Core 1.2 WebGL retains old categorical row slots when an explicit domain changes. CPU scales and SVG update correctly, while tiles/text can leave the heatmap viewport. | EmbeddingSummary heatmap gene dropdowns; native data/mean checks alone do not verify rendered placement | [Upstream PR #595](https://github.com/genome-spy/genome-spy/pull/595) is merged after the published 1.2.0 release. Strict pixel regressions in [browser/test_embedding_summary.py](../../tests/integrations/scanpy/browser/test_embedding_summary.py) check changed/duplicate choices with values on/off. Adopt the released fix and require these tests to pass; no local Core patch or alternate row encoding. |
+| C18 | Core 1.2 WebGL retains old categorical row slots when an explicit domain changes. CPU scales and SVG update correctly, while tiles/text can leave the heatmap viewport. | EmbeddingSummary heatmap gene dropdowns; native data/mean checks alone do not verify rendered placement | [Upstream PR #595](https://github.com/genome-spy/genome-spy/pull/595) is merged after the published 1.2.0 release. Strict pixel regressions in [browser/test_linked_embeddings.py](../../tests/integrations/scanpy/browser/test_linked_embeddings.py) check changed/duplicate choices with values on/off. Adopt the released fix and require these tests to pass; no local Core patch or alternate row encoding. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

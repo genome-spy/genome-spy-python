@@ -132,7 +132,7 @@ families with different lookup semantics. Do not call upstream plotting, inspect
 rendered artists, import benchmark scripts, or promote prototype geometry as
 runtime preparation. Source and dataset provenance are reviewed before reuse.
 The [Scanpy 1.11.5 reuse audit](COMPATIBILITY.md#reusing-scanpy-computations)
-and [delegation/counterexample tests](../../tests/integrations/scanpy/test_upstream_reuse.py)
+and [delegation/counterexample tests](../../tests/integrations/scanpy/test_contract.py)
 make these boundaries explicit. Recheck them when adding support for a version
 that exposes suitable public plotting-preparation methods.
 

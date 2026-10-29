@@ -169,10 +169,8 @@ jobs:
         if: github.ref == 'refs/heads/main' || inputs.full_scanpy
         run: >-
           "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
-          tests/integrations/scanpy/browser/test_grid_interactions.py
-          tests/integrations/scanpy/browser/test_brushing.py
-          tests/integrations/scanpy/browser/test_embedding_summary.py
-          tests/integrations/scanpy/browser/test_embedding_summary_tracks.py
+          tests/integrations/scanpy/browser/test_grid_interactions.py::TestGridInteractions
+          tests/integrations/scanpy/browser/test_linked_embeddings.py
           -q --basetemp="${{ runner.temp }}/scanpy-compat-browser"
 
   codegen:
