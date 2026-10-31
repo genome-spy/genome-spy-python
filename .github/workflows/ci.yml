@@ -101,6 +101,14 @@ jobs:
           enable-cache: true
           python-version: ${{ matrix.python }}
       - run: uv sync --locked --dev --extra scanpy --group scanpy-test
+      # Run notebooks first so rendering failures surface before the long suites.
+      - if: matrix.python == '3.11'
+        run: uv run --no-sync python -m playwright install --with-deps chromium
+      - name: Render the workflow notebooks in JupyterLab
+        if: matrix.python == '3.11' && (github.ref == 'refs/heads/main' || inputs.full_scanpy)
+        run: |
+          uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_umap.ipynb --screenshot "${{ runner.temp }}/scanpy-notebooks/umap-notebook.png"
+          uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_expression.ipynb --screenshot "${{ runner.temp }}/scanpy-notebooks/expression-notebook.png"
       - name: Fast Scanpy checks
         if: github.ref != 'refs/heads/main' && !inputs.full_scanpy
         run: >-
@@ -112,9 +120,6 @@ jobs:
         run: >-
           uv run --no-sync pytest tests/integrations/scanpy
           --ignore=tests/integrations/scanpy/browser -q --durations=10
-      # The renderer is JavaScript; repeat it once, rather than for each Python.
-      - if: matrix.python == '3.11'
-        run: uv run --no-sync python -m playwright install --with-deps chromium
       - name: Browser smoke checks
         if: matrix.python == '3.11' && github.ref != 'refs/heads/main' && !inputs.full_scanpy
         run: >-
@@ -125,16 +130,13 @@ jobs:
         run: >-
           uv run --no-sync pytest tests/integrations/scanpy/browser -q
           --basetemp="${{ runner.temp }}/scanpy-browser"
-      - name: Render the workflow notebooks in JupyterLab
-        if: matrix.python == '3.11' && (github.ref == 'refs/heads/main' || inputs.full_scanpy)
-        run: |
-          uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_umap.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/umap-notebook.png"
-          uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_expression.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/expression-notebook.png"
       - uses: actions/upload-artifact@v7
         if: always() && matrix.python == '3.11'
         with:
           name: scanpy-browser
-          path: ${{ runner.temp }}/scanpy-browser
+          path: |
+            ${{ runner.temp }}/scanpy-browser
+            ${{ runner.temp }}/scanpy-notebooks
           if-no-files-found: ignore
 
   scanpy-compatibility:
@@ -251,10 +253,10 @@ jobs:
         with:
           name: notebook-rendering
           path: |
-            ${{ runner.temp }}/notebook-rendering.png
-            ${{ runner.temp }}/embed-api.png
-            ${{ runner.temp }}/annotate-intervals.png
-            ${{ runner.temp }}/select-genes.png
-            ${{ runner.temp }}/pick-genes.png
-            ${{ runner.temp }}/edit-sequence.png
+            ${{ runner.temp }}/notebook-rendering.*
+            ${{ runner.temp }}/embed-api.*
+            ${{ runner.temp }}/annotate-intervals.*
+            ${{ runner.temp }}/select-genes.*
+            ${{ runner.temp }}/pick-genes.*
+            ${{ runner.temp }}/edit-sequence.*
           if-no-files-found: ignore

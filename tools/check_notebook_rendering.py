@@ -23,6 +23,100 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 
+def _observe_rendering(page, console: list) -> None:
+    """Record browser warnings and context loss before notebook widgets load."""
+    page.on(
+        "console",
+        lambda message: console.append({"type": message.type, "text": message.text}),
+    )
+    page.on(
+        "requestfailed",
+        lambda request: console.append(
+            {"type": "requestfailed", "text": f"{request.url}: {request.failure}"}
+        ),
+    )
+    page.add_init_script("""
+        window.notebookContextEvents = [];
+        for (const type of ['webglcontextlost', 'webglcontextrestored',
+                            'webglcontextcreationerror']) {
+            document.addEventListener(type, event => {
+                window.notebookContextEvents.push({type,
+                    time: performance.now(), message: event.statusMessage,
+                    canvasIndex: [...document.querySelectorAll('canvas')]
+                        .indexOf(event.target)});
+            }, true);
+        }
+    """)
+
+
+def _rendering_state(canvas) -> dict:
+    """Read notebook and canvas state without changing the chart."""
+    return canvas.evaluate("""canvas => {
+        const bounds = el => {
+            const r = el.getBoundingClientRect();
+            const style = getComputedStyle(el);
+            return {x: r.x, y: r.y, width: r.width, height: r.height,
+                display: style.display, visibility: style.visibility};
+        };
+        const widget = window.jupyterapp?.shell.currentWidget;
+        const cell = canvas.closest('.jp-CodeCell');
+        const ancestors = [];
+        for (let el = canvas.parentElement; el; el = el.parentElement) {
+            ancestors.push({className: el.className, ...bounds(el)});
+        }
+        return {
+            kernelStatus: widget?.sessionContext.session?.kernel?.status,
+            cellIndex: [...document.querySelectorAll('.jp-CodeCell')].indexOf(cell),
+            source: cell?.querySelector('.jp-InputArea')?.textContent,
+            output: cell?.querySelector('.jp-OutputArea')?.textContent,
+            canvas: {bufferWidth: canvas.width, bufferHeight: canvas.height, ...bounds(canvas)},
+            ancestors,
+            canvases: [...document.querySelectorAll('.jp-OutputArea canvas')]
+                .map(el => ({bufferWidth: el.width, bufferHeight: el.height, ...bounds(el)})),
+            contextEvents: window.notebookContextEvents,
+            errors: [...document.querySelectorAll('.jp-OutputArea-error')]
+                .map(el => el.textContent),
+        };
+    }""")
+
+
+def _scroll_to_canvas(page, canvas) -> None:
+    """Let Jupyter lay out an offscreen cell before scrolling to its chart."""
+    page.wait_for_function(
+        """async canvas => {
+            const notebook = window.jupyterapp.shell.currentWidget.content;
+            const index = notebook.widgets.findIndex(cell => cell.node.contains(canvas));
+            if (index < 0) throw new Error('Chart does not belong to a notebook cell');
+            await notebook.scrollToItem(index, 'start');
+            return true;
+        }""",
+        arg=canvas.element_handle(),
+    )
+    canvas.scroll_into_view_if_needed()
+
+
+def _check_canvas(
+    page, canvas, screenshot: Path, console: list, errors: list, token: str
+) -> None:
+    """Assert the chart has painted; save browser state when it has not."""
+    state = _rendering_state(canvas)
+    pixels = canvas.screenshot(path=str(screenshot))
+    # A canvas element alone can exist even when rendering failed.
+    colors = Image.open(io.BytesIO(pixels)).convert("RGB").getcolors(1_000_000)
+    if colors is None or len(colors) < 20:
+        state.update(
+            afterScreenshot=_rendering_state(canvas),
+            console=console,
+            pageErrors=errors,
+            colorCount=None if colors is None else len(colors),
+        )
+        screenshot.with_suffix(".json").write_text(
+            json.dumps(state, indent=2).replace(token, "<redacted>")
+        )
+        page.screenshot(path=str(screenshot.with_suffix(".page.png")))
+        raise AssertionError("Chart canvas is blank or unexpectedly uniform")
+
+
 def _run_kernel(page, code: str) -> None:
     status = page.evaluate(
         """async code => {
@@ -382,7 +476,9 @@ def main() -> None:
                             viewport={"width": 1500, "height": 1100}
                         )
                         errors: list[str] = []
+                        console: list[dict] = []
                         page.on("pageerror", lambda error: errors.append(str(error)))
+                        _observe_rendering(page, console)
                         page.goto(f"{url}/lab/tree/smoke.ipynb?token={token}")
                         page.wait_for_function(
                             "window.jupyterapp?.shell.currentWidget?.context?.isReady"
@@ -424,6 +520,7 @@ def main() -> None:
                         elif args.workflow == "python-rows":
                             canvas = page.locator(".jp-OutputArea canvas").last
                         canvas.wait_for(state="visible", timeout=120_000)
+                        _scroll_to_canvas(page, canvas)
                         page.wait_for_timeout(2000)
                         if page.locator(".jp-OutputArea-error").count() or errors:
                             raise AssertionError(f"Notebook rendering errors: {errors}")
@@ -533,17 +630,9 @@ def main() -> None:
                         args.screenshot.parent.mkdir(parents=True, exist_ok=True)
                         if args.workflow:
                             _check_workflow(page, canvas, args.workflow)
-                        pixels = canvas.screenshot(path=str(args.screenshot))
-                        # A canvas element alone can exist even when rendering failed.
-                        colors = (
-                            Image.open(io.BytesIO(pixels))
-                            .convert("RGB")
-                            .getcolors(1_000_000)
+                        _check_canvas(
+                            page, canvas, args.screenshot, console, errors, token
                         )
-                        if colors is None or len(colors) < 20:
-                            raise AssertionError(
-                                "Chart canvas is blank or unexpectedly uniform"
-                            )
                         if args.workflow:
                             page.set_viewport_size({"width": 1500, "height": 1800})
                             canvas.locator(
@@ -632,7 +721,10 @@ def main() -> None:
                         browser.close()
             except Exception:
                 log.seek(0)
-                sys.stderr.write(log.read())
+                server_log = log.read().replace(token, "<redacted>")
+                args.screenshot.parent.mkdir(parents=True, exist_ok=True)
+                args.screenshot.with_suffix(".server.log").write_text(server_log)
+                sys.stderr.write(server_log)
                 raise
             finally:
                 server.terminate()
