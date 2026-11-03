@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Render container-sized notebook charts, including the clustered heatmap gallery
   example, at a default height of 760 pixels instead of a cropped 150-pixel
-  canvas. Fixed chart heights and explicit widget layout heights are preserved.
+  canvas. Fixed chart heights, explicit widget layout heights, and heights
+  allocated by notebook containers such as `HBox` are preserved.
 
 ## [0.8.0] - 2026-10-29
 

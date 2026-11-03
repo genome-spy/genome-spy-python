@@ -10,11 +10,16 @@ playwright = pytest.importorskip("playwright.sync_api")
 
 
 @pytest.mark.parametrize(
-    ("fixed_height", "layout_height", "expected"),
-    [(None, None, 760), (240, None, 260), (None, 400, 400)],
+    ("fixed_height", "layout_height", "parent_height", "expected"),
+    [
+        (None, None, None, 760),
+        (240, None, None, 260),
+        (None, 400, None, 400),
+        (None, None, 400, 400),
+    ],
 )
 def test_widget_height_respects_chart_and_layout_sizes(
-    fixed_height, layout_height, expected
+    fixed_height, layout_height, parent_height, expected
 ):
     chart = (
         gs.Chart([{"x": 1, "y": 2}])
@@ -39,6 +44,16 @@ def test_widget_height_respects_chart_and_layout_sizes(
         try:
             page = browser.new_page()
             page.set_content('<div id="widget" style="width: 800px"></div>')
+            if parent_height is not None:
+                page.locator("#widget").evaluate(
+                    """(el, height) => {
+                        const parent = document.createElement('div');
+                        parent.style.cssText = `display: flex; height: ${height}px`;
+                        el.before(parent);
+                        parent.append(el);
+                    }""",
+                    parent_height,
+                )
             page.add_style_tag(content=str(widget._css))
             if layout_height is not None:
                 page.locator("#widget").evaluate(
@@ -63,6 +78,64 @@ def test_widget_height_respects_chart_and_layout_sizes(
                 arg=expected,
             )
             assert page.locator("#widget").bounding_box()["height"] == expected
+            if parent_height is not None:
+                assert (
+                    page.locator("#widget").evaluate(
+                        "el => el.parentElement.getBoundingClientRect().height"
+                    )
+                    == parent_height
+                )
             assert page.locator(".message-box").count() == 0
         finally:
             browser.close()
+
+
+def test_widget_uses_real_jupyter_hbox_height(tmp_path, monkeypatch):
+    import sys
+
+    import nbformat
+
+    from tools import check_notebook_rendering
+
+    notebook = nbformat.v4.new_notebook(
+        cells=[
+            nbformat.v4.new_code_cell("""import genome_spy as gs
+from ipywidgets import HBox, Layout
+
+chart = gs.Chart([
+    {"x": x, "y": y, "value": x + 10 * y}
+    for x in range(10) for y in range(10)
+]).mark_rect().encode(
+    x=gs.X("x:O").axis(None), y=gs.Y("y:O").axis(None), color="value:Q"
+)
+widget = chart.widget(inline=True, controls=False)
+display(HBox([widget], layout=Layout(height="400px")))
+""")
+        ],
+        metadata={
+            "kernelspec": {
+                "name": "python3",
+                "display_name": "Python 3",
+                "language": "python",
+            }
+        },
+    )
+    source = tmp_path / "hbox.ipynb"
+    source.write_text(nbformat.writes(notebook))
+    check_canvas = check_notebook_rendering._check_canvas
+
+    def check_hbox(page, canvas, *args):
+        heights = canvas.evaluate("""canvas => {
+            const widget = canvas.closest('.genome-spy');
+            const parent = widget.closest('.widget-hbox');
+            return [parent.getBoundingClientRect().height,
+                widget.getBoundingClientRect().height, canvas.height];
+        }""")
+        assert heights == [400, 400, 400]
+        check_canvas(page, canvas, *args)
+
+    monkeypatch.setattr(check_notebook_rendering, "_check_canvas", check_hbox)
+    monkeypatch.setattr(
+        sys, "argv", ["check", str(source), "--screenshot", str(tmp_path / "hbox.png")]
+    )
+    check_notebook_rendering.main()

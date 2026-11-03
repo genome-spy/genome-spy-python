@@ -37,8 +37,8 @@ class JupyterChart(anywidget.AnyWidget):
 
     _esm = _ESM_PATH
     _css = """
-    /* Inline widget layout heights override this container-sized chart default. */
-    .genome-spy-widget-container-height { height: 760px; }
+    /* Let container-sized canvases shrink or grow to their host's height. */
+    .genome-spy-widget-container-height > .canvas-wrapper { flex-basis: 760px; }
     """
     _embed_widget_id = traitlets.Unicode().tag(sync=True)
     _embed_bridge_url = traitlets.Unicode(

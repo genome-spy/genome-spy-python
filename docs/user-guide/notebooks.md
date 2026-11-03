@@ -43,7 +43,8 @@ Leave the chart as the last expression in a cell:
 
 This is enough to display and explore a chart. Charts that fill their container,
 such as the clustered heatmap, get a default notebook height of 760 pixels.
-Charts with a fixed height keep that size. To choose a different container
+Charts with a fixed height keep that size, and widgets in containers such as
+`HBox` use the height available in their parent. To choose a different container
 height, keep the widget and set `view.layout.height = "500px"`.
 
 ### Create a chart from a dataframe
