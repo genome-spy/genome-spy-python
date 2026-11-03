@@ -113,8 +113,6 @@ function fixture(datasets = []) {
     el: Object.assign(new EventTarget(), {
       textContent: "",
       style: {},
-      querySelector: () => null,
-      classList: { toggle() {} },
       replaceCount: 0,
       replaceChildren() {
         this.replaceCount += 1;
@@ -743,32 +741,4 @@ test("disposal removes dataset listeners and finalizes the current embed", async
   assert.equal(rendered.finalized, 1);
   assert.equal(rendered.loads.length, 0);
   delete globalThis.__widgetEmbed;
-});
-
-test("container height follows Core flex sizing across spec changes", async () => {
-  const f = fixture();
-  const classes = new Set();
-  f.el.classList.toggle = (name, enabled) => {
-    if (enabled) classes.add(name);
-    else classes.delete(name);
-  };
-  let flexGrow = "1";
-  const wrapper = {};
-  f.el.querySelector = () => wrapper;
-  const previous = globalThis.getComputedStyle;
-  globalThis.getComputedStyle = () => ({ flexGrow });
-  globalThis.__widgetEmbed = async () => apiFixture().api;
-  try {
-    await renderChart({ ...f, signal: f.controller.signal });
-    assert.ok(classes.has("genome-spy-widget-container-height"));
-    flexGrow = "0";
-    f.model.emit("change:spec");
-    await waitFor(() => !classes.has("genome-spy-widget-container-height"));
-    flexGrow = "1";
-    f.model.emit("change:spec");
-    await waitFor(() => classes.has("genome-spy-widget-container-height"));
-  } finally {
-    f.controller.abort();
-    globalThis.getComputedStyle = previous;
-  }
 });

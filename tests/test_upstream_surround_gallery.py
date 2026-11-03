@@ -68,7 +68,13 @@ def test_python_reproduces_upstream_surround_structure(
     example: str, upstream: str
 ) -> None:
     spec, reference = _specs(example, upstream)
-    assert _structure(spec) == _structure(reference)
+    actual = _structure(spec)
+    if example == "clustered_heatmap":
+        # The local example authors its own notebook heights, unlike the reference.
+        assert actual["spec"].pop("height") == 480
+        assert actual["surround"]["top"][0]["height"] == 96
+        actual["surround"]["top"][0]["height"] = {"grow": 0.2}
+    assert actual == _structure(reference)
 
 
 @pytest.mark.parametrize(("example", "upstream"), EXAMPLES)

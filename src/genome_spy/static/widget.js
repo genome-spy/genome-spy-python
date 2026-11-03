@@ -300,12 +300,6 @@ export async function renderChart({ model, el, signal }) {
         return;
       }
       api = nextApi;
-      const canvasWrapper = el.querySelector(".canvas-wrapper");
-      // Core marks container-sized canvases with a growing flex wrapper.
-      el.classList.toggle(
-        "genome-spy-widget-container-height",
-        Boolean(canvasWrapper && getComputedStyle(canvasWrapper).flexGrow !== "0")
-      );
       try {
         const nextControls = await mountControls({
           container: el,

@@ -454,7 +454,9 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
     spec_output_id = f"gs-spec-output-{example.name}"
     spec_copy_id = f"gs-spec-copy-{example.name}"
     spec_copy_message_id = f"gs-spec-copy-message-{example.name}"
-    host_style = f"height:{example.height}px"
+    host_style = (
+        "height:auto" if example.intrinsic_height else f"height:{example.height}px"
+    )
     if example.max_width is not None:
         host_style += f";max-width:{example.max_width}px"
     chart = (

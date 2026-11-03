@@ -1,6 +1,7 @@
 """Check notebook container sizing against the packaged GenomeSpy runtime."""
 
 import json
+from pathlib import Path
 from urllib.parse import quote
 
 import genome_spy as gs
@@ -10,24 +11,47 @@ playwright = pytest.importorskip("playwright.sync_api")
 
 
 @pytest.mark.parametrize(
-    ("fixed_height", "layout_height", "parent_height", "expected"),
+    (
+        "kind",
+        "width",
+        "height",
+        "host_width",
+        "host_height",
+        "layout_height",
+        "expected",
+    ),
     [
-        (None, None, None, 760),
-        (240, None, None, 260),
-        (None, 400, None, 400),
-        (None, None, 400, 400),
+        ("unit", None, None, 500, None, None, None),
+        ("unit", 200, 120, 800, None, None, [220, 140]),
+        ("unit", None, 240, 800, None, None, [800, 260]),
+        ("step", None, None, 500, None, None, [500, 80]),
+        ("vconcat", None, None, 500, None, None, [500, 330]),
+        ("unit", None, None, 500, 350, None, [500, 350]),
+        ("unit", None, None, 900, 600, None, [900, 600]),
+        ("unit", None, None, 800, None, 400, [800, 400]),
     ],
 )
-def test_widget_height_respects_chart_and_layout_sizes(
-    fixed_height, layout_height, parent_height, expected
+def test_widget_uses_native_plot_and_container_dimensions(
+    kind, width, height, host_width, host_height, layout_height, expected
 ):
     chart = (
-        gs.Chart([{"x": 1, "y": 2}])
+        gs.Chart([{"x": i, "y": i} for i in range(3)])
         .mark_point()
         .encode(x=gs.X("x:Q").axis(None), y=gs.Y("y:Q").axis(None))
     )
-    if fixed_height is not None:
-        chart = chart.properties(height=fixed_height)
+    if kind == "step":
+        chart = chart.encode(
+            y=gs.Y("y:O").scale(paddingInner=0, paddingOuter=0).axis(None)
+        ).properties(height=gs.step(20))
+    elif kind == "vconcat":
+        chart = gs.vconcat(
+            chart.properties(height=100), chart.properties(height=200), spacing=10
+        )
+    else:
+        if width is not None:
+            chart = chart.properties(width=width)
+        if height is not None:
+            chart = chart.properties(height=height)
     widget = chart.widget(inline=True, controls=False)
     state = {
         name: getattr(widget, name)
@@ -43,8 +67,8 @@ def test_widget_height_respects_chart_and_layout_sizes(
         browser = runtime.chromium.launch()
         try:
             page = browser.new_page()
-            page.set_content('<div id="widget" style="width: 800px"></div>')
-            if parent_height is not None:
+            page.set_content(f'<div id="widget" style="width: {host_width}px"></div>')
+            if host_height is not None:
                 page.locator("#widget").evaluate(
                     """(el, height) => {
                         const parent = document.createElement('div');
@@ -52,9 +76,10 @@ def test_widget_height_respects_chart_and_layout_sizes(
                         el.before(parent);
                         parent.append(el);
                     }""",
-                    parent_height,
+                    host_height,
                 )
-            page.add_style_tag(content=str(widget._css))
+            if css := getattr(widget, "_css", ""):
+                page.add_style_tag(content=str(css))
             if layout_height is not None:
                 page.locator("#widget").evaluate(
                     "(el, height) => el.style.height = `${height}px`", layout_height
@@ -69,28 +94,44 @@ def test_widget_height_respects_chart_and_layout_sizes(
                 window.controller = new AbortController();
                 await renderChart({{model, el: document.querySelector('#widget'),
                     signal: controller.signal}});
+                if ({json.dumps(expected is None)}) {{
+                    const reference = document.createElement('div');
+                    reference.style.width = '{host_width}px';
+                    document.body.append(reference);
+                    const core = await import(values.bundle_url);
+                    await core.embed(reference, structuredClone(values.spec), values.embed_options);
+                    const canvas = reference.querySelector('canvas');
+                    window.nativeSize = [canvas.width, canvas.height];
+                }}
                 window.rendered = true;
                 """,
             )
             page.wait_for_function("window.rendered")
+            if expected is None:
+                expected = page.evaluate("window.nativeSize")
             page.wait_for_function(
-                "height => document.querySelector('canvas').height === height",
+                """size => {
+                    const canvas = document.querySelector('canvas');
+                    return canvas.width === size[0] && canvas.height === size[1];
+                }""",
                 arg=expected,
             )
-            assert page.locator("#widget").bounding_box()["height"] == expected
-            if parent_height is not None:
+            assert page.locator("#widget").bounding_box()["width"] == host_width
+            assert page.locator("#widget").bounding_box()["height"] == expected[1]
+            if host_height is not None:
                 assert (
                     page.locator("#widget").evaluate(
                         "el => el.parentElement.getBoundingClientRect().height"
                     )
-                    == parent_height
+                    == host_height
                 )
             assert page.locator(".message-box").count() == 0
         finally:
             browser.close()
 
 
-def test_widget_uses_real_jupyter_hbox_height(tmp_path, monkeypatch):
+@pytest.mark.parametrize("plot", ["hbox", "clustered_heatmap"])
+def test_widget_dimensions_in_real_jupyter(tmp_path, monkeypatch, plot):
     import sys
 
     import nbformat
@@ -120,11 +161,45 @@ display(HBox([widget], layout=Layout(height="400px")))
             }
         },
     )
+    if plot == "clustered_heatmap":
+        example = (
+            Path(__file__).resolve().parents[2] / "docs/examples/clustered_heatmap.py"
+        )
+        notebook.cells[0].source = f"""import runpy
+chart = runpy.run_path({str(example)!r})["chart"]
+widget = chart.widget(inline=True, controls=False)
+widget.layout.width = "900px"
+display(widget)
+"""
     source = tmp_path / "hbox.ipynb"
     source.write_text(nbformat.writes(notebook))
     check_canvas = check_notebook_rendering._check_canvas
 
     def check_hbox(page, canvas, *args):
+        if plot == "clustered_heatmap":
+            initial_height = canvas.evaluate("el => el.height")
+            assert initial_height > 480 + 96
+            assert canvas.evaluate("el => el.width") == 900
+            bounds = canvas.bounding_box()
+            page.mouse.move(
+                bounds["x"] + bounds["width"] * 0.55,
+                bounds["y"] + bounds["height"] * 0.5,
+            )
+            page.mouse.wheel(0, -180)
+            page.wait_for_timeout(500)
+            assert canvas.evaluate("el => el.height") == initial_height
+            check_notebook_rendering._run_kernel(page, 'widget.layout.width = "600px"')
+            page.wait_for_function("document.querySelector('canvas').width === 600")
+            assert canvas.evaluate("el => el.height") > 480 + 96
+            assert (
+                abs(
+                    canvas.evaluate("""el => el.height -
+                el.closest('.genome-spy').getBoundingClientRect().height""")
+                )
+                < 1
+            )
+            check_canvas(page, canvas, *args)
+            return
         heights = canvas.evaluate("""canvas => {
             const widget = canvas.closest('.genome-spy');
             const parent = widget.closest('.widget-hbox');

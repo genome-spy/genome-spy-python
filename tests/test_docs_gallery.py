@@ -2134,6 +2134,17 @@ def test_gallery_example_can_cap_embed_width() -> None:
     assert 'class="gs-doc-embed" style="height:500px;max-width:980px"' in markdown
 
 
+def test_intrinsic_heatmap_gallery_height_follows_the_spec() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    example = gallery.collect_example(EXAMPLES_DIR / "clustered_heatmap.py")
+    markdown = extension._detail_md(example, "https://example.test/bundle.js")
+
+    assert example.spec["spec"]["height"] == 480
+    assert example.spec["surround"]["top"][0]["height"] == 96
+    assert 'class="gs-doc-embed" style="height:auto;max-width:1100px"' in markdown
+
+
 def test_minigallery_links_include_cache_busting_query(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

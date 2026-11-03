@@ -41,11 +41,18 @@ Leave the chart as the last expression in a cell:
 :end-before: notebooks-implicit-display-end
 ```
 
-This is enough to display and explore a chart. Charts that fill their container,
-such as the clustered heatmap, get a default notebook height of 760 pixels.
-Charts with a fixed height keep that size, and widgets in containers such as
-`HBox` use the height available in their parent. To choose a different container
-height, keep the widget and set `view.layout.height = "500px"`.
+This is enough to display and explore a chart.
+
+GenomeSpy computes the canvas size from the specification, including room for
+titles, axes, and legends. Fixed heights and step-sized plots keep their authored
+dimensions. Container-sized plots use the space provided by their host, including
+an `HBox` or an explicit widget layout size. The notebook wrapper does not impose
+a default width or height.
+
+A fully flexible plot has no intrinsic height. For standalone notebook output,
+author a plot `height` in the specification or provide a sized widget container.
+The clustered heatmap example declares its matrix and tree heights in the chart
+itself; other plots do not inherit those sizes.
 
 ### Create a chart from a dataframe
 

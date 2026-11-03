@@ -24,7 +24,11 @@ converts the supplied node hierarchies into orthogonal link endpoints.
 
 `gs.surround()` places the gene tree above the matrix, the cell-line tree to its
 left, and a `gs.SurroundSideSpec` with annotation strips and labels to its right.
-Shared index scales align each side with the matrix. Fractional dendrogram
+Shared index scales align each side with the matrix. The matrix reserves eight
+pixels per cell line, with a tree panel one fifth as tall. GenomeSpy adds space
+for titles, labels, and legends, so the same specification works in a notebook
+without setting a widget height. Its width follows the available container.
+The authored panel heights stay stable while zooming. Fractional dendrogram
 offsets use `bandstep()` to stay connected across gaps while zooming. The
 trees' independent height scales use `gs.ViewportDomainRef(mode="contain")`.
 
