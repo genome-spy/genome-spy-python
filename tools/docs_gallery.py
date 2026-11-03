@@ -114,6 +114,7 @@ class Example:
     max_width: int | None
     source: str
     spec: dict
+    intrinsic_height: bool = False
     thumbnail_width: int | None = None
     thumbnail_stage_width: int | None = None
     thumbnail_fit: bool = True
@@ -191,6 +192,7 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
         ),
         source=path.read_text(encoding="utf-8"),
         spec=spec,
+        intrinsic_height=bool(meta.get("intrinsic_height", False)),
         thumbnail_width=(
             int(meta["thumbnail_width"])
             if meta.get("thumbnail_width") is not None

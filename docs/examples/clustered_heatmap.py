@@ -10,10 +10,12 @@ from genome_spy.schema import Encoding, OverhangConfig, StyleConfig
 META = {
     "category": "Expression and heatmaps",
     "order": 10,
-    "height": 760,
+    "height": 800,
+    "intrinsic_height": True,
     "max_width": 1100,
 }
 DATA = "https://data.genomespy.app/datasets/depmap-cell-line-rna-seq/v1/"
+heatmap_height = 60 * 8
 view_width = gs.Expression("width")
 view_height = gs.Expression("height")
 cell_lines = gs.Data(
@@ -69,7 +71,7 @@ column_tree = (
         )
         .legend(None),
     )
-    .properties(name="columnDendrogram", height=gs.SizeDef(grow=0.2))
+    .properties(name="columnDendrogram", height=heatmap_height * 0.2)
 )
 row_tree = (
     gs.Chart(gs.Data(url=DATA + "cell-line-tree.json"))
@@ -317,7 +319,7 @@ feature_labels = (
 
 chart = (
     gs.surround(
-        (cells + feature_labels).properties(name="heatmap"),
+        (cells + feature_labels).properties(name="heatmap", height=heatmap_height),
         surround=gs.SurroundSides(
             top=[column_tree], left=[row_tree], right=annotations
         ),

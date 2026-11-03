@@ -36,10 +36,6 @@ class JupyterChart(anywidget.AnyWidget):
     """A lightweight anywidget wrapper around GenomeSpy's ``embed`` API."""
 
     _esm = _ESM_PATH
-    _css = """
-    /* Inline widget layout heights override this container-sized chart default. */
-    .genome-spy-widget-container-height { height: 760px; }
-    """
     _embed_widget_id = traitlets.Unicode().tag(sync=True)
     _embed_bridge_url = traitlets.Unicode(
         "data:text/javascript;base64,"
