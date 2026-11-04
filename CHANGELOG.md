@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Preserve nested transform lists when authoring branch transforms and nested
   container unions in generated type annotations.
 
+### Performance
+
+- Reuse checked schema setup across serializations while validating every new
+  instance. Changed or replaced custom schemas are checked again, and cache size
+  is bounded. This avoids repeated schema setup in composed charts and releases.
+
 ## [0.8.1] - 2026-11-03
 
 ### Fixed
