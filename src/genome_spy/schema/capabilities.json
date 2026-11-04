@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "definitions": [
     "AggregateOp",
     "AggregateParams",
@@ -28,8 +28,16 @@
     "BindRadioSelect",
     "BindRange",
     "Binding",
+    "BranchParams",
     "BrushConfig",
     "BuiltInThemeName",
+    "CategorySelectionChannel",
+    "CategorySelectionParameter<\"color\">",
+    "CategorySelectionParameter<\"fill\">",
+    "CategorySelectionParameter<\"shape\">",
+    "CategorySelectionParameter<\"stroke\">",
+    "CategorySelectionParameter<\"x\">",
+    "CategorySelectionParameter<\"y\">",
     "ChannelWithScale",
     "ChromPosDef",
     "ChromosomalLocus",
@@ -85,6 +93,7 @@
     "DynamicOpacity",
     "Encoding",
     "EventConfig",
+    "ExplicitlyOrderedDendrogramParams",
     "ExprDef",
     "ExprFilterParams",
     "ExprParameter",
@@ -103,6 +112,7 @@
     "FieldOrDatumDefWithCondition<MarkPropFieldDef<TypeForShape>,(string|null)>",
     "FieldOrDatumDefWithCondition<ScaleDatumDef,(string|null)>",
     "FieldOrDatumDefWithCondition<ScaleDatumDef,number>",
+    "FigWigData",
     "FilterParams",
     "FilterScoredLabelsParams",
     "FlattenCigarParams",
@@ -120,10 +130,14 @@
     "GenomeDefinition",
     "GenomeSpyConfig",
     "Gff3Data",
+    "GradientIntervalSelectionParameter<\"color\">",
+    "GradientIntervalSelectionParameter<\"fill\">",
+    "GradientIntervalSelectionParameter<\"stroke\">",
     "HConcatSpec",
     "HandledTooltip",
     "IdentifierParams",
     "ImportSpec",
+    "IndexDendrogramParams",
     "IndexUrlSourceRef",
     "IndexUrlTemplate",
     "IndexedFastaData",
@@ -133,7 +147,7 @@
     "InlineGenomeDefinition",
     "InlineLocusAssembly",
     "InteractionEventType",
-    "IntervalSelectionConfig",
+    "IntervalSelectionParameter",
     "JsonDataFormat",
     "KeyDef",
     "LayerSpec",
@@ -195,7 +209,6 @@
     "PlainValueParameter",
     "PointConfig",
     "PointProps",
-    "PointSelectionConfig",
     "Position2Def",
     "PositionDatumDef",
     "PositionDef",
@@ -203,9 +216,11 @@
     "PositionFieldDef",
     "PositionValueDef",
     "PositionalChannel",
+    "PositionalIntervalSelectionParameter",
     "PrimaryPositionalChannel",
     "ProjectParams",
     "RangeConfig",
+    "RecordSelectionParameter",
     "RectConfig",
     "RectProps",
     "RegexExtractParams",
@@ -249,13 +264,13 @@
     "SelectionParameter",
     "SelectionPredicateDefinition",
     "SelectionPredicateOperand",
-    "SelectionType",
     "SelectionUnionTest",
     "SeparatorProps",
     "SequenceGenerator",
     "SequenceParams",
     "SetIntersectionParams",
     "ShapeDef",
+    "SiblingOrderedDendrogramParams",
     "SingleUrlSourceRef",
     "SizeDef",
     "SortOrder",
@@ -263,6 +278,7 @@
     "Step",
     "StringDatumDef",
     "StringFieldDef",
+    "StrokeAlign",
     "StyleConfig",
     "SurroundPlotSpec",
     "SurroundSide",
@@ -283,6 +299,7 @@
     "TitleOrient",
     "Tooltip",
     "TooltipDef",
+    "TransformOutput",
     "TransformParams",
     "TransitionedExprParameter",
     "TransitionedMultiscaleStops",
@@ -306,6 +323,7 @@
     "ValueDefWithCondition<(string|null),TypeForShape>",
     "ValueDefWithCondition<number,Type>",
     "ValueParameter",
+    "ValuesParams",
     "VariableParameter",
     "VcfData",
     "VcfDataFormat",
@@ -314,6 +332,7 @@
     "ViewOpacityDef",
     "ViewSpec",
     "ViewportDomainRef",
+    "ViewportSizeDef",
     "WigDataFormat",
     "WindowOnlyOp",
     "WindowOp",
@@ -381,6 +400,16 @@
       "schema": "CollectParams",
       "type": "collect",
       "method": "transform_collect"
+    },
+    {
+      "schema": "ValuesParams",
+      "type": "values",
+      "method": "transform_values"
+    },
+    {
+      "schema": "BranchParams",
+      "type": "branch",
+      "method": "transform_branch"
     },
     {
       "schema": "CoverageParams",
@@ -547,6 +576,10 @@
       "method": "bigwig"
     },
     {
+      "type": "figwig",
+      "method": "figwig"
+    },
+    {
       "type": "gff3",
       "method": "gff3"
     },
@@ -611,7 +644,7 @@
         "helper": "selection_interval",
         "parameter_schema": "SelectionParameter",
         "config_property": "select",
-        "config_schema": "IntervalSelectionConfig",
+        "config_schema": null,
         "fixed": {
           "type": "interval"
         }
@@ -620,7 +653,7 @@
         "helper": "selection_point",
         "parameter_schema": "SelectionParameter",
         "config_property": "select",
-        "config_schema": "PointSelectionConfig",
+        "config_schema": null,
         "fixed": {
           "type": "point"
         }

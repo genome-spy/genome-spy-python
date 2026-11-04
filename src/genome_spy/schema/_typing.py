@@ -15,6 +15,9 @@ Baseline_T: TypeAlias = Literal["top", "middle", "bottom", "alphabetic", "baseli
 BuiltInThemeName_T: TypeAlias = Literal[
     "genomespy", "vegalite", "quartz", "dark", "fivethirtyeight", "urbaninstitute"
 ]
+CategorySelectionChannel_T: TypeAlias = Literal[
+    "x", "y", "color", "fill", "stroke", "shape"
+]
 FieldName_T: TypeAlias = str
 Field_T: TypeAlias = str
 FontStyle_T: TypeAlias = Literal["normal", "italic"]
@@ -113,8 +116,8 @@ ChannelWithScale_T: TypeAlias = (
     | Literal["dy"]
 )
 SelectionExtent_T: TypeAlias = Literal["auto", "view", "container"]
-SelectionType_T: TypeAlias = Literal["point", "interval"]
 SortOrder_T: TypeAlias = Literal["ascending", "descending"]
+StrokeAlign_T: TypeAlias = Literal["inside", "center", "outside"]
 TitleAnchor_T: TypeAlias = Literal[None, "start", "middle", "end"]
 TitleFrame_T: TypeAlias = Literal["bounds", "group"]
 TitleOrient_T: TypeAlias = Literal["none", "left", "right", "top", "bottom"]
@@ -145,6 +148,7 @@ __all__ = [
     "AxisPlacement_T",
     "Baseline_T",
     "BuiltInThemeName_T",
+    "CategorySelectionChannel_T",
     "FieldName_T",
     "Field_T",
     "FontStyle_T",
@@ -177,8 +181,8 @@ __all__ = [
     "PositionalChannel_T",
     "ChannelWithScale_T",
     "SelectionExtent_T",
-    "SelectionType_T",
     "SortOrder_T",
+    "StrokeAlign_T",
     "TitleAnchor_T",
     "TitleFrame_T",
     "TitleOrient_T",

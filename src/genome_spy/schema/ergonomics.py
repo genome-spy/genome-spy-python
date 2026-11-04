@@ -35,7 +35,6 @@ from genome_spy.schema._typing import (
     ScaleInterpolate_T,
     ScaleType_T,
     SelectionExtent_T,
-    SelectionType_T,
     SortOrder_T,
     TitleAnchor_T,
     TitleFrame_T,
@@ -147,6 +146,7 @@ class DatumChannelMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -230,6 +230,7 @@ class DatumChannelMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -311,6 +312,7 @@ class DatumChannelMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -419,7 +421,7 @@ class DatumChannelMethodMixin:
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -447,6 +449,7 @@ class DatumChannelMethodMixin:
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Self:
@@ -465,8 +468,8 @@ class DatumChannelMethodMixin:
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -479,8 +482,9 @@ class DatumChannelMethodMixin:
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -509,6 +513,7 @@ class DatumChannelMethodMixin:
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -634,6 +639,7 @@ class LocusChannelMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -717,6 +723,7 @@ class LocusChannelMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -798,6 +805,7 @@ class LocusChannelMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -857,7 +865,7 @@ class LocusChannelMethodMixin:
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -885,6 +893,7 @@ class LocusChannelMethodMixin:
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Self:
@@ -903,8 +912,8 @@ class LocusChannelMethodMixin:
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -917,8 +926,9 @@ class LocusChannelMethodMixin:
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -947,6 +957,7 @@ class LocusChannelMethodMixin:
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -1167,13 +1178,37 @@ _PARAMETER_TYPES = (
     core.PlainExprParameter,
     core.TransitionedExprParameter,
     core.DebouncedExprParameter,
-    core.SelectionParameter,
+    core.PositionalIntervalSelectionParameter,
+    core.GradientIntervalSelectionParameterColor,
+    core.GradientIntervalSelectionParameterFill,
+    core.GradientIntervalSelectionParameterStroke,
+    core.RecordSelectionParameter,
+    core.CategorySelectionParameterX,
+    core.CategorySelectionParameterY,
+    core.CategorySelectionParameterColor,
+    core.CategorySelectionParameterFill,
+    core.CategorySelectionParameterStroke,
+    core.CategorySelectionParameterShape,
     core.RulerParameter,
     core.VariableParameter,
     core.ValueParameter,
     core.ExprParameter,
+    core.SelectionParameter,
+    core.IntervalSelectionParameter,
 )
-_SELECTION_PARAMETER_TYPES = (core.SelectionParameter,)
+_SELECTION_PARAMETER_TYPES = (
+    core.PositionalIntervalSelectionParameter,
+    core.GradientIntervalSelectionParameterColor,
+    core.GradientIntervalSelectionParameterFill,
+    core.GradientIntervalSelectionParameterStroke,
+    core.RecordSelectionParameter,
+    core.CategorySelectionParameterX,
+    core.CategorySelectionParameterY,
+    core.CategorySelectionParameterColor,
+    core.CategorySelectionParameterFill,
+    core.CategorySelectionParameterStroke,
+    core.CategorySelectionParameterShape,
+)
 
 
 @overload
@@ -1267,16 +1302,56 @@ def param(
     name: str | None = None,
     /,
     *,
-    select: SelectionType_T
-    | core.PointSelectionConfig
-    | dict[str, Any]
-    | core.IntervalSelectionConfig,
+    select: Literal["interval"] | dict[str, Any],
     description: str | UndefinedType = Undefined,
     persist: bool | UndefinedType = Undefined,
     push: Literal["outer"] | UndefinedType = Undefined,
     value: core.SelectionInitIntervalMapping
     | dict[str, Any]
     | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    bind: Literal["legend"],
+    select: dict[str, Any],
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: dict[str, Any] | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    select: Literal["point"] | dict[str, Any],
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    select: dict[str, Any],
+    bind: Literal["legend"] | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: Sequence[dict[str, Any]] | UndefinedType = Undefined,
     empty: bool = True,
 ) -> Parameter: ...
 
@@ -1307,6 +1382,7 @@ def param(
     | BindRangeKwds
     | core.BindInput
     | BindInputKwds
+    | Literal["legend"]
     | UndefinedType = Undefined,
     debounce: float | UndefinedType = Undefined,
     description: str | UndefinedType = Undefined,
@@ -1314,10 +1390,11 @@ def param(
     persist: bool | UndefinedType = Undefined,
     push: Literal["outer"] | UndefinedType = Undefined,
     ruler: core.RulerConfig | RulerConfigKwds | UndefinedType = Undefined,
-    select: SelectionType_T
-    | core.PointSelectionConfig
+    select: Literal["interval"]
     | dict[str, Any]
-    | core.IntervalSelectionConfig
+    | dict[str, Any]
+    | Literal["point"]
+    | dict[str, Any]
     | UndefinedType = Undefined,
     transition: core.LerpTransition | dict[str, Any] | UndefinedType = Undefined,
     value: Any | UndefinedType = Undefined,
@@ -1372,7 +1449,17 @@ def param(
             core.PlainExprParameter,
             core.TransitionedExprParameter,
             core.DebouncedExprParameter,
-            core.SelectionParameter,
+            core.PositionalIntervalSelectionParameter,
+            core.GradientIntervalSelectionParameterColor,
+            core.GradientIntervalSelectionParameterFill,
+            core.GradientIntervalSelectionParameterStroke,
+            core.RecordSelectionParameter,
+            core.CategorySelectionParameterX,
+            core.CategorySelectionParameterY,
+            core.CategorySelectionParameterColor,
+            core.CategorySelectionParameterFill,
+            core.CategorySelectionParameterStroke,
+            core.CategorySelectionParameterShape,
             core.RulerParameter,
         ),
         empty=empty,
@@ -1463,7 +1550,13 @@ def selection_interval(
     | str
     | bool
     | UndefinedType = Undefined,
-    encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
+    encodings: Sequence[
+        PrimaryPositionalChannel_T
+        | Literal["color"]
+        | Literal["fill"]
+        | Literal["stroke"]
+    ]
+    | UndefinedType = Undefined,
     extent: SelectionExtent_T | UndefinedType = Undefined,
     mark: core.BrushConfig | dict[str, Any] | UndefinedType = Undefined,
     on: DomEventType_T
@@ -1477,10 +1570,12 @@ def selection_interval(
     | str
     | bool
     | UndefinedType = Undefined,
+    bind: Literal["legend"] | UndefinedType = Undefined,
     description: str | UndefinedType = Undefined,
     persist: bool | UndefinedType = Undefined,
     push: Literal["outer"] | UndefinedType = Undefined,
     value: core.SelectionInitIntervalMapping
+    | dict[str, Any]
     | dict[str, Any]
     | UndefinedType = Undefined,
     empty: bool = True,
@@ -1489,12 +1584,13 @@ def selection_interval(
 
     Args:
         name: Parameter name. A stable name is generated when omitted.
-        clear: A string or object that defines the events that should clear the selection. __Default value:__ ``"dblclick"``
-        encodings: An array of encoding channels that define the interval selection.
+        clear: A string or object that defines the events that should clear the selection. Set to ``false`` to disable these events. Legend-bound point selections also reset on unmodified background clicks, independently of this property. __Default value:__ ``"dblclick"``; no ``clear`` event for legend-bound point selections.
+        encodings: Schema-defined configuration property.
         extent: Visual extent of the interval selection rectangle. ``"auto"`` draws one spanning rectangle when the selected channel can span a concat safely. ``"view"`` draws one rectangle per participating view. ``"container"`` requires one spanning rectangle. __Default value:__ ``"auto"``
         mark: Interval selections display a rectangle mark to show the selected range. Use the ``mark`` property to adjust the appearance of this rectangle.
         on: A string or object that defines the events to which the selection should listen. __Default value:__ - point selections: ``"click"`` - interval selections: - ``"mousedown[event.shiftKey]"`` when any brushed channel is zoomable - ``"mousedown"`` otherwise
         zoom: Controls whether an active interval selection can be resized by mouse wheel. The wheel interaction only applies when the cursor is over the interval. Can be: - ``true`` / ``false`` - event type string such as ``"wheel"`` or ``"wheel[event.altKey]"`` - an ``EventConfig`` object Currently, only ``"wheel"`` events are supported. __Default value:__ - ``false`` when any brushed channel uses a zoomable scale - ``true`` otherwise
+        bind: Schema-defined configuration property.
         description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
         persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
         push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
@@ -1511,26 +1607,32 @@ def selection_interval(
         >>> selection_interval().param.to_dict(validate=False)
         {...}
     """
-    config = core.IntervalSelectionConfig(
-        type="interval",
-        clear=clear,
-        encodings=encodings,
-        extent=extent,
-        mark=mark,
-        on=on,
-        zoom=zoom,
-    )
+    config = {
+        "type": "interval",
+        "clear": clear,
+        "encodings": encodings,
+        "extent": extent,
+        "mark": mark,
+        "on": on,
+        "zoom": zoom,
+    }
     from genome_spy._parameters import _make_parameter
 
     return _make_parameter(
         name,
         select=config,
+        bind=bind,
         description=description,
         persist=persist,
         push=push,
         value=value,
         empty=empty,
-        _variants=(core.SelectionParameter,),
+        _variants=(
+            core.PositionalIntervalSelectionParameter,
+            core.GradientIntervalSelectionParameterColor,
+            core.GradientIntervalSelectionParameterFill,
+            core.GradientIntervalSelectionParameterStroke,
+        ),
     )
 
 
@@ -1544,31 +1646,41 @@ def selection_point(
     | str
     | bool
     | UndefinedType = Undefined,
+    encodings: Sequence[
+        Literal["x"]
+        | Literal["y"]
+        | Literal["color"]
+        | Literal["fill"]
+        | Literal["stroke"]
+        | Literal["shape"]
+    ]
+    | UndefinedType = Undefined,
     on: DomEventType_T
     | core.EventConfig
     | EventConfigKwds
     | str
     | UndefinedType = Undefined,
     toggle: bool | UndefinedType = Undefined,
+    bind: Literal["legend"] | UndefinedType = Undefined,
     description: str | UndefinedType = Undefined,
     persist: bool | UndefinedType = Undefined,
     push: Literal["outer"] | UndefinedType = Undefined,
-    value: core.SelectionInitIntervalMapping
-    | dict[str, Any]
-    | UndefinedType = Undefined,
+    value: Sequence[dict[str, Any]] | UndefinedType = Undefined,
     empty: bool = True,
 ) -> Parameter:
     """Create a GenomeSpy ``selection_point`` parameter.
 
     Args:
         name: Parameter name. A stable name is generated when omitted.
-        clear: A string or object that defines the events that should clear the selection. __Default value:__ ``"dblclick"``
+        clear: A string or object that defines the events that should clear the selection. Set to ``false`` to disable these events. Legend-bound point selections also reset on unmodified background clicks, independently of this property. __Default value:__ ``"dblclick"``; no ``clear`` event for legend-bound point selections.
+        encodings: Schema-defined configuration property.
         on: A string or object that defines the events to which the selection should listen. __Default value:__ - point selections: ``"click"`` - interval selections: - ``"mousedown[event.shiftKey]"`` when any brushed channel is zoomable - ``"mousedown"`` otherwise
-        toggle: Controls whether data values should be toggled (inserted or removed from a point selection) when clicking with the shift key pressed. - ``true`` -- additional values can be selected by shift-clicking. - ``false`` -- only a single value can be selected at a time. __Default value:__ ``true``
+        toggle: Controls whether input events with Shift pressed add or remove selected values. - ``true`` -- values can be added or removed while holding Shift. - ``false`` -- only a single value can be selected at a time. __Default value:__ ``true`` when ``on`` uses ``"click"``, ``false`` otherwise.
+        bind: Populate this selection by clicking its categorical symbol legend. Plot input is disabled unless ``select.on`` is explicitly specified. Unmodified background clicks reset all legend-bound selections, independently of ``select.clear``. Default double-click clearing is disabled.
         description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
         persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
         push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
-        value: Initial value for the selection.
+        value: Initial raw categories, keyed by the declared encoding channel.
         empty: Whether an empty selection matches as a predicate.
 
     Returns:
@@ -1581,18 +1693,33 @@ def selection_point(
         >>> selection_point().param.to_dict(validate=False)
         {...}
     """
-    config = core.PointSelectionConfig(type="point", clear=clear, on=on, toggle=toggle)
+    config = {
+        "type": "point",
+        "clear": clear,
+        "encodings": encodings,
+        "on": on,
+        "toggle": toggle,
+    }
     from genome_spy._parameters import _make_parameter
 
     return _make_parameter(
         name,
         select=config,
+        bind=bind,
         description=description,
         persist=persist,
         push=push,
         value=value,
         empty=empty,
-        _variants=(core.SelectionParameter,),
+        _variants=(
+            core.RecordSelectionParameter,
+            core.CategorySelectionParameterX,
+            core.CategorySelectionParameterY,
+            core.CategorySelectionParameterColor,
+            core.CategorySelectionParameterFill,
+            core.CategorySelectionParameterStroke,
+            core.CategorySelectionParameterShape,
+        ),
     )
 
 

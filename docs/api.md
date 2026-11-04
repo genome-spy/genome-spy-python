@@ -140,43 +140,345 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    :toctree: generated/schema/
    :nosignatures:
 
+   AggregateOp
+   AggregateParams
+   Align
+   AlignmentMismatchesParams
+   ArrowConfig
+   ArrowDirection
+   ArrowProps
+   ArrowRelativeSize
+   ArrowSize
+   Axis
+   AxisConfig
    AxisGenomeData
+   AxisLabelLayoutParams
+   AxisOrient
+   AxisPlacement
+   AxisTicksData
+   BamData
+   Baseline
+   BedDataFormat
+   BedpeDataFormat
+   BigBedData
+   BigWigData
+   BindCheckbox
+   BindInput
+   BindRadioSelect
+   BindRange
+   Binding
+   BranchParams
    BrushConfig
+   BuiltInThemeName
+   CategorySelectionChannel
+   CategorySelectionParameterColor
+   CategorySelectionParameterFill
+   CategorySelectionParameterShape
+   CategorySelectionParameterStroke
+   CategorySelectionParameterX
+   CategorySelectionParameterY
+   ChannelWithScale
+   ChromPosDef
+   ChromosomalLocus
+   CollectParams
+   ColorDef
+   ColorSchemeConfig
+   CompareParams
+   ComplexDomain
+   ConcatSpec
+   ConditionalMarkPropExprDefType
+   ConditionalMarkPropExprDefTypeForShape
+   ConditionalMarkPropFieldDefType
+   ConditionalMarkPropFieldDefTypeForShape
+   ConditionalParameterMarkPropExprDefType
+   ConditionalParameterMarkPropExprDefTypeForShape
+   ConditionalParameterMarkPropFieldDefType
+   ConditionalParameterMarkPropFieldDefTypeForShape
+   ConditionalParameterScaleDatumDef
+   ConditionalParameterValueDefNumberExprRef
+   ConditionalParameterValueDefStringNullExprRef
+   ConditionalScaleDatumDef
+   ConditionalTestMarkPropExprDefType
+   ConditionalTestMarkPropExprDefTypeForShape
+   ConditionalTestMarkPropFieldDefType
+   ConditionalTestMarkPropFieldDefTypeForShape
+   ConditionalTestScaleDatumDef
+   ConditionalTestValueDefNumberExprRef
+   ConditionalTestValueDefStringNullExprRef
+   ConditionalValueDefNumberExprRef
+   ConditionalValueDefStringNullExprRef
+   Contig
+   CoordinateLookupInput
+   CoordinateLookupParams
+   CoreRootSpec
+   CoverageParams
+   CrossData
+   CrossInput
+   CrossParams
+   CsvDataFormat
    Data
    DataFormat
+   DataSource
+   DebouncedExprParameter
+   DendrogramParams
+   DirectionDef
+   Displace1DParams
+   Displace2DParams
+   DomEventType
+   DomainValue
+   DomainValueArray
+   DsvDataFormat
+   DynamicCallbackData
    DynamicOpacity
+   Encoding
+   EventConfig
+   ExplicitlyOrderedDendrogramParams
+   ExprDef
+   ExprFilterParams
+   ExprParameter
    ExprRef
    Expression
    FacetFieldDef
    FacetHeader
    FacetMapping
    FacetSpacing
+   FacetSpec
+   FadedMultiscaleStops
+   Field
+   FieldDefWithoutScale
+   FieldName
+   FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull
+   FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+   FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
+   FieldOrDatumDefWithConditionScaleDatumDefNumber
+   FieldOrDatumDefWithConditionScaleDatumDefStringNull
+   FigWigData
+   FilterParams
+   FilterScoredLabelsParams
+   FlattenCigarParams
+   FlattenCompressedExonsParams
+   FlattenDelimitedParams
+   FlattenParams
+   FlattenSequenceParams
+   FontStyle
+   FontWeight
+   FormulaParams
+   Generator
    GenomeAxis
+   GenomeConfig
+   GenomeConfigBase
+   GenomeDefinition
+   GenomeSpyConfig
+   GenomeSpySchema
+   Gff3Data
+   GradientIntervalSelectionParameterColor
+   GradientIntervalSelectionParameterFill
+   GradientIntervalSelectionParameterStroke
+   HConcatSpec
    HandledTooltip
+   IdentifierParams
+   ImportSpec
+   IndexDendrogramParams
+   IndexUrlSourceRef
+   IndexUrlTemplate
+   IndexedFastaData
+   InlineData
+   InlineDataset
+   InlineGenomeConfig
+   InlineGenomeDefinition
+   InlineLocusAssembly
+   InteractionEventType
+   IntervalSelectionParameter
+   JsonDataFormat
+   KeyDef
+   LayerSpec
+   LazyData
+   LazyDataParams
    Legend
+   LegendConfig
+   LegendDirection
    LegendLayout
+   LegendOrient
+   LegendRegionAnchor
    LegendRegionLayout
+   LegendResolutionBehavior
+   LegendTitleOrient
    LerpTransition
+   LinearizeGenomicCoordinateParams
+   LinkConfig
+   LinkProps
+   LookupParams
    LookupSelfInput
+   MarkConfig
+   MarkPropDefNumber
+   MarkPropDefStringNull
+   MarkPropDefStringNullTypeForShape
+   MarkPropExprDef
+   MarkPropExprDefType
+   MarkPropExprDefTypeForShape
+   MarkProps
+   MarkType
+   MeasureTextParams
+   MergeFacetsParams
+   MultiUrlSourceRef
+   MultiscaleSpec
    MultiscaleStops
+   MultiscaleStopsDef
+   NamedData
+   NamedGenomeConfig
    NamedSelectionPredicateRef
+   NumericDomain
+   NumericMarkPropDef
+   NumericStopDef
+   NumericValueDef
+   OffsetChannel
+   OffsetDef
+   OrderCondition
+   OrderDef
+   OtherDataFormat
+   OverhangConfig
+   PackLegendLabelsParams
+   PaddingConfig
    Paddings
+   ParamTransition
    Parameter
    ParameterPredicate
    Parse
+   ParseValue
+   PileupParams
+   PlainExprParameter
+   PlainValueParameter
+   PointConfig
+   PointProps
+   Position2Def
+   PositionDatumDef
+   PositionDef
+   PositionExprDef
+   PositionFieldDef
+   PositionValueDef
+   PositionalChannel
+   PositionalIntervalSelectionParameter
+   PrimaryPositionalChannel
+   ProjectParams
+   RangeConfig
+   RecordSelectionParameter
+   RectConfig
+   RectProps
+   RegexExtractParams
+   RegexFoldParams
+   ResolutionBehavior
+   ResolutionMapLegendResolutionBehavior
+   ResolutionMapResolutionBehavior
+   Root
+   RuleConfig
+   RuleProps
+   RulerChannelValue
+   RulerClear
+   RulerConfig
+   RulerDisplay
+   RulerEventConfig
+   RulerEventType
+   RulerExtent
+   RulerInitMapping
    RulerMarkConfig
+   RulerParameter
+   RulerSnap
+   RulerSource
+   SampleParams
+   Scalar
+   ScalarDomain
    Scale
+   ScaleConfig
    ScaleGroupsData
+   ScaleInterpolate
+   ScaleInterpolateParams
+   ScaleType
+   SchemeParams
+   SearchDef
+   SecondaryChromPosDef
+   SecondaryOffsetChannel
+   SecondaryOffsetDef
+   SecondaryPositionalChannel
    SelectionDomainRef
+   SelectionExtent
+   SelectionFilterParams
+   SelectionInitIntervalMapping
+   SelectionParameter
    SelectionPredicateDefinition
    SelectionPredicateOperand
    SelectionUnionTest
+   SeparatorProps
+   SequenceGenerator
+   SequenceParams
+   SetIntersectionParams
+   ShapeDef
+   SiblingOrderedDendrogramParams
+   SingleUrlSourceRef
    SizeDef
+   SortOrder
+   StackParams
    Step
+   StringDatumDef
+   StringFieldDef
+   StrokeAlign
+   StyleConfig
+   SurroundPlotSpec
+   SurroundSide
    SurroundSideSpec
    SurroundSides
+   SurroundSpec
+   TabixTsvData
+   TemplateImport
+   TextConfig
+   TextDef
+   TextProps
+   TickConfig
+   TickProps
    Title
+   TitleAnchor
+   TitleConfig
+   TitleFrame
+   TitleOrient
+   TooltipDef
+   TransformOutput
+   TransformParams
+   TransitionedExprParameter
+   TransitionedMultiscaleStops
+   TransitionedValueParameter
+   TruncateTextParams
+   Type
+   TypeForShape
+   UnitSpec
+   UrlData
+   UrlGenomeConfig
+   UrlGenomeDefinition
+   UrlImport
+   UrlList
+   UrlSourceRef
+   UrlTemplate
+   VConcatSpec
+   ValueDefArrowDirection
+   ValueDefNumber
+   ValueDefString
+   ValueDefWithConditionNumberType
+   ValueDefWithConditionStringNullType
+   ValueDefWithConditionStringNullTypeForShape
+   ValueParameter
+   ValuesParams
+   VariableParameter
+   VcfData
+   VcfDataFormat
+   ViewBackground
+   ViewConfig
+   ViewOpacityDef
+   ViewSpec
    ViewportDomainRef
+   ViewportSizeDef
+   WigDataFormat
+   WindowOnlyOp
+   WindowOp
+   WindowParams
+   ZoomParams
 ```
 
 ## Data sources

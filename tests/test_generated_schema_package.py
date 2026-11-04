@@ -34,8 +34,89 @@ from genome_spy.schema import (
     load_schema,
 )
 from genome_spy.schema import channels as generated_channels
+from genome_spy.schema import core as generated_core
 from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import SchemaValidationError
+
+
+def test_branch_transform_preserves_nested_transforms() -> None:
+    spec = (
+        gs.Chart([{"value": 1}])
+        .mark_point()
+        .transform_branch(
+            transform=[gs.ValuesParams(type="values", field="value", param="observed")]
+        )
+        .add_params(gs.param("observed"))
+        .to_dict()
+    )
+    assert spec["transform"] == [
+        {
+            "type": "branch",
+            "transform": [{"type": "values", "field": "value", "param": "observed"}],
+        }
+    ]
+
+
+@pytest.mark.parametrize("channel", ["x", "y", "color", "fill", "stroke", "shape"])
+def test_category_selection_helpers_follow_schema_branches(channel) -> None:
+    selection = gs.selection_point(
+        "selected", encodings=[channel], value=[{channel: "A"}], empty=False
+    )
+    spec = gs.Chart().mark_point().add_params(selection).to_dict()
+    assert selection.is_selection
+    assert spec["params"] == [
+        {
+            "name": "selected",
+            "select": {"type": "point", "encodings": [channel]},
+            "value": [{channel: "A"}],
+        }
+    ]
+
+
+@pytest.mark.parametrize("channel", ["color", "fill", "stroke"])
+def test_legend_selection_helpers_follow_schema_branches(channel) -> None:
+    selection = gs.selection_interval("range", encodings=[channel], bind="legend")
+    assert selection.param.to_dict() == {
+        "name": "range",
+        "select": {"type": "interval", "encodings": [channel]},
+        "bind": "legend",
+    }
+
+
+def test_selection_helpers_reject_incompatible_branch_properties() -> None:
+    with pytest.raises(TypeError, match="No GenomeSpy parameter variant"):
+        gs.selection_point("invalid", encodings=["size"])
+    with pytest.raises(
+        SchemaValidationError, match="Invalid PositionalIntervalSelectionParameter"
+    ):
+        gs.selection_interval(
+            "invalid", encodings=["color"], extent="view"
+        ).param.to_dict()
+
+
+def test_figwig_lazy_source_is_generated() -> None:
+    assert gs.lazy.figwig(
+        "signal.figwig", tracks=["sample"], mode="exact"
+    ).to_dict() == {
+        "lazy": {
+            "type": "figwig",
+            "url": "signal.figwig",
+            "tracks": ["sample"],
+            "mode": "exact",
+        }
+    }
+
+
+def test_rule_border_properties_are_generated() -> None:
+    spec = (
+        gs.Chart().mark_rule(fill="blue", stroke="red", strokeAlign="inside").to_dict()
+    )
+    assert spec["mark"] == {
+        "type": "rule",
+        "fill": "blue",
+        "stroke": "red",
+        "strokeAlign": "inside",
+    }
 
 
 @pytest.mark.parametrize(
@@ -429,6 +510,23 @@ def test_every_generated_channel_is_public() -> None:
     for name in generated_channels.__all__:
         assert name in gs.__all__
         assert getattr(gs, name) is getattr(generated_channels, name)
+
+
+def test_every_generated_schema_class_is_public() -> None:
+    from genome_spy import api
+    from genome_spy.data import Data
+    from genome_spy._parameters import Parameter
+
+    for name in generated_core.__all__:
+        value = getattr(generated_core, name)
+        if inspect.isclass(value):
+            assert name in gs.__all__
+            assert name in api.__all__
+            if name not in {"Data", "Parameter", *generated_channels.__all__}:
+                assert getattr(gs, name) is value
+                assert getattr(api, name) is value
+    assert gs.Data is Data
+    assert gs.Parameter is Parameter
 
 
 def test_every_schema_root_has_a_public_builder() -> None:

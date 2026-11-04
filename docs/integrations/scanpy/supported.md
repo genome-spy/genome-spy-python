@@ -64,11 +64,8 @@ for those plots and its global style-setting helpers.
 - **Linked selections have a boundary mismatch.** In `EmbeddingSummary`, cells
   exactly on a brush's upper or right edge can appear in summaries but be omitted
   from the displayed count and Python selection results.
-- **Changing linked heatmap genes can misplace rows.** With bundled GenomeSpy
-  Core 1.2.0, a gene-menu change can leave tiles or value labels at old positions.
-  Choose genes in Python when reliable row placement is required.
-- **Some legends can clip.** Large symbols or vertical legends with multiple
-  columns can exceed their allocated space in the bundled runtime. Inspect the
+- **Large legend symbols can clip.** Large symbols can exceed their allocated
+  space in short panels. Inspect the
   final layout, especially with many categories.
 - **Large live counts can slow brushing.** Exact counting currently scans plotted
   cells on brush updates. The faster native path awaits an adopted published

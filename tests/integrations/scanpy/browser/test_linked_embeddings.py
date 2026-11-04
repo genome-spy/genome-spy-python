@@ -483,7 +483,9 @@ class TestEmbeddingSummary:
         set_brush(page, {"x": [20, 21], "y": [20, 21]})
         assert rows(page, "selected-composition") == []
         assert rows(page, "selected-observation-histogram") == []
-        assert rows(page, names["selected-observation-coverage"]) == []
+        assert rows(page, names["selected-observation-coverage"]) == [
+            {"valid": 0, "missing": 0, "label": "Selected: 0 valid, 0 missing"}
+        ]
         assert rows(page, "all-composition") == reference
         assert rows(page, "all-observation-histogram") == histogram
 
@@ -824,10 +826,6 @@ class TestEmbeddingSummary:
             )
 
     @pytest.mark.parametrize("show_values", [False, True])
-    @pytest.mark.xfail(
-        strict=True,
-        reason="Core 1.2 GPU categorical positions retain removed slots; upstream PR #595 is unreleased",
-    )
     def test_heatmap_gene_changes_keep_rows_inside_the_plot(
         self, page, adata, show_values
     ):

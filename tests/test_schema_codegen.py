@@ -11,6 +11,7 @@ from tools.generate_schema_wrapper import (
     interaction_helper_names,
     write_public_channel_exports,
     write_public_interaction_exports,
+    write_public_schema_exports,
     write_schema_files,
     write_schema_package,
 )
@@ -324,7 +325,8 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     assert "'input': 'range'" in ergonomics_module.source
     assert "input: Literal['range']" not in ergonomics_module.source
     assert "def selection_interval(" in ergonomics_module.source
-    assert "config = core.IntervalSelectionConfig(" in (ergonomics_module.source)
+    assert "'type': 'interval'" in ergonomics_module.source
+    compile(ergonomics_module.source, "ergonomics.py", "exec")
     assert "def ruler(" in ergonomics_module.source
     assert "config = core.RulerConfig(" in ergonomics_module.source
     assert "def param(\n    name: str | None = None," in ergonomics_module.source
@@ -359,17 +361,25 @@ def test_parameter_factories_follow_future_schema_variants() -> None:
         "required": ["name", "future"],
     }
     definitions["BindInput"]["properties"]["input"]["enum"].append("date")
-    definitions["SelectionParameter"]["properties"]["select"]["anyOf"].append(
-        {"$ref": "#/definitions/LassoSelectionConfig"}
+    definitions["SelectionParameter"]["anyOf"].append(
+        {"$ref": "#/definitions/FutureSelectionParameter%3C%22lasso%22%3E"}
     )
-    definitions["LassoSelectionConfig"] = {
+    definitions['FutureSelectionParameter<"lasso">'] = {
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "type": {"const": "lasso", "type": "string"},
-            "on": {"type": "string"},
+            "name": {"type": "string"},
+            "select": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "type": {"const": "lasso", "type": "string"},
+                    "on": {"type": "string"},
+                },
+                "required": ["type"],
+            },
         },
-        "required": ["type"],
+        "required": ["name", "select"],
     }
 
     module = SchemaWrapperGenerator(schema).generate_ergonomics_module()
@@ -383,11 +393,12 @@ def test_parameter_factories_follow_future_schema_variants() -> None:
         "_SELECTION_PARAMETER_TYPES =", 1
     )[0]
     assert "core.FutureParameter" in parameter_types
-    assert "_SELECTION_PARAMETER_TYPES = (core.SelectionParameter,)" in module.source
+    compile(module.source, "ergonomics.py", "exec")
+    assert "core.FutureSelectionParameterLasso" in module.source
     assert "input: Literal['text', 'number', 'color', 'date']" in module.source
     assert "def selection_lasso(" in module.source
-    assert "config = core.LassoSelectionConfig(" in module.source
-    assert "_variants=(core.SelectionParameter,)" in module.source
+    assert "'type': 'lasso'" in module.source
+    assert "_variants=(core.FutureSelectionParameterLasso,)" in module.source
     assert "selection_lasso" in interaction_helper_names(generator)
 
 
@@ -1181,6 +1192,44 @@ def test_inline_object_setters_are_derived_from_schema(property_name: str) -> No
     assert 'x: Literal["x", "x2"]' not in source
 
 
+def test_inline_union_setters_preserve_nested_annotations() -> None:
+    schema = {
+        "definitions": {
+            "FutureOptions": {
+                "type": "object",
+                "properties": {
+                    "config": {
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {"field": {"type": "string"}},
+                            },
+                            {
+                                "type": "object",
+                                "properties": {"field": {"type": "number"}},
+                            },
+                        ]
+                    },
+                    "domain": {
+                        "anyOf": [
+                            {"type": "array", "items": {"type": ["number", "null"]}},
+                            {
+                                "type": "object",
+                                "properties": {"initial": {"type": "number"}},
+                            },
+                        ]
+                    },
+                },
+            },
+        },
+    }
+    source = SchemaWrapperGenerator(schema).generate_core_module().source
+    compile(source, "core.py", "exec")
+    assert "field: str | float | UndefinedType = Undefined" in source
+    assert "initial: float | UndefinedType = Undefined" in source
+    assert "Sequence[float | None]" in source
+
+
 def test_future_channels_are_added_to_public_exports(tmp_path: Path) -> None:
     for filename in ("api.py", "__init__.py"):
         (tmp_path / filename).write_text(
@@ -1195,6 +1244,28 @@ def test_future_channels_are_added_to_public_exports(tmp_path: Path) -> None:
         assert "    FutureChannel," in source
         assert '    "FutureChannel",' in source
         compile(source, filename, "exec")
+
+
+def test_future_schema_classes_are_exported_without_replacing_builders(
+    tmp_path: Path,
+) -> None:
+    for filename in ("api.py", "__init__.py"):
+        (tmp_path / filename).write_text(
+            "from genome_spy.data import Data\n"
+            "# BEGIN GENERATED SCHEMA IMPORTS\n# END GENERATED SCHEMA IMPORTS\n"
+            "__all__ = [\n    'Data',\n    # BEGIN GENERATED SCHEMA EXPORTS\n"
+            "    # END GENERATED SCHEMA EXPORTS\n]\n",
+            encoding="utf-8",
+        )
+    write_public_schema_exports(tmp_path, ("Data", "FutureParams"))
+    original = {path: path.read_text() for path in tmp_path.glob("*.py")}
+    write_public_schema_exports(tmp_path, ("Data", "FutureParams"))
+    for path, source in original.items():
+        assert path.read_text() == source
+        assert "    FutureParams," in source
+        assert '    "FutureParams",' in source
+        assert "    Data," not in source
+        compile(source, str(path), "exec")
 
 
 def test_capabilities_do_not_silently_drop_future_root_variants() -> None:

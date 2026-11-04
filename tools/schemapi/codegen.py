@@ -288,12 +288,13 @@ class ParameterConfigFactorySpec:
 
     helper_name: str
     parameter_class_name: str
-    config_class_name: str
+    config_class_name: str | None
     config_property: str
     parameter_properties: tuple[PropertySpec, ...]
     config_properties: tuple[PropertySpec, ...]
     fixed_properties: tuple[tuple[str, Any], ...] = ()
     supports_empty: bool = False
+    parameter_variants: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -468,15 +469,23 @@ class SchemaAnalyzer:
                 )
         return variants
 
-    def union_variants(self, definition_name: str) -> tuple[UnionVariantSpec, ...]:
+    def union_variants(
+        self, definition_name: str | dict[str, Any]
+    ) -> tuple[UnionVariantSpec, ...]:
         """Expand a named union into concrete, branch-preserving leaves."""
-        schema = self.definitions.get(definition_name)
+        schema = (
+            self.definitions.get(definition_name)
+            if isinstance(definition_name, str)
+            else definition_name
+        )
         if not isinstance(schema, dict):
             return ()
         raw_variants = self._union_variants(
             schema,
-            seen=frozenset({definition_name}),
-            schema_name=definition_name,
+            seen=frozenset({definition_name})
+            if isinstance(definition_name, str)
+            else frozenset(),
+            schema_name=definition_name if isinstance(definition_name, str) else None,
         )
         variants: list[UnionVariantSpec] = []
         for variant in raw_variants:
@@ -1025,57 +1034,82 @@ class SchemaWrapperGenerator:
     ) -> tuple[ParameterConfigFactorySpec, ...]:
         """Return selection and nested-config parameter helper definitions."""
         specs: list[ParameterConfigFactorySpec] = []
-        selection_schema = self._definitions_map.get("SelectionParameter", {})
-        selection_properties = self._analyzer.resolve_properties(selection_schema)
-        select_schema = selection_properties.get("select", {})
-        choices = (
-            select_schema.get("anyOf", select_schema.get("oneOf", []))
-            if isinstance(select_schema, dict)
-            else []
-        )
-        if isinstance(choices, list):
-            for choice in choices:
-                if not isinstance(choice, dict):
+        selections: dict[str, list[tuple[UnionVariantSpec, UnionVariantSpec]]] = {}
+        for parameter in self._analyzer.union_variants("SelectionParameter"):
+            if parameter.schema_name is None:
+                continue
+            properties = self._analyzer.resolve_properties(
+                self._definitions_map[parameter.schema_name]
+            )
+            for config in self._analyzer.union_variants(properties.get("select", {})):
+                values = dict(config.discriminators).get("type", ())
+                if "type" not in config.required:
                     continue
-                config_name = _ref_name(choice)
-                config_schema = self._definitions_map.get(config_name or "")
-                if (
-                    config_name is None
-                    or not isinstance(config_schema, dict)
-                    or not self._base_analyzer.schema_looks_object_like(config_schema)
-                ):
-                    continue
-                variants = self._analyzer.union_variants(config_name)
-                for variant in variants:
-                    values = next(
-                        (
-                            discriminator_values
-                            for name, discriminator_values in variant.discriminators
-                            if name == "type" and name in variant.required
-                        ),
-                        (),
-                    )
-                    for value in values:
-                        if not isinstance(value, str) or variant.schema_name is None:
-                            continue
-                        specs.append(
-                            ParameterConfigFactorySpec(
-                                helper_name=f"selection_{_snake_name(value)}",
-                                parameter_class_name="SelectionParameter",
-                                config_class_name=variant.schema_name,
-                                config_property="select",
-                                parameter_properties=tuple(
-                                    prop
-                                    for prop in self.schema_property_specs(
-                                        "SelectionParameter"
-                                    )
-                                    if prop.name not in {"name", "select"}
-                                ),
-                                config_properties=variant.properties,
-                                fixed_properties=(("type", value),),
-                                supports_empty=True,
-                            )
+                for value in values:
+                    if isinstance(value, str):
+                        selections.setdefault(value, []).append((parameter, config))
+
+        def merged_properties(
+            groups: list[tuple[PropertySpec, ...]], excluded: set[str]
+        ) -> tuple[PropertySpec, ...]:
+            by_name: dict[str, list[PropertySpec]] = {}
+            for group in groups:
+                for prop in group:
+                    if prop.name not in excluded:
+                        by_name.setdefault(prop.name, []).append(prop)
+            merged = []
+            for name, properties in sorted(by_name.items()):
+                annotations = _dedupe_preserve_order(
+                    prop.annotation.annotation for prop in properties
+                )
+                annotation = " | ".join(annotations)
+                if all(value.startswith("Sequence[") for value in annotations):
+                    annotation = (
+                        "Sequence["
+                        + " | ".join(
+                            value[len("Sequence[") : -1] for value in annotations
                         )
+                        + "]"
+                    )
+                merged.append(
+                    PropertySpec(
+                        name=name,
+                        annotation=AnnotationSpec(
+                            annotation,
+                            needs_sequence=any(
+                                prop.annotation.needs_sequence for prop in properties
+                            ),
+                        ),
+                        description=properties[0].description,
+                    )
+                )
+            return tuple(merged)
+
+        for value, branches in selections.items():
+            specs.append(
+                ParameterConfigFactorySpec(
+                    helper_name=f"selection_{_snake_name(value)}",
+                    parameter_class_name="SelectionParameter",
+                    config_class_name=None,
+                    config_property="select",
+                    parameter_properties=merged_properties(
+                        [parameter.properties for parameter, _ in branches],
+                        {"name", "select"},
+                    ),
+                    config_properties=merged_properties(
+                        [config.properties for _, config in branches], set()
+                    ),
+                    fixed_properties=(("type", value),),
+                    supports_empty=True,
+                    parameter_variants=tuple(
+                        dict.fromkeys(
+                            parameter.schema_name
+                            for parameter, _ in branches
+                            if parameter.schema_name is not None
+                        )
+                    ),
+                )
+            )
 
         for variant in self._analyzer.union_variants("Parameter"):
             required_config_names = variant.required - {"name"}
@@ -3122,9 +3156,7 @@ def _schema_class_source(
         spec.name: (
             _nested_property_specs(analyzer, spec.nested_schema_class_name)
             if spec.nested_schema_class_name is not None
-            else analyzer.property_specs_from_properties(
-                resolved_properties[spec.name].get("properties", {})
-            )
+            else _inline_property_specs(analyzer, resolved_properties[spec.name])
         )
         for spec in property_specs
     }
@@ -3787,7 +3819,7 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
     variant_classes = _core_class_tuple_source(variant_names)
     return "\n\n".join(
         [
-            "\n\n".join(overloads),
+            "\n\n".join(dict.fromkeys(overloads)),
             "\n".join(
                 [
                     "def param(",
@@ -3834,7 +3866,7 @@ def _core_class_tuple_source(class_names: tuple[str, ...]) -> str:
     """Render a tuple of generated ``core`` schema classes."""
     if not class_names:
         return "()"
-    return "(" + ", ".join(f"core.{name}" for name in class_names) + ",)"
+    return "(" + ", ".join(f"core.{_class_name(name)}" for name in class_names) + ",)"
 
 
 def _parameter_type_metadata_source(
@@ -3950,13 +3982,30 @@ def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
             f"        >>> {spec.helper_name}().param.to_dict(validate=False)",
             "        {...}",
             '    """',
-            f"    config = core.{spec.config_class_name}({config_arguments})",
+            (
+                f"    config = core.{_class_name(spec.config_class_name)}({config_arguments})"
+                if spec.config_class_name is not None
+                else "    config = {"
+                + ", ".join(
+                    [
+                        *(
+                            f"{name!r}: {value!r}"
+                            for name, value in spec.fixed_properties
+                        ),
+                        *(
+                            f"{prop.name!r}: {prop.python_name}"
+                            for prop in config_properties
+                        ),
+                    ]
+                )
+                + "}"
+            ),
             "    from genome_spy._parameters import _make_parameter",
             "",
             "    return _make_parameter(",
             "        name,",
             f"        {spec.config_property}=config{parameter_arguments}{empty_argument},",
-            f"        _variants=(core.{spec.parameter_class_name},),",
+            f"        _variants={_core_class_tuple_source(spec.parameter_variants or (spec.parameter_class_name,))},",
             "    )",
             "",
             "",
@@ -4407,12 +4456,12 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             )
         parameters.append(parameter_source(property_spec))
         if schema_name in spec.required:
-            assignments.append(f"        transform[{schema_name!r}] = {value_source}")
+            assignments.append(f"        _transform[{schema_name!r}] = {value_source}")
         else:
             assignments.extend(
                 [
                     f"        if {python_name} is not Undefined:",
-                    f"            transform[{schema_name!r}] = {value_source}",
+                    f"            _transform[{schema_name!r}] = {value_source}",
                 ]
             )
 
@@ -4558,10 +4607,10 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             indent=8,
         )
         repeated_lines = [
-            f"        transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
+            f"        _transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
             *validation_lines,
             *assignments,
-            "        return self._append_transform(transform)  "
+            "        return self._append_transform(_transform)  "
             "# type: ignore[attr-defined, no-any-return]",
         ]
 
@@ -4871,6 +4920,23 @@ def _channel_nested_setter_source(
     )
 
 
+def _inline_property_specs(
+    analyzer: SchemaAnalyzer, schema: dict[str, Any]
+) -> tuple[PropertySpec, ...]:
+    """Collect inline setter options without losing alternative property types."""
+    properties: dict[str, list[dict[str, Any]]] = {}
+    for variant in analyzer.property_variants(schema):
+        for name, value in variant.items():
+            if value.get("not") != {}:
+                properties.setdefault(name, []).append(value)
+    return analyzer.property_specs_from_properties(
+        {
+            name: {"anyOf": variants} if len(variants) > 1 else variants[0]
+            for name, variants in properties.items()
+        }
+    )
+
+
 def _nested_property_specs(
     analyzer: SchemaAnalyzer, class_name: str | None
 ) -> tuple[PropertySpec, ...]:
@@ -4925,8 +4991,8 @@ def _schema_property_method_source(
 
 
 def _nested_value_annotation(annotation: str) -> str:
-    """Add optional nested-setter sentinels without duplicating schema variants."""
-    return " | ".join(dict.fromkeys([*annotation.split(" | "), "None", "object"]))
+    """Add nested-setter sentinels while preserving unions inside containers."""
+    return f"{annotation} | None | object"
 
 
 def _typed_dict_source(name: str, property_specs: tuple[PropertySpec, ...]) -> str:

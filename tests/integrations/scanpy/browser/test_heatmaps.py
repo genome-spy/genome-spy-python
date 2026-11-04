@@ -675,11 +675,11 @@ class TestMatrix:
                 if navigated:
                     px, py = pointer(page, bounds)
                     page.mouse.wheel(0, -250)
-                    page.wait_for_timeout(250)
+                    wait_for_navigation(page, "matrix", probe=11)
                     page.mouse.down()
                     page.mouse.move(px + 15, py + 15, steps=5)
                     page.mouse.up()
-                    page.wait_for_timeout(700)
+                    wait_for_navigation(page, "matrix", probe=11)
                 root = svg_root(page)
                 for axis, side, prefix in (
                     ("x", "bottom", "gene"),

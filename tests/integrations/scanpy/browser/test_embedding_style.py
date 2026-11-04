@@ -13,7 +13,6 @@ from scipy.ndimage import distance_transform_cdt, maximum_filter, minimum_filter
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.schema import SCHEMA_VERSION
 from tests.integrations.scanpy.browser.interactions import move_to
 from tests.integrations.scanpy.browser.rendering import (
     assert_complete_chart,
@@ -222,12 +221,6 @@ class TestColorbar:
             assert item["y"] + item["height"] <= size["height"] + 1
 
     @pytest.mark.reference
-    @pytest.mark.xfail(
-        SCHEMA_VERSION == "1.2.0",
-        strict=True,
-        raises=AssertionError,
-        reason="C11: Core 1.2 vertical legend extent excludes subsequent columns",
-    )
     def test_native_vertical_legend_keeps_every_column_visible(self, page, tmp_path):
         categories = [f"category-{i}" for i in range(12)]
         chart = (
@@ -600,6 +593,7 @@ class TestEmbeddingEdges:
             assert (distance[first] > radius).mean() < 0.01
         ink = [(255 - image).sum() for image in interior]
         assert abs(ink[0] / ink[1] - 1) < 0.1
+        # Core and Agg differ slightly in antialiased point-stroke blending.
         for x, y in data.obsm["X_umap"]:
             px = round((x - xdomain[0]) / np.ptp(xdomain) * actual.width)
             py = round((ydomain[1] - y) / np.ptp(ydomain) * actual.height)
@@ -607,7 +601,7 @@ class TestEmbeddingEdges:
                 np.abs(pixels[py - 1 : py + 2, px - 1 : px + 2] - target[py, px])
                 .max(axis=2)
                 .min()
-                <= 12
+                <= 16
             )
         rgb = np.asarray(matplotlib.colors.to_rgb(color)) * 255
         edge_hue = (255 - rgb) / (255 - rgb).max()

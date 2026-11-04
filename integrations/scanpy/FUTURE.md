@@ -29,13 +29,13 @@ acceptance criteria. Keep detailed parameter contracts in
   Full coverage means native equivalents for the agreed Scanpy plotting scope,
   with documented rendering differences; it does not mean emulating Matplotlib.
 
-## Follow the coming GenomeSpy release
+## Adopt the released GenomeSpy 1.3 capabilities
 
 - **Interactive legend selection:** replace the linked-expression examples' fixed
-  gene lists with native legend-based selection when released. Reuse the shared
+  gene lists with the native legend-based selection released in 1.3.0. Reuse the shared
   summary data and selection helpers. Verify clearing, repeated changes, linked
   panels, layout and Python selection retrieval where offered. Do not restore
-  dropdowns as a substitute. Recheck the dynamic heatmap placement issue (C18).
+  dropdowns as a substitute. The dynamic heatmap placement regression (C18) now passes.
 - **Rule outlines for PAGA:** use the released native outline properties to add
   thin white borders to overlapping edges in the shared PAGA renderer. Verify
   widths, crossings, zoom, picking and exports across PAGA plots. Remove the old

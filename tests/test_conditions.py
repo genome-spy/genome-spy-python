@@ -90,7 +90,7 @@ def test_generated_predicate_and_selection_union() -> None:
         {"and": []},
         {"or": []},
         {"not": {"ref": "nested"}},
-        {"param": "brush", "project": {"x": "y"}},
+        {"param": "brush", "project": {"x": "size"}},
         {"ref": "named", "empty": False},
         {"expr": "datum.x > 0"},
     ],
@@ -132,4 +132,13 @@ def test_generated_projection_setter_preserves_original_predicate() -> None:
         "value": 1,
     }
     with pytest.raises(SchemaValidationError):
-        gs.when(original.project(x="y"))
+        gs.when(original.project(x="size"))
+
+
+def test_category_projection_can_cross_positional_channels() -> None:
+    predicate = gs.ParameterPredicate(param="categories").project(x="y")
+    assert gs.when(predicate).then(gs.value(1)).to_dict()["condition"] == {
+        "param": "categories",
+        "project": {"x": "y"},
+        "value": 1,
+    }

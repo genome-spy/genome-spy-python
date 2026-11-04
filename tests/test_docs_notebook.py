@@ -199,7 +199,7 @@ def test_umap_page_reads_prepared_coordinates_without_analysis(
         GUIDE, download_path="umap.ipynb", bundle_url="/core.js"
     )
     specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
-    assert len(specs) == 13
+    assert len(specs) == 14
     assert reads == list(cached.values())
     for index, basis, dimensions in [
         *[(i, "X_umap", (0, 1)) for i in range(7)],
@@ -243,7 +243,7 @@ def test_umap_page_reads_prepared_coordinates_without_analysis(
 @pytest.mark.parametrize(
     "notebook, title, section, charts",
     [
-        (GUIDE, "UMAP and embeddings", "select-cells", 13),
+        (GUIDE, "UMAP and embeddings", "select-cells", 14),
         (EXPRESSION_GUIDE, "Expression plots", "heatmap", 9),
         (EXPORT_GUIDE, "Save and export", "use-the-plot-buttons", 1),
         (TRACKS_GUIDE, "Expression tracks", "plot-individual-cells", 3),
