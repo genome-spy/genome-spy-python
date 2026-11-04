@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-11-04
+
+### Added
+
+- Generated authoring support for Figwig lazy sources, branch and values
+  transforms, category and legend selections, categorical scale grouping and
+  zooming, dendrogram domain outputs, and rule fills and borders.
+- Automatically expose generated schema classes through the public Python API
+  while preserving existing chart, data, channel and parameter builders.
+
+### Changed
+
+- Upgrade bundled GenomeSpy Core, controls, Inspector and schema to 1.3.0.
+- Derive inline union setters, generic schema names and selection helper options
+  from the upstream schema, without handwritten additions for individual features.
+- Follow Core 1.3.0's zero-valued rows for empty ungrouped aggregates and its
+  expanded selection projection grammar.
+
+### Fixed
+
+- Adopt released fixes for shared point hover, categorical-domain updates and
+  vertical multi-column legend layout.
+- Preserve nested transform lists when authoring branch transforms and nested
+  container unions in generated type annotations.
+
 ## [0.8.1] - 2026-11-03
 
 ### Fixed
