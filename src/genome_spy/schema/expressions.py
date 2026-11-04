@@ -480,6 +480,36 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("zoomLevel", *arguments)
 
     @classmethod
+    def selectionActive(cls, selection: IntoExpression, /) -> Expression:
+        """Build a GenomeSpy ``selectionActive`` expression."""
+        return _function_expression("selectionActive", selection)
+
+    @classmethod
+    def selectionValues(
+        cls, selection: IntoExpression, component: IntoExpression, /
+    ) -> Expression:
+        """Build a GenomeSpy ``selectionValues`` expression."""
+        return _function_expression("selectionValues", selection, component)
+
+    @classmethod
+    def selectionContains(
+        cls,
+        selection: IntoExpression,
+        component: IntoExpression,
+        value: IntoExpression,
+        /,
+    ) -> Expression:
+        """Build a GenomeSpy ``selectionContains`` expression."""
+        return _function_expression("selectionContains", selection, component, value)
+
+    @classmethod
+    def selectionBounds(
+        cls, selection: IntoExpression, component: IntoExpression, /
+    ) -> Expression:
+        """Build a GenomeSpy ``selectionBounds`` expression."""
+        return _function_expression("selectionBounds", selection, component)
+
+    @classmethod
     def tickStep(
         cls, start: IntoExpression, stop: IntoExpression, count: IntoExpression, /
     ) -> Expression:

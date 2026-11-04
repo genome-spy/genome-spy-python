@@ -33,6 +33,7 @@ from genome_spy.schema._typing import (
     Scalar_T,
     ScaleInterpolate_T,
     ScaleType_T,
+    StrokeAlign_T,
     TitleAnchor_T,
     TitleFrame_T,
     TitleOrient_T,
@@ -407,9 +408,17 @@ class MarkMethodMixin:
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fillOpacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        filled: bool | UndefinedType = Undefined,
         minLength: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         size: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        stroke: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        strokeAlign: StrokeAlign_T
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         strokeCap: Literal["butt"]
         | Literal["square"]
         | Literal["round"]
@@ -418,6 +427,11 @@ class MarkMethodMixin:
         | UndefinedType = Undefined,
         strokeDash: Sequence[float] | UndefinedType = Undefined,
         strokeDashOffset: float | UndefinedType = Undefined,
+        strokeOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        strokeWidth: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         style: str | Sequence[str] | UndefinedType = Undefined,
         tooltip: core.HandledTooltip
         | HandledTooltipKwds
@@ -442,12 +456,19 @@ class MarkMethodMixin:
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
+            fill (str | ExprRef | dict[str, Any]): The fill color.
+            fillOpacity (float | ExprRef | dict[str, Any]): The fill opacity. Value between ``0`` and ``1``.
+            filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
             minLength (float | ExprRef | dict[str, Any]): The minimum stroke length in pixels. Use this property to ensure that very short strokes remain visible even when the user zooms out. **Default value:** ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
+            stroke (str | ExprRef | dict[str, Any]): The stroke color
+            strokeAlign (StrokeAlign_T | ExprRef | dict[str, Any]): Position of the full-width stroke band relative to the nominal body. Inside strokes extend inward by ``strokeWidth``, centered strokes extend half inward and half outward, and outside strokes extend entirely outward. The nominal body is unchanged. Canvas uses an outside-style approximation for all alignments. __Default value:__ ``"outside"``
             strokeCap (Literal['butt'] | Literal['square'] | Literal['round'] | ExprRef | dict[str, Any]): The style of stroke ends. Available choices: ``"butt"``, ``"round``", and ``"square"``. **Default value:** ``"butt"``
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
+            strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
+            strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
@@ -466,12 +487,19 @@ class MarkMethodMixin:
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
             "cursor": cursor,
+            "fill": fill,
+            "fillOpacity": fillOpacity,
+            "filled": filled,
             "minLength": minLength,
             "opacity": opacity,
             "size": size,
+            "stroke": stroke,
+            "strokeAlign": strokeAlign,
             "strokeCap": strokeCap,
             "strokeDash": strokeDash,
             "strokeDashOffset": strokeDashOffset,
+            "strokeOpacity": strokeOpacity,
+            "strokeWidth": strokeWidth,
             "style": style,
             "tooltip": tooltip,
             "x": x,
@@ -1985,7 +2013,17 @@ class ImportedViewConstructorMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | dict[str, Any]
@@ -1999,7 +2037,7 @@ class ImportedViewConstructorMixin:
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for the imported subtree at the import site. This config is merged before the imported spec's own root-level ``config``, so imported specs can remain self-contained and override import-site defaults where needed.
             import\\_ (UrlImport | dict[str, Any] | TemplateImport): The method to import a specification.
             name (str): The name given to the imported view. This property overrides the name specified in the imported specification and defines an import scope that is used for bookmarkable view visibility and parameter addressing.
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter] | dict[str, Any]): Dynamic variables that parameterize a visualization. Parameters defined here override the parameters defined in the imported specification.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter] | dict[str, Any]): Dynamic variables that parameterize a visualization. Parameters defined here override the parameters defined in the imported specification.
             visible (bool): Overrides the visibility of the imported view. If not specified, the imported specification's ``visible`` property is used.
             zindex (float): Overrides the imported view's z-order among sibling views. Higher values render later. This does not affect layout order. __Default value:__ the imported view's ``zindex``, or ``0``
         """
@@ -2076,7 +2114,17 @@ class UnitPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -2089,11 +2137,15 @@ class UnitPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -2127,18 +2179,14 @@ class UnitPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -2177,17 +2225,17 @@ class UnitPropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             predicates (dict[str, Any]): Define a selection test once instead of repeating it across this unit's conditional encodings, including conditional draw order. Use ``test: { ref: "name" }`` in a condition to reference it. Definitions are local to this unit and are not inherited. An inherited encoding may reference a name if each consuming unit defines it. Selection parameters and projected channels resolve in this unit. Filter transforms do not use these definitions.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -2290,7 +2338,17 @@ class UnitPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -2303,11 +2361,15 @@ class UnitPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -2341,18 +2403,14 @@ class UnitPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -2390,17 +2448,17 @@ class UnitPropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             predicates (dict[str, Any]): Define a selection test once instead of repeating it across this unit's conditional encodings, including conditional draw order. Use ``test: { ref: "name" }`` in a condition to reference it. Definitions are local to this unit and are not inherited. An inherited encoding may reference a name if each consuming unit defines it. Selection parameters and projected channels resolve in this unit. Filter transforms do not use these definitions.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -2503,7 +2561,17 @@ class UnitPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -2516,11 +2584,15 @@ class UnitPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -2554,18 +2626,14 @@ class UnitPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -2603,17 +2671,17 @@ class UnitPropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             predicates (dict[str, Any]): Define a selection test once instead of repeating it across this unit's conditional encodings, including conditional draw order. Use ``test: { ref: "name" }`` in a condition to reference it. Definitions are local to this unit and are not inherited. An inherited encoding may reference a name if each consuming unit defines it. Selection parameters and projected channels resolve in this unit. Filter transforms do not use these definitions.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -2717,7 +2785,17 @@ class LayerPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -2729,11 +2807,15 @@ class LayerPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -2767,18 +2849,14 @@ class LayerPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -2817,16 +2895,16 @@ class LayerPropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -2926,7 +3004,17 @@ class LayerPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -2938,11 +3026,15 @@ class LayerPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -2976,18 +3068,14 @@ class LayerPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -3025,16 +3113,16 @@ class LayerPropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -3134,7 +3222,17 @@ class LayerPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -3146,11 +3244,15 @@ class LayerPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -3184,18 +3286,14 @@ class LayerPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -3233,16 +3331,16 @@ class LayerPropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -3346,7 +3444,17 @@ class HConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -3363,11 +3471,15 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -3400,18 +3512,14 @@ class HConcatPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -3450,7 +3558,7 @@ class HConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -3458,9 +3566,9 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -3562,7 +3670,17 @@ class HConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -3579,11 +3697,15 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -3616,18 +3738,14 @@ class HConcatPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -3665,7 +3783,7 @@ class HConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -3673,9 +3791,9 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -3777,7 +3895,17 @@ class HConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -3794,11 +3922,15 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -3831,18 +3963,14 @@ class HConcatPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -3880,7 +4008,7 @@ class HConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -3888,9 +4016,9 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -3995,7 +4123,17 @@ class VConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -4012,11 +4150,15 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -4049,18 +4191,14 @@ class VConcatPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -4098,7 +4236,7 @@ class VConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -4106,10 +4244,10 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``vconcat`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -4198,7 +4336,17 @@ class VConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -4215,11 +4363,15 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -4265,18 +4417,14 @@ class VConcatPropertiesMixin:
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -4313,7 +4461,7 @@ class VConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -4321,10 +4469,10 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``vconcat`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -4413,7 +4561,17 @@ class VConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -4430,11 +4588,15 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -4480,18 +4642,14 @@ class VConcatPropertiesMixin:
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -4528,7 +4686,7 @@ class VConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -4536,10 +4694,10 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``vconcat`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -4643,7 +4801,17 @@ class ConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -4660,11 +4828,15 @@ class ConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -4697,18 +4869,14 @@ class ConcatPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -4747,7 +4915,7 @@ class ConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -4755,9 +4923,9 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -4858,7 +5026,17 @@ class ConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -4875,11 +5053,15 @@ class ConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -4912,18 +5094,14 @@ class ConcatPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -4961,7 +5139,7 @@ class ConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -4969,9 +5147,9 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -5072,7 +5250,17 @@ class ConcatPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -5089,11 +5277,15 @@ class ConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -5126,18 +5318,14 @@ class ConcatPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -5175,7 +5363,7 @@ class ConcatPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
@@ -5183,9 +5371,9 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -5294,7 +5482,17 @@ class MultiscalePropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -5306,11 +5504,15 @@ class MultiscalePropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -5344,18 +5546,14 @@ class MultiscalePropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -5394,17 +5592,17 @@ class MultiscalePropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             stops (Sequence[float | ExprRef | dict[str, Any]] | FadedMultiscaleStops | dict[str, Any] | TransitionedMultiscaleStops): Stop definition that controls transitions between the multiscale levels. - ``number[]`` is shorthand for ``{ metric: "unitsPerPixel", values: ... }`` - ``(number | ExprRef)[]`` supports mixed constants and expressions - Object form allows configuring metric, channel, and fade.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -5505,7 +5703,17 @@ class MultiscalePropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -5522,11 +5730,15 @@ class MultiscalePropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -5560,18 +5772,14 @@ class MultiscalePropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -5609,17 +5817,17 @@ class MultiscalePropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             stops (Sequence[float | ExprRef | dict[str, Any]] | FadedMultiscaleStops | dict[str, Any] | TransitionedMultiscaleStops): Stop definition that controls transitions between the multiscale levels. - ``number[]`` is shorthand for ``{ metric: "unitsPerPixel", values: ... }`` - ``(number | ExprRef)[]`` supports mixed constants and expressions - Object form allows configuring metric, channel, and fade.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -5720,7 +5928,17 @@ class MultiscalePropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -5737,11 +5955,15 @@ class MultiscalePropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -5775,18 +5997,14 @@ class MultiscalePropertiesMixin:
         ]
         | UndefinedType = Undefined,
         view: core.ViewBackground | ViewBackgroundKwds | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -5824,17 +6042,17 @@ class MultiscalePropertiesMixin:
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             stops (Sequence[float | ExprRef | dict[str, Any]] | FadedMultiscaleStops | dict[str, Any] | TransitionedMultiscaleStops): Stop definition that controls transitions between the multiscale levels. - ``number[]`` is shorthand for ``{ metric: "unitsPerPixel", values: ... }`` - ``(number | ExprRef)[]`` supports mixed constants and expressions - Object form allows configuring metric, channel, and fade.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -5934,7 +6152,17 @@ class FacetPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -5947,11 +6175,15 @@ class FacetPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -5984,18 +6216,14 @@ class FacetPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -6034,7 +6262,7 @@ class FacetPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             spacing (float | FacetSpacing | dict[str, Any]): Space in pixels between facet rows and columns, including header bands. A number sets both directions. An object sets each direction separately; omitted directions use the default. Zero removes the gap. __Default value:__ ``10``
@@ -6042,9 +6270,9 @@ class FacetPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -6136,7 +6364,17 @@ class FacetPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -6154,11 +6392,15 @@ class FacetPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -6191,18 +6433,14 @@ class FacetPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -6240,7 +6478,7 @@ class FacetPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             spacing (float | FacetSpacing | dict[str, Any]): Space in pixels between facet rows and columns, including header bands. A number sets both directions. An object sets each direction separately; omitted directions use the default. Zero removes the gap. __Default value:__ ``10``
@@ -6248,9 +6486,9 @@ class FacetPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -6342,7 +6580,17 @@ class FacetPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -6360,11 +6608,15 @@ class FacetPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -6397,18 +6649,14 @@ class FacetPropertiesMixin:
             | core.WindowParams
         ]
         | UndefinedType = Undefined,
-        viewportHeight: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportHeight: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
-        viewportWidth: core.SizeDef
-        | SizeDefKwds
-        | float
-        | core.ExprRef
+        viewportWidth: core.ViewportSizeDef
         | dict[str, Any]
+        | float
         | Literal["container"]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
@@ -6446,7 +6694,7 @@ class FacetPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             spacing (float | FacetSpacing | dict[str, Any]): Space in pixels between facet rows and columns, including header bands. A number sets both directions. An object sets each direction separately; omitted directions use the default. Zero removes the gap. __Default value:__ ``10``
@@ -6454,9 +6702,9 @@ class FacetPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
-            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (ViewportSizeDef | dict[str, Any] | float | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -6552,7 +6800,17 @@ class SurroundPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -6565,11 +6823,15 @@ class SurroundPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -6635,7 +6897,7 @@ class SurroundPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             spacing (float): Gap between the center and each side, in pixels. __Default value:__ ``10``
@@ -6644,7 +6906,7 @@ class SurroundPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -6726,7 +6988,17 @@ class SurroundPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -6746,11 +7018,15 @@ class SurroundPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -6815,7 +7091,7 @@ class SurroundPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             spacing (float): Gap between the center and each side, in pixels. __Default value:__ ``10``
@@ -6824,7 +7100,7 @@ class SurroundPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -6906,7 +7182,17 @@ class SurroundPropertiesMixin:
             | core.PlainExprParameter
             | core.TransitionedExprParameter
             | core.DebouncedExprParameter
-            | core.SelectionParameter
+            | core.PositionalIntervalSelectionParameter
+            | core.GradientIntervalSelectionParameterColor
+            | core.GradientIntervalSelectionParameterFill
+            | core.GradientIntervalSelectionParameterStroke
+            | core.RecordSelectionParameter
+            | core.CategorySelectionParameterX
+            | core.CategorySelectionParameterY
+            | core.CategorySelectionParameterColor
+            | core.CategorySelectionParameterFill
+            | core.CategorySelectionParameterStroke
+            | core.CategorySelectionParameterShape
             | core.RulerParameter
         ]
         | UndefinedType = Undefined,
@@ -6926,11 +7212,15 @@ class SurroundPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.DendrogramParams
+            core.IndexDendrogramParams
             | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
             | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
@@ -6995,7 +7285,7 @@ class SurroundPropertiesMixin:
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
-            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | PositionalIntervalSelectionParameter | GradientIntervalSelectionParameterColor | GradientIntervalSelectionParameterFill | GradientIntervalSelectionParameterStroke | RecordSelectionParameter | CategorySelectionParameterX | CategorySelectionParameterY | CategorySelectionParameterColor | CategorySelectionParameterFill | CategorySelectionParameterStroke | CategorySelectionParameterShape | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
             scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             spacing (float): Gap between the center and each side, in pixels. __Default value:__ ``10``
@@ -7004,7 +7294,7 @@ class SurroundPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
@@ -7383,6 +7673,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7466,6 +7757,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7547,6 +7839,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7647,6 +7940,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7730,6 +8024,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7811,6 +8106,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7911,6 +8207,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7994,6 +8291,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8075,6 +8373,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8175,6 +8474,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -8258,6 +8558,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8339,6 +8640,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8439,6 +8741,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -8522,6 +8825,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8603,6 +8907,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8703,6 +9008,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -8786,6 +9092,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8867,6 +9174,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8967,6 +9275,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -9050,6 +9359,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -9131,6 +9441,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -9231,6 +9542,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -9314,6 +9626,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -9395,6 +9708,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -9495,6 +9809,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -9578,6 +9893,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -9659,6 +9975,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -9759,6 +10076,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -9842,6 +10160,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -9923,6 +10242,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -10023,6 +10343,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -10106,6 +10427,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -10187,6 +10509,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -10287,6 +10610,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -10370,6 +10694,7 @@ class ConfigMethodMixin:
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -10451,6 +10776,7 @@ class ConfigMethodMixin:
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -10740,6 +11066,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         rowPadding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         spacing: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolBaseFillColor: str
@@ -10809,6 +11136,7 @@ class ConfigMethodMixin:
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             rowPadding (float): Padding between legend rows in pixels.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             spacing (float): Spacing in pixels between legends collected into the same legend region.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolBaseFillColor (str | ExprRef | dict[str, Any]): Base fill color for legend symbols when the legend does not encode fill.
@@ -10861,6 +11189,7 @@ class ConfigMethodMixin:
             "orient": orient,
             "padding": padding,
             "rowPadding": rowPadding,
+            "selectionLabel": selectionLabel,
             "spacing": spacing,
             "style": style,
             "symbolBaseFillColor": symbolBaseFillColor,
@@ -10929,6 +11258,7 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         rowPadding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         spacing: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolBaseFillColor: str
@@ -10998,6 +11328,7 @@ class ConfigMethodMixin:
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             rowPadding (float): Padding between legend rows in pixels.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             spacing (float): Spacing in pixels between legends collected into the same legend region.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolBaseFillColor (str | ExprRef | dict[str, Any]): Base fill color for legend symbols when the legend does not encode fill.
@@ -11050,6 +11381,7 @@ class ConfigMethodMixin:
             "orient": orient,
             "padding": padding,
             "rowPadding": rowPadding,
+            "selectionLabel": selectionLabel,
             "spacing": spacing,
             "style": style,
             "symbolBaseFillColor": symbolBaseFillColor,
@@ -11657,9 +11989,17 @@ class ConfigMethodMixin:
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fillOpacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        filled: bool | UndefinedType = Undefined,
         minLength: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         size: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        stroke: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        strokeAlign: StrokeAlign_T
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         strokeCap: Literal["butt"]
         | Literal["square"]
         | Literal["round"]
@@ -11668,6 +12008,11 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         strokeDash: Sequence[float] | UndefinedType = Undefined,
         strokeDashOffset: float | UndefinedType = Undefined,
+        strokeOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        strokeWidth: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         style: str | Sequence[str] | UndefinedType = Undefined,
         tooltip: core.HandledTooltip
         | HandledTooltipKwds
@@ -11692,12 +12037,19 @@ class ConfigMethodMixin:
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
+            fill (str | ExprRef | dict[str, Any]): The fill color.
+            fillOpacity (float | ExprRef | dict[str, Any]): The fill opacity. Value between ``0`` and ``1``.
+            filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
             minLength (float | ExprRef | dict[str, Any]): The minimum stroke length in pixels. Use this property to ensure that very short strokes remain visible even when the user zooms out. **Default value:** ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
+            stroke (str | ExprRef | dict[str, Any]): The stroke color
+            strokeAlign (StrokeAlign_T | ExprRef | dict[str, Any]): Position of the full-width stroke band relative to the nominal body. Inside strokes extend inward by ``strokeWidth``, centered strokes extend half inward and half outward, and outside strokes extend entirely outward. The nominal body is unchanged. Canvas uses an outside-style approximation for all alignments. __Default value:__ ``"outside"``
             strokeCap (Literal['butt'] | Literal['square'] | Literal['round'] | ExprRef | dict[str, Any]): The style of stroke ends. Available choices: ``"butt"``, ``"round``", and ``"square"``. **Default value:** ``"butt"``
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
+            strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
+            strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
@@ -11716,12 +12068,19 @@ class ConfigMethodMixin:
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
             "cursor": cursor,
+            "fill": fill,
+            "fillOpacity": fillOpacity,
+            "filled": filled,
             "minLength": minLength,
             "opacity": opacity,
             "size": size,
+            "stroke": stroke,
+            "strokeAlign": strokeAlign,
             "strokeCap": strokeCap,
             "strokeDash": strokeDash,
             "strokeDashOffset": strokeDashOffset,
+            "strokeOpacity": strokeOpacity,
+            "strokeWidth": strokeWidth,
             "style": style,
             "tooltip": tooltip,
             "x": x,
@@ -11764,7 +12123,7 @@ class ConfigMethodMixin:
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -11809,6 +12168,7 @@ class ConfigMethodMixin:
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Self:
@@ -11827,8 +12187,8 @@ class ConfigMethodMixin:
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             index (dict[str, Any]): Defaults for GenomeSpy's ``index`` scales.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             locus (dict[str, Any]): Defaults for GenomeSpy's ``locus`` scales.
@@ -11849,8 +12209,9 @@ class ConfigMethodMixin:
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -11887,6 +12248,7 @@ class ConfigMethodMixin:
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -12342,33 +12704,56 @@ class TransformMethodMixin:
     def transform_dendrogram(
         self,
         *,
-        height: Field_T,
-        key: Field_T,
-        leafIndex: Field_T,
-        parentKey: Field_T,
         as_: Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
+        domainParam: core.TransformOutput | dict[str, Any] | UndefinedType = Undefined,
+        height: Field_T | UndefinedType = Undefined,
+        key: Field_T | UndefinedType = Undefined,
+        leaf: Field_T | UndefinedType = Undefined,
+        leafIndex: Field_T | UndefinedType = Undefined,
+        leafOrder: Sequence[Scalar_T]
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        parentKey: Field_T | UndefinedType = Undefined,
+        siblingOrder: Field_T | UndefinedType = Undefined,
     ) -> Self:
         """Add a ``dendrogram`` transform.
 
         Args:
+            as\\_ (Sequence[str]): Output field names for source/target IDs, heights, anchors, and fractional offsets. Generated values overwrite copied child metadata. Names must be distinct and cannot use the reserved internal __uniqueId. Categorical mode defaults to sourceValue/targetValue for its anchor fields. __Default value:__ ["sourceId", "targetId", "sourceHeight", "targetHeight", "sourceIndex", "targetIndex", "sourceOffset", "targetOffset"]
+            description (str): A description of the transform step. Can be used for documentation and agent context.
+            domainParam (TransformOutput | dict[str, Any]): Publishes the ordered band domain as a read-only array parameter. A string such as ``"sampleOrder"`` creates the output in this view. Use ``{ "name": "sampleOrder", "push": "outer" }`` to publish into the nearest ancestor that declares ``{ "name": "sampleOrder" }`` in its ``params``.
             height (Field_T): Finite, nonnegative merge height, including leaf heights.
             key (Field_T): Unique string or finite numeric node identifier.
+            leaf (Field_T): Leaf category field. Values must be distinct strings, finite numbers, or booleans.
             leafIndex (Field_T): Integer row position for each leaf, matching the heatmap order. Indices must be distinct and in [0, 2^44); each subtree's leaves must be contiguous in the ordered leaf sequence. Internal nodes need no value in this field.
+            leafOrder (Sequence[Scalar_T] | ExprRef | dict[str, Any]): Complete ordered band domain. Include every leaf category exactly once; extra categories reserve slots.
             parentKey (Field_T): Parent node identifier. Exactly one root must contain null.
-            as\\_ (Sequence[str]): Output field names for source/target IDs, heights, integer anchors, and fractional offsets. Generated values overwrite copied child metadata. Names must be distinct and cannot use the reserved internal __uniqueId. __Default value:__ ["sourceId", "targetId", "sourceHeight", "targetHeight", "sourceIndex", "targetIndex", "sourceOffset", "targetOffset"]
-            description (str): A description of the transform step. Can be used for documentation and agent context.
+            siblingOrder (Field_T): Finite numeric order on each non-root node, unique among its siblings.
         """
-        transform: dict[str, Any] = {"type": "dendrogram"}
-        transform["height"] = height
-        transform["key"] = key
-        transform["leafIndex"] = leafIndex
-        transform["parentKey"] = parentKey
+        _transform: dict[str, Any] = {"type": "dendrogram"}
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        if domainParam is not Undefined:
+            _transform["domainParam"] = domainParam
+        if height is not Undefined:
+            _transform["height"] = height
+        if key is not Undefined:
+            _transform["key"] = key
+        if leaf is not Undefined:
+            _transform["leaf"] = leaf
+        if leafIndex is not Undefined:
+            _transform["leafIndex"] = leafIndex
+        if leafOrder is not Undefined:
+            _transform["leafOrder"] = leafOrder
+        if parentKey is not Undefined:
+            _transform["parentKey"] = parentKey
+        if siblingOrder is not Undefined:
+            _transform["siblingOrder"] = siblingOrder
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_alignment_mismatches(
         self,
@@ -12392,22 +12777,22 @@ class TransformMethodMixin:
             sequence (Field_T): Read sequence field. __Default value:__ ``"seq"``
             start (Field_T): The read's reference start coordinate. __Default value:__ ``"start"``
         """
-        transform: dict[str, Any] = {"type": "alignmentMismatches"}
+        _transform: dict[str, Any] = {"type": "alignmentMismatches"}
         if cigar is not Undefined:
-            transform["cigar"] = cigar
+            _transform["cigar"] = cigar
         if copyFields is not Undefined:
-            transform["copyFields"] = copyFields
+            _transform["copyFields"] = copyFields
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if md is not Undefined:
-            transform["md"] = md
+            _transform["md"] = md
         if quality is not Undefined:
-            transform["quality"] = quality
+            _transform["quality"] = quality
         if sequence is not Undefined:
-            transform["sequence"] = sequence
+            _transform["sequence"] = sequence
         if start is not Undefined:
-            transform["start"] = start
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["start"] = start
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_aggregate(
         self,
@@ -12427,18 +12812,18 @@ class TransformMethodMixin:
             groupby (Sequence[Field_T]): The fields by which to group the data. If these are not defined, all rows will be grouped into a single category.
             ops (Sequence[AggregateOp_T]): The aggregation operations to be performed on the fields, such as ``"sum"``, ``"q1"``, ``"median"``, ``"q3"``, or ``"count"``.
         """
-        transform: dict[str, Any] = {"type": "aggregate"}
+        _transform: dict[str, Any] = {"type": "aggregate"}
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if fields is not Undefined:
-            transform["fields"] = fields
+            _transform["fields"] = fields
         if groupby is not Undefined:
-            transform["groupby"] = groupby
+            _transform["groupby"] = groupby
         if ops is not Undefined:
-            transform["ops"] = ops
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["ops"] = ops
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_collect(
         self,
@@ -12454,14 +12839,93 @@ class TransformMethodMixin:
             groupby (Sequence[Field_T]): Arranges the data into consecutive batches based on the groups. This is mainly intended for internal use so that faceted data can be handled as batches.
             sort (CompareParams | CompareParamsKwds): The sort order.
         """
-        transform: dict[str, Any] = {"type": "collect"}
+        _transform: dict[str, Any] = {"type": "collect"}
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if groupby is not Undefined:
-            transform["groupby"] = groupby
+            _transform["groupby"] = groupby
         if sort is not Undefined:
-            transform["sort"] = sort
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["sort"] = sort
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
+
+    def transform_values(
+        self,
+        *,
+        field: Field_T,
+        param: core.TransformOutput | dict[str, Any],
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Add a ``values`` transform.
+
+        Args:
+            field (Field_T): Field whose scalar values form the output array, preserving order and duplicates.
+            param (TransformOutput | dict[str, Any]): Publishes the array as a read-only parameter. A string such as ``"categories"`` creates the output in this view. Use ``{ "name": "categories", "push": "outer" }`` to publish into the nearest ancestor that declares ``{ "name": "categories" }`` in its ``params``. The ancestor declaration accepts only ``name`` and an optional ``description``. Claimed outputs are read-only and start with an empty array when the producer view is constructed. Each output has exactly one producer.
+            description (str): A description of the transform step. Can be used for documentation and agent context.
+        """
+        _transform: dict[str, Any] = {"type": "values"}
+        _transform["field"] = field
+        _transform["param"] = param
+        if description is not Undefined:
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
+
+    def transform_branch(
+        self,
+        *,
+        transform: Sequence[
+            core.IndexDendrogramParams
+            | dict[str, Any]
+            | core.SiblingOrderedDendrogramParams
+            | core.ExplicitlyOrderedDendrogramParams
+            | core.AlignmentMismatchesParams
+            | core.AggregateParams
+            | core.CollectParams
+            | core.ValuesParams
+            | core.BranchParams
+            | core.CoverageParams
+            | core.CoordinateLookupParams
+            | core.CrossParams
+            | core.Displace1DParams
+            | core.Displace2DParams
+            | core.FlattenDelimitedParams
+            | core.FormulaParams
+            | core.LookupParams
+            | core.ExprFilterParams
+            | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
+            | core.FilterScoredLabelsParams
+            | core.FlattenParams
+            | core.FlattenCompressedExonsParams
+            | core.FlattenCigarParams
+            | core.FlattenSequenceParams
+            | core.IdentifierParams
+            | core.LinearizeGenomicCoordinateParams
+            | core.MeasureTextParams
+            | core.TruncateTextParams
+            | core.PackLegendLabelsParams
+            | core.MergeFacetsParams
+            | core.PileupParams
+            | core.ProjectParams
+            | core.RegexExtractParams
+            | core.RegexFoldParams
+            | core.SampleParams
+            | core.SetIntersectionParams
+            | core.StackParams
+            | core.WindowParams
+        ],
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Add a ``branch`` transform.
+
+        Args:
+            transform (Sequence[IndexDendrogramParams | dict[str, Any] | SiblingOrderedDendrogramParams | ExplicitlyOrderedDendrogramParams | AlignmentMismatchesParams | AggregateParams | CollectParams | ValuesParams | BranchParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Side transforms in the same parameter scope as the owning view.
+            description (str): A description of the transform step. Can be used for documentation and agent context.
+        """
+        _transform: dict[str, Any] = {"type": "branch"}
+        _transform["transform"] = transform
+        if description is not Undefined:
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_coverage(
         self,
@@ -12489,24 +12953,24 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             weight (Field_T): A field representing an optional weight for the segment. Can be used with copy ratios, for example.
         """
-        transform: dict[str, Any] = {"type": "coverage"}
-        transform["end"] = end
-        transform["start"] = start
+        _transform: dict[str, Any] = {"type": "coverage"}
+        _transform["end"] = end
+        _transform["start"] = start
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if asChrom is not Undefined:
-            transform["asChrom"] = asChrom
+            _transform["asChrom"] = asChrom
         if asEnd is not Undefined:
-            transform["asEnd"] = asEnd
+            _transform["asEnd"] = asEnd
         if asStart is not Undefined:
-            transform["asStart"] = asStart
+            _transform["asStart"] = asStart
         if chrom is not Undefined:
-            transform["chrom"] = chrom
+            _transform["chrom"] = chrom
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if weight is not Undefined:
-            transform["weight"] = weight
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["weight"] = weight
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_coordinate_lookup(
         self,
@@ -12532,22 +12996,22 @@ class TransformMethodMixin:
             fields (Field_T | Sequence[Field_T] | None): Coordinate field or ``[chrom, pos]`` fields in the primary data. Defaults to ``key``.
             values (Sequence[Field_T] | None): Fields to copy from a matching side-input row. Defaults to all fields except ``key``.
         """
-        transform: dict[str, Any] = {"type": "coordinateLookup"}
-        transform["from"] = from_
-        transform["key"] = key
+        _transform: dict[str, Any] = {"type": "coordinateLookup"}
+        _transform["from"] = from_
+        _transform["key"] = key
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if channel is not Undefined:
-            transform["channel"] = channel
+            _transform["channel"] = channel
         if default is not Undefined:
-            transform["default"] = default
+            _transform["default"] = default
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if fields is not Undefined:
-            transform["fields"] = fields
+            _transform["fields"] = fields
         if values is not Undefined:
-            transform["values"] = values
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["values"] = values
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_cross(
         self,
@@ -12561,11 +13025,11 @@ class TransformMethodMixin:
             from\\_ (CrossInput | dict[str, Any]): The finite eager foreign data and its optional preprocessing transforms.
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "cross"}
-        transform["from"] = from_
+        _transform: dict[str, Any] = {"type": "cross"}
+        _transform["from"] = from_
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_displace1d(
         self,
@@ -12593,18 +13057,18 @@ class TransformMethodMixin:
             extent (Sequence[float] | ExprRef | dict[str, Any]): Preferred outer bounds for the placed collision intervals, expressed in the original ``pos`` coordinate system. The bounds are multiplied by ``positionFactor`` together with the item positions. When all items cannot fit, they remain non-overlapping and extend beyond the bounds by the minimum necessary amount. An expression can update the bounds reactively.
             positionFactor (float | ExprRef | dict[str, Any]): A multiplier applied to ``pos`` before placement. An expression can convert position units to logical pixels and react to zoom or layout changes. Use an ascending ``pos`` sort for a positive factor and a descending sort for a negative factor. Place a ``collect`` transform before this transform to buffer input for expression-driven updates. __Default value:__ ``1``
         """
-        transform: dict[str, Any] = {"type": "displace1d"}
-        transform["length"] = length
-        transform["pos"] = pos
+        _transform: dict[str, Any] = {"type": "displace1d"}
+        _transform["length"] = length
+        _transform["pos"] = pos
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if extent is not Undefined:
-            transform["extent"] = extent
+            _transform["extent"] = extent
         if positionFactor is not Undefined:
-            transform["positionFactor"] = positionFactor
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["positionFactor"] = positionFactor
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_displace2d(
         self,
@@ -12645,24 +13109,24 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             key (Field_T): Field containing a unique string or finite numeric identifier. Use a key to preserve placement when upstream transforms replace, filter, or reorder rows. Without a key, placement state follows row object identity.
         """
-        transform: dict[str, Any] = {"type": "displace2d"}
-        transform["height"] = height
-        transform["width"] = width
-        transform["x"] = x
-        transform["y"] = y
+        _transform: dict[str, Any] = {"type": "displace2d"}
+        _transform["height"] = height
+        _transform["width"] = width
+        _transform["x"] = x
+        _transform["y"] = y
         if anchorHeight is not Undefined:
-            transform["anchorHeight"] = anchorHeight
+            _transform["anchorHeight"] = anchorHeight
         if anchorWidth is not Undefined:
-            transform["anchorWidth"] = anchorWidth
+            _transform["anchorWidth"] = anchorWidth
         if animationHalfLife is not Undefined:
-            transform["animationHalfLife"] = animationHalfLife
+            _transform["animationHalfLife"] = animationHalfLife
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if key is not Undefined:
-            transform["key"] = key
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["key"] = key
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_flatten_delimited(
         self,
@@ -12680,14 +13144,14 @@ class TransformMethodMixin:
             as\\_ (Sequence[str] | str): The output field name(s) for the flattened field. **Default:** the input fields.
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "flattenDelimited"}
-        transform["field"] = field
-        transform["separator"] = separator
+        _transform: dict[str, Any] = {"type": "flattenDelimited"}
+        _transform["field"] = field
+        _transform["separator"] = separator
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_formula(
         self,
@@ -12705,14 +13169,14 @@ class TransformMethodMixin:
             debounce (float): Trailing-edge delay in milliseconds before requesting dataflow replay after a reactive expression dependency changes. Repeated changes restart the delay. Parameter updates and incoming data are not delayed. Incoming batches use current parameter values, and a completed batch satisfies any pending reactive replay. The delay does not wait for independently scheduled lazy data loads. __Default value:__ no delay
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "formula"}
-        transform["as"] = as_
-        transform["expr"] = _expression_string(expr)
+        _transform: dict[str, Any] = {"type": "formula"}
+        _transform["as"] = as_
+        _transform["expr"] = _expression_string(expr)
         if debounce is not Undefined:
-            transform["debounce"] = debounce
+            _transform["debounce"] = debounce
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_calculate(
         self,
@@ -12790,20 +13254,20 @@ class TransformMethodMixin:
             fields (Field_T | Sequence[Field_T] | None): The fields in the input data to match against the lookup-table key. This array must have the same length and order as ``key``. Defaults to ``key``.
             values (Sequence[Field_T] | None): Fields to copy from a matching side-input row. Defaults to all fields except ``key``.
         """
-        transform: dict[str, Any] = {"type": "lookup"}
-        transform["from"] = from_
-        transform["key"] = key
+        _transform: dict[str, Any] = {"type": "lookup"}
+        _transform["from"] = from_
+        _transform["key"] = key
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if default is not Undefined:
-            transform["default"] = default
+            _transform["default"] = default
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if fields is not Undefined:
-            transform["fields"] = fields
+            _transform["fields"] = fields
         if values is not Undefined:
-            transform["values"] = values
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["values"] = values
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_filter(
         self,
@@ -12823,10 +13287,10 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             empty (bool): If true, the filter retains all rows when the selection is empty. **Default:** ``true``
             expr (str): An expression string. The row is removed if the expression evaluates to false.
-            fields (dict[str, Any]): An optional mapping of positional channels to fields. Used to determine which fields are checked against the selection intervals.
+            fields (dict[str, Any]): Maps selection components to fields. Required for category and interval filters, which have no implicit visual encoding. Category mappings must cover exactly the declared component.
             param (str): A selection parameter. The row is removed if it is not part of the selection.
         """
-        transform: dict[str, Any] = {"type": "filter"}
+        _transform: dict[str, Any] = {"type": "filter"}
         from genome_spy._parameters import Parameter
 
         if expression is not Undefined:
@@ -12845,18 +13309,18 @@ class TransformMethodMixin:
         if expr is Undefined and param is Undefined:
             raise TypeError("filter requires an expression or param")
         if debounce is not Undefined:
-            transform["debounce"] = debounce
+            _transform["debounce"] = debounce
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if empty is not Undefined:
-            transform["empty"] = empty
+            _transform["empty"] = empty
         if expr is not Undefined:
-            transform["expr"] = _expression_string(cast(str | ExpressionOperand, expr))
+            _transform["expr"] = _expression_string(cast(str | ExpressionOperand, expr))
         if fields is not Undefined:
-            transform["fields"] = fields
+            _transform["fields"] = fields
         if param is not Undefined:
-            transform["param"] = param
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["param"] = param
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_axis_label_layout(
         self,
@@ -12902,31 +13366,31 @@ class TransformMethodMixin:
             chromLabelWidth (Field_T): Schema-defined ``chromLabelWidth`` property.
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "axisLabelLayout"}
-        transform["channel"] = channel
-        transform["labelAlign"] = labelAlign
-        transform["labelAngle"] = labelAngle
-        transform["labelBaseline"] = labelBaseline
-        transform["labelFlush"] = labelFlush
-        transform["labelFlushOffset"] = labelFlushOffset
-        transform["labelFlushZoomExtent"] = labelFlushZoomExtent
-        transform["labelFontSize"] = labelFontSize
-        transform["labelOffset"] = labelOffset
-        transform["labelOverlap"] = labelOverlap
-        transform["labelSeparation"] = labelSeparation
-        transform["labelVisible"] = labelVisible
-        transform["labelWidth"] = labelWidth
+        _transform: dict[str, Any] = {"type": "axisLabelLayout"}
+        _transform["channel"] = channel
+        _transform["labelAlign"] = labelAlign
+        _transform["labelAngle"] = labelAngle
+        _transform["labelBaseline"] = labelBaseline
+        _transform["labelFlush"] = labelFlush
+        _transform["labelFlushOffset"] = labelFlushOffset
+        _transform["labelFlushZoomExtent"] = labelFlushZoomExtent
+        _transform["labelFontSize"] = labelFontSize
+        _transform["labelOffset"] = labelOffset
+        _transform["labelOverlap"] = labelOverlap
+        _transform["labelSeparation"] = labelSeparation
+        _transform["labelVisible"] = labelVisible
+        _transform["labelWidth"] = labelWidth
         if chromLabelAlign is not Undefined:
-            transform["chromLabelAlign"] = chromLabelAlign
+            _transform["chromLabelAlign"] = chromLabelAlign
         if chromLabelPadding is not Undefined:
-            transform["chromLabelPadding"] = chromLabelPadding
+            _transform["chromLabelPadding"] = chromLabelPadding
         if chromLabelSpacing is not Undefined:
-            transform["chromLabelSpacing"] = chromLabelSpacing
+            _transform["chromLabelSpacing"] = chromLabelSpacing
         if chromLabelWidth is not Undefined:
-            transform["chromLabelWidth"] = chromLabelWidth
+            _transform["chromLabelWidth"] = chromLabelWidth
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_filter_scored_labels(
         self,
@@ -12954,23 +13418,23 @@ class TransformMethodMixin:
             padding (float): Padding (in pixels) around the element. **Default:** ``0``
             pos2 (Field_T): The field representing element's end position on the domain. If not specified, the ``pos`` field is used.
         """
-        transform: dict[str, Any] = {"type": "filterScoredLabels"}
-        transform["pos"] = pos
-        transform["score"] = score
-        transform["width"] = width
+        _transform: dict[str, Any] = {"type": "filterScoredLabels"}
+        _transform["pos"] = pos
+        _transform["score"] = score
+        _transform["width"] = width
         if asMidpoint is not Undefined:
-            transform["asMidpoint"] = asMidpoint
+            _transform["asMidpoint"] = asMidpoint
         if channel is not Undefined:
-            transform["channel"] = channel
+            _transform["channel"] = channel
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if lane is not Undefined:
-            transform["lane"] = lane
+            _transform["lane"] = lane
         if padding is not Undefined:
-            transform["padding"] = padding
+            _transform["padding"] = padding
         if pos2 is not Undefined:
-            transform["pos2"] = pos2
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["pos2"] = pos2
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_flatten(
         self,
@@ -12988,16 +13452,16 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             index (str): The output field name for the zero-based index of the array values. If unspecified, an index field is not added.
         """
-        transform: dict[str, Any] = {"type": "flatten"}
+        _transform: dict[str, Any] = {"type": "flatten"}
         if fields is not Undefined:
-            transform["fields"] = fields
+            _transform["fields"] = fields
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if index is not Undefined:
-            transform["index"] = index
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["index"] = index
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_flatten_compressed_exons(
         self,
@@ -13015,16 +13479,16 @@ class TransformMethodMixin:
             exons (Field_T): The field containing the exons. **Default:** ``"exons"``
             start (Field_T): Start coordinate of the gene body. **Default:** ``"start"``
         """
-        transform: dict[str, Any] = {"type": "flattenCompressedExons"}
+        _transform: dict[str, Any] = {"type": "flattenCompressedExons"}
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if exons is not Undefined:
-            transform["exons"] = exons
+            _transform["exons"] = exons
         if start is not Undefined:
-            transform["start"] = start
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["start"] = start
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_flatten_cigar(
         self,
@@ -13042,16 +13506,16 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             start (Field_T): The read's reference start coordinate. __Default value:__ ``"start"``
         """
-        transform: dict[str, Any] = {"type": "flattenCigar"}
+        _transform: dict[str, Any] = {"type": "flattenCigar"}
         if cigar is not Undefined:
-            transform["cigar"] = cigar
+            _transform["cigar"] = cigar
         if copyFields is not Undefined:
-            transform["copyFields"] = copyFields
+            _transform["copyFields"] = copyFields
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if start is not Undefined:
-            transform["start"] = start
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["start"] = start
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_flatten_sequence(
         self,
@@ -13067,14 +13531,14 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             field (Field_T): The field to flatten. **Default:** ``"sequence"``
         """
-        transform: dict[str, Any] = {"type": "flattenSequence"}
+        _transform: dict[str, Any] = {"type": "flattenSequence"}
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if field is not Undefined:
-            transform["field"] = field
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["field"] = field
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_identifier(
         self,
@@ -13088,12 +13552,12 @@ class TransformMethodMixin:
             as\\_ (str): The field where the identifier is stored. __Default value:__ ``"_uniqueId"``
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "identifier"}
+        _transform: dict[str, Any] = {"type": "identifier"}
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_linearize_genomic_coordinate(
         self,
@@ -13115,17 +13579,17 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             offset (float | Sequence[float]): An offset or offsets that allow for adjusting the numbering base. The offset is subtracted from the positions. GenomeSpy uses internally zero-based indexing with half-open intervals. UCSC-based formats (BED, etc.) generally use this scheme. However, for example, VCF files use one-based indexing and must be adjusted by setting the offset to ``1``. **Default:** ``0``
         """
-        transform: dict[str, Any] = {"type": "linearizeGenomicCoordinate"}
-        transform["as"] = as_
-        transform["chrom"] = chrom
-        transform["pos"] = pos
+        _transform: dict[str, Any] = {"type": "linearizeGenomicCoordinate"}
+        _transform["as"] = as_
+        _transform["chrom"] = chrom
+        _transform["pos"] = pos
         if channel is not Undefined:
-            transform["channel"] = channel
+            _transform["channel"] = channel
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if offset is not Undefined:
-            transform["offset"] = offset
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["offset"] = offset
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_measure_text(
         self,
@@ -13149,19 +13613,19 @@ class TransformMethodMixin:
             fontStyle (FontStyle_T): The font style. Valid values: ``"normal"`` and ``"italic"``. **Default:** ``"normal"``
             fontWeight (FontWeight_T): The font weight. The following strings and numbers are valid values: ``"thin"`` (``100``), ``"light"`` (``300``), ``"regular"`` (``400``), ``"normal"`` (``400``), ``"medium"`` (``500``), ``"bold"`` (``700``), ``"black"`` (``900``) **Default:** ``"regular"``
         """
-        transform: dict[str, Any] = {"type": "measureText"}
-        transform["as"] = as_
-        transform["field"] = field
-        transform["fontSize"] = fontSize
+        _transform: dict[str, Any] = {"type": "measureText"}
+        _transform["as"] = as_
+        _transform["field"] = field
+        _transform["fontSize"] = fontSize
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if font is not Undefined:
-            transform["font"] = font
+            _transform["font"] = font
         if fontStyle is not Undefined:
-            transform["fontStyle"] = fontStyle
+            _transform["fontStyle"] = fontStyle
         if fontWeight is not Undefined:
-            transform["fontWeight"] = fontWeight
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["fontWeight"] = fontWeight
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_truncate_text(
         self,
@@ -13189,24 +13653,24 @@ class TransformMethodMixin:
             fontWeight (FontWeight_T): The font weight. **Default:** ``"regular"``
             limit (float): Maximum text width in pixels.
         """
-        transform: dict[str, Any] = {"type": "truncateText"}
-        transform["field"] = field
-        transform["fontSize"] = fontSize
+        _transform: dict[str, Any] = {"type": "truncateText"}
+        _transform["field"] = field
+        _transform["fontSize"] = fontSize
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if ellipsis is not Undefined:
-            transform["ellipsis"] = ellipsis
+            _transform["ellipsis"] = ellipsis
         if font is not Undefined:
-            transform["font"] = font
+            _transform["font"] = font
         if fontStyle is not Undefined:
-            transform["fontStyle"] = fontStyle
+            _transform["fontStyle"] = fontStyle
         if fontWeight is not Undefined:
-            transform["fontWeight"] = fontWeight
+            _transform["fontWeight"] = fontWeight
         if limit is not Undefined:
-            transform["limit"] = limit
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["limit"] = limit
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_pack_legend_labels(
         self,
@@ -13244,35 +13708,35 @@ class TransformMethodMixin:
             yExtent (float | ExprRef | dict[str, Any]): Height of the pixel-space layout area. When provided, the transform also emits inverted y coordinates for GenomeSpy's unit y range.
             yOffset (float): Vertical offset for all generated entry coordinates in pixels. **Default:** ``0``
         """
-        transform: dict[str, Any] = {"type": "packLegendLabels"}
-        transform["labelWidth"] = labelWidth
+        _transform: dict[str, Any] = {"type": "packLegendLabels"}
+        _transform["labelWidth"] = labelWidth
         if columnPadding is not Undefined:
-            transform["columnPadding"] = columnPadding
+            _transform["columnPadding"] = columnPadding
         if columns is not Undefined:
-            transform["columns"] = columns
+            _transform["columns"] = columns
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if direction is not Undefined:
-            transform["direction"] = direction
+            _transform["direction"] = direction
         if fontSize is not Undefined:
-            transform["fontSize"] = fontSize
+            _transform["fontSize"] = fontSize
         if labelOffset is not Undefined:
-            transform["labelOffset"] = labelOffset
+            _transform["labelOffset"] = labelOffset
         if rowPadding is not Undefined:
-            transform["rowPadding"] = rowPadding
+            _transform["rowPadding"] = rowPadding
         if symbolOffset is not Undefined:
-            transform["symbolOffset"] = symbolOffset
+            _transform["symbolOffset"] = symbolOffset
         if symbolSize is not Undefined:
-            transform["symbolSize"] = symbolSize
+            _transform["symbolSize"] = symbolSize
         if symbolStrokeWidth is not Undefined:
-            transform["symbolStrokeWidth"] = symbolStrokeWidth
+            _transform["symbolStrokeWidth"] = symbolStrokeWidth
         if xOffset is not Undefined:
-            transform["xOffset"] = xOffset
+            _transform["xOffset"] = xOffset
         if yExtent is not Undefined:
-            transform["yExtent"] = yExtent
+            _transform["yExtent"] = yExtent
         if yOffset is not Undefined:
-            transform["yOffset"] = yOffset
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["yOffset"] = yOffset
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_merge_facets(
         self,
@@ -13284,10 +13748,10 @@ class TransformMethodMixin:
         Args:
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "mergeFacets"}
+        _transform: dict[str, Any] = {"type": "mergeFacets"}
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_pileup(
         self,
@@ -13314,20 +13778,20 @@ class TransformMethodMixin:
             preferredOrder (Sequence[str] | Sequence[float] | Sequence[bool]): The order of the lane preferences. The first element contains the value that should place the segment on the first lane and so forth. If the preferred lane is occupied, the first available lane is taken.
             spacing (float): The spacing between adjacent segments on the same lane in coordinate units. **Default:** ``1``.
         """
-        transform: dict[str, Any] = {"type": "pileup"}
-        transform["end"] = end
-        transform["start"] = start
+        _transform: dict[str, Any] = {"type": "pileup"}
+        _transform["end"] = end
+        _transform["start"] = start
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if preference is not Undefined:
-            transform["preference"] = preference
+            _transform["preference"] = preference
         if preferredOrder is not Undefined:
-            transform["preferredOrder"] = preferredOrder
+            _transform["preferredOrder"] = preferredOrder
         if spacing is not Undefined:
-            transform["spacing"] = spacing
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["spacing"] = spacing
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_project(
         self,
@@ -13343,13 +13807,13 @@ class TransformMethodMixin:
             as\\_ (Sequence[str]): New names for the projected fields. If omitted, the names of the source fields are used.
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "project"}
-        transform["fields"] = fields
+        _transform: dict[str, Any] = {"type": "project"}
+        _transform["fields"] = fields
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_regex_extract(
         self,
@@ -13369,15 +13833,15 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             skipInvalidInput (bool): Do not complain about invalid input. Just skip it and leave the new fields undefined on the affected row. **Default:** ``false``
         """
-        transform: dict[str, Any] = {"type": "regexExtract"}
-        transform["as"] = as_
-        transform["field"] = field
-        transform["regex"] = regex
+        _transform: dict[str, Any] = {"type": "regexExtract"}
+        _transform["as"] = as_
+        _transform["field"] = field
+        _transform["regex"] = regex
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if skipInvalidInput is not Undefined:
-            transform["skipInvalidInput"] = skipInvalidInput
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["skipInvalidInput"] = skipInvalidInput
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_regex_fold(
         self,
@@ -13397,16 +13861,16 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             skipRegex (str): An optional regex that matches to fields that should not be included in the new folded rows.
         """
-        transform: dict[str, Any] = {"type": "regexFold"}
-        transform["asValue"] = asValue
-        transform["columnRegex"] = columnRegex
+        _transform: dict[str, Any] = {"type": "regexFold"}
+        _transform["asValue"] = asValue
+        _transform["columnRegex"] = columnRegex
         if asKey is not Undefined:
-            transform["asKey"] = asKey
+            _transform["asKey"] = asKey
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if skipRegex is not Undefined:
-            transform["skipRegex"] = skipRegex
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["skipRegex"] = skipRegex
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_sample(
         self,
@@ -13420,12 +13884,12 @@ class TransformMethodMixin:
             size (float): The maximum sample size. **Default:** ``500``
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
-        transform: dict[str, Any] = {"type": "sample"}
+        _transform: dict[str, Any] = {"type": "sample"}
         if size is not Undefined:
-            transform["size"] = size
+            _transform["size"] = size
         if description is not Undefined:
-            transform["description"] = description
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["description"] = description
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_set_intersection(
         self,
@@ -13443,14 +13907,14 @@ class TransformMethodMixin:
             description (str): A description of the transform step. Can be used for documentation and agent context.
             membership (Field_T): Optional field containing a Boolean membership value. The values ``0`` and ``1`` are also accepted. When omitted, every input row denotes membership.
         """
-        transform: dict[str, Any] = {"type": "setIntersection"}
-        transform["element"] = element
-        transform["set"] = set
+        _transform: dict[str, Any] = {"type": "setIntersection"}
+        _transform["element"] = element
+        _transform["set"] = set
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if membership is not Undefined:
-            transform["membership"] = membership
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["membership"] = membership
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_stack(
         self,
@@ -13477,23 +13941,23 @@ class TransformMethodMixin:
             offset (Literal['zero', 'center', 'normalize', 'information']): How to offset the values in a stack. ``"zero"`` (default) starts stacking at 0. ``"center"`` centers the values around zero. ``"normalize"`` computes intra-stack percentages and normalizes the values to the range of ``[0, 1]``. ``"information"`` computes a layout for a sequence logo. The total height of the stack reflects the group's information content.
             sort (CompareParams | CompareParamsKwds): The sort order of data in each stack.
         """
-        transform: dict[str, Any] = {"type": "stack"}
-        transform["groupby"] = groupby
+        _transform: dict[str, Any] = {"type": "stack"}
+        _transform["groupby"] = groupby
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if baseField is not Undefined:
-            transform["baseField"] = baseField
+            _transform["baseField"] = baseField
         if cardinality is not Undefined:
-            transform["cardinality"] = cardinality
+            _transform["cardinality"] = cardinality
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if field is not Undefined:
-            transform["field"] = field
+            _transform["field"] = field
         if offset is not Undefined:
-            transform["offset"] = offset
+            _transform["offset"] = offset
         if sort is not Undefined:
-            transform["sort"] = sort
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["sort"] = sort
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_window(
         self,
@@ -13521,25 +13985,25 @@ class TransformMethodMixin:
             params (Sequence[float | None]): Optional operation parameters. ``lag`` and ``lead`` use an offset, while ``ntile`` and ``nth_value`` use a positive integer.
             sort (CompareParams | CompareParamsKwds): Fields used to sort rows before window functions are calculated. Without sorting, rows retain their input order and no rows are peers.
         """
-        transform: dict[str, Any] = {"type": "window"}
-        transform["ops"] = ops
+        _transform: dict[str, Any] = {"type": "window"}
+        _transform["ops"] = ops
         if as_ is not Undefined:
-            transform["as"] = as_
+            _transform["as"] = as_
         if description is not Undefined:
-            transform["description"] = description
+            _transform["description"] = description
         if fields is not Undefined:
-            transform["fields"] = fields
+            _transform["fields"] = fields
         if frame is not Undefined:
-            transform["frame"] = frame
+            _transform["frame"] = frame
         if groupby is not Undefined:
-            transform["groupby"] = groupby
+            _transform["groupby"] = groupby
         if ignorePeers is not Undefined:
-            transform["ignorePeers"] = ignorePeers
+            _transform["ignorePeers"] = ignorePeers
         if params is not Undefined:
-            transform["params"] = params
+            _transform["params"] = params
         if sort is not Undefined:
-            transform["sort"] = sort
-        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+            _transform["sort"] = sort
+        return self._append_transform(_transform)  # type: ignore[attr-defined, no-any-return]
 
 
 __all__ = [

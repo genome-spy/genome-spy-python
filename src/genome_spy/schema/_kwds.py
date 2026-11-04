@@ -27,8 +27,8 @@ from genome_spy.schema._typing import (
     Scalar_T,
     ScaleInterpolate_T,
     ScaleType_T,
-    SelectionType_T,
     SortOrder_T,
+    StrokeAlign_T,
     TitleAnchor_T,
     TitleFrame_T,
     TitleOrient_T,
@@ -38,10 +38,6 @@ if TYPE_CHECKING:
     from genome_spy.schema.core import (
         ArrowConfig,
         AxisConfig,
-        BindCheckbox,
-        BindInput,
-        BindRadioSelect,
-        BindRange,
         ChromPosDef,
         ChromosomalLocus,
         DirectionDef,
@@ -57,7 +53,6 @@ if TYPE_CHECKING:
         GenomeAxis,
         HandledTooltip,
         InlineGenomeDefinition,
-        IntervalSelectionConfig,
         Legend,
         LegendConfig,
         LegendLayout,
@@ -70,7 +65,6 @@ if TYPE_CHECKING:
         OrderDef,
         Parse,
         PointConfig,
-        PointSelectionConfig,
         Position2Def,
         PositionDatumDef,
         PositionExprDef,
@@ -138,6 +132,7 @@ class AxisKwds(TypedDict, total=False):
     labelOverlap: bool | Literal["parity"] | Literal["greedy"]
     labelPadding: float
     labelSeparation: float
+    labelSqueeze: bool
     labels: bool
     maxExtent: float
     minExtent: float
@@ -222,6 +217,7 @@ class AxisConfigKwds(TypedDict, total=False):
     labelOverlap: bool | Literal["parity"] | Literal["greedy"]
     labelPadding: float
     labelSeparation: float
+    labelSqueeze: bool
     labels: bool
     maxExtent: float
     minExtent: float
@@ -532,6 +528,7 @@ class GenomeAxisKwds(TypedDict, total=False):
     labelOverlap: bool | Literal["parity"] | Literal["greedy"]
     labelPadding: float
     labelSeparation: float
+    labelSqueeze: bool
     labels: bool
     maxExtent: float
     minExtent: float
@@ -622,6 +619,7 @@ class LegendKwds(TypedDict, total=False):
     offset: float
     orient: LegendOrient_T | ExprRef | dict[str, Any]
     padding: float
+    selectionLabel: bool
     style: str | Sequence[str] | None
     symbolFillColor: str | ExprRef | dict[str, Any]
     symbolOpacity: float | ExprRef | dict[str, Any]
@@ -666,6 +664,7 @@ class LegendConfigKwds(TypedDict, total=False):
     orient: LegendOrient_T | ExprRef | dict[str, Any]
     padding: float
     rowPadding: float
+    selectionLabel: bool
     spacing: float
     style: str | Sequence[str] | None
     symbolBaseFillColor: str | ExprRef | dict[str, Any]
@@ -764,16 +763,7 @@ class PaddingsKwds(TypedDict, total=False):
 class ParameterKwds(TypedDict, total=False):
     """TypedDict helper for raw ``Parameter`` mappings."""
 
-    bind: (
-        BindCheckbox
-        | BindCheckboxKwds
-        | BindRadioSelect
-        | BindRadioSelectKwds
-        | BindRange
-        | BindRangeKwds
-        | BindInput
-        | BindInputKwds
-    )
+    bind: Literal["legend"]
     debounce: float
     description: str
     expr: str
@@ -781,12 +771,7 @@ class ParameterKwds(TypedDict, total=False):
     persist: bool
     push: Literal["outer"]
     ruler: RulerConfig | RulerConfigKwds
-    select: (
-        SelectionType_T
-        | PointSelectionConfig
-        | dict[str, Any]
-        | IntervalSelectionConfig
-    )
+    select: dict[str, Any]
     transition: LerpTransition | dict[str, Any]
     value: RulerInitMapping | dict[str, Any]
 
@@ -910,9 +895,14 @@ class RuleConfigKwds(TypedDict, total=False):
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
     cursor: str | ExprRef | dict[str, Any]
+    fill: str | ExprRef | dict[str, Any]
+    fillOpacity: float | ExprRef | dict[str, Any]
+    filled: bool
     minLength: float | ExprRef | dict[str, Any]
     opacity: float | ExprRef | dict[str, Any]
     size: float | ExprRef | dict[str, Any]
+    stroke: str | ExprRef | dict[str, Any]
+    strokeAlign: StrokeAlign_T | ExprRef | dict[str, Any]
     strokeCap: (
         Literal["butt"]
         | Literal["square"]
@@ -922,6 +912,8 @@ class RuleConfigKwds(TypedDict, total=False):
     )
     strokeDash: Sequence[float]
     strokeDashOffset: float
+    strokeOpacity: float | ExprRef | dict[str, Any]
+    strokeWidth: float | ExprRef | dict[str, Any]
     style: str | Sequence[str]
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
     x: float | ExprRef | dict[str, Any]
@@ -996,7 +988,11 @@ class ScaleKwds(TypedDict, total=False):
     domainTransition: bool
     exponent: float
     gapPositions: (
-        Sequence[float] | Literal["chromosomes"] | ExprRef | dict[str, Any] | None
+        Sequence[str | float | bool]
+        | Literal["chromosomes"]
+        | ExprRef
+        | dict[str, Any]
+        | None
     )
     gapWidth: float | ExprRef | dict[str, Any] | None
     interpolate: (
@@ -1013,6 +1009,7 @@ class ScaleKwds(TypedDict, total=False):
     round: bool
     scheme: str | SchemeParams | SchemeParamsKwds
     type: ScaleType_T
+    viewport: Sequence[float] | None
     zero: bool
     zoom: bool | ZoomParams | ZoomParamsKwds
 
@@ -1041,7 +1038,11 @@ class ScaleConfigKwds(TypedDict, total=False):
     domainTransition: bool
     exponent: float
     gapPositions: (
-        Sequence[float] | Literal["chromosomes"] | ExprRef | dict[str, Any] | None
+        Sequence[str | float | bool]
+        | Literal["chromosomes"]
+        | ExprRef
+        | dict[str, Any]
+        | None
     )
     gapWidth: float | ExprRef | dict[str, Any] | None
     index: dict[str, Any]
@@ -1066,6 +1067,7 @@ class ScaleConfigKwds(TypedDict, total=False):
     round: bool
     scheme: str | SchemeParams | SchemeParamsKwds
     type: ScaleType_T
+    viewport: Sequence[float] | None
     zero: bool
     zoom: bool | ZoomParams | ZoomParamsKwds
 
@@ -1094,10 +1096,15 @@ class SeparatorPropsKwds(TypedDict, total=False):
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
     cursor: str | ExprRef | dict[str, Any]
+    fill: str | ExprRef | dict[str, Any]
+    fillOpacity: float | ExprRef | dict[str, Any]
+    filled: bool
     includePlotMargin: bool
     minLength: float | ExprRef | dict[str, Any]
     opacity: float | ExprRef | dict[str, Any]
     size: float | ExprRef | dict[str, Any]
+    stroke: str | ExprRef | dict[str, Any]
+    strokeAlign: StrokeAlign_T | ExprRef | dict[str, Any]
     strokeCap: (
         Literal["butt"]
         | Literal["square"]
@@ -1107,6 +1114,8 @@ class SeparatorPropsKwds(TypedDict, total=False):
     )
     strokeDash: Sequence[float]
     strokeDashOffset: float
+    strokeOpacity: float | ExprRef | dict[str, Any]
+    strokeWidth: float | ExprRef | dict[str, Any]
     style: str | Sequence[str]
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
     type: Literal["rule"]

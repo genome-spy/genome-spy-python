@@ -43,6 +43,7 @@ from genome_spy.schema import (
     RulerParameter,
     SCHEMA_VERSION,
     Step,
+    RecordSelectionParameter,
     SelectionParameter,
     Title,
     TransitionedValueParameter,
@@ -650,7 +651,7 @@ def test_parameter_factory_selects_exact_schema_leaf() -> None:
     assert type(value.param) is PlainValueParameter
     assert type(transitioned.param) is TransitionedValueParameter
     assert type(expression.param) is PlainExprParameter
-    assert type(selection.param) is SelectionParameter
+    assert type(selection.param) is RecordSelectionParameter
     assert type(ruler.param) is RulerParameter
     assert expression.param.to_dict()["expr"] == "(value + ' suffix')"
     with pytest.raises(TypeError, match="Selection parameters cannot"):

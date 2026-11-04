@@ -286,6 +286,7 @@ class Angle(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -326,6 +327,7 @@ class Angle(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -355,6 +357,7 @@ class Angle(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -398,7 +401,7 @@ class Angle(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -426,6 +429,7 @@ class Angle(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Angle:
@@ -444,8 +448,8 @@ class Angle(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -458,8 +462,9 @@ class Angle(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -488,6 +493,7 @@ class Angle(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -720,6 +726,7 @@ class Color(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -760,6 +767,7 @@ class Color(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -789,6 +797,7 @@ class Color(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -832,7 +841,7 @@ class Color(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -860,6 +869,7 @@ class Color(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Color:
@@ -878,8 +888,8 @@ class Color(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -892,8 +902,9 @@ class Color(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -922,6 +933,7 @@ class Color(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -1102,7 +1114,7 @@ class Direction(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -1130,6 +1142,7 @@ class Direction(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Direction:
@@ -1148,8 +1161,8 @@ class Direction(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -1162,8 +1175,9 @@ class Direction(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -1192,6 +1206,7 @@ class Direction(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -1424,6 +1439,7 @@ class Dx(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -1464,6 +1480,7 @@ class Dx(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -1493,6 +1510,7 @@ class Dx(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -1536,7 +1554,7 @@ class Dx(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -1564,6 +1582,7 @@ class Dx(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Dx:
@@ -1582,8 +1601,8 @@ class Dx(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -1596,8 +1615,9 @@ class Dx(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -1626,6 +1646,7 @@ class Dx(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -1858,6 +1879,7 @@ class Dy(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -1898,6 +1920,7 @@ class Dy(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -1927,6 +1950,7 @@ class Dy(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -1970,7 +1994,7 @@ class Dy(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -1998,6 +2022,7 @@ class Dy(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Dy:
@@ -2016,8 +2041,8 @@ class Dy(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -2030,8 +2055,9 @@ class Dy(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -2060,6 +2086,7 @@ class Dy(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -2367,6 +2394,7 @@ class Fill(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -2407,6 +2435,7 @@ class Fill(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -2436,6 +2465,7 @@ class Fill(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -2479,7 +2509,7 @@ class Fill(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -2507,6 +2537,7 @@ class Fill(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Fill:
@@ -2525,8 +2556,8 @@ class Fill(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -2539,8 +2570,9 @@ class Fill(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -2569,6 +2601,7 @@ class Fill(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -2801,6 +2834,7 @@ class FillOpacity(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -2841,6 +2875,7 @@ class FillOpacity(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -2870,6 +2905,7 @@ class FillOpacity(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -2913,7 +2949,7 @@ class FillOpacity(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -2941,6 +2977,7 @@ class FillOpacity(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> FillOpacity:
@@ -2959,8 +2996,8 @@ class FillOpacity(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -2973,8 +3010,9 @@ class FillOpacity(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -3003,6 +3041,7 @@ class FillOpacity(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -3310,6 +3349,7 @@ class Opacity(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -3350,6 +3390,7 @@ class Opacity(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -3379,6 +3420,7 @@ class Opacity(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -3422,7 +3464,7 @@ class Opacity(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -3450,6 +3492,7 @@ class Opacity(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Opacity:
@@ -3468,8 +3511,8 @@ class Opacity(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -3482,8 +3525,9 @@ class Opacity(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -3512,6 +3556,7 @@ class Opacity(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -4027,6 +4072,7 @@ class Shape(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -4067,6 +4113,7 @@ class Shape(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -4096,6 +4143,7 @@ class Shape(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -4139,7 +4187,7 @@ class Shape(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -4167,6 +4215,7 @@ class Shape(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Shape:
@@ -4185,8 +4234,8 @@ class Shape(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -4199,8 +4248,9 @@ class Shape(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -4229,6 +4279,7 @@ class Shape(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -4461,6 +4512,7 @@ class Size(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -4501,6 +4553,7 @@ class Size(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -4530,6 +4583,7 @@ class Size(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -4573,7 +4627,7 @@ class Size(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -4601,6 +4655,7 @@ class Size(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Size:
@@ -4619,8 +4674,8 @@ class Size(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -4633,8 +4688,9 @@ class Size(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -4663,6 +4719,7 @@ class Size(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -4895,6 +4952,7 @@ class Stroke(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -4935,6 +4993,7 @@ class Stroke(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -4964,6 +5023,7 @@ class Stroke(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -5007,7 +5067,7 @@ class Stroke(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -5035,6 +5095,7 @@ class Stroke(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Stroke:
@@ -5053,8 +5114,8 @@ class Stroke(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -5067,8 +5128,9 @@ class Stroke(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -5097,6 +5159,7 @@ class Stroke(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -5329,6 +5392,7 @@ class StrokeOpacity(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -5369,6 +5433,7 @@ class StrokeOpacity(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -5398,6 +5463,7 @@ class StrokeOpacity(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -5441,7 +5507,7 @@ class StrokeOpacity(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -5469,6 +5535,7 @@ class StrokeOpacity(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> StrokeOpacity:
@@ -5487,8 +5554,8 @@ class StrokeOpacity(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -5501,8 +5568,9 @@ class StrokeOpacity(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -5531,6 +5599,7 @@ class StrokeOpacity(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -5763,6 +5832,7 @@ class StrokeWidth(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -5803,6 +5873,7 @@ class StrokeWidth(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -5832,6 +5903,7 @@ class StrokeWidth(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -5875,7 +5947,7 @@ class StrokeWidth(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -5903,6 +5975,7 @@ class StrokeWidth(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> StrokeWidth:
@@ -5921,8 +5994,8 @@ class StrokeWidth(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -5935,8 +6008,9 @@ class StrokeWidth(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -5965,6 +6039,7 @@ class StrokeWidth(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -6155,7 +6230,7 @@ class Text(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -6183,6 +6258,7 @@ class Text(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Text:
@@ -6201,8 +6277,8 @@ class Text(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -6215,8 +6291,9 @@ class Text(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -6245,6 +6322,7 @@ class Text(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -6435,7 +6513,7 @@ class Tooltip(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -6463,6 +6541,7 @@ class Tooltip(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Tooltip:
@@ -6481,8 +6560,8 @@ class Tooltip(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -6495,8 +6574,9 @@ class Tooltip(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -6525,6 +6605,7 @@ class Tooltip(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -6864,6 +6945,7 @@ class X(Channel):
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -6947,6 +7029,7 @@ class X(Channel):
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7028,6 +7111,7 @@ class X(Channel):
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7087,7 +7171,7 @@ class X(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -7115,6 +7199,7 @@ class X(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> X:
@@ -7133,8 +7218,8 @@ class X(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -7147,8 +7232,9 @@ class X(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -7177,6 +7263,7 @@ class X(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -7431,6 +7518,7 @@ class X2(Channel):
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7514,6 +7602,7 @@ class X2(Channel):
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7595,6 +7684,7 @@ class X2(Channel):
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7654,7 +7744,7 @@ class X2(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -7682,6 +7772,7 @@ class X2(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> X2:
@@ -7700,8 +7791,8 @@ class X2(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -7714,8 +7805,9 @@ class X2(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -7744,6 +7836,7 @@ class X2(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -8109,6 +8202,7 @@ class XOffset(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -8149,6 +8243,7 @@ class XOffset(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -8178,6 +8273,7 @@ class XOffset(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -8221,7 +8317,7 @@ class XOffset(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -8249,6 +8345,7 @@ class XOffset(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> XOffset:
@@ -8267,8 +8364,8 @@ class XOffset(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -8281,8 +8378,9 @@ class XOffset(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -8311,6 +8409,7 @@ class XOffset(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -8565,6 +8664,7 @@ class Y(Channel):
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -8648,6 +8748,7 @@ class Y(Channel):
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8729,6 +8830,7 @@ class Y(Channel):
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8788,7 +8890,7 @@ class Y(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -8816,6 +8918,7 @@ class Y(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Y:
@@ -8834,8 +8937,8 @@ class Y(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -8848,8 +8951,9 @@ class Y(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -8878,6 +8982,7 @@ class Y(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -9132,6 +9237,7 @@ class Y2(Channel):
         | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
         labelSeparation: float | UndefinedType = Undefined,
+        labelSqueeze: bool | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -9215,6 +9321,7 @@ class Y2(Channel):
             labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
             labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
+            labelSqueeze (bool): Shrink each tick label uniformly to fit its band, accounting for label rotation. Supported only for band scales. Enables ranged text fitting and bypasses ``labelOverlap``, including an explicitly configured strategy. Labels stay aligned with their bands at viewport edges. Very small labels fade out using the text mark's normal fitting behavior. __Default value:__ ``false``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -9296,6 +9403,7 @@ class Y2(Channel):
             "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
             "labelSeparation": labelSeparation,
+            "labelSqueeze": labelSqueeze,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -9355,7 +9463,7 @@ class Y2(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -9383,6 +9491,7 @@ class Y2(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> Y2:
@@ -9401,8 +9510,8 @@ class Y2(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -9415,8 +9524,9 @@ class Y2(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -9445,6 +9555,7 @@ class Y2(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }
@@ -9810,6 +9921,7 @@ class YOffset(Channel):
         | dict[str, Any]
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
+        selectionLabel: bool | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolFillColor: str
         | core.ExprRef
@@ -9850,6 +9962,7 @@ class YOffset(Channel):
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
+            selectionLabel (bool): Show the selected numeric range below a bound gradient legend. Set to ``false`` to hide the readout and remove its reserved space. Does not affect gradient ticks or the brush. __Default value:__ ``true``
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
@@ -9879,6 +9992,7 @@ class YOffset(Channel):
             "offset": offset,
             "orient": orient,
             "padding": padding,
+            "selectionLabel": selectionLabel,
             "style": style,
             "symbolFillColor": symbolFillColor,
             "symbolOpacity": symbolOpacity,
@@ -9922,7 +10036,7 @@ class YOffset(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
-        gapPositions: Sequence[float]
+        gapPositions: Sequence[str | float | bool]
         | Literal["chromosomes"]
         | core.ExprRef
         | dict[str, Any]
@@ -9950,6 +10064,7 @@ class YOffset(Channel):
         round: bool | UndefinedType = Undefined,
         scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
         type: ScaleType_T | UndefinedType = Undefined,
+        viewport: Sequence[float] | None | UndefinedType = Undefined,
         zero: bool | UndefinedType = Undefined,
         zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
     ) -> YOffset:
@@ -9968,8 +10083,8 @@ class YOffset(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
-            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
-            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
+            gapPositions (Sequence[str | float | bool] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional band, point, index, or locus scales. For band/point scales, list domain category values; numeric categories are values, not ranks. Missing or first categories add no gap. Index/locus cuts use numeric coordinates: 10 separates bands 9 and 10. ``"chromosomes"`` inserts gaps between the assembly's chromosomes. Positions are deduplicated in domain order. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. With step-based sizing, gaps add to plot size while the base step stays fixed. Band/point gaps do not support ``round: true``. Nested categorical offsets under a gapped band require an explicit offset range. On a step-sized axis, gap expressions must be independent of the resulting plot width or height. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -9982,8 +10097,9 @@ class YOffset(Channel):
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
             type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            viewport (Sequence[float] | None): Initial and reset scale viewport for positional band or point scales, expressed as a half-open rank interval. Fractional endpoints allow smooth navigation. Intervals narrower than one category expand around their midpoint to span one category. The categorical domain retains its membership and order. Categorical zoom uses boolean ``zoom`` and is bounded by the full domain. This scale viewport differs from a layout viewport, which scrolls already-laid-out content using ``viewportWidth`` or ``viewportHeight``. __Default value:__ ``null``, fitting all categories.
             zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
-            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+            zoom (bool | ZoomParams | ZoomParamsKwds): Enable interactive zooming and panning on a positional scale. Band and point scales accept a boolean and navigate their scale viewport while retaining the full categorical domain. Continuous scales also accept zoom extent options. __Default value:__ ``true`` for index and locus scales; ``false`` otherwise.
         """
         defined = {
             "align": align,
@@ -10012,6 +10128,7 @@ class YOffset(Channel):
             "round": round,
             "scheme": scheme,
             "type": type,
+            "viewport": viewport,
             "zero": zero,
             "zoom": zoom,
         }

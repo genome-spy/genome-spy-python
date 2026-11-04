@@ -10,6 +10,7 @@ grow toward the same generated-schema plus handwritten-API architecture.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 import shutil
@@ -301,6 +302,14 @@ def write_schema_files(
         interaction_helper_names(generator),
     )
     write_public_channel_exports(output_dir.parent, channels_module.exports)
+    write_public_schema_exports(
+        output_dir.parent,
+        tuple(
+            node.name
+            for node in ast.parse(core_module.source).body
+            if isinstance(node, ast.ClassDef)
+        ),
+    )
 
 
 def interaction_helper_names(generator: SchemaWrapperGenerator) -> tuple[str, ...]:
@@ -357,6 +366,43 @@ def write_public_channel_exports(package_dir: Path, names: tuple[str, ...]) -> N
             "EXPORTS",
             [f'    "{name}",' for name in names],
             prefix="GENERATED CHANNEL",
+        )
+
+
+def write_public_schema_exports(package_dir: Path, names: tuple[str, ...]) -> None:
+    """Expose schema classes without replacing handwritten public builders."""
+    for filename in ("api.py", "__init__.py"):
+        path = package_dir / filename
+        if not path.exists():
+            continue
+        source = re.sub(
+            r"# BEGIN GENERATED SCHEMA IMPORTS\n.*?# END GENERATED SCHEMA IMPORTS",
+            "",
+            path.read_text(encoding="utf-8"),
+            flags=re.DOTALL,
+        )
+        imported = {
+            alias.asname or alias.name
+            for node in ast.walk(ast.parse(source))
+            if isinstance(node, ast.ImportFrom)
+            for alias in node.names
+        }
+        exports = sorted(set(names) - imported)
+        _replace_generated_block(
+            path,
+            "IMPORTS",
+            [
+                "from genome_spy.schema.core import (",
+                *(f"    {name}," for name in exports),
+                ")",
+            ],
+            prefix="GENERATED SCHEMA",
+        )
+        _replace_generated_block(
+            path,
+            "EXPORTS",
+            [f'    "{name}",' for name in exports],
+            prefix="GENERATED SCHEMA",
         )
 
 
