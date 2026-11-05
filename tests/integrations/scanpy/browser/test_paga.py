@@ -28,6 +28,42 @@ from tests.integrations.scanpy.paga_fixtures import (
 class TestPaga:
     """Registered native PAGA graph paint, labels, hover, navigation and HTML delivery."""
 
+    def test_crossing_edges_have_native_white_outlines(self, page):
+        from scipy.sparse import csr_matrix
+
+        a = make_paga()
+        a.uns["paga"]["connectivities"] = csr_matrix(
+            [
+                [0, 0.8, 0, 0],
+                [0.8, 0, 0, 0],
+                [0, 0, 0, 0.8],
+                [0, 0, 0.8, 0],
+            ]
+        )
+        chart = gsc.pl.paga(
+            a,
+            pos=np.array([[-1, -1], [1, 1], [-1, 1], [1, -1]]),
+            show_node_labels=False,
+            zoom=True,
+            show=False,
+        )
+        render(page, chart)
+        edges = [
+            e
+            for group in svg_root(page).iter()
+            if group.get("data-mark-type") == "rule" and group.get("clip-path")
+            for e in group
+        ]
+        assert len(edges) == 2
+        for edge in edges:
+            assert len(edge) == 2
+            outline, body = edge
+            assert outline.get("stroke") == "white"
+            assert outline.get("mask")
+            assert float(outline.get("stroke-width")) > 0
+            assert body.get("fill") == "#999999"
+            assert outline.get("d") == body.get("d")
+
     @pytest.mark.reference
     @pytest.mark.parametrize(
         "case",
@@ -147,12 +183,27 @@ class TestPaga:
             if e.get("data-mark-type") == "rule" and e.get("clip-path")
         ]
         assert len(rules) == len(expected_lines)
-        for group, reference_line in zip(rules, expected_lines, strict=True):
+        widths = page.evaluate(
+            """async()=>{
+                const svg=(await api.imageExport.svg()).blob;
+                const root=new DOMParser().parseFromString(await svg.text(),'image/svg+xml').documentElement;
+                root.style.cssText='position:fixed;visibility:hidden';document.body.append(root);
+                const widths=[...root.querySelectorAll('[data-mark-type="rule"][clip-path]')].map(group=>
+                    [...group.children].map(edge=>edge.tagName==='g'
+                        ?edge.lastElementChild.getBBox().height
+                        :+(edge.getAttribute('stroke-width')||group.getAttribute('stroke-width')||1)));
+                root.remove();return widths;
+            }"""
+        )
+        for group, measured, reference_line in zip(
+            rules, widths, expected_lines, strict=True
+        ):
             assert len(group) == len(reference_line.get_segments())
-            for line, width in zip(group, reference_line.get_linewidths(), strict=True):
-                assert float(
-                    line.get("stroke-width", group.get("stroke-width", "1"))
-                ) == pytest.approx(width * 100 / 72, abs=0.051)
+            np.testing.assert_allclose(
+                measured,
+                np.asarray(reference_line.get_linewidths()) * 100 / 72,
+                atol=0.051,
+            )
         actual = panel_image(page, bounds)
         pixels, target = (
             np.asarray(actual).astype(float),
@@ -309,7 +360,7 @@ class TestPaga:
 
     @pytest.mark.parametrize("color", ["score", "g1", "degree_solid"])
     @pytest.mark.parametrize("height", [120, 360])
-    def test_numeric_colorbar_fits_plot_height_with_title_beside_it(
+    def test_numeric_legend_fits_plot_height_with_title_and_range(
         self, page, color, height
     ):
         from tests.integrations.scanpy.browser.interactions import position, svg_root
@@ -334,8 +385,24 @@ class TestPaga:
         assert len(bars) == 1
         bar = bars[0]
         top, length = (float(bar.get("y")), float(bar.get("height")))
-        assert top == pytest.approx(bounds["y"], abs=1.1)
-        assert top + length == pytest.approx(bounds["y"] + bounds["height"], abs=1.1)
+        border = next(
+            group for group in root.iter() if group.get("data-name") == "gradientBorder"
+        )
+        paint = next(
+            element
+            for element in border.iter()
+            if element.get("data-mark-type") == "rect"
+        )
+        frame = next(element for element in paint if element.tag.endswith("rect"))
+        stroke = float(paint.get("stroke-width")) / 2
+        outer_top = float(frame.get("y")) - stroke
+        outer_bottom = float(frame.get("y")) + float(frame.get("height")) + stroke
+        assert top >= outer_top and top + length <= outer_bottom
+        assert outer_top == pytest.approx(bounds["y"], abs=1.1)
+        assert not any(
+            e.get("data-name") == "gradientSelectionFeedback" for e in root.iter()
+        )
+        assert outer_bottom == pytest.approx(bounds["y"] + bounds["height"], abs=1.1)
         title = next(
             (e for e in root.iter() if e.tag.endswith("text") and e.text == color)
         )

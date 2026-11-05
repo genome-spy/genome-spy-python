@@ -736,12 +736,17 @@ class TestEmbeddingSummaryTracks:
         ]
         assert len(selected) == 2
         for leaf in selected:
-            assert leaf["transform"][-1] == {
+            assert leaf["transform"][-2] == {
                 "type": "filter",
                 "param": "cells",
                 "fields": {"x": "_coord_0", "y": "_coord_1"},
                 "empty": True,
             }
+            assert leaf["transform"][-1]["type"] == "filter"
+            assert (
+                "selectionContains(embedding_color_0,'color',datum['_color_0'])"
+                in leaf["transform"][-1]["expr"]
+            )
         hidden = plot.add_tracks(show=False).to_chart()
         assert records(hidden) == source
 

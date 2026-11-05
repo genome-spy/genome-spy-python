@@ -9,7 +9,12 @@ import pytest
 
 import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.interactions import move_to, wait_for_navigation
+from tests.integrations.scanpy.browser.interactions import (
+    click_legend,
+    move_to,
+    svg_root,
+    wait_for_navigation,
+)
 from tests.integrations.scanpy.browser.rendering import (
     assert_complete_chart,
     panel_image,
@@ -58,6 +63,177 @@ class TestUmap:
             move_to(page, bounds, float(x), float(y), *domains, f"stable-{index}")
             page.get_by_text(f"stable-{index}", exact=True).wait_for(state="visible")
             assert page.get_by_text("Observation ID", exact=True).is_visible()
+
+    @pytest.mark.parametrize("add_outline", [False, True])
+    def test_linked_hover_follows_cells_across_sorted_panels_and_clears(
+        self, page, add_outline
+    ):
+        a = fixture()[:2].copy()
+        a.obsm["X_umap"] = np.array([[0.0, 0.0], [1.0, 1.0]])
+        chart = gsc.pl.umap(
+            a,
+            color=["cell_type", "score"],
+            add_outline=add_outline,
+            size=80,
+            width=200,
+            height=200,
+            frameon=False,
+            obs_id="cell_id",
+            show=False,
+        )
+        render(page, chart)
+        domains = [
+            points(units(chart.to_dict())[0])["encoding"][d]["scale"]["domain"]
+            for d in ("x", "y")
+        ]
+        for panel in (0, 1, 0):
+            bounds = page.evaluate(
+                "i=>api.views.getLayoutBounds({scope:[],view:'panel-'+i})", panel
+            )
+            move_to(page, bounds, 1, 1, *domains, "stable-1")
+            page.wait_for_function(
+                "api.params.get('cell_hover').getValue().datum?._obs_id === 'stable-1'"
+            )
+            outlined = [
+                node
+                for node in svg_root(page).iter()
+                if node.get("stroke") == "#111827"
+                and float(node.get("stroke-width", 0)) > 0
+            ]
+            assert len(outlined) == 2
+        page.mouse.move(0, 0)
+        page.wait_for_function("!api.params.get('cell_hover').getValue().datum")
+        assert not any(
+            node.get("stroke") == "#111827" and float(node.get("stroke-width", 0)) > 0
+            for node in svg_root(page).iter()
+        )
+
+    @pytest.mark.parametrize("color", ["cell_type", "score"])
+    @pytest.mark.parametrize("outlines", [False, True])
+    def test_native_legends_dim_cells_without_removing_them(
+        self, page, color, outlines
+    ):
+        chart = gsc.pl.umap(
+            fixture(),
+            color=color,
+            add_outline=outlines,
+            size=50,
+            width=240,
+            height=240,
+            zoom=True,
+            show=False,
+        )
+        render(page, chart)
+        if color == "cell_type":
+            click_legend(page, "C")
+        else:
+            bar = next(
+                e
+                for e in svg_root(page).iter()
+                if e.tag.endswith("rect")
+                and e.get("fill", "").startswith("url(#legend-gradient-")
+            )
+            canvas = page.locator("canvas").bounding_box()
+            x = canvas["x"] + float(bar.get("x")) + float(bar.get("width")) / 2
+            y = canvas["y"] + float(bar.get("y"))
+            height = float(bar.get("height"))
+            page.mouse.move(x, y + height * 0.25)
+            page.mouse.down()
+            page.mouse.move(x, y + height * 0.65, steps=10)
+            page.mouse.up()
+        page.evaluate("() => new Promise(requestAnimationFrame)")
+        circles = [
+            e
+            for group in svg_root(page).iter()
+            if group.get("data-mark-type") == "point" and group.get("clip-path")
+            for e in group
+        ]
+        assert len(circles) == 8 * (3 if outlines else 1)
+        opacity = [float(e.get("fill-opacity", "1")) for e in circles]
+        assert 0.04 in opacity and 1 in opacity
+        if outlines:
+            groups = [
+                sorted(float(e.get("fill-opacity", "1")) for e in group)
+                for group in svg_root(page).iter()
+                if group.get("data-mark-type") == "point" and group.get("clip-path")
+            ]
+            assert len(groups) >= 3
+            dimmed = [group.count(0.04) for group in groups]
+            # Foreground missing colors may split into a fourth layer.
+            assert dimmed[0] == dimmed[1] == sum(dimmed[2:]) > 0
+
+    @pytest.mark.parametrize("hover", [False, True])
+    def test_legend_selections_highlight_the_same_cells_in_every_panel(
+        self, page, hover
+    ):
+        a = fixture()
+        a.obs["score"] = np.arange(a.n_obs, dtype=float)
+        chart = gsc.pl.umap(
+            a,
+            color=["cell_type", "score", "g1"],
+            obs_id="cell_id",
+            hover=hover,
+            zoom=True,
+            width=200,
+            height=200,
+            show=False,
+        )
+        render(page, chart)
+
+        def highlighted():
+            result = []
+            for panel in range(3):
+                data = page.evaluate(
+                    "i=>api.views.get({scope:[],view:'panel-'+i}).data.read({scope:'all',limit:100}).rows",
+                    panel,
+                )
+                assert len(data) == a.n_obs
+                result.append({r["_obs_id"] for r in data if r["_legend_opacity"] == 1})
+            assert result[0] == result[1] == result[2]
+            return result[0]
+
+        all_cells = set(a.obs.cell_id)
+        assert highlighted() == all_cells
+        click_legend(page, "C")
+        category = set(a.obs.loc[a.obs.cell_type == "C", "cell_id"])
+        assert highlighted() == category
+        click_legend(page, "C", shift=True)
+        assert highlighted() == all_cells
+
+        bar = next(
+            e
+            for e in svg_root(page).iter()
+            if e.tag.endswith("rect")
+            and e.get("fill", "").startswith("url(#legend-gradient-")
+        )
+        canvas = page.locator("canvas").bounding_box()
+        x = canvas["x"] + float(bar.get("x")) + float(bar.get("width")) / 2
+        y = canvas["y"] + float(bar.get("y"))
+        height = float(bar.get("height"))
+        page.mouse.move(x, y + height * 0.2)
+        page.mouse.down()
+        page.mouse.move(x, y + height * 0.8, steps=10)
+        page.mouse.up()
+        page.evaluate("() => new Promise(requestAnimationFrame)")
+        low, high = page.evaluate(
+            "api.params.get('embedding_color_1').getValue().intervals.color"
+        )
+        numeric = set(a.obs.loc[(a.obs.score >= low) & (a.obs.score < high), "cell_id"])
+        assert 0 < len(numeric) < a.n_obs
+        assert highlighted() == numeric
+        click_legend(page, "C")
+        assert highlighted() == numeric & category
+        click_legend(page, "C", shift=True)
+        assert highlighted() == numeric
+        page.evaluate(
+            "api.params.get('embedding_color_1').setValue({type:'interval',intervals:{color:null}})"
+        )
+        page.evaluate("() => new Promise(requestAnimationFrame)")
+        assert highlighted() == all_cells
+        assert not any(
+            e.get("data-name") == "gradientSelectionFeedback"
+            for e in svg_root(page).iter()
+        )
 
     @pytest.mark.parametrize("offset", [0.3, 0.65])
     def test_tiny_points_can_be_hovered_at_their_center(self, page, offset):
@@ -621,7 +797,7 @@ class TestScatter:
         bounds = render(page, getattr(gsc.pl, family)(*args, **options))
         svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
         symbols = page.evaluate(
-            "({svg,edge}) => {\n        const root = new DOMParser().parseFromString(svg,'image/svg+xml').documentElement;\n        root.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';\n        document.body.append(root);\n        const symbols = [...root.querySelectorAll('circle,rect,path')].flatMap(n => {\n            const b=n.getBoundingClientRect();\n            return b.x > edge ? [{shape:n.tagName,width:b.width}] : [];\n        });\n        root.remove();\n        return symbols;\n        }",
+            "({svg,edge}) => {\n        const root = new DOMParser().parseFromString(svg,'image/svg+xml').documentElement;\n        root.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';\n        document.body.append(root);\n        const symbols = [...root.querySelectorAll('[data-name=\"symbols\"] circle,[data-name=\"symbols\"] rect,[data-name=\"symbols\"] path')].flatMap(n => {\n            const b=n.getBoundingClientRect();\n            return b.x > edge ? [{shape:n.tagName,width:b.width}] : [];\n        });\n        root.remove();\n        return symbols;\n        }",
             {"svg": svg, "edge": bounds["x"] + bounds["width"]},
         )
         assert len(symbols) == 2

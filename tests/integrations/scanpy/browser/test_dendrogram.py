@@ -61,7 +61,11 @@ def test_tree_height_fits_visible_branches_after_zoom(
     )
     # A test-only name exposes the native domain without changing production specs.
     tree["encoding"][height_axis]["scale"]["name"] = "test-tree-height"
-    rows = spec["datasets"][tree["data"]["name"]]
+    render(page, gs.TopLevelSpec.from_dict(spec), scale_prefix=family)
+    rows = page.evaluate(
+        "name=>api.views.get({scope:[],view:name}).data.read({scope:'all',limit:1000}).rows",
+        tree["name"],
+    )
     full_height = max(row["distance"] for row in rows)
     root_slot = next(row["leaf"] for row in rows if row["distance"] == full_height)
     edge = max(
@@ -72,7 +76,6 @@ def test_tree_height_fits_visible_branches_after_zoom(
         min(edge["leaf"], edge["leaf2"]) - 0.05,
         max(edge["leaf"], edge["leaf2"]) + 0.05,
     ]
-    render(page, gs.TopLevelSpec.from_dict(spec), scale_prefix=family)
     before = page.evaluate(
         "api.getScaleResolutionByName('test-tree-height').getDomain()"
     )
@@ -563,3 +566,40 @@ def test_native_zero_height_viewport_keeps_zero_at_leaf_edge(page):
     # Let native fitting settle without requiring the broken domain value.
     page.wait_for_timeout(700)
     assert page.evaluate("api.getScaleResolutionByName('height').getScale()(0)") == 0
+
+
+class _CategoricalViewportUnsupported(RuntimeError):
+    """Identify the exact native capability that still blocks named tree axes."""
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=_CategoricalViewportUnsupported,
+    reason="C22: Core 1.3 viewport-derived heights require a continuous positional axis.",
+)
+def test_native_categorical_axis_can_drive_viewport_height(page):
+    from playwright.sync_api import Error
+
+    chart = (
+        gs.Chart([{"group": "A", "height": 2}, {"group": "B", "height": 4}])
+        .mark_point()
+        .encode(
+            x=gs.X("group:N").scale(type="band", domain=["A", "B"], zoom=True),
+            y=gs.Y("height:Q").scale(
+                name="tree-height",
+                domain=gs.ViewportDomainRef(source="viewport"),
+                zero=True,
+                nice=False,
+            ),
+        )
+    )
+    try:
+        render(page, chart)
+    except Error as error:
+        if "requires an independent continuous positional scale" in str(error):
+            raise _CategoricalViewportUnsupported() from error
+        raise
+    assert page.evaluate("api.getScaleResolutionByName('tree-height').getDomain()") == [
+        0,
+        4,
+    ]

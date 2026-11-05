@@ -22,6 +22,7 @@ from genome_spy.integrations.scanpy._embedding.interactions import (
 from tests.browser.test_embed_api import module_url
 from tests.integrations.scanpy.browser.interactions import (
     hover_at,
+    click_legend,
     position,
     render_summary,
     rows,
@@ -330,6 +331,91 @@ class TestBrushing:
 class TestEmbeddingSummary:
     """Observed native placement, missing values and scoped brush updates."""
 
+    def test_legend_and_brush_update_every_summary_and_keep_bars_inside_axes(
+        self, page, adata
+    ):
+        chart = (
+            gsc.pl.EmbeddingSummary(adata, "HLA-DRA", "type")
+            .add_heatmap(show_values=True)
+            .add_histogram("HLA-DRA")
+            .add_composition("type", height=180)
+            .add_tracks("HLA-DRA", height=100)
+            .to_chart()
+        )
+        names = render_summary(page, chart)
+
+        def point_opacities():
+            embedding = next(
+                g for g in svg_root(page).iter() if g.get("data-name") == "umap-points"
+            )
+            return sorted(
+                float(e.get("fill-opacity", "1"))
+                for group in embedding.iter()
+                if group.get("data-mark-type") == "point"
+                for e in group
+            )
+
+        reference = rows(page, "tracks-all-0")
+        assert rows(page, names["selected-expression"]) == []
+        click_legend(page, "B", index=-1)
+        selected = rows(page, names["selected-expression"])
+        assert len(selected) == 1
+        assert selected[0]["_group"] == "B"
+        assert selected[0]["mean"] == pytest.approx((0.5 + 1 + 2) / 3)
+        assert (
+            sum(row["count"] for row in rows(page, "selected-expression-histogram"))
+            == 3
+        )
+        assert {row["_obs_id"] for row in rows(page, "tracks-selected-0")} == {
+            "cell-2",
+            "cell-3",
+            "cell-4",
+        }
+        assert [
+            (r["_color_0"], r["count"]) for r in rows(page, "selected-composition")
+        ] == [("B", 3)]
+        set_brush(page, {"x": [1.5, 3.5], "y": [0.5, 1.5]})
+        selected = rows(page, names["selected-expression"])
+        assert selected[0]["mean"] == pytest.approx(0.75)
+        assert rows(page, "umap-count-cells")[0]["count"] == 2
+        assert {row["_obs_id"] for row in rows(page, "tracks-selected-0")} == {
+            "cell-2",
+            "cell-3",
+        }
+        assert point_opacities() == [0.04] * 4 + [0.85] * 2
+        click_legend(page, "A", index=-1)
+        assert rows(page, names["selected-expression"]) == []
+        assert rows(page, "tracks-selected-0") == []
+        assert rows(page, "umap-count-cells")[0]["count"] == 0
+        click_legend(page, "A", index=-1, shift=True)
+        assert rows(page, names["selected-expression"])[0]["mean"] == pytest.approx(
+            0.75
+        )
+        set_brush(page, {"x": None, "y": None})
+        assert rows(page, names["selected-expression"]) == []
+        assert rows(page, "tracks-selected-0") == reference
+        assert point_opacities() == [0.85] * 6
+        set_brush(page, {"x": [-1, 6], "y": [-1, 3]})
+        root = svg_root(page)
+        for name in ("all-composition", "selected-composition"):
+            bounds = page.evaluate(
+                "name=>api.views.getLayoutBounds({scope:[],view:name})", name
+            )
+            rectangles = [
+                e
+                for g in root.iter()
+                if g.get("data-name") == name
+                for e in g.iter()
+                if e.tag.endswith("rect")
+            ]
+            assert len(rectangles) == 2
+            for rect in rectangles:
+                assert float(rect.get("y")) >= bounds["y"] - 0.25
+                assert (
+                    float(rect.get("y")) + float(rect.get("height"))
+                    <= bounds["y"] + bounds["height"] + 0.25
+                )
+
     @pytest.mark.smoke
     @pytest.mark.parametrize("cmap", ["seurat", "viridis"])
     def test_fitted_heatmap_values_follow_brush_means_contrast_and_clear(
@@ -477,9 +563,11 @@ class TestEmbeddingSummary:
             b = cohort_rectangles["selected-composition"][
                 next((i for i, row in enumerate(selected) if row["_obs_1"] == category))
             ]
-            assert abs(float(a.get("y")) - float(b.get("y"))) >= min(
-                float(a.get("height")), float(b.get("height"))
-            )
+            # Selected bars sit inside the wider reference bars for the same category.
+            assert float(a.get("y")) < float(b.get("y"))
+            assert float(b.get("y")) + float(b.get("height")) < float(
+                a.get("y")
+            ) + float(a.get("height"))
         set_brush(page, {"x": [20, 21], "y": [20, 21]})
         assert rows(page, "selected-composition") == []
         assert rows(page, "selected-observation-histogram") == []

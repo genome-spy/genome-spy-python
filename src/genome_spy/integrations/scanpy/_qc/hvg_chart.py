@@ -213,6 +213,7 @@ def build_variable_genes(
         )
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(
+            selectionLabel=False,
             orient="bottom",
             direction="horizontal",
             labelFont=FONT,

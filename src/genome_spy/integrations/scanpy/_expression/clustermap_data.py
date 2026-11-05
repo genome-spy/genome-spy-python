@@ -13,7 +13,7 @@ from genome_spy.integrations.scanpy._data import (
     require_resident_expression,
     resolve_use_raw,
 )
-from genome_spy.integrations.scanpy._dendrogram_data import TreeData
+from genome_spy.integrations.scanpy._dendrogram_data import TreeData, tree_nodes
 from genome_spy.integrations.scanpy._style import _categorical, _palette, native_color
 
 CONTEXT = "gsc.pl.clustermap"
@@ -54,7 +54,10 @@ def _tree(values: np.ndarray, linkage: Any, *, method: str, metric: str) -> Tree
             )
     info = hierarchy.dendrogram(linkage, no_plot=True, color_threshold=-np.inf)
     return TreeData(
-        tuple(info["leaves"]), np.asarray(info["icoord"]), np.asarray(info["dcoord"])
+        tuple(info["leaves"]),
+        np.asarray(info["icoord"]),
+        np.asarray(info["dcoord"]),
+        nodes=tree_nodes(linkage, info["leaves"]),
     )
 
 

@@ -92,7 +92,17 @@ def build_matrixplot(
     )
 
     # Tiles fill their slots; missing means leave an empty slot with its label.
-    x, y, scales = grouped_axes(rows, columns, xpadding=0, ypadding=0, zoom=zoom)
+    x, y, scales = grouped_axes(
+        rows,
+        columns,
+        xpadding=0,
+        ypadding=0,
+        zoom=zoom,
+        groups=list(map(str, colors.columns if swap_axes else colors.index))
+        if tree is None and totals is None
+        else (),
+        swap_axes=swap_axes,
+    )
     tiles = (
         gs.Chart(summary_records(colors, swap_axes=swap_axes, context=context))
         .transform_filter("isValid(datum._mean)")

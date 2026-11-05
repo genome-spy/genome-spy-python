@@ -15,6 +15,7 @@ from genome_spy.integrations.scanpy._embedding.chart import build_embedding
 from genome_spy.integrations.scanpy._embedding.data import PreparedEmbedding
 from genome_spy.integrations.scanpy._embedding.interactions import (
     brush_count,
+    brush_membership,
     brush_owner,
     brush_value,
 )
@@ -24,6 +25,7 @@ from genome_spy.integrations.scanpy._embedding.summary_data import (
     prepare_tracks,
 )
 from genome_spy.integrations.scanpy._grid_interactions import with_values
+from genome_spy.integrations.scanpy._legend_interactions import legend_focus
 from genome_spy.integrations.scanpy._style import embedding_style
 
 
@@ -31,7 +33,7 @@ def _gene_controls(
     options: dict[str, Any], fields: dict[str, str], panel: str, *, offset: int = 0
 ) -> list[gs.Parameter]:
     """Keep gene choices in native parameters owned by this composition."""
-    if not options["gene_controls"]:
+    if options["gene_controls"] is not True:
         return []
     return [
         gs.param(
@@ -53,7 +55,7 @@ def _heatmap(
     options: dict[str, Any],
     show_legend: bool,
     controls: list[gs.Parameter],
-) -> gs.Chart | gs.LayerChart:
+) -> gs.TopLevelSpec:
     """Return selected-cell gene means as tiles, with optional gene controls and values."""
     genes = options["genes"]
     selected_fields = (
@@ -83,14 +85,15 @@ def _heatmap(
     )
     if controls:
         tiles = tiles.transform_filter(f"indexof({gene_expression}, datum.gene) >= 0")
+    means = tiles.transform_aggregate(
+        groupby=["_group", "gene"],
+        fields=["expression", "expression"],
+        ops=["mean", "count"],
+        as_=["mean", "cells"],
+    )
+    tiles = means
     tiles = (
-        tiles.transform_aggregate(
-            groupby=["_group", "gene"],
-            fields=["expression", "expression"],
-            ops=["mean", "count"],
-            as_=["mean", "cells"],
-        )
-        .mark_rect()
+        tiles.mark_rect()
         .encode(
             x=gs.X("_group:N", title=prepared.panels[0].key)
             .scale(type="band", domain=groups, padding=0.04)
@@ -111,11 +114,12 @@ def _heatmap(
         .properties(name="selected-expression")
     )
     chart = with_values(tiles, "mean") if options["show_values"] else tiles
-    return chart.properties(
+    chart = chart.properties(
         title=options["title"],
         width=options["width"],
         height=options["height"],
     )
+    return chart
 
 
 def _percentages(source: gs.Chart, groupby: list[str], cohort: str) -> gs.Chart:
@@ -138,6 +142,7 @@ def _tracks_panel(
     options: dict[str, Any],
     color_scale: gs.Scale,
     brush: gs.Parameter,
+    legend_match: gs.Expression,
 ) -> gs.TopLevelSpec:
     """Reuse the tracks renderer and native cell filter without changing cell order."""
     from genome_spy.integrations.scanpy._expression.tracksplot_chart import (
@@ -175,6 +180,7 @@ def _tracks_panel(
             "fields": {"x": "_coord_0", "y": "_coord_1"},
             "empty": True,
         },
+        highlight_filter=legend_match,
         show_legend=False,
     ).properties(name="marker-tracks", title=options["title"])
 
@@ -296,12 +302,12 @@ def _composition(
     options: dict[str, Any],
     show_legend: bool,
 ) -> gs.LayerChart:
-    """Return paired group percentages, preserving the observation's colors and order."""
+    """Compare selected percentages against wider, faint reference bars."""
     assert observation.color is not None
     field = observation.field
     domain = observation.color.to_dict()["domain"]
 
-    def cohort(source: gs.Chart, label: str, name: str) -> gs.Chart:
+    def cohort(source: gs.Chart, label: str, name: str, band: float) -> gs.Chart:
         return (
             _percentages(source.transform_project(fields=[field]), [field], label)
             .mark_rect(minWidth=0, minHeight=0)
@@ -310,12 +316,9 @@ def _composition(
                     domain=[0, 100], nice=False
                 ),
                 x2=gs.value(0),
-                y=gs.Y(f"{field}:N", title=options["key"])
+                y=gs.Y(f"{field}:N", title=options["key"], band=band)
                 .scale(type="band", domain=domain, padding=0.15)
                 .axis(labelLimit=130),
-                yOffset=gs.YOffset("cohort:N").scale(
-                    type="band", domain=["All cells", "Selected"], padding=0.1
-                ),
                 color=gs.Color(f"{field}:N", scale=observation.color).legend(None),
                 opacity=gs.Opacity("cohort:N", title="Cohort")
                 .scale(
@@ -334,8 +337,8 @@ def _composition(
         )
 
     return (
-        cohort(gs.Chart(), "All cells", "all-composition")
-        + cohort(selected, "Selected", "selected-composition")
+        cohort(gs.Chart(), "All cells", "all-composition", 0.85)
+        + cohort(selected, "Selected", "selected-composition", 0.4)
     ).properties(
         title=options["title"],
         width=options["width"],
@@ -483,6 +486,7 @@ def build_summary(
     direction: Literal["horizontal", "vertical"] = (
         "horizontal" if legend_position in ("top", "bottom") else "vertical"
     )
+    focus, legend_match = legend_focus("embedding_color_0", "_color_0")
     embedding = (
         build_embedding(
             prepared,
@@ -490,6 +494,11 @@ def build_summary(
             hover=True,
             zoom=zoom,
             coordinate_domains=(domains[0], domains[1]),
+            cell_filter=(
+                ~gs.expr.selectionActive(gs.Expression(brush.name))
+                | brush_membership(brush, ("_coord_0", "_coord_1"))
+            ),
+            legend_selection=(focus, legend_match) if legend_show else None,
         )
         ._with_properties(
             {
@@ -509,6 +518,7 @@ def build_summary(
                 name=f"{prepared.basis}-count-cells",
                 width=size,
                 within_brush=True,
+                cell_filter=legend_match if legend_show else None,
             )
         )
     overlay = brush_owner(
@@ -530,9 +540,15 @@ def build_summary(
     )
     chart = gs.vconcat(overlay).resolve_scale(x="independent", y="independent")
 
-    # All summaries read the same brush-filtered cell table.
-    selected = gs.Chart().transform_filter(
-        brush, fields={"x": "_coord_0", "y": "_coord_1"}, empty=False
+    # Legends and the brush restrict the same cohort; clearing either keeps the other.
+    legend_match = legend_match if legend_show else gs.Expression("true")
+    active = gs.expr.selectionActive(gs.Expression(brush.name))
+    if legend_show:
+        active = active | gs.expr.selectionActive(gs.Expression(focus.name))
+    selected = (
+        gs.Chart()
+        .transform_filter(brush, fields={"x": "_coord_0", "y": "_coord_1"}, empty=True)
+        .transform_filter(active & legend_match)
     )
     panels: list[tuple[gs.TopLevelSpec, str]] = []
     gene_parameters: list[gs.Parameter] = []
@@ -554,7 +570,9 @@ def build_summary(
         assert color_scale is not None
         panels.append(
             (
-                _tracks_panel(prepared, fields, groups, tracks, color_scale, brush),
+                _tracks_panel(
+                    prepared, fields, groups, tracks, color_scale, brush, legend_match
+                ),
                 tracks["position"],
             )
         )
@@ -578,9 +596,14 @@ def build_summary(
     result = _place_panels(chart, panels, spacing)
     return (
         result.properties(data=table)
-        .add_params(brush_value(brush), *gene_parameters)
+        .add_params(
+            brush_value(brush),
+            *([gs.param(focus.name, value=None)] if legend_show else []),
+            *gene_parameters,
+        )
         .resolve_legend(default="collected")
         .configure_legend(
+            selectionLabel=False,
             orient=legend_position,
             direction=direction,
             columns=1,

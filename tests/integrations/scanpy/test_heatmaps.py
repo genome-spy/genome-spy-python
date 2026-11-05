@@ -327,7 +327,9 @@ class TestHeatmap:
         a.obs["group"] = a.obs["group"].cat.remove_unused_categories()
         spec = heatmap_plot(a, dendrogram=True).to_dict()
         tree = spec["surround"]["right"][0]
-        assert len(spec["datasets"][tree["data"]["name"]]) == 2
+        nodes = spec["datasets"][tree["data"]["name"]]
+        assert sum(node["parent"] is not None for node in nodes) == 2
+        assert any(t["type"] == "dendrogram" for t in tree["transform"])
         hidden = heatmap_plot(adata, var_names=["g1"] * 51).to_dict()
         shown = heatmap_plot(
             adata, var_names=["g1"] * 51, show_gene_labels=True
@@ -444,12 +446,15 @@ class TestMatrix:
             show_values=True,
             show=False,
         ).to_dict()
-        assert set(spec["surround"]) == {"bottom", "left"}
+        assert set(spec["surround"]) == {"bottom"}
+        assert spec["scales"]["y"]["type"] == "band"
+        assert spec["scales"]["y"]["domain"] == ["first", "last"]
         assert spec["spec"]["width"] == 400
         assert "padding" not in spec and "params" not in spec
         for axis, count in (("x", 3), ("y", 2)):
-            assert spec["scales"][axis]["domain"] == [0, count - 1]
-            assert spec["scales"][axis]["gapPositions"] == []
+            if axis == "x":
+                assert spec["scales"][axis]["domain"] == [0, count - 1]
+                assert spec["scales"][axis]["gapPositions"] == []
             assert spec["scales"][axis]["zoom"] is True
             assert "name" not in spec["scales"][axis]
         for mark in leaf_marks(spec):
@@ -1097,8 +1102,9 @@ class TestTracksplot:
         assert len(data) == 27 and (data["_value"] < 0).sum() == 1
         log = tracksplot_plot(adata, log=True).to_dict()
         assert units(log)[0]["layer"][0]["encoding"]["y"]["scale"]["domain"][0] > 0
-        assert (
-            "datum._value_1 > 0" in units(log)[1]["layer"][0]["transform"][-1]["expr"]
+        assert any(
+            transform["type"] == "filter" and "datum._value_1 > 0" in transform["expr"]
+            for transform in units(log)[1]["layer"][0]["transform"]
         )
         single = adata[adata.obs["group"] == "A"]
         assert len(tracksplot_records(tracksplot_plot(single))) == 3

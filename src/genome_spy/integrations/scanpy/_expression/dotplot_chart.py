@@ -207,6 +207,10 @@ def build_dotplot(
         xgaps=[] if swap_axes else gaps,
         ygaps=gaps if swap_axes else [],
         gap_width=group_gap,
+        groups=list(map(str, colors.columns if swap_axes else colors.index))
+        if tree is None and totals is None
+        else (),
+        swap_axes=swap_axes,
     )
     dots = (
         gs.Chart(table)

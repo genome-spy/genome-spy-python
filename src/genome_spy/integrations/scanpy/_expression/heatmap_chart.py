@@ -337,6 +337,7 @@ def build_heatmap(
         .resolve_legend(color="collected")
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(
+            selectionLabel=False,
             labelFont=FONT,
             labelFontSize=TICK,
             titleFont=FONT,

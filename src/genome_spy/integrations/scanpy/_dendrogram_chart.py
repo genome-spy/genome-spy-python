@@ -1,4 +1,4 @@
-"""Native marks render Python tree geometry; GenomeSpy performs no clustering."""
+"""Lay out Python tree nodes natively, retaining stored fractional group centers."""
 
 from typing import Literal
 
@@ -78,11 +78,40 @@ def tree_track(
     Integer anchors and fractional offsets share the matrix's gapped index scale.
     Fit visible heights; zero-only trees keep a nonzero range with zero at the edge.
     """
-    records = tree_records(tree, leaf_positions)
-    for record in records:
-        for field in ("leaf", "leaf2"):
-            record[f"{field}_offset"] = record[field] % 1
-            record[field] = float(np.floor(record[field]))
+    if len(leaf_positions) != len(tree.order):
+        raise ValueError("Tree leaf positions must match the number of groups.")
+    if tree.nodes and all(float(slot).is_integer() for slot in leaf_positions):
+        nodes = [
+            {
+                **node,
+                "slot": None if node["slot"] is None else leaf_positions[node["slot"]],
+            }
+            for node in tree.nodes
+        ]
+        source = gs.Chart(nodes).transform_dendrogram(
+            key="id",
+            parentKey="parent",
+            height="height",
+            leafIndex="slot",
+            as_=[
+                "parent",
+                "child",
+                "distance",
+                "distance2",
+                "leaf",
+                "leaf2",
+                "leaf_offset",
+                "leaf2_offset",
+            ],
+        )
+    else:
+        # Unequal cell-group centers need their stored fractional positions.
+        records = tree_records(tree, leaf_positions)
+        for record in records:
+            for field in ("leaf", "leaf2"):
+                record[f"{field}_offset"] = record[field] % 1
+                record[field] = float(np.floor(record[field]))
+        source = gs.Chart(records)
     axis = "x" if horizontal else "y"
     leaf = (gs.X if horizontal else gs.Y)("leaf:I", band=0.5).axis(None)
 
@@ -102,7 +131,7 @@ def tree_track(
         )
         .axis(None)
     )
-    chart = _tree_links(gs.Chart(records), horizontal=horizontal, linewidth=linewidth)
+    chart = _tree_links(source, horizontal=horizontal, linewidth=linewidth)
     if horizontal:
         return chart.encode(
             x=leaf,

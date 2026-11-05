@@ -17,6 +17,7 @@ from genome_spy.integrations.scanpy._expression.grouped_chart import (
     index_scales,
     _slot_labels,
 )
+from genome_spy.integrations.scanpy._legend_interactions import legend_focus
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
     grid_interactions,
@@ -119,7 +120,15 @@ def _color_tracks(
             )
 
             # Missing annotations leave the white track background visible.
-            chart = chart.transform_filter("isValid(datum._color)")
+            focus, match = legend_focus(f"clustermap_annotation_{index}", "_color")
+            chart = (
+                chart.transform_filter("isValid(datum._color)")
+                .add_params(focus)
+                .transform_calculate(_legend_opacity=gs.expr.if_(match, 1, 0.15))
+                .encode(
+                    opacity=gs.Opacity("_legend_opacity:Q").scale(None).legend(None)
+                )
+            )
             if hover:
                 chart = chart.encode(
                     tooltip=[gs.Tooltip("_color:N", title=str(categories.name))]
@@ -270,7 +279,7 @@ def build_clustermap(
     x, y = zoom_axes(x, y, enabled=zoom, name="clustermap")
     scales = index_scales(x, y)
 
-    # The surround owns both scales; tiles and side views only declare fields.
+    # Trees need continuous slot viewports to fit their visible branch heights.
     x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
     tiles = tiles.encode(x=x, y=y)
     center = grid_interactions(
@@ -326,6 +335,7 @@ def build_clustermap(
         .resolve_legend(color="collected")
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(
+            selectionLabel=False,
             labelFont=FONT,
             labelFontSize=TICK,
             titleFont=FONT,

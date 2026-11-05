@@ -156,6 +156,8 @@ def _embedding(
     save: bool | str | None = None,
     marker: str | Sequence[str] = ".",
     hover: bool = True,
+    linked_hover: bool = True,
+    legend_controls: bool = False,
     zoom: bool = False,
     selection: Parameter | None = None,
     obs_id: str | None = None,
@@ -240,6 +242,10 @@ def _embedding(
         add_outline=False if add_outline is None else add_outline,
         edges=edges,
     )
+    if not isinstance(linked_hover, bool):
+        raise TypeError(f"{context}: linked_hover must be boolean.")
+    if not isinstance(legend_controls, bool):
+        raise TypeError(f"{context}: legend_controls must be boolean.")
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._embedding.data import prepare_embedding
     from genome_spy.integrations.scanpy._embedding.chart import build_embedding
@@ -298,7 +304,13 @@ def _embedding(
         edges_color=edges_color if edges else "grey",
     )
     chart = build_embedding(
-        prepared, style, hover=hover, zoom=zoom, selection=selection
+        prepared,
+        style,
+        hover=hover,
+        linked_hover=linked_hover,
+        legend_controls=legend_controls,
+        zoom=zoom,
+        selection=selection,
     )
     return _finish_plot(chart, show, sc)
 
@@ -332,6 +344,7 @@ def scatter(
     show: bool | None = None,
     save: str | bool | None = None,
     hover: bool = True,
+    linked_hover: bool = True,
     zoom: bool = False,
     width: float | None = None,
     height: float | None = None,
@@ -371,6 +384,7 @@ def scatter(
         show: Display the chart, using Scanpy autoshow when None.
         save: None/False only; save the returned native chart as HTML/JSON.
         hover: Enable native point tooltips.
+        linked_hover: Highlight the same cell in all panels; defaults to True.
         zoom: Enable x/y zoom and panning.
         width: Native panel width in pixels.
         height: Native panel height in pixels.
@@ -407,6 +421,8 @@ def scatter(
         hover=hover,
         zoom=zoom,
     )
+    if not isinstance(linked_hover, bool):
+        raise TypeError(f"{context}: linked_hover must be boolean.")
     sc = _prepare_plot(show, save, context=context)
     from dataclasses import replace
     from genome_spy.integrations.scanpy._embedding.scatter_data import prepare_scatter
@@ -452,7 +468,11 @@ def scatter(
     )
     style = replace(style, legend_symbol_size=300)
     return _finish_plot(
-        build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
+        build_embedding(
+            prepared, style, hover=hover, linked_hover=linked_hover, zoom=zoom
+        ),
+        show,
+        sc,
     )
 
 
@@ -477,6 +497,7 @@ def embedding_density(
     show: bool | None = None,
     save: bool | str | None = None,
     hover: bool = True,
+    linked_hover: bool = True,
     zoom: bool = False,
     obs_id: str | None = None,
     width: float | None = None,
@@ -509,6 +530,7 @@ def embedding_density(
         show: Display once, return a chart when False, or use Scanpy autoshow.
         save: None or False; use native chart.save for HTML/JSON.
         hover: Show stable cell identity, stored density and coordinates.
+        linked_hover: Outline the same cell across panels; False keeps only tooltips.
         zoom: Enable shared x/y zoom across density panels.
         obs_id: Optional unique, nonmissing obs column for stable cell IDs.
         width: Plot width per panel, default 300 logical pixels.
@@ -556,6 +578,8 @@ def embedding_density(
         hover=hover,
         zoom=zoom,
     )
+    if not isinstance(linked_hover, bool):
+        raise TypeError(f"{context}: linked_hover must be boolean.")
     if not isinstance(basis, str) or not basis:
         raise ValueError(f"{context}: basis must be a nonempty string.")
     for name, value in (("key", key), ("groupby", groupby), ("title", title)):
@@ -624,7 +648,11 @@ def embedding_density(
         na_color="lightgray",
     )
     return _finish_plot(
-        build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
+        build_embedding(
+            prepared, style, hover=hover, linked_hover=linked_hover, zoom=zoom
+        ),
+        show,
+        sc,
     )
 
 
@@ -987,6 +1015,12 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
         **kwargs: Shared embedding options shown in the signature. Components
             are one-based strings; dimensions are zero-based pairs. Raw/layer
             lookup, colors, defaults and native controls match pl.umap.
+            linked_hover=True outlines the hovered cell across panels; False keeps
+            only tooltips. hover=False disables both.
+            legend_controls=True adds a gene-colorbar dropdown and visibility
+            checkboxes for observation legends. Gene colorbars start with the
+            first gene; numeric observation legends start hidden. Category
+            legends sit below the panels and colorbars on the right.
             marker accepts '.', 'o', 's' and 'D', once or per panel.
             colorbar_loc accepts right, left, top, bottom, or None to hide it.
             add_outline draws two background outlines with outline_width and
@@ -2385,7 +2419,7 @@ def paga_path(
         save: Only None/False; use native HTML/JSON export.
         hover: Include value and annotation tooltips.
         zoom: True navigates y; "xy" navigates both axes and aligned tracks.
-        series_select: Add a dropdown to emphasize one plotted key.
+        series_select: Emphasize keys through the line legend, or a dropdown in heatmaps.
         ruler: Show a native cursor along the path.
         show_values: Show fitted tile values; requires as_heatmap=True.
         width: Native plot area width in pixels.
@@ -3133,7 +3167,7 @@ def sim(
         hover: Show the existing time-series value tooltips.
         zoom: True navigates both point axes or heatmap y; 'xy' navigates both.
         show_values: Fit numeric labels inside heatmap cells; points reject True.
-        series_select: Add a dropdown to emphasize one gene in points or heatmap.
+        series_select: Use the gene legend for points, or a dropdown for heatmap rows.
         ruler: Show a native cursor for reading sample positions.
         run_select: Add a run dropdown; unavailable for shuffled samples.
         connect: Join adjacent simulation samples within each run; point output only.
@@ -3260,7 +3294,7 @@ def timeseries(
         save: Only None/False; use the native chart's HTML/JSON export.
         hover: Show series, source sample position, time, value and numeric color.
         zoom: Enable native wheel zoom and drag panning on both axes.
-        series_select: Add a dropdown to emphasize one series without filtering samples.
+        series_select: Use the series legend to emphasize profiles without removing samples.
         ruler: Show a native cursor for reading time positions.
         width: Native plot-area width in pixels, default 992.
         height: Native plot-area height in pixels, default 739.2.
@@ -3351,7 +3385,7 @@ def timeseries_subplot(
         save: Only None/False; use the native chart's HTML/JSON export.
         hover: Show series, source position, time, value and numeric color.
         zoom: Enable native wheel zoom and panning on both axes.
-        series_select: Add a dropdown to emphasize one series without filtering samples.
+        series_select: Use the series legend to emphasize profiles without removing samples.
         ruler: Show a native cursor for reading time positions.
         width: Native plot-area width in pixels, default 496.
         height: Native plot-area height in pixels, default 369.6.

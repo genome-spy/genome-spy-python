@@ -14,7 +14,7 @@ from genome_spy.integrations.scanpy._expression import (
     matrixplot_builder as _matrixplot_builder,
 )
 from tests.integrations.scanpy.expression_fixtures import make_tree_adata
-from tests.integrations.scanpy.helpers import points
+from tests.integrations.scanpy.helpers import points, grid_labels
 
 sc = pytest.importorskip("scanpy")
 
@@ -103,10 +103,7 @@ def test_actual_scanpy_chains_match_order_positions_sizes_and_padding(adata, swa
             ("left", ax.get_yticklabels()),
             ("bottom", ax.get_xticklabels()),
         ]:
-            label_spec = spec["surround"][side][0]
-            labels = [
-                row["label"] for row in spec["datasets"][label_spec["data"]["name"]]
-            ]
+            labels = grid_labels(spec, "x" if side == "bottom" else "y")
             assert labels == [tick.get_text() for tick in ticks]
         assert spec["scales"]["x"]["paddingOuter"] == pytest.approx(0.6)
         assert spec["scales"]["y"]["paddingOuter"] == pytest.approx(0.2)
@@ -270,8 +267,7 @@ def test_actual_scanpy_chain_matches_values_labels_edges_and_bounds(adata, swapp
             ("bottom", ax.get_xticklabels()),
             ("left", ax.get_yticklabels()),
         ]:
-            labels = spec["surround"][side][0]
-            assert [r["label"] for r in spec["datasets"][labels["data"]["name"]]] == [
+            assert grid_labels(spec, "x" if side == "bottom" else "y") == [
                 tick.get_text() for tick in ticks
             ]
         assert points(spec)["mark"]["stroke"] == "navy"
