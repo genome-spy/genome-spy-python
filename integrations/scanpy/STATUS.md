@@ -82,8 +82,9 @@ in JupyterLab; the strict docs build, Ruff, mypy and 32 JavaScript checks pass.
 The wheel and source distribution pass strict metadata, license and artifact
 checks. Follow-up browser regressions cover shared dimming (including transparent
 points), restored legend defaults, categorical navigation and linked cohort data.
-The release workflow gates publication on the complete browser and compatibility
-checks. All generated
+Release CI keeps compatibility checks and browser smoke checks automatic.
+Exhaustive browser comparisons run locally or with the opt-in `full_browser` flag,
+which defaults to false for main and releases as well as PRs. All generated
 evidence stays outside Git; tracked notebooks contain no outputs or widget state.
 
 ### Current work queue

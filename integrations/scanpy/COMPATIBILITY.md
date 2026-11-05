@@ -2022,8 +2022,9 @@ Use Arrow for large notebook payloads; validated JSON export can be expensive.
 The [self-contained UMAP notebook](notebooks/scanpy_umap.ipynb) demonstrates the
 native widget and its live Python connection. PR CI runs fast preparation checks
 on both tested Scanpy versions and representative browser interactions once.
-Main/full/release runs add reference comparisons, the supported Python matrix,
-the complete browser suite and both JupyterLab workflow renders. See the
+Main/full/release runs add Python reference comparisons, the supported Python
+matrix and both JupyterLab workflow renders. Browser smoke checks stay automatic;
+exhaustive browser comparisons run locally or with the manual `full_browser` flag. See the
 [validation commands](README.md#validation).
 
 

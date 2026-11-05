@@ -206,10 +206,14 @@ plot family and shared behavior. Classes keep distinct fixture setups local to
 their test section. The workflow notebook checks stay in their own module.
 
 Tests live under `tests/integrations/scanpy/`. Ordinary PRs run fast Python checks
-against Scanpy 1.11.5 and 1.12.4, plus observed browser smoke checks once. Main,
-full manual runs and releases also run upstream comparisons, every browser check
-and both workflow notebooks. Release CI explicitly enables `full_scanpy`.
-New PR updates cancel superseded PR runs; main and release checks are retained.
+against Scanpy 1.11.5 and 1.12.4, plus browser smoke checks. Main and releases
+add Python reference comparisons, the supported Python matrix and both workflow
+notebooks. `full_scanpy` enables those Python and notebook checks manually.
+
+Exhaustive browser comparisons run locally by default. To request them remotely,
+set `full_browser=true` when dispatching CI or the release workflow. This flag is
+separate from `full_scanpy` and defaults to false, including releases. Browser
+smoke checks remain automatic. New PR updates cancel superseded PR runs.
 
 ```sh
 uv sync --dev --extra scanpy --group scanpy-test
@@ -221,6 +225,8 @@ uv run --no-sync pytest tests/integrations/scanpy/browser -m smoke
 # Full verification, including every marked check.
 uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
 uv run --no-sync pytest tests/integrations/scanpy/browser
+# Optional exhaustive remote browser checks.
+gh workflow run ci.yml -f full_browser=true
 # Complete notebook execution only.
 uv run --no-sync pytest tests/integrations/scanpy/test_notebooks.py -m workflow
 ```

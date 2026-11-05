@@ -7,13 +7,20 @@ on:
   workflow_dispatch:
     inputs:
       full_scanpy:
-        description: Run all Scanpy references, browsers and workflows
+        description: Run full Scanpy Python references and notebooks
+        type: boolean
+        default: false
+      full_browser:
+        description: Run exhaustive Scanpy browser comparisons
         type: boolean
         default: false
   # Reused by the release workflow as a pre-publish gate.
   workflow_call:
     inputs:
       full_scanpy:
+        type: boolean
+        default: false
+      full_browser:
         type: boolean
         default: false
 
@@ -121,12 +128,12 @@ jobs:
           uv run --no-sync pytest tests/integrations/scanpy
           --ignore=tests/integrations/scanpy/browser -q --durations=10
       - name: Browser smoke checks
-        if: matrix.python == '3.11' && github.ref != 'refs/heads/main' && !inputs.full_scanpy
+        if: matrix.python == '3.11' && !inputs.full_browser
         run: >-
           uv run --no-sync pytest tests/integrations/scanpy/browser -m smoke -q
           --basetemp="${{ runner.temp }}/scanpy-browser"
       - name: Full browser checks
-        if: matrix.python == '3.11' && (github.ref == 'refs/heads/main' || inputs.full_scanpy)
+        if: matrix.python == '3.11' && inputs.full_browser
         run: >-
           uv run --no-sync pytest tests/integrations/scanpy/browser -q
           --basetemp="${{ runner.temp }}/scanpy-browser"
@@ -165,10 +172,17 @@ jobs:
         run: >-
           "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
           tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -q
-      - if: github.ref == 'refs/heads/main' || inputs.full_scanpy
+      - if: github.ref == 'refs/heads/main' || inputs.full_scanpy || inputs.full_browser
         run: '"$RUNNER_TEMP/scanpy-compat/bin/python" -m playwright install --with-deps chromium'
-      - name: Check native interactions with current Scanpy
-        if: github.ref == 'refs/heads/main' || inputs.full_scanpy
+      - name: Browser smoke checks with current Scanpy
+        if: (github.ref == 'refs/heads/main' || inputs.full_scanpy) && !inputs.full_browser
+        run: >-
+          "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
+          tests/integrations/scanpy/browser/test_grid_interactions.py::TestGridInteractions
+          tests/integrations/scanpy/browser/test_linked_embeddings.py
+          -m smoke -q --basetemp="${{ runner.temp }}/scanpy-compat-browser"
+      - name: Full native interactions with current Scanpy
+        if: inputs.full_browser
         run: >-
           "$RUNNER_TEMP/scanpy-compat/bin/python" -m pytest
           tests/integrations/scanpy/browser/test_grid_interactions.py::TestGridInteractions

@@ -1961,3 +1961,10 @@ Scanpy computations, optional group gaps, opt-in values and existing data semant
 
 Physical-phone verification remains a separate handoff. STATUS.md and the release
 workflow record the checks for 0.10.0.
+
+### Exhaustive browser checks — 5 November 2026
+
+Keep the full browser suite available locally. Remote CI and releases run browser
+smoke checks by default. A separate `full_browser` workflow input enables exhaustive
+comparisons on demand; `full_scanpy` continues to control Python references and
+workflow notebooks. Preserve all regression cases and their existing assertions.

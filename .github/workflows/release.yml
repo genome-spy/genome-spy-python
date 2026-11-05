@@ -12,6 +12,10 @@ on:
         type: choice
         options: [none, testpypi, pypi]
         default: none
+      full_browser:
+        description: Run exhaustive Scanpy browser comparisons
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -25,6 +29,7 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       full_scanpy: true
+      full_browser: ${{ inputs.full_browser || false }}
 
   build:
     needs: check
