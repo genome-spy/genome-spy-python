@@ -11,7 +11,7 @@ import pytest
 from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
-from tests.integrations.scanpy.browser.interactions import pointer
+from tests.integrations.scanpy.browser.interactions import pointer, scale_state
 from tests.integrations.scanpy.browser.rendering import panel_image, render
 from tests.integrations.scanpy.helpers import index_position, points, scanpy_rank_labels
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
@@ -264,14 +264,14 @@ def test_ranked_expression_uses_existing_y_navigation_and_guides(page, family):
         **options,
     )
     bounds = render(page, chart, scale_prefix=family)
-    domains = f"['x','y'].map(axis=>api.getScaleResolutionByName('{family}-'+axis).getDomain())"
-    before = page.evaluate(domains)
+    scales = [f"{family}-x", f"{family}-y"]
+    before = scale_state(page, scales)
     pointer(page, bounds)
     page.mouse.wheel(0, -260)
     page.wait_for_timeout(700)
-    after = page.evaluate(domains)
+    after = scale_state(page, scales)
     assert after[0] == before[0]
-    assert after[1][1] - after[1][0] < before[1][1] - before[1][0]
+    assert after[1]["bandwidth"] > before[1]["bandwidth"]
     svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
     assert all(text in svg for text in ("g1", "g2", "g3", "g4"))
 
@@ -333,10 +333,12 @@ def test_statistic_colors_labels_and_complete_guides_match_scanpy(
         py = round(
             index_position(
                 y,
-                yscale["domain"][1] + 1,
+                len(yscale["domain"])
+                if yscale["type"] == "band"
+                else yscale["domain"][1] + 1,
                 yscale["paddingOuter"],
                 bounds["height"],
-                yscale["gapPositions"],
+                yscale.get("gapPositions", []),
             )
             * 1.5
         )
@@ -397,14 +399,14 @@ def test_statistic_hover_zoom_and_offline_delivery(page, family, tmp_path):
     )
     if family == "dotplot":
         assert float(values[-1]) == 100
-    domains = f"['x','y'].map(axis=>api.getScaleResolutionByName('{family}-'+axis).getDomain())"
-    before = page.evaluate(domains)
+    scales = [f"{family}-x", f"{family}-y"]
+    before = scale_state(page, scales)
     pointer(page, bounds)
     page.mouse.wheel(0, -300)
     page.wait_for_timeout(500)
-    after = page.evaluate(domains)
+    after = scale_state(page, scales)
     assert after[0] == before[0]
-    assert after[1][1] - after[1][0] < before[1][1] - before[1][0]
+    assert after[1]["bandwidth"] > before[1]["bandwidth"]
     path = tmp_path / f"statistic-{family}.html"
     chart.save(path, inline=True, controls=False)
     page.context.set_offline(True)
