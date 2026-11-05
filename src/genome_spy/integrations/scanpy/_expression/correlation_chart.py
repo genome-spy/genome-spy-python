@@ -158,5 +158,5 @@ def build_correlation_matrix(
         )
         .properties(scales=scales)
         .configure_view(stroke="transparent", strokeWidth=0)
-        .configure_legend(labelFont=_FONT, labelFontSize=_TICK)
+        .configure_legend(selectionLabel=False, labelFont=_FONT, labelFontSize=_TICK)
     )

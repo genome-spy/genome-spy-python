@@ -14,6 +14,7 @@ from tests.integrations.scanpy.browser.interactions import (
     pointer,
     position,
     ruler_lines,
+    scale_state,
     svg_root,
     value_texts,
     wait_for_navigation,
@@ -112,21 +113,21 @@ class TestGridInteractions:
             for axis in ("x", "y"):
                 spec["scales"][axis]["name"] = f"matrix-{axis}"
         bounds = render(page, spec, scale_prefix=family)
-        domains = f"['{family}-x','{family}-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"
-        before = page.evaluate(domains)
+        scales = [f"{family}-x", f"{family}-y"]
+        before = scale_state(page, scales)
         px, py = pointer(page, bounds)
         page.mouse.wheel(0, -800)
         page.wait_for_timeout(180)
-        zoomed = page.evaluate(domains)
+        zoomed = scale_state(page, scales)
         assert zoomed[0] == before[0]
-        assert zoomed[1][1] - zoomed[1][0] < before[1][1] - before[1][0]
+        assert zoomed[1]["bandwidth"] > before[1]["bandwidth"]
         if family == "heatmap":
             assert value_texts(svg_root(page))
         page.mouse.down()
         page.mouse.move(px + 25, py + 15, steps=5)
         page.mouse.up()
         page.wait_for_timeout(150)
-        panned = page.evaluate(domains)
+        panned = scale_state(page, scales)
         assert panned[0] == before[0]
         assert panned[1] != zoomed[1]
 
@@ -443,11 +444,12 @@ class TestGridInteractions:
         for slot in (0, 1):
             column, row = (0, slot) if swapped else (slot, 0)
             columns, rows = (4, 3) if swapped else (3, 4)
+            expected = ["C", row] if swapped else [column, "C"]
             pointer(
                 page, bounds, (column + 0.8) / (columns + 0.6), (row + 1) / (rows + 1)
             )
             page.wait_for_timeout(100)
-            assert page.evaluate(coordinates) == [column, row]
+            assert page.evaluate(coordinates) == expected
             root = svg_root(page)
             guides = ruler_lines(root)
             assert len(guides) == 2
@@ -471,7 +473,7 @@ class TestGridInteractions:
                 page, bounds, (column + 0.4) / (columns + 0.6), (row + 0.6) / (rows + 1)
             )
             page.wait_for_timeout(100)
-            assert page.evaluate(coordinates) == [column, row]
+            assert page.evaluate(coordinates) == expected
             assert not page.locator("table.attributes").is_visible()
         px, py = pointer(
             page, bounds, (column + 0.8) / (columns + 0.6), (row + 1) / (rows + 1)
@@ -507,17 +509,22 @@ class TestGridInteractions:
         )
         assert after == radii
         fractions = page.evaluate(
-            "([column,row])=>['x','y'].map((axis,i)=>{\n        const s=api.getScaleResolutionByName(`dotplot-${axis}`).getScale();\n        return axis==='x' ? s(column)+s.bandwidth()/2 : 1-s(row)+s.bandwidth()/2;\n    })",
-            [column, row],
+            """values => ['x','y'].map((axis,i) => {
+                const s = api.getScaleResolutionByName(`dotplot-${axis}`).getScale();
+                const categorical = typeof values[i] === 'string';
+                return axis === 'x' ? s(values[i]) + s.bandwidth()/2
+                    : 1 - s(values[i]) + (categorical ? -1 : 1) * s.bandwidth()/2;
+            })""",
+            expected,
         )
         px, py = pointer(page, bounds, *fractions)
         for dx in (0, 1, -1):
             page.mouse.move(px + dx, py)
             page.wait_for_timeout(100)
             selected = page.evaluate(coordinates)
-            if selected == [column, row]:
+            if selected == expected:
                 break
-        assert selected == [column, row]
+        assert selected == expected
         px += dx
         canvas = page.locator("canvas").first.bounding_box()
         vertical, horizontal = ruler_lines(svg_root(page))

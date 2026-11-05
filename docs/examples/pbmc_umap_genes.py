@@ -1,6 +1,7 @@
 """PBMC UMAP panels.
 
 Compare six marker genes, total counts, and cell types on one embedding.
+Hover over a cell to outline it in every panel.
 """
 
 import genome_spy as gs
@@ -25,10 +26,22 @@ cells = from_anndata(
     obsm_keys=[("X_umap", 0), ("X_umap", 1)],
 )
 zoom = gs.Expression("zoomLevel")
+hovered = gs.selection_point(
+    "cell_hover",
+    on="pointerover",
+    clear="mouseleave",
+    toggle=False,
+    persist=False,
+    empty=False,
+)
 points = (
     gs.Chart()
     .mark_point(size=gs.expr(gs.expr.min(8 * gs.expr.pow(zoom, 0.6), 40)), opacity=0.9)
+    .add_params(hovered.copy(push="outer"))
     .encode(
+        key=gs.Key("cell"),
+        stroke=gs.value("#111827"),
+        strokeWidth=gs.when(hovered).then(gs.value(2)).otherwise(gs.value(0)),
         x=gs.X("X_umap-0:Q")
         .scale(
             name="pbmc-umap-x",
@@ -78,19 +91,32 @@ counts = (
     )
     .properties(title=gs.title("n_counts", fontSize=13))
 )
-labels = points.encode(
-    color=gs.Color("cell_type:N")
-    .scale(
-        domain=data["groups"]["cell_type"].tolist(),
-        range=data["groups"]["color"].tolist(),
+cell_types = gs.selection_point("cell_types", encodings=["color"], bind="legend")
+labels = (
+    points.add_params(cell_types)
+    .encode(
+        opacity=gs.when(cell_types).then(gs.value(0.9)).otherwise(gs.value(0.15)),
+        color=gs.Color("cell_type:N")
+        .scale(
+            domain=data["groups"]["cell_type"].tolist(),
+            range=data["groups"]["color"].tolist(),
+        )
+        .legend(title="Cell type", orient="bottom", columns=2),
+        tooltip=["cell:N", "cell_type:N"],
     )
-    .legend(title="Cell type", orient="bottom", columns=2),
-    tooltip=["cell:N", "cell_type:N"],
-).properties(title=gs.title("cell_type", fontSize=13))
+    .properties(title=gs.title("cell_type", fontSize=13))
+)
 chart = (
     gs.concat(*panels, counts, labels, columns=4, spacing=16)
     .properties(data=cells, title="PBMC markers and cell annotations")
+    .transform_identifier()
+    .add_params(gs.param("cell_hover", value=None))
     .resolve_scale(x="shared", y="shared", color="independent")
     .resolve_legend(default="collected")
-    .configure_legend(direction="horizontal", titleOrient="top", columnPadding=20)
+    .configure_legend(
+        selectionLabel=False,
+        direction="horizontal",
+        titleOrient="top",
+        columnPadding=20,
+    )
 )

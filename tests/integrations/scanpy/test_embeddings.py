@@ -21,7 +21,12 @@ from tests.integrations.scanpy.embedding_fixtures import (
     reference_cases,
     scatter_cases,
 )
-from tests.integrations.scanpy.helpers import leaf_marks, points, units
+from tests.integrations.scanpy.helpers import (
+    embedding_legend,
+    leaf_marks,
+    points,
+    units,
+)
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
@@ -96,10 +101,7 @@ class TestUmap:
             )
             assert unit["title"]["text"] == expected["title"]
             if expected["legend"] is not None:
-                assert (
-                    points(unit)["encoding"]["color"]["legend"]["values"]
-                    == expected["legend"]
-                )
+                assert embedding_legend(unit)["values"] == expected["legend"]
             if expected["color_domain"] is not None:
                 assert (
                     points(unit)["encoding"]["color"]["scale"]["domain"]
@@ -361,6 +363,82 @@ class TestUmap:
         assert unit["mark"]["fillOpacity"] == 0.25
         assert {r["_size_0"] for r in umap_rows(chart)} == {0}
 
+    def test_native_legend_controls_follow_fields_without_changing_cells(self, adata):
+        colors = ["g1", "g2", "score", "cell_type", "g1"]
+        baseline = gsc.pl.umap(adata, color=colors, show=False)
+        chart = gsc.pl.umap(adata, color=colors, legend_controls=True, show=False)
+        assert umap_rows(chart) == umap_rows(baseline)
+        spec = chart.to_dict()
+        for key, value in baseline.to_dict()["config"]["legend"].items():
+            if key not in {"orient", "direction", "layout"}:
+                assert spec["config"]["legend"][key] == value
+        controls = [p for p in spec["params"] if "bind" in p]
+        assert len(controls) == 3
+        assert controls[0]["bind"]["options"] == [None, "g1", "g2"]
+        assert controls[0]["value"] == "g1"
+        assert [p["value"] for p in controls[1:]] == [False, True]
+        assert spec["resolve"]["legend"]["default"] == "collected"
+        styles = spec["config"]["style"]
+        assert set(styles) == {f"embedding-legend-{key}" for key in set(colors)}
+        assert styles["embedding-legend-cell_type"]["orient"] == "bottom"
+        assert spec["config"]["legend"]["orient"] == "right"
+        assert not any("bind" in p for p in baseline.to_dict()["params"])
+
+    @pytest.mark.parametrize(
+        "brush_name", ["gene_colorbar", "show_legend_1", "show_legend_2"]
+    )
+    def test_legend_controls_preserve_caller_brush_names(self, adata, brush_name):
+        brush = gs.selection_interval(brush_name, encodings=["x", "y"])
+        spec = gsc.pl.umap(
+            adata,
+            color=["g1", "score", "cell_type"],
+            legend_controls=True,
+            selection=brush,
+            show=False,
+        ).to_dict()
+        parameters = {p["name"]: p for p in spec["params"]}
+        assert len(parameters) == len(spec["params"])
+        assert parameters[brush_name] == {
+            "name": brush_name,
+            "value": {"type": "interval", "intervals": {"x": None, "y": None}},
+        }
+        controls = [p for p in parameters.values() if "bind" in p]
+        assert len(controls) == 3
+        for control, field in zip(controls, ["g1", "score", "cell_type"], strict=True):
+            assert control["name"] != brush_name
+            expression = spec["config"]["style"][f"embedding-legend-{field}"][
+                "disable"
+            ]["expr"]
+            assert control["name"] in expression
+
+    def test_hidden_legends_do_not_get_visibility_controls(self, adata):
+        chart = gsc.pl.umap(
+            adata,
+            color=["g1", "cell_type"],
+            legend_controls=True,
+            legend_loc=None,
+            colorbar_loc=None,
+            show=False,
+        )
+        assert not any("bind" in p for p in chart.to_dict()["params"])
+        with pytest.raises(TypeError, match="legend_controls must be boolean"):
+            gsc.pl.umap(adata, legend_controls="yes", show=False)
+
+    @pytest.mark.parametrize("options", [{"linked_hover": False}, {"hover": False}])
+    def test_linked_hover_can_be_disabled_without_changing_cells(self, adata, options):
+        enabled = gsc.pl.umap(adata, color=["cell_type", "score"], show=False)
+        disabled = gsc.pl.umap(
+            adata, color=["cell_type", "score"], show=False, **options
+        )
+        assert umap_rows(enabled) == umap_rows(disabled)
+        assert not any(
+            p["name"] == "cell_hover" for p in disabled.to_dict().get("params", [])
+        )
+        assert all(
+            "condition" not in points(panel)["encoding"].get("strokeWidth", {})
+            for panel in units(disabled.to_dict())
+        )
+
     @pytest.mark.parametrize(
         "palette", [[(1, 0, 0, 0.5)] * 4, ["#ff000080"] * 4, ["tab:blue"] * 4]
     )
@@ -522,23 +600,24 @@ class TestUmap:
         panels = units(spec["vconcat"][0])
         counter = spec["vconcat"][1]
         assert "data" not in counter
-        assert spec["data"] == panels[0]["data"]
+        assert spec["data"] == original.to_dict()["data"]
+        shared = spec["vconcat"][0]
+        assert shared["transform"] == original.to_dict()["transform"]
+        assert all("data" not in panel for panel in panels)
         assert counter["name"] == f"umap-count-{brush.name}"
         assert counter["transform"][-2] == {
             "type": "aggregate",
-            "fields": ["selected"],
-            "ops": ["sum"],
             "as": ["count"],
         }
         assert panels[0]["name"] == f"umap-brush-{brush.name}"
-        assert panels[0]["params"] == [
+        assert [p for p in panels[0]["params"] if p["name"] == brush.name] == [
             {
                 "name": brush.name,
                 "select": {"type": "interval", "encodings": ["x", "y"]},
                 "push": "outer",
             }
         ]
-        assert "params" not in panels[1]
+        assert all(p["name"] != brush.name for p in panels[1].get("params", []))
         for panel, baseline in zip(panels, units(original.to_dict()), strict=True):
             point = points(panel)
             for key in ("encoding", "mark", "transform"):
@@ -555,9 +634,15 @@ class TestUmap:
         spec = chart.to_dict()
         assert spec["params"][0]["value"]["intervals"] == {"x": None, "y": None}
         panel = units(spec["vconcat"][0])[0]
-        assert panel["params"][0]["push"] == "outer"
+        assert (
+            next(p for p in panel["params"] if p["name"] == brush.name)["push"]
+            == "outer"
+        )
         point = points(panel)
-        assert "fillOpacity" not in point["encoding"]
+        baseline = gsc.pl.umap(
+            adata, color="cell_type", legend_loc=legend_loc, show=False
+        ).to_dict()
+        assert point["encoding"] == points(baseline)["encoding"]
 
     def test_brushing_rejects_different_projection_pairs(self, adata):
         with pytest.raises(NotImplementedError, match="same dimensions"):
@@ -668,7 +753,7 @@ class TestEmbedding:
         assert spec["title"]["text"] == expected["title"]
         color = mark["encoding"]["color"]
         if expected["legend"] is not None:
-            assert color["legend"]["values"] == expected["legend"]
+            assert embedding_legend(spec)["values"] == expected["legend"]
             paints = dict(
                 zip(color["scale"]["domain"], color["scale"]["range"], strict=True)
             )
@@ -928,13 +1013,8 @@ class TestScatter:
         assert updated["datasets"] == original["datasets"]
         assert units(updated) == units(original)
         plot = units(updated["vconcat"][0]) if linked else units(updated)
-        assert all(
-            (
-                "orient" not in points(panel)["encoding"]["color"]["legend"]
-                for panel in plot
-            )
-        )
-        assert "columns" not in points(plot[0])["encoding"]["color"]["legend"]
+        assert all(("orient" not in embedding_legend(panel) for panel in plot))
+        assert "columns" not in embedding_legend(plot[0])
 
     def test_many_categories_keep_scanpy_column_defaults(self):
         a = make_scatter_adata()
@@ -942,7 +1022,7 @@ class TestScatter:
         spec = gsc.pl.scatter(
             a, "x_value", "y_value", color="many", show=False
         ).to_dict()
-        assert spec["encoding"]["color"]["legend"]["columns"] == 3
+        assert embedding_legend(spec)["columns"] == 3
 
     @pytest.mark.parametrize("family", ["umap", "scatter"])
     @pytest.mark.parametrize(
@@ -1002,7 +1082,7 @@ class TestScatter:
         plt.close(ax.figure)
         spec = getattr(gsc.pl, family)(*args, **options).to_dict()
         mark = points(spec)
-        guide = mark["encoding"]["color"]["legend"]
+        guide = embedding_legend(spec)
         config = spec["config"]["legend"]
         shape = config.get(
             "symbolType", mark["encoding"].get("shape", {}).get("value", "circle")
@@ -1090,8 +1170,8 @@ class TestScatter:
             assert [
                 to_hex(paints[r["_color_0"]], keep_alpha=True) for r in rows
             ] == expected["colors"]
-            if color["legend"] is not None:
-                assert color["legend"]["values"] == expected["legend"]
+            if embedding_legend(spec) is not None:
+                assert embedding_legend(spec)["values"] == expected["legend"]
         else:
             assert color["scale"]["domain"] == expected["color_domain"]
 
@@ -1293,7 +1373,7 @@ class TestScatter:
         ).to_dict()
         for index, panel in enumerate(units(spec)):
             color = points(panel)["encoding"]["color"]
-            assert color["legend"]["values"] == ["A", "B"]
+            assert embedding_legend(panel)["values"] == ["A", "B"]
             assert color["scale"]["domain"] == ["B", "A", "NA"]
             expected = (
                 ["blue", "green", "lightgrey"]
@@ -1324,12 +1404,11 @@ class TestScatter:
         assert [r["_obs_label"] for r in rows] == list(
             a.obs_names[np.argsort(a.obs["score"].to_numpy())]
         )
-        assert spec["transform"][-1] == {
+        assert points(spec)["transform"][-1] == {
             "type": "filter",
             "expr": "isValid(datum._value_0)",
         }
-        assert "layer" not in spec
-        assert spec["encoding"]["x"]["axis"]["labels"] is True
+        assert points(spec)["encoding"]["x"]["axis"]["labels"] is True
         assert spec["title"]["text"] == "score"
 
     def test_missing_numeric_color_does_not_expand_coordinate_limits(self):
@@ -1340,10 +1419,10 @@ class TestScatter:
             a, "x_value", "y_value", color="score", show=False
         ).to_dict()
         np.testing.assert_allclose(
-            spec["encoding"]["x"]["scale"]["domain"], [-1.15, 2.15]
+            points(spec)["encoding"]["x"]["scale"]["domain"], [-1.15, 2.15]
         )
         assert len(scatter_records(spec)) == a.n_obs
-        assert spec["transform"][-1]["expr"] == "isValid(datum._value_0)"
+        assert points(spec)["transform"][-1]["expr"] == "isValid(datum._value_0)"
 
     def test_duplicate_names_get_distinct_point_ids_without_changing_display_labels(
         self,

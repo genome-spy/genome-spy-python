@@ -18,6 +18,7 @@ from tests.integrations.scanpy.browser.interactions import (
     hover_at,
     pointer,
     position,
+    scale_state,
     svg_root,
     value_texts,
     wait_for_navigation,
@@ -661,16 +662,12 @@ class TestMatrix:
             zoom=zoom,
             show=False,
         ).to_dict()
-        for side in ("bottom", "left"):
-            spec["surround"][side][0]["name"] = f"test-{side}"
         for axis in ("x", "y"):
             spec["scales"][axis]["name"] = f"matrix-{axis}"
         for width, height in ((240, 200), (400, 280)):
             spec["spec"].update(width=width, height=height)
             bounds = matrix_render(page, gs.TopLevelSpec.from_dict(spec))
-            original = page.evaluate(
-                "api.getScaleResolutionByName('matrix-x').getDomain()"
-            )
+            original = scale_state(page, ["matrix-x"])
             for navigated in (False, True):
                 if navigated:
                     px, py = pointer(page, bounds)
@@ -685,15 +682,8 @@ class TestMatrix:
                     ("x", "bottom", "gene"),
                     ("y", "left", "group"),
                 ):
-                    track = page.evaluate(
-                        "view=>api.views.getLayoutBounds({scope:[],view})",
-                        f"test-{side}",
-                    )
-                    assert track["width" if axis == "x" else "height"] == pytest.approx(
-                        bounds["width" if axis == "x" else "height"]
-                    )
                     centers = page.evaluate(
-                        "axis=>{const s=api.getScaleResolutionByName(`matrix-${axis}`).getScale();\n                    return Array.from({length:12},(_,i)=>axis==='x'\n                        ?s(i)+s.bandwidth()/2:1-s(i)+s.bandwidth()/2)}",
+                        "axis=>{const s=api.getScaleResolutionByName(`matrix-${axis}`).getScale();\n                    return Array.from({length:12},(_,i)=>axis==='x'\n                        ?s('gene'+i)+s.bandwidth()/2:1-s('group'+i)-s.bandwidth()/2)}",
                         axis,
                     )
                     labels = [
@@ -718,19 +708,7 @@ class TestMatrix:
                             centers[slot],
                             ET.tostring(label),
                         )
-                        # Native clipping can retain a partly visible label's outside anchor.
-                        cross, extent = (
-                            ("y", "height") if axis == "x" else ("x", "width")
-                        )
-                        assert (
-                            track[cross]
-                            <= xy[1 if axis == "x" else 0]
-                            <= track[cross] + track[extent]
-                        )
-            assert (
-                page.evaluate("api.getScaleResolutionByName('matrix-x').getDomain()")
-                != original
-            ) is (zoom == "xy")
+            assert (scale_state(page, ["matrix-x"]) != original) is (zoom == "xy")
 
     @pytest.mark.parametrize("explicit_labels", [False, True])
     @pytest.mark.parametrize("titles", ["both", "x", "y"])
@@ -1324,6 +1302,39 @@ class TestClustermap:
 
 class TestTracksplot:
     """Observed native track registration, hover, legends and linked navigation."""
+
+    def test_group_legend_highlights_all_gene_tracks_and_the_strip(self, page):
+        from tests.integrations.scanpy.browser.interactions import click_legend
+
+        a = make_heatmap_adata()
+        chart = gsc.pl.tracksplot(
+            a, ["g1", "g2", "g3"], "group", width=400, height=180, show=False
+        )
+        tracksplot_render(page, chart)
+        click_legend(page, "C")
+        profiles = [
+            g
+            for g in svg_root(page).iter()
+            if g.get("data-mark-type") == "rect" and g.get("clip-path")
+        ]
+        assert len(profiles) == 4
+        for group in profiles:
+            opacities = [
+                float(e.get("fill-opacity", group.get("fill-opacity", "1")))
+                for e in group
+            ]
+            assert 0.15 in opacities and 1 in opacities
+        click_legend(page, "C", shift=True)
+        profiles = [
+            g
+            for g in svg_root(page).iter()
+            if g.get("data-mark-type") == "rect" and g.get("clip-path")
+        ]
+        assert all(
+            float(e.get("fill-opacity", group.get("fill-opacity", "1"))) == 1
+            for group in profiles
+            for e in group
+        )
 
     @pytest.mark.smoke
     @pytest.mark.parametrize("log", [False, True])

@@ -2,6 +2,7 @@
 
 Explore 72 genes across 60 DepMap cell lines with aligned clustering trees and
 cell-line annotations. Pan and zoom to inspect individual expression values.
+Click annotation legends to emphasize a group.
 """
 
 import genome_spy as gs
@@ -118,10 +119,13 @@ row_tree = (
     .properties(name="rowDendrogram", width=gs.SizeDef(grow=0.2))
 )
 
+lineages = gs.selection_point("lineages", encodings=["color"], bind="legend")
 lineage = (
     gs.Chart()
+    .add_params(lineages)
     .mark_rect(clip="y")
     .encode(
+        opacity=gs.when(lineages).then(gs.value(1)).otherwise(gs.value(0.15)),
         color=gs.Color("lineage:N")
         .scale(
             domain=[
@@ -149,7 +153,7 @@ lineage = (
                 "#9467bd",
             ],
         )
-        .legend(title="Cancer lineage", columns=3)
+        .legend(title="Cancer lineage", columns=3),
     )
     .properties(
         name="cancerAnnotation",
@@ -157,16 +161,21 @@ lineage = (
         title=gs.Title(text="Lineage", style="metadata-column-title"),
     )
 )
+growth_patterns = gs.selection_point(
+    "growth_patterns", encodings=["color"], bind="legend"
+)
 growth = (
     gs.Chart()
+    .add_params(growth_patterns)
     .mark_rect(clip="y")
     .encode(
+        opacity=gs.when(growth_patterns).then(gs.value(1)).otherwise(gs.value(0.15)),
         color=gs.Color("growthPattern:N")
         .scale(
             domain=["Adherent", "Suspension", "Mixed"],
             range=["#33936b", "#8064a2", "#d78239"],
         )
-        .legend(title="Growth pattern", direction="vertical", columns=1)
+        .legend(title="Growth pattern", direction="vertical", columns=1),
     )
     .properties(
         name="growthAnnotation",
@@ -174,16 +183,21 @@ growth = (
         title=gs.Title(text="Growth pattern", style="metadata-column-title"),
     )
 )
+sample_origins = gs.selection_point(
+    "sample_origins", encodings=["color"], bind="legend"
+)
 origin = (
     gs.Chart()
+    .add_params(sample_origins)
     .mark_rect(clip="y")
     .encode(
+        opacity=gs.when(sample_origins).then(gs.value(1)).otherwise(gs.value(0.15)),
         color=gs.Color("sampleOrigin:N")
         .scale(
             domain=["Primary", "Metastatic", "Unknown"],
             range=["#3274a1", "#d1495b", "#cbd5e1"],
         )
-        .legend(title="Sample origin", direction="vertical", columns=1)
+        .legend(title="Sample origin", direction="vertical", columns=1),
     )
     .properties(
         name="originAnnotation",
@@ -373,6 +387,7 @@ chart = (
         }
     )
     .configure_legend(
+        selectionLabel=False,
         orient="bottom",
         direction="horizontal",
         gradientLength=110,

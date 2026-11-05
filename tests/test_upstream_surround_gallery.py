@@ -74,6 +74,31 @@ def test_python_reproduces_upstream_surround_structure(
         assert actual["spec"].pop("height") == 480
         assert actual["surround"]["top"][0]["height"] == 96
         actual["surround"]["top"][0]["height"] = {"grow": 0.2}
+        assert actual["config"]["legend"].pop("selectionLabel") is False
+        # Keep upstream geometry intact while checking the added native legend focus.
+        annotations = {
+            "cancerAnnotation": "lineages",
+            "growthAnnotation": "growth_patterns",
+            "originAnnotation": "sample_origins",
+        }
+        right = actual["surround"]["right"]
+        for annotation in right["views"] if isinstance(right, dict) else right:
+            name = annotation.get("name")
+            if name not in annotations:
+                continue
+            parameter = annotations.pop(name)
+            assert annotation.pop("params") == [
+                {
+                    "bind": "legend",
+                    "name": parameter,
+                    "select": {"type": "point", "encodings": ["color"]},
+                }
+            ]
+            assert annotation["encoding"].pop("opacity") == {
+                "value": 0.15,
+                "condition": {"empty": True, "param": parameter, "value": 1},
+            }
+        assert not annotations
     assert actual == _structure(reference)
 
 

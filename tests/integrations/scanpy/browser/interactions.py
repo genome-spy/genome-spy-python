@@ -104,9 +104,11 @@ def pointer(page, bounds, x=0.5, y=0.5):
     return px, py
 
 
-def hover_at(page, x, y, *, probe=True, canvas_index=0, target=None):
+def hover_at(page, x, y, *, probe=True, canvas_index=0, canvas=None, target=None):
     """Pause then move within the native tooltip's small picking neighborhood."""
-    canvas = page.locator("canvas").nth(canvas_index).bounding_box()
+    canvas = (
+        canvas if canvas is not None else page.locator("canvas").nth(canvas_index)
+    ).bounding_box()
     page.mouse.move(canvas["x"] + x - 2, canvas["y"] + y - 2)
     page.wait_for_timeout(450)
     offsets = ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)) if probe else ((0, 0),)
@@ -146,13 +148,27 @@ def move_to(page, bounds, x, y, x_domain, y_domain, expected_id):
     return px, py
 
 
+def scale_state(page, names):
+    """Read domain and placement, since categorical zoom moves bands without renaming them."""
+    return page.evaluate(
+        """names => names.map(name => {
+            const resolution = api.getScaleResolutionByName(name);
+            const scale = resolution.getScale(), domain = scale.domain();
+            return {domain: resolution.getDomain(), first: scale(domain[0]),
+                    last: scale(domain.at(-1)), bandwidth: scale.bandwidth()};
+        })""",
+        names,
+    )
+
+
 def wait_for_navigation(page, family, probe=2, *, scale_names=None):
     """Wait for stable scale positions before measuring a completed zoom or pan."""
     page.evaluate(
         """async ({names,probe})=>{
         const sample=()=>names.flatMap(name=>{
             const s=api.getScaleResolutionByName(name).getScale();
-            return [...s.domain(),s(0),s(probe)];
+            const domain=s.domain();
+            return [...domain.filter(Number.isFinite),s(domain[0]),s(domain.at(-1)),s.bandwidth?.()??0];
         });
         let previous=sample(), stable=0;
         const deadline=performance.now()+3000;
@@ -167,3 +183,29 @@ def wait_for_navigation(page, family, probe=2, *, scale_names=None):
     }""",
         {"names": scale_names or [f"{family}-x", f"{family}-y"], "probe": probe},
     )
+
+
+def click_legend(page, label, *, index=0, shift=False, canvas=None):
+    """Click a visible native legend label using its exported text bounds."""
+    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    point = page.evaluate(
+        """({svg,label,index}) => {
+            const root = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement;
+            root.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden';
+            document.body.append(root);
+            const node = [...root.querySelectorAll('text')].filter(n=>n.textContent===label).at(index);
+            if (!node) throw Error('Missing legend label: '+label);
+            const box = node.getBoundingClientRect();
+            const point = {x:box.x+box.width/2,y:box.y+box.height/2};
+            root.remove();
+            return point;
+        }""",
+        {"svg": svg, "label": label, "index": index},
+    )
+    canvas = (page.locator("canvas").first if canvas is None else canvas).bounding_box()
+    if shift:
+        page.keyboard.down("Shift")
+    page.mouse.click(canvas["x"] + point["x"], canvas["y"] + point["y"])
+    if shift:
+        page.keyboard.up("Shift")
+    page.evaluate("() => new Promise(requestAnimationFrame)")

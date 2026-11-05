@@ -10,6 +10,7 @@ import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
+from genome_spy.integrations.scanpy._legend_interactions import legend_focus
 from genome_spy.integrations.scanpy._expression.grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._grid_interactions import index_offset, zoom_axes
 from genome_spy.integrations.scanpy._data import figsize_pixels, number
@@ -52,6 +53,7 @@ def _slot_labels(
     positions: Sequence[float] | None = None,
     font_size: float = _TICK,
     clip: bool | Literal["x", "y"] = True,
+    cull: bool = True,
 ) -> gs.Chart:
     """Return a side view placing labels at the supplied row or column positions.
 
@@ -77,7 +79,7 @@ def _slot_labels(
             baseline="middle",
             yOffset=-8 if opposite else 8,
             clip=clip,
-            cullByVisibleRange="x",
+            cullByVisibleRange="x" if cull else False,
             tooltip=None,
         ).encode(
             x=coordinate.field("slot"),
@@ -92,7 +94,7 @@ def _slot_labels(
         baseline="middle",
         xOffset=8 if opposite else -8,
         clip=clip,
-        cullByVisibleRange="y",
+        cullByVisibleRange="y" if cull else False,
         tooltip=None,
     ).encode(
         x=gs.value(0 if opposite else 1),
@@ -310,20 +312,17 @@ def index_scales(
     ygaps: Sequence[int] = (),
     gap_width: float = 4,
 ) -> ScalesKwds:
-    """Move the supplied index definitions to a surround's shared scale owner.
+    """Move the supplied position scales to their shared surround.
 
     Native gaps keep every aligned track on the same slot positions.
     """
-    return gs.scales(
-        x=gs.Scale(
-            type="index",
-            **x.scale(gapPositions=list(xgaps), gapWidth=gap_width).to_dict()["scale"],
-        ),
-        y=gs.Scale(
-            type="index",
-            **y.scale(gapPositions=list(ygaps), gapWidth=gap_width).to_dict()["scale"],
-        ),
-    )
+    definitions = []
+    for axis, gaps in ((x, xgaps), (y, ygaps)):
+        definition = axis.to_dict()["scale"].copy()
+        definition.setdefault("type", "index")
+        definition.update(gapPositions=list(gaps), gapWidth=gap_width)
+        definitions.append(gs.Scale(**definition))
+    return gs.scales(x=definitions[0], y=definitions[1])
 
 
 def color_legend(title: str | None) -> gs.Legend:
@@ -349,6 +348,8 @@ def grouped_axes(
     xgaps: Sequence[int] = (),
     ygaps: Sequence[int] = (),
     gap_width: float = 4,
+    groups: Sequence[str] = (),
+    swap_axes: bool = False,
 ) -> tuple[gs.X, gs.Y, ScalesKwds]:
     """Return x/y axes and shared scales from grouped table dimensions and padding.
 
@@ -368,6 +369,25 @@ def grouped_axes(
             tickSize=3.5 * _PT,
             tickWidth=0.8 * _PT,
         )
+        if groups and ((channel is gs.X) == swap_axes):
+            axis = (
+                channel("_group:N")
+                .scale(
+                    type="band",
+                    domain=list(groups),
+                    padding=0,
+                    paddingOuter=padding,
+                    reverse=reverse,
+                    zoom=False,
+                )
+                .axis(
+                    title=None,
+                    domain=False,
+                    labelAngle=-90 if swap_axes else 0,
+                    labelFont=_FONT,
+                    labelFontSize=_TICK,
+                )
+            )
         if grid:
             axis = axis.axis(grid=True, gridColor="gray", gridWidth=0.1 * _PT)
         axes.append(axis)
@@ -376,8 +396,8 @@ def grouped_axes(
 
     # The surround owns scales; marks retain only their fields and tick settings.
     return (
-        gs.X("_x:I", axis=x.to_dict()["axis"]),
-        gs.Y("_y:I", axis=y.to_dict()["axis"]),
+        gs.X(**{key: value for key, value in x.to_dict().items() if key != "scale"}),
+        gs.Y(**{key: value for key, value in y.to_dict().items() if key != "scale"}),
         scales,
     )
 
@@ -414,10 +434,13 @@ def finish_grouped_chart(
     )
 
     # Each annotation owns a viewport and inherits the center's aligned scale.
-    sides: dict[str, Any] = {
-        "bottom": [_slot_labels(xlabels, x.axis(None), horizontal=True)],
-        "left": [_slot_labels(ylabels, y.axis(None), horizontal=False)],
-    }
+    sides: dict[str, Any] = {}
+    for labels, axis, horizontal, side in (
+        (xlabels, x, True, "bottom"),
+        (ylabels, y, False, "left"),
+    ):
+        if axis.to_dict().get("type") != "nominal":
+            sides[side] = [_slot_labels(labels, axis.axis(None), horizontal=horizontal)]
     if groups:
         brackets = gs.layer(
             *_brackets(
@@ -438,7 +461,10 @@ def finish_grouped_chart(
         count = len(xlabels) if swap_axes else len(ylabels)
         sides["top" if swap_axes else "right"] = [
             tree_track(
-                tree, list(range(count)), horizontal=swap_axes, size=tree_size
+                tree,
+                list(range(count)),
+                horizontal=swap_axes,
+                size=tree_size,
             ).properties(name=f"{name}-tree")
         ]
     if group_track is not None:
@@ -458,6 +484,7 @@ def finish_grouped_chart(
         chart.resolve_legend(color="collected", size="collected")
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(
+            selectionLabel=False,
             labelFont=_FONT,
             labelFontSize=_TICK,
             titleFont=_FONT,
@@ -552,6 +579,7 @@ def _category_strip(
     horizontal: bool,
     title: str,
     hover: bool,
+    selection: gs.Parameter | None = None,
 ) -> gs.Chart:
     """Return one native category band per cell, sharing the gapped cell axis.
 
@@ -564,6 +592,17 @@ def _category_strip(
         minOpacity=1,
         tooltip={"handler": "default"} if hover else None,
     ).encode(color=color, **{"x" if horizontal else "y": coordinate.field("slot")})
+    if color.to_dict().get("legend") is not None:
+        focus, match = legend_focus(
+            selection.name if selection is not None else "heatmap_groups", "label"
+        )
+        if selection is not None:
+            focus = focus.copy(push="outer")
+        strip = (
+            strip.add_params(focus)
+            .transform_calculate(_legend_opacity=gs.expr.if_(match, 1, 0.15))
+            .encode(opacity=gs.Opacity("_legend_opacity:Q").scale(None).legend(None))
+        )
     if hover:
         strip = strip.encode(tooltip=[gs.Tooltip("label:N", title=title)])
     strip = strip.properties(name="heatmap-category-strip")

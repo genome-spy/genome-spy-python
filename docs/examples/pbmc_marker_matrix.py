@@ -1,6 +1,7 @@
 """PBMC marker matrix.
 
 Compare mean marker expression across eight cell types, with aligned cell counts.
+Drag over the colorbar to emphasize a value range.
 """
 
 import genome_spy as gs
@@ -32,11 +33,16 @@ gene_x = (
 )
 
 # Prepared means include cells with zero expression.
+expression_range = gs.selection_interval(
+    "expression_range", encodings=["color"], bind="legend"
+)
 matrix = (
     gs.Chart(data["means"])
+    .add_params(expression_range)
     .mark_rect(xOffset=1, x2Offset=-1, yOffset=1, y2Offset=-1)
     .encode(
         x=gene_x,
+        opacity=gs.when(expression_range).then(gs.value(1)).otherwise(gs.value(0.15)),
         y=row_y.field("row_start"),
         y2="row_end:Q",
         color=gs.Color("mean_expression:Q")
@@ -155,6 +161,6 @@ chart = (
         )
     )
     .resolve_legend(default="collected")
-    .configure_legend(direction="horizontal", titleOrient="top")
+    .configure_legend(selectionLabel=False, direction="horizontal", titleOrient="top")
     .properties(title="PBMC marker expression by cell type")
 )

@@ -84,12 +84,16 @@ airway_tooltip = [
 ]
 
 # Plot each gene's mean expression against its fold change.
+directions = gs.selection_point("directions", encodings=["color"], bind="legend")
+
 ma_points = (
     gs.Chart()
     .transform_collect()
     .transform_formula(expr=DIRECTION_EXPRESSION, as_="direction")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
+    .add_params(directions)
     .encode(
+        opacity=gs.when(directions).then(gs.value(0.58)).otherwise(gs.value(0.08)),
         x=gs.X("log10_base_mean:Q")
         .scale(domain=domains["ma_x"], zoom=True)
         .title("log10 mean count"),
@@ -207,3 +211,5 @@ chart = (
     )
     .add_params(effect_cutoff, significance_cutoff)
 )
+
+chart = chart.configure_legend(selectionLabel=False)

@@ -13,6 +13,41 @@ playwright = pytest.importorskip("playwright.sync_api")
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def _expose_guide_api(markup, index):
+    """Track the current native API in tests, clearing it on disposal."""
+    return markup.replace(
+        "{ bare: true }) : null;",
+        f"""{{ bare: true }}) : null;
+        window.guideApis[{index}] = api;
+        const finalize = api.finalize;
+        api.finalize = () => {{
+            window.guideApis[{index}] = null;
+            finalize();
+        }};""",
+    )
+
+
+def _show_guide_chart(page, index):
+    """Scroll to a chart and wait for its current render before inspecting it."""
+    host = page.locator(".gs-doc-embed").nth(index)
+    host.scroll_into_view_if_needed()
+    page.wait_for_function("i => Boolean(window.guideApis[i])", arg=index)
+    host.locator("canvas").wait_for()
+    page.evaluate("i => {window.api = guideApis[i];}", index)
+    page.evaluate(
+        "async () => {await document.fonts.ready; await new Promise(requestAnimationFrame);}"
+    )
+    # Native entry animation changes pointer coordinates until its scale settles.
+    page.wait_for_function(
+        """i => {
+        const canvas = document.querySelectorAll('.gs-doc-embed')[i].querySelector('canvas');
+        return Math.abs(canvas.getBoundingClientRect().width - guideApis[i].getLogicalCanvasSize().width) < 0.1;
+    }""",
+        arg=index,
+    )
+    return host
+
+
 @pytest.fixture(params=[1200, 430])
 def page(request):
     """Open a clean browser at each supported guide width and check its errors."""
@@ -43,13 +78,7 @@ def _render_guide(page, monkeypatch, name):
     embeds = re.findall(r"```\{raw\} html\n(.*?)\n```", markdown, re.S)
     specs = [json.loads(value) for value in re.findall(r"const spec = (.*);", markdown)]
     # Test-only access to the native APIs; the documentation exposes no globals.
-    embeds = [
-        embed.replace(
-            "{ bare: true }) : null;",
-            f"{{ bare: true }}) : null; window.guideApis[{index}] = api;",
-        )
-        for index, embed in enumerate(embeds)
-    ]
+    embeds = [_expose_guide_api(embed, index) for index, embed in enumerate(embeds)]
     css = (ROOT / "docs/_static/genomespy.css").read_text()
     markup = (
         f"<style>{css}\nbody{{margin:16px}} main{{max-width:786px;margin:auto}}</style>"
@@ -69,15 +98,7 @@ def _render_guide(page, monkeypatch, name):
         lambda route: route.fulfill(content_type="text/html", body=markup),
     )
     page.goto("http://guide.test/")
-    page.wait_for_function(
-        "count => guideApis.filter(Boolean).length === count", arg=len(specs)
-    )
-    page.evaluate(
-        "async () => { await document.fonts.ready; await new Promise(requestAnimationFrame); }"
-    )
-    page.wait_for_function("""() => [...document.querySelectorAll('canvas')].every((c, i) =>
-        Math.abs(c.getBoundingClientRect().width - guideApis[i].getLogicalCanvasSize().width) < 0.1)
-    """)
+    _show_guide_chart(page, 0)
     return specs
 
 
@@ -87,6 +108,7 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
     assert len(specs) == 3
     assert page.locator(".message-box").count() == 0
     for index in range(3):
+        _show_guide_chart(page, index)
         size = page.evaluate("i => guideApis[i].getLogicalCanvasSize()", index)
         assert size["width"] <= 786
         assert (
@@ -129,7 +151,7 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
         )
     assert specs[2]["scales"]["x"]["gapWidth"] == 3
     assert specs[2]["spacing"] == 6
-    canvas = page.locator("canvas").nth(2)
+    canvas = page.locator(".gs-doc-embed").nth(2).locator("canvas")
     canvas.scroll_into_view_if_needed()
     page.evaluate("""() => {
         window.track = guideApis[2].debug.getViewRoot().getDescendants()
@@ -139,7 +161,7 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
     bounds = page.evaluate(
         "() => {const {x,y,width,height} = track.coords; return {x,y,width,height};}"
     )
-    scroller = page.locator(".canvas-wrapper").nth(2)
+    scroller = page.locator(".gs-doc-embed").nth(2).locator(".canvas-wrapper")
     scroller.evaluate(
         "(el, x) => el.scrollLeft = Math.max(0, x - el.clientWidth / 2)",
         bounds["x"] + bounds["width"] / 2,
@@ -173,15 +195,15 @@ def test_tracks_guide_fits_and_preserves_shared_navigation(monkeypatch, page):
 def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
     pytest.importorskip("scanpy")
     from tests.integrations.scanpy.browser.interactions import (
+        click_legend,
         point_coordinates,
-        position,
         svg_root,
         value_texts,
     )
 
     specs = _render_guide(page, monkeypatch, "paga.ipynb")
     assert len(specs) == 10
-    page.evaluate("window.api = guideApis[0]")
+    _show_guide_chart(page, 0)
     root = svg_root(page)
     symbols = [
         p
@@ -208,49 +230,88 @@ def test_paga_guide_legends_edge_cutoff_and_path_focus(monkeypatch, page):
     assert len(edges()) < count
     np.testing.assert_array_equal(point_coordinates(page)[0], before)
     for index in [1, 2, 3]:
-        page.evaluate("i => window.api = guideApis[i]", index)
+        _show_guide_chart(page, index)
         assert sum(e.tag.endswith("linearGradient") for e in svg_root(page).iter()) == 1
         assert page.evaluate("api.getLogicalCanvasSize().width") <= 786
-    page.evaluate("window.api = guideApis[5]")
+    _show_guide_chart(page, 5)
     assert not value_texts(svg_root(page))
-    page.evaluate("window.api = guideApis[6]")
-    text = [e for e in svg_root(page).iter() if e.tag.endswith("text")]
-    title = next(e for e in text if e.text == "Source group")
-    legend = [e for e in text if e.text in ["Adjacency", "Tree"]]
-    assert len(legend) == 2
-    label_bottom = page.evaluate("""() => {
-        const view = api.debug.getViewRoot().getDescendants()
-            .find(v => v.spec.encoding?.x?.field === 'slot');
-        return view.coords.y + view.coords.height;
-    }""")
-    assert position(title)[1] > label_bottom
-    assert min(position(e)[1] for e in legend) > position(title)[1]
+    _show_guide_chart(page, 6)
+    from tests.integrations.scanpy.browser.rendering import guide_geometry
+
+    boxes = guide_geometry(page)["text"]
+    title = next(box for box in boxes if box["label"] == "Source group")
+    legend = [box for box in boxes if box["label"] in ("Adjacency", "Tree")]
+    names = specs[6]["encoding"]["x"]["scale"]["domain"]
+    ticks = [box for box in boxes if box["label"] in names]
+    assert ticks and len(legend) == 2
+    assert max(box["y"] + box["height"] for box in ticks) < title["y"]
+    assert min(box["y"] for box in legend) > title["y"] + title["height"]
     assert (
         page.evaluate("api.getLogicalCanvasSize().height")
         <= page.locator(".gs-doc-embed").nth(6).bounding_box()["height"]
     )
-    page.evaluate("window.api = guideApis[9]")
-    page.locator("select").select_option(label="LYZ")
+    host = _show_guide_chart(page, 9)
+    click_legend(page, "LYZ", canvas=host.locator("canvas"))
     opacity = {float(r.get("stroke-opacity", "1")) for r in edges()}
     assert len(opacity) == 2 and min(opacity) < max(opacity)
-    assert page.evaluate("guideApis[7].getLogicalCanvasSize().width") <= 786
+    _show_guide_chart(page, 7)
+    assert page.evaluate("api.getLogicalCanvasSize().width") <= 786
 
 
 def test_profiles_guide_run_gene_focus_and_heatmap_zoom(monkeypatch, page):
     pytest.importorskip("scanpy")
     from tests.integrations.scanpy.browser.interactions import (
+        click_legend,
         svg_root,
         value_texts,
     )
 
     specs = _render_guide(page, monkeypatch, "profiles.ipynb")
     assert len(specs) == 7
-    controls = page.locator("select")
-    assert controls.count() == 5
-    # The first control belongs to the supplied profiles; the next pair to simulation points.
-    controls.nth(1).select_option(label="Gata1")
-    controls.nth(2).select_option(label="2")
-    page.evaluate("window.api = guideApis[3]")
+    for index in (0, 4):
+        _show_guide_chart(page, index)
+        label_view = specs[index]["surround"]["left"][0]
+        mark = label_view["mark"]
+        assert mark["align"] == "right" and mark["xOffset"] == -8
+        assert mark["clip"] == "x" and mark["cullByVisibleRange"] is False
+        source = label_view["data"]
+        labels = source.get(
+            "values", specs[index].get("datasets", {}).get(source.get("name"))
+        )
+        names = [row["label"] for row in labels]
+        boxes = page.evaluate(
+            """async names => {
+            const svg = new DOMParser().parseFromString(
+                await (await api.imageExport.svg()).blob.text(), 'image/svg+xml').documentElement;
+            svg.style.cssText='position:fixed;left:0;top:0;visibility:hidden';
+            document.body.append(svg);
+            const boxes=[...svg.querySelectorAll('text')].filter(n=>names.includes(n.textContent)).map(n=>{
+                const b=n.getBoundingClientRect();
+                const group=n.closest('[clip-path]');
+                const clip=group && svg.querySelector(group.getAttribute('clip-path').slice(4,-1)+' rect');
+                const c=clip ? {
+                    left:+clip.getAttribute('x'), top:+clip.getAttribute('y'),
+                    right:+clip.getAttribute('x') + +clip.getAttribute('width'),
+                    bottom:+clip.getAttribute('y') + +clip.getAttribute('height')
+                } : svg.getBoundingClientRect();
+                return {label:n.textContent,left:b.left,right:b.right,top:b.top,bottom:b.bottom,
+                    clipLeft:c.left,clipRight:c.right,clipTop:c.top,clipBottom:c.bottom};
+            });
+            svg.remove();return boxes;
+        }""",
+            names,
+        )
+        assert {box["label"] for box in boxes} == set(names)
+        for box in boxes:
+            assert box["left"] >= box["clipLeft"] - 1, box
+            assert box["right"] <= box["clipRight"] + 1, box
+            assert box["top"] >= box["clipTop"] - 1, box
+            assert box["bottom"] <= box["clipBottom"] + 1, box
+    host = _show_guide_chart(page, 3)
+    controls = host.locator("select")
+    assert controls.count() == 1
+    click_legend(page, "Gata1", canvas=host.locator("canvas"))
+    controls.select_option(label="2")
     root = svg_root(page)
     points = [
         p
@@ -261,9 +322,9 @@ def test_profiles_guide_run_gene_focus_and_heatmap_zoom(monkeypatch, page):
     assert len(points) == 3200
     assert sum(float(p.get("fill-opacity", "1")) == 0.85 for p in points) == 160
     assert sum(float(p.get("fill-opacity", "1")) == 0.12 for p in points) == 3040
-    page.evaluate("window.api = guideApis[4]")
+    _show_guide_chart(page, 4)
     assert not value_texts(svg_root(page))
-    chart = page.locator("canvas").nth(4)
+    chart = page.locator(".gs-doc-embed").nth(4).locator("canvas")
     chart.scroll_into_view_if_needed()
     bounds = page.evaluate("""() => {
         const view = api.debug.getViewRoot().getDescendants()
@@ -271,7 +332,7 @@ def test_profiles_guide_run_gene_focus_and_heatmap_zoom(monkeypatch, page):
         window.simGrid = view;
         const {x,y,width,height} = view.coords; return {x,y,width,height};
     }""")
-    scroller = page.locator(".canvas-wrapper").nth(4)
+    scroller = page.locator(".gs-doc-embed").nth(4).locator(".canvas-wrapper")
     scroller.evaluate(
         "(el, x) => el.scrollLeft = Math.max(0, x-el.clientWidth/2)",
         bounds["x"] + bounds["width"] / 2,
@@ -299,11 +360,12 @@ def test_data_check_guide_sliders_update_saved_results_preview(monkeypatch, page
     sc = pytest.importorskip("scanpy")
     specs = _render_guide(page, monkeypatch, "quality.ipynb")
     assert len(specs) == 3
-    sliders = page.locator('input[type="range"]')
-    assert sliders.count() == 2
+    host = _show_guide_chart(page, 1)
+    slider = host.locator('input[type="range"]')
+    assert slider.count() == 1
     saved = sc.read_h5ad(ROOT / "tmp/scanpy-guide-data/quality/hvg.h5ad")
     before = saved.var["highly_variable"].copy()
-    sliders.nth(0).evaluate(
+    slider.evaluate(
         "(el) => {el.value=1; el.dispatchEvent(new Event('input', {bubbles:true}));}"
     )
     count = int((saved.var["dispersions_norm"] >= 1).sum())
@@ -325,8 +387,9 @@ def test_data_check_guide_sliders_update_saved_results_preview(monkeypatch, page
             for r in g
         ]
 
+    host = _show_guide_chart(page, 2)
     original = bins()
-    sliders.nth(1).evaluate(
+    host.locator('input[type="range"]').evaluate(
         "(el) => {el.value=0.7; el.dispatchEvent(new Event('input', {bubbles:true}));}"
     )
     updated = bins()
@@ -338,12 +401,11 @@ def test_data_check_guide_sliders_update_saved_results_preview(monkeypatch, page
     assert reloaded.var["highly_variable"].equals(before)
 
 
-def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
+def test_umap_grid_native_legend_controls_and_linked_selection(monkeypatch, page):
     sc = pytest.importorskip("scanpy")
-    import genome_spy.integrations.scanpy as gsc
-
     specs = _render_guide(page, monkeypatch, "umap.ipynb")
     # Every grid panel stays square, including the categorical panel with a legend.
+    host = _show_guide_chart(page, 13)
     grid = page.evaluate("""() => guideApis[13].debug.getViewRoot().getDescendants()
         .filter(v => v.spec.mark?.type === 'point'
             && v.spec.encoding?.x?.field?.startsWith('_coord_'))
@@ -353,7 +415,97 @@ def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
     assert all(abs(p["width"] - p["height"]) < 0.1 for p in grid)
     assert len({round(p["x"]) for p in grid}) == 3
     assert len({round(p["y"]) for p in grid}) == 3
+    assert specs[13]["resolve"]["legend"]["default"] == "collected"
+    assert specs[13]["config"]["legend"]["orient"] == "right"
+    from tests.integrations.scanpy.browser.interactions import click_legend, svg_root
+
+    def legend_titles(orient=None):
+        names = (
+            {f"legend_region_{orient}"}
+            if orient
+            else {"legend_region_right", "legend_region_bottom"}
+        )
+        return {
+            e.text
+            for region in svg_root(page).iter()
+            if region.get("data-name") in names
+            for e in region.iter()
+            if e.tag.endswith("text")
+        }
+
+    genes = {"CD79A", "MS4A1", "IGJ", "CD3D", "FCER1A", "FCGR3A", "LYZ"}
+    select = host.locator("select")
+    checkboxes = host.locator('input[type="checkbox"]')
+    assert select.count() == 1 and checkboxes.count() == 2
+    assert legend_titles() & genes == {"CD79A"}
+    assert "bulk_labels" in legend_titles("bottom")
+    assert "bulk_labels" not in legend_titles("right")
+    assert "n_counts" not in legend_titles()
+    select.select_option("MS4A1")
+    checkboxes.nth(0).check()
+    page.evaluate("()=>new Promise(requestAnimationFrame)")
+    assert legend_titles() & genes == {"MS4A1"}
+    assert {"n_counts", "bulk_labels"} <= legend_titles()
+    legend_bounds = page.evaluate("""async () => {
+        const svg=new DOMParser().parseFromString(await (await api.imageExport.svg()).blob.text(),'image/svg+xml').documentElement;
+        svg.style.cssText='position:fixed;left:0;top:0;visibility:hidden';
+        document.body.append(svg);
+        const legend=svg.querySelector('[data-name="legend_region_right"]');
+        const {x,y,width,height}=legend.getBoundingClientRect();
+        const bottom=svg.querySelector('[data-name="legend_region_bottom"]').getBoundingClientRect();
+        const category={x:bottom.x,y:bottom.y,width:bottom.width,height:bottom.height};
+        svg.remove();return {legend:{x,y,width,height},category,canvas:api.getLogicalCanvasSize()};
+    }""")
+    legend = legend_bounds["legend"]
+    assert legend["x"] >= max(p["x"] + p["width"] for p in grid)
+    assert legend["x"] + legend["width"] <= legend_bounds["canvas"]["width"] + 1
+    assert legend["y"] + legend["height"] <= legend_bounds["canvas"]["height"] + 1
+    category = legend_bounds["category"]
+    assert category["y"] >= max(p["y"] + p["height"] for p in grid)
+    assert category["x"] >= -1
+    assert category["x"] + category["width"] <= legend_bounds["canvas"]["width"] + 1
+    assert category["y"] + category["height"] <= legend_bounds["canvas"]["height"] + 1
+    assert legend_bounds["canvas"]["height"] <= page.locator(".gs-doc-embed").nth(
+        13
+    ).evaluate("el=>el.clientHeight")
+
+    select.select_option(label="None")
+    checkboxes.nth(0).uncheck()
+    checkboxes.nth(1).uncheck()
+    page.evaluate("()=>new Promise(requestAnimationFrame)")
+    assert not legend_titles()
+    checkboxes.nth(1).check()
+    select.select_option("CD79A")
+    page.evaluate("()=>new Promise(requestAnimationFrame)")
+    assert legend_titles() & genes == {"CD79A"}
+    assert "bulk_labels" in legend_titles() and "n_counts" not in legend_titles()
+    host.locator(".canvas-wrapper").evaluate("el => el.scrollLeft = 0")
+    click_legend(page, "CD19+ B", canvas=host.locator("canvas"))
+    selected_count = int(
+        (sc.datasets.pbmc68k_reduced().obs["bulk_labels"] == "CD19+ B").sum()
+    )
+    groups = [
+        g
+        for g in svg_root(page).iter()
+        if g.get("data-mark-type") == "point" and g.get("clip-path")
+    ]
+    assert len(groups) == 9
+    for group in groups:
+        assert len(group) == 700
+        assert (
+            sum(float(point.get("fill-opacity", "1")) == 1 for point in group)
+            == selected_count
+        )
+    click_legend(page, "CD19+ B", shift=True, canvas=host.locator("canvas"))
+
+
+def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
+    sc = pytest.importorskip("scanpy")
+    import genome_spy.integrations.scanpy as gsc
+
+    specs = _render_guide(page, monkeypatch, "umap.ipynb")
     width = page.viewport_size["width"]
+    _show_guide_chart(page, 0)
     page.evaluate("""() => {
         window.points = index => guideApis[index].debug.getViewRoot()
             .getDescendants().find(view => view.spec.mark?.type === 'point'
@@ -408,8 +560,7 @@ def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
         arg=domains,
     )
 
-    linked = page.locator("canvas").nth(1)
-    linked.scroll_into_view_if_needed()
+    linked = _show_guide_chart(page, 1).locator("canvas")
     box = linked.bounding_box()
     bounds = page.evaluate("bounds(1)")
     x, y = box["x"] + bounds["x"], box["y"] + bounds["y"]
@@ -430,6 +581,7 @@ def test_umap_guide_interactions_and_horizontal_scroll(monkeypatch, page):
     )
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     if width == 430:
+        _show_guide_chart(page, 0)
         scroller = page.locator(".canvas-wrapper").first
         assert scroller.evaluate("el => getComputedStyle(el).overflowX") == "auto"
         assert scroller.evaluate("el => el.scrollWidth > el.clientWidth")
@@ -457,7 +609,7 @@ def test_prepared_embedding_guide_hover_and_zoom(monkeypatch, page, index, label
 
     specs = _render_guide(page, monkeypatch, "umap.ipynb")
     assert len(specs) == 14
-    page.evaluate("i => {window.api = guideApis[i];}", index)
+    _show_guide_chart(page, index)
     bounds = page.evaluate("""() => {
         window.embedding = api.debug.getViewRoot().getDescendants()
             .find(v => v.spec.mark?.type === 'point'
@@ -465,7 +617,7 @@ def test_prepared_embedding_guide_hover_and_zoom(monkeypatch, page, index, label
         const {x,y,width,height} = embedding.coords;
         return {x,y,width,height};
     }""")
-    chart = page.locator("canvas").nth(index)
+    chart = page.locator(".gs-doc-embed").nth(index).locator("canvas")
     chart.scroll_into_view_if_needed()
     host = page.locator(".gs-doc-embed").nth(index)
     size = page.evaluate("api.getLogicalCanvasSize()")
@@ -501,7 +653,7 @@ def test_prepared_embedding_guide_hover_and_zoom(monkeypatch, page, index, label
     distances, _ = cKDTree(normalized).query(normalized, k=2)
     selected = int(distances[:, 1].argmax())
     x, y = normalized[selected]
-    page.locator(".canvas-wrapper").nth(index).evaluate(
+    page.locator(".gs-doc-embed").nth(index).locator(".canvas-wrapper").evaluate(
         "(el, x) => {el.scrollLeft = Math.max(0, x-el.clientWidth/2);}",
         bounds["x"] + x * bounds["width"],
     )
@@ -514,7 +666,7 @@ def test_prepared_embedding_guide_hover_and_zoom(monkeypatch, page, index, label
         page,
         bounds["x"] + x * bounds["width"],
         bounds["y"] + (1 - y) * bounds["height"],
-        canvas_index=index,
+        canvas=chart,
         target=tooltip,
     )
     tooltip.wait_for(state="visible")
@@ -581,15 +733,23 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
     from tests.integrations.scanpy.browser.interactions import value_texts
 
     specs = _render_guide(page, monkeypatch, "expression.ipynb")
-    assert page.evaluate("""() => [
-        [0, 'grid_cursor'], [1, 'grid_hover'], [2, 'grid_cursor'],
-        [3, 'grid_hover'], [6, 'grid_cursor'], [7, 'grid_cursor'], [8, 'grid_hover']
-    ].every(([index, name]) => Boolean(guideApis[index].getParam(name)))""")
-    sizes = page.evaluate("""() => [...document.querySelectorAll('.gs-doc-embed')]
-        .map((host, i) => ({height:host.clientHeight,
-            canvas:guideApis[i].getLogicalCanvasSize().height}))""")
-    for index, size in enumerate(sizes):
-        assert size["canvas"] <= size["height"], (index, size)
+    for index in range(len(specs)):
+        host = _show_guide_chart(page, index)
+        assert page.evaluate("api.getLogicalCanvasSize().height") <= host.evaluate(
+            "el => el.clientHeight"
+        )
+        param = {
+            0: "grid_cursor",
+            1: "grid_hover",
+            2: "grid_cursor",
+            3: "grid_hover",
+            6: "grid_cursor",
+            7: "grid_cursor",
+            8: "grid_hover",
+        }.get(index)
+        if param:
+            assert page.evaluate("name => Boolean(api.getParam(name))", param)
+    _show_guide_chart(page, 0)
     page.evaluate("""() => {
         window.plot = index => guideApis[index].debug.getViewRoot().getDescendants()
             .find(view => view.spec.encoding?.color?.field === (index === 2 ? '_value' : '_mean'));
@@ -604,8 +764,9 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
     fractions = page.evaluate(
         """row => ['x', 'y'].map(channel => {
         const scale = plot(0).getScaleResolution(channel).getScale();
-        const value = scale(row[`_${channel}`]);
-        return (channel === 'x' ? value : 1 - value) + scale.bandwidth() / 2;
+        const value = scale(row[plot(0).spec.encoding[channel].field]);
+        const offset = scale.bandwidth() / 2;
+        return channel === 'x' ? value + offset : 1 - value + (scale.type === 'band' ? -offset : offset);
     })""",
         dot,
     )
@@ -630,16 +791,17 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
     page.locator("table.attributes").get_by_text(dot["_group"], exact=True).wait_for(
         state="visible"
     )
+    _show_guide_chart(page, 2)
     overview = ET.fromstring(
         page.evaluate("async () => (await guideApis[2].imageExport.svg()).blob.text()")
     )
     assert not value_texts(overview)
     for index in [0, 1, 7, 8, 2]:
-        chart = page.locator("canvas").nth(index)
-        chart.scroll_into_view_if_needed()
+        host = _show_guide_chart(page, index)
+        chart = host.locator("canvas")
         bounds = page.evaluate("gridBounds", index)
         # Bring the plot into view before using its center on a narrow page.
-        scroller = page.locator(".canvas-wrapper").nth(index)
+        scroller = page.locator(".gs-doc-embed").nth(index).locator(".canvas-wrapper")
         scroller.evaluate(
             "(el, center) => el.scrollLeft = Math.max(0, center - el.clientWidth / 2)",
             bounds["x"] + bounds["width"] / 2,
@@ -681,10 +843,20 @@ def test_expression_guide_hover_zoom_and_fitted_values(monkeypatch, page):
 def test_diagnostic_guide_charts_render(monkeypatch, page, name):
     sc = pytest.importorskip("scanpy")
     specs = _render_guide(page, monkeypatch, name)
-    assert page.locator("canvas").count() == len(specs)
-    sizes = page.evaluate("""() => [...document.querySelectorAll('.gs-doc-embed')]
-        .map((host, i) => ({height:host.clientHeight,
-            canvas:guideApis[i].getLogicalCanvasSize().height}))""")
+    sizes = []
+    exports = []
+    for index in range(len(specs)):
+        host = _show_guide_chart(page, index)
+        assert host.locator("canvas").count() == 1
+        sizes.append(
+            {
+                "height": host.evaluate("el => el.clientHeight"),
+                "canvas": page.evaluate("api.getLogicalCanvasSize().height"),
+            }
+        )
+        exports.append(
+            page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+        )
     overflow = [
         (index, size)
         for index, size in enumerate(sizes)
@@ -692,8 +864,6 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
     ]
     assert not overflow, overflow
     assert page.locator(".message-box").count() == 0
-    exports = page.evaluate("""async () => Promise.all(guideApis.map(async api =>
-        (await api.imageExport.svg()).blob.text()))""")
     assert all("<svg" in svg and "<text" in svg for svg in exports)
     if name == "ranked.ipynb":
         gene = sc.datasets.pbmc68k_reduced().uns["rank_genes_groups"]["names"][
@@ -708,6 +878,7 @@ def test_diagnostic_guide_charts_render(monkeypatch, page, name):
     else:
         assert "PC1" in exports[0] and "PC2" in exports[0]
         assert all(size["height"] - size["canvas"] <= 40 for size in sizes), sizes
+        _show_guide_chart(page, 2)
         overview = page.evaluate("""() => {
             const api = guideApis[2];
             return {canvas:api.getLogicalCanvasSize(),
@@ -745,7 +916,7 @@ def test_ranked_summary_guide_hover_without_zoom(monkeypatch, page, index):
     from tests.integrations.scanpy.browser.interactions import hover_at
 
     specs = _render_guide(page, monkeypatch, "ranked.ipynb")
-    page.evaluate("i => {window.api = guideApis[i];}", index)
+    _show_guide_chart(page, index)
     bounds = page.evaluate("""() => {
         window.rankGrid = api.debug.getViewRoot().getDescendants()
             .find(v => v.spec.encoding?.color?.field === '_mean');
@@ -764,9 +935,9 @@ def test_ranked_summary_guide_hover_without_zoom(monkeypatch, page, index):
         })""",
         row,
     )
-    chart = page.locator("canvas").nth(index)
+    chart = page.locator(".gs-doc-embed").nth(index).locator("canvas")
     chart.scroll_into_view_if_needed()
-    page.locator(".canvas-wrapper").nth(index).evaluate(
+    page.locator(".gs-doc-embed").nth(index).locator(".canvas-wrapper").evaluate(
         "(el, x) => {el.scrollLeft = Math.max(0, x-el.clientWidth/2);}",
         bounds["x"] + bounds["width"] * fractions[0],
     )
@@ -774,7 +945,7 @@ def test_ranked_summary_guide_hover_without_zoom(monkeypatch, page, index):
         page,
         bounds["x"] + bounds["width"] * fractions[0],
         bounds["y"] + bounds["height"] * fractions[1],
-        canvas_index=index,
+        canvas=chart,
     )
     tooltip = page.locator("table.attributes")
     tooltip.get_by_text(row["_gene"], exact=True).wait_for(state="visible")

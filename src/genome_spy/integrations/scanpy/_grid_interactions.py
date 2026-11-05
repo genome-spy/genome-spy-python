@@ -74,8 +74,14 @@ def series_focus(
     *,
     name: str = "profile_focus",
     title: str = "Focus: ",
+    channel: Literal["color", "fill", "stroke", "shape"] | None = None,
 ) -> tuple[gs.Parameter, gs.Expression]:
-    """Return a native dropdown and opacity expression that emphasize one series."""
+    """Return native legend or dropdown controls and an expression that dims other series."""
+    if channel is not None:
+        from genome_spy.integrations.scanpy._legend_interactions import legend_focus
+
+        focus, match = legend_focus(name, field, channel=channel)
+        return focus, gs.expr.if_(match, 0.85, 0.12)
     all_series = ""
     while all_series in labels:
         all_series += "_"

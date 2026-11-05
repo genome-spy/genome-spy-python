@@ -54,10 +54,13 @@ colors = gs.Scale(
     domain=data["groups"]["cell_type"].tolist(), range=data["groups"]["color"].tolist()
 )
 # Native AnnData inputs expose obs directly for the cell annotation rail.
+cell_types = gs.selection_point("cell_types", encodings=["color"], bind="legend")
 rail = (
     gs.Chart(adata)
+    .add_params(cell_types)
     .mark_rect(minHeight=0, minOpacity=1)
     .encode(
+        opacity=gs.when(cell_types).then(gs.value(1)).otherwise(gs.value(0.15)),
         y=cell_y,
         y2="cell_end:Q",
         color=gs.Color("cell_type:N")
@@ -99,5 +102,10 @@ chart = (
         title="PBMC marker expression in individual cells",
     )
     .resolve_legend(default="collected")
-    .configure_legend(direction="horizontal", titleOrient="top", columnPadding=20)
+    .configure_legend(
+        selectionLabel=False,
+        direction="horizontal",
+        titleOrient="top",
+        columnPadding=20,
+    )
 )

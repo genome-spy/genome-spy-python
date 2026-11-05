@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 import warnings
 
@@ -25,6 +25,25 @@ class TreeData:
     order: tuple[Any, ...]
     icoord: np.ndarray
     dcoord: np.ndarray
+    nodes: tuple[dict[str, Any], ...] = field(default=(), kw_only=True)
+
+
+def tree_nodes(linkage: np.ndarray, order: Sequence[int]) -> tuple[dict[str, Any], ...]:
+    """Return native tree nodes from Python linkage and its saved leaf order."""
+    count = len(order)
+    slots = {int(leaf): slot for slot, leaf in enumerate(order)}
+    nodes = [
+        {"id": leaf, "parent": None, "height": 0.0, "slot": slots[leaf]}
+        for leaf in range(count)
+    ]
+    for i, merge in enumerate(linkage):
+        parent = count + i
+        nodes.append(
+            {"id": parent, "parent": None, "height": float(merge[2]), "slot": None}
+        )
+        for child in merge[:2]:
+            nodes[int(child)]["parent"] = parent
+    return tuple(nodes)
 
 
 @dataclass(frozen=True, slots=True)
@@ -183,6 +202,7 @@ def prepare_dendrogram(
         correlation=correlation[np.ix_(positions, positions)],
         icoord=icoord,
         dcoord=dcoord,
+        nodes=tree_nodes(linkage, indices.tolist()),
     )
 
 

@@ -282,14 +282,14 @@ class EmbeddingSummary:
             vmax: Fixed upper color limit; None derives it from loaded values.
             title: Panel title; omitted uses the summary label, None hides it.
             show_values: Show fitted group means with the shared native text style.
-            gene_controls: Show one native gene selector per row, using constructor genes.
+            gene_controls: Show a dropdown for each gene row.
 
         Returns:
             This builder for further chaining.
 
         Raises:
             ValueError: If genes, placement or dimensions are invalid.
-            TypeError: If show, show_values or gene_controls is not boolean.
+            TypeError: If show, show_values or gene_controls is invalid.
 
         Example:
             >>> plot.add_heatmap(["LYZ"], position="bottom", vmin=-2.5, vmax=2.5)

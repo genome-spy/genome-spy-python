@@ -436,6 +436,14 @@ spatial range count remains Core work, not an implemented integration capability
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 
+Linked-hover follow-up: outline the hovered cell across multipanel embeddings by
+default, with `linked_hover=False` retaining tooltips and `hover=False` disabling
+both. Use native shared point selection and an identifier before panel projections;
+keep `_obs_id` as the stable source key. Require browser checks for different color
+sorting, missing values, multiple rows, moving between panels, clearing, opt-out,
+brushing and zoom. Initial appearance must remain unchanged. C19 gates adoption
+on a released Core; do not use a locally patched bundle.
+
 ### M02 — grouped access and dotplot (plain-chart preview closed)
 
 M02.a–d are verified for the plain-chart preview; see [data evidence](STATUS.md#verification)
@@ -1598,6 +1606,15 @@ Expensive
 embedding, differential-expression or graph analysis must use reviewed prepared
 inputs or be shown as a Jupyter-only step with matching prepared page data.
 
+Keep only nearby documentation charts alive through the shared prose-page embed
+helper. Reserve their layout space, load them within 300 pixels of the viewport,
+dispose controls before finalizing distant charts, and recreate charts on return.
+Zoom and brush state reset after unloading. Verify long-page scrolling in both
+directions, rapid scroll changes during loading, controls and visible rendering
+with a small browser context budget. Adopt the released Core context-cleanup fix
+from PR #638 before declaring native context release verified; do not patch the
+bundled runtime locally.
+
 Each example has one or two short sentences, code and a live chart, in that order.
 Use plain user-facing language. Explain what the plot shows, how to use it and
 any limit that affects the task. Put module details, helper reuse, milestone IDs,
@@ -1677,8 +1694,9 @@ The user chose a class matching the DotPlot/MatrixPlot builder conventions on
 27 October 2026. `gsc.pl.EmbeddingSummary` is now an implemented preview. This is a
 GenomeSpy extension; no corresponding Scanpy class is claimed. The native boundary
 agreement and full retained-memory/resource gates below remain open for release.
-Heatmap gene controls also await the released categorical-mapping fix (C18);
-changed row positions must match visible GPU pixels, not only means or SVG export.
+The categorical-mapping fix (C18) is released in wrapper 0.9.0 / Core 1.3.0 and
+passes the heatmap gene-change pixel checks with values on and off. Keep checking
+visible GPU positions, not only means or SVG export, when changing displayed genes.
 
 - Construction initially accepts unique gene names (string or sequence), one
   categorical observation column as `groupby`, `basis="umap"`, `use_raw`/`layer`,
@@ -1709,10 +1727,11 @@ changed row positions must match visible GPU pixels, not only means or SVG expor
   Controls belong to the composition root, with no AnnData reads or callbacks.
   Histogram bins cover all candidate genes when controls are enabled; heatmap
   order follows its controls, with duplicate choices shown once by the native scale.
-  The guide uses fixed gene lists without dropdowns at the user's request
-  (28 October 2026). After adopting the release with interactive legends, update
-  these examples to native legend-based gene selection. Retain the existing
-  dropdown API tests and the C18 regression until its released fix is verified.
+  The guide uses fixed gene lists without dropdowns at the user's request.
+  The Core 1.3.0 row-placement fix permits the optional dropdown API; retain its
+  tests and C18 pixel regression. Legend-based gene selection remains deferred:
+  the user rejected adding a separate gene-mean plot just to provide its legend.
+  Category legends instead select cells for every existing summary and tracks.
 - `add_tracks(...)` adds one marker-track panel using constructor genes and the
   existing tracks renderer. Reuse `heatmap_values` for group order/original row
   positions and the prepared group color scale. Keep one shared cell table with
@@ -1894,3 +1913,58 @@ shared export user guide and notebook renderer. Let notebook chart metadata opt
 into existing native controls, with shared validation and no custom download code.
 Keep save/display cells runnable in the downloaded notebook but unexecuted by
 Sphinx. Check actual image downloads, output-free source and the page/download match.
+
+## Native improvements after wrapper 0.9.0
+
+Authorized 2026-11-05. Use released Core 1.3.0 and shared plotting helpers. Keep
+Scanpy computations, optional group gaps, opt-in values and existing data semantics.
+
+- [x] Shared PAGA rules use native white outside borders, preserving body widths,
+  edge layers, hover and navigation. SVG checks measure body geometry separately
+  from native outline paint. Numeric legends hide the optional range readout.
+- [x] Multipanel embeddings share native record identity before projection/sorting.
+  Linked hover is on by default, with `linked_hover=False` and `hover=False`.
+  Browser checks cover panel transitions, clearing and outlined points.
+- [x] Shared category/gradient legend focus is used by embeddings, PAGA and known
+  annotations. Profile/simulation/path line legends replace series dropdowns.
+  Numeric-only colorbars, heatmap row controls and simulation runs keep dropdowns
+  where there is no matching series legend; no dummy legend marks are added.
+- [x] Multipanel legend selections combine at the shared cell source. The UMAP
+  guide grid uses one multipanel call so every category/range selection links.
+  `legend_controls=True` supplies the controls in the shared embedding renderer.
+  Its native dropdown chooses one gene colorbar (or none); count/group legends
+  have checkboxes. Automatic legend defaults expose field-specific native styles
+  and reflow colorbars on the right and category legends below the grid. Hiding
+  a legend preserves its selection.
+- [x] EmbeddingSummary legends and the brush update every summary and tracks.
+  Remove the extra gene-mean plot; keep optional native row dropdowns. Pair
+  composition bars as narrower selected bars over faint references, using native
+  band coverage without offset-scale compensation.
+- [x] Uniquely named matrices, adjacency strips and summary groups use native band
+  axes when positions do not also serve trees, totals or overlays. Repeated genes
+  retain separate positions. Native dendrogram layout consumes Python tree nodes
+  for integer leaves; unequal cell-group centers retain their stored geometry.
+- [ ] Complete categorical adaptive-tree migration after Core supports it (C22).
+  Current Core rejects viewport-derived heights from categorical position scales.
+  A strict capability regression detects a future fix. Keep adaptive index trees;
+  do not replace viewport fitting with a fixed domain or custom zoom listener.
+- [x] Brush counts use native filtering/counting, including empty selections.
+- [x] Docs scroll tests verify explicit context loss with released Core 1.3.0,
+  controls disposal, reserved space and recreation on return.
+- [x] Gallery updates cover PBMC hover/heatmaps, clustered annotation legends,
+  t-SNE, stacked bars, MA/volcano category focus and end-anchored scrolling.
+- [ ] Add a focused Figwig gallery only when a licensed, prepared, public input is
+  available. Existing BigWig inputs remain unchanged; no conversion workaround.
+- [x] Update and execute both workflows and the affected guides. Keep tracked
+  notebooks free of outputs/state. Integration/reference checks, browser
+  interactions and strict docs pass; final validation is recorded in STATUS.md.
+
+Physical-phone verification remains a separate handoff. STATUS.md and the release
+workflow record the checks for 0.10.0.
+
+### Exhaustive browser checks — 5 November 2026
+
+Keep the full browser suite available locally. Remote CI and releases run browser
+smoke checks by default. A separate `full_browser` workflow input enables exhaustive
+comparisons on demand; `full_scanpy` continues to control Python references and
+workflow notebooks. Preserve all regression cases and their existing assertions.

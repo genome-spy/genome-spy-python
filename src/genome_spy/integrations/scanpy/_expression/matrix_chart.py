@@ -58,11 +58,15 @@ def _matrix_axis(
 
     Cropped matrices hide offscreen anchors without clipping the visible text.
     """
+    categorical = axis.to_dict().get("type") == "nominal"
     axis = axis.axis(
-        title=title if labels is None else None,
+        title=title if labels is None or categorical else None,
         titlePadding=8,
-        labels=labels is None,
-        values=list(range(len(names))) if labels is not None else Undefined,
+        labels=labels is None or categorical,
+        labelAngle=-90 if categorical and horizontal else 0,
+        values=list(range(len(names)))
+        if labels is not None and not categorical
+        else Undefined,
         domain=False,
         tickSize=3.5 * PT,
         tickWidth=0.8 * PT,
@@ -73,6 +77,8 @@ def _matrix_axis(
         titleFontWeight="normal",
         titleFontSize=10 * PT,
     )
+    if categorical:
+        return axis, None
     side: gs.Chart | None = None
     if horizontal and tick_labels is not None:
         axis = axis.axis(title=None, labels=False, values=list(tick_labels))
@@ -84,13 +90,12 @@ def _matrix_axis(
             axis.axis(None),
             horizontal=horizontal,
             clip=("y" if horizontal else "x") if cropped else True,
+            cull=not cropped,
         )
         if cropped:
             channel = "x" if horizontal else "y"
             # The domain filter keeps boundary labels without pixel-rounding culls.
-            ticks = ticks.mark_text(cullByVisibleRange=False).transform_filter(
-                f"inrange(datum.slot, domain('{channel}'))"
-            )
+            ticks = ticks.transform_filter(f"inrange(datum.slot, domain('{channel}'))")
         if title is not None:
             ticks = ticks.properties(
                 title=gs.Title(
@@ -209,6 +214,23 @@ def build_matrix(
     )
     name = context.rsplit(".", 1)[-1]
 
+    # Unique names can use native axes; positional overlays and repeated names keep slots.
+    if limits is None and overlay is None and not len(highlights_x):
+        if xticks is not None and len(set(xlabels)) == columns:
+            x = gs.X("_column:N")
+            scales["x"] = gs.Scale(
+                type="band", domain=xlabels, padding=0, zoom=zoom == "xy"
+            )
+        if yticks is not None and len(set(ylabels)) == rows:
+            y = gs.Y("_row:N")
+            scales["y"] = gs.Scale(
+                type="band",
+                domain=ylabels,
+                padding=0,
+                reverse=reverse_y,
+                zoom=bool(zoom),
+            )
+
     # Named rows and columns share the same axis and side-label rules.
     axes = []
     sides = {}
@@ -306,7 +328,8 @@ def build_matrix(
         center, surround=gs.SurroundSides(**sides), spacing=0
     ).properties(scales=scales)
     if limits is not None:
-        chart = chart.properties(padding={"top": TICK / 2, "bottom": TICK / 2})
+        # Endpoint labels need a full text line beyond the cropped plot area.
+        chart = chart.properties(padding={"top": TICK, "bottom": TICK})
     if title is not None:
         chart = chart.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))
     if focus is not None:
@@ -314,6 +337,7 @@ def build_matrix(
     if run is not None:
         chart = chart.add_params(run)
     return chart.configure_view(stroke="transparent", strokeWidth=0).configure_legend(
+        selectionLabel=False,
         labelFont=FONT,
         labelFontSize=TICK,
         layout={"anchor": "middle", "direction": "vertical", "wrap": False},

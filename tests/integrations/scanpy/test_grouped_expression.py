@@ -25,7 +25,7 @@ from tests.integrations.scanpy.expression_fixtures import (
     make_grouped_adata,
     matrixplot_cases,
 )
-from tests.integrations.scanpy.helpers import points
+from tests.integrations.scanpy.helpers import points, grid_labels
 
 sc = pytest.importorskip("scanpy")
 GROUPED_DATA_FIXTURE = Path(__file__).with_name("fixtures") / "grouped.json"
@@ -515,11 +515,14 @@ class TestDotplot:
         )
         for channel, padding in [("x", 0.3), ("y", 0.5)]:
             encoding = unit["encoding"][channel]
-            assert encoding["type"] == "index"
-            assert spec["scales"][channel]["domain"] == [
-                0,
-                int(data[f"_{channel}"].max()),
-            ]
+            if encoding["type"] == "index":
+                assert spec["scales"][channel]["domain"] == [
+                    0,
+                    int(data[f"_{channel}"].max()),
+                ]
+            else:
+                assert encoding["type"] == "nominal"
+                assert grid_labels(spec, channel) == reference[f"{channel}_labels"]
             assert spec["scales"][channel]["paddingOuter"] == pytest.approx(padding)
             assert spec["scales"][channel]["zoom"] is False
         assert spec["scales"]["y"]["reverse"] is True
@@ -802,8 +805,7 @@ class TestMatrixplot:
             equal_nan=True,
         )
         for side, axis in [("bottom", "x"), ("left", "y")]:
-            labels = spec["datasets"][spec["surround"][side][0]["data"]["name"]]
-            assert [row["label"] for row in labels] == reference[f"{axis}_labels"]
+            assert grid_labels(spec, axis) == reference[f"{axis}_labels"]
         np.testing.assert_allclose(
             points(spec)["encoding"]["color"]["scale"]["domain"],
             reference["color_domain"],

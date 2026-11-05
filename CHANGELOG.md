@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-11-05
+
+### Added
+
+- Linked hover across multipanel Scanpy embeddings, enabled by default.
+  Set `linked_hover=False` to keep independent tooltips.
+- Native legend selections across embedding panels and linked expression
+  summaries. Legends and brushes now update the same selected cells.
+- Optional `legend_controls=True` for embedding grids: choose one gene colorbar
+  and show or hide observation legends without clearing their selections.
+- Native white outlines on PAGA edges and interactive legends for tracks,
+  profiles, simulations and expression annotations.
+
+### Changed
+
+- Use native categorical axes and dendrogram layout where compatible, while
+  preserving index axes for adaptive trees and repeated labels.
+- Make unselected embedding points fainter and give the linked expression
+  example a pale midpoint at zero.
+
+### Fixed
+
+- Dim point outlines and missing-value layers together with their foreground.
+- Keep composition bars inside their category bands and profile heatmap labels
+  inside their available space.
+- Release off-screen documentation charts and recreate them on return, limiting
+  simultaneous WebGL contexts on phones and long pages.
+- Rebuild notebook chart specifications when their Python rendering code changes.
+- Preserve legend appearance and hidden range readouts when controls are enabled,
+  and use automatic parameter names to avoid collisions with brushes.
+
 ## [0.9.0] - 2026-11-04
 
 ### Added

@@ -8,6 +8,7 @@ import genome_spy as gs
 from genome_spy.schemapi import Undefined
 
 from genome_spy.integrations.scanpy._labels import displaced_labels
+from genome_spy.integrations.scanpy._legend_interactions import legend_focus
 from genome_spy.integrations.scanpy._data import coordinate_domain, number
 from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
 from genome_spy.integrations.scanpy._style import (
@@ -53,6 +54,8 @@ def _adjacency_strip(
             zero=False,
             nice=False,
         )
+    elif len(set(labels)) == len(labels):
+        x = gs.X("_source_label:N").scale(type="band", domain=labels, padding=0)
     else:
         from genome_spy.integrations.scanpy._expression.grouped_chart import coordinate
 
@@ -68,8 +71,11 @@ def _adjacency_strip(
         dots.transform_filter("isValid(datum._y)")
         .encode(
             x=x.axis(
-                title="Source group" if labels is None else None,
-                labels=labels is None,
+                title="Source group"
+                if labels is None or len(set(labels)) == len(labels)
+                else None,
+                labels=labels is None or len(set(labels)) == len(labels),
+                labelAngle=-90 if labels is not None else 0,
             ),
             y=y.axis(title="Connectivity"),
             fill=gs.Fill("_kind:N", scale=colors).legend(
@@ -92,7 +98,7 @@ def _adjacency_strip(
             titleFontWeight="normal",
         )
     )
-    if labels is not None:
+    if labels is not None and len(set(labels)) != len(labels):
         from genome_spy.integrations.scanpy._expression.grouped_chart import (
             _slot_labels,
         )
@@ -112,7 +118,9 @@ def _adjacency_strip(
             surround=gs.SurroundSides(bottom=[source_labels]),
             spacing=0,
         ).resolve_legend(default="collected")
-    return chart.configure_legend(labelFont=FONT, labelFontSize=10 * PT)
+    return chart.configure_legend(
+        selectionLabel=False, labelFont=FONT, labelFontSize=10 * PT
+    )
 
 
 def build_paga_adjacency(
@@ -234,7 +242,10 @@ def _edge_layers(
         rules = (
             gs.Chart(edges)
             .mark_rule(
-                color="grey" if is_dashed else "#999999",
+                fill="grey" if is_dashed else "#999999",
+                stroke="white",
+                strokeWidth=0.7 * PT,
+                strokeAlign="outside",
                 opacity=0.5 if is_dashed else 1,
                 clip=True,
                 tooltip={"handler": "default"} if hover else None,
@@ -469,6 +480,18 @@ def build_paga(
             .legend(None),
         )
     )
+    if not numeric or colorbar:
+        focus, match = legend_focus(
+            "paga_node_color",
+            "_color" if numeric else "_group",
+            channel="fill",
+            categorical=not numeric,
+        )
+        points = (
+            points.add_params(focus)
+            .transform_calculate(_legend_opacity=gs.expr.if_(match, 1, 0.15))
+            .encode(opacity=gs.Opacity("_legend_opacity:Q").scale(None).legend(None))
+        )
     if hover:
         tooltips = [
             gs.Tooltip("_group:N", title="Group"),
@@ -514,7 +537,9 @@ def build_paga(
                 "strokeWidth": 0.8 * PT if frameon else 0,
             },
         )
-        .configure_legend(labelFont=FONT, labelFontSize=10 * PT, labelLimit=300)
+        .configure_legend(
+            selectionLabel=False, labelFont=FONT, labelFontSize=10 * PT, labelLimit=300
+        )
     )
     if cutoff is not None:
         result = result.add_params(cutoff)

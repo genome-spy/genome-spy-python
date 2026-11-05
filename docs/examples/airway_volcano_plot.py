@@ -84,12 +84,16 @@ airway_tooltip = [
 ]
 
 # Plot each gene's fold change against its significance.
+directions = gs.selection_point("directions", encodings=["color"], bind="legend")
+
 volcano_points = (
     gs.Chart()
     .transform_collect()
     .transform_formula(expr=DIRECTION_EXPRESSION, as_="direction")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
+    .add_params(directions)
     .encode(
+        opacity=gs.when(directions).then(gs.value(0.58)).otherwise(gs.value(0.08)),
         x=gs.X("log2fc:Q")
         .scale(domain=domains["volcano_x"], zoom=True)
         .title("log2 fold change (treated / control)"),
@@ -221,3 +225,5 @@ chart = (
     )
     .add_params(effect_cutoff, significance_cutoff)
 )
+
+chart = chart.configure_legend(selectionLabel=False)

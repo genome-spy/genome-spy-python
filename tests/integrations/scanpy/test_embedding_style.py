@@ -15,7 +15,12 @@ from tests.integrations.scanpy.embedding_fixtures import (
     make_density,
     make_embedding_adata,
 )
-from tests.integrations.scanpy.helpers import leaf_marks, points, units
+from tests.integrations.scanpy.helpers import (
+    embedding_legend,
+    leaf_marks,
+    points,
+    units,
+)
 
 sc = pytest.importorskip("scanpy")
 
@@ -345,12 +350,17 @@ class TestColorbar:
         assert legend["gradientThickness"] == legend["gradientLength"] / 30
         categorical, continuous = [points(panel)["encoding"] for panel in units(spec)]
         expected = deepcopy(points(units(original)[0])["encoding"])
-        if location not in (None, "right"):
-            expected["color"]["legend"].update(orient="right", direction="vertical")
         assert categorical == expected
+        expected_guide = embedding_legend(units(original)[0])
+        if location not in (None, "right"):
+            expected_guide.update(orient="right", direction="vertical")
+        assert embedding_legend(units(spec)[0]) == expected_guide
         expected = deepcopy(points(units(original)[1])["encoding"])
         if location is None:
             expected["color"]["legend"] = None
+            assert continuous["fillOpacity"]["field"] == "_legend_opacity"
+        else:
+            assert continuous["fillOpacity"]["field"] == "_legend_opacity"
         assert continuous == expected
 
     @pytest.mark.parametrize("linked", [False, True])
@@ -509,7 +519,18 @@ class TestEmbeddingOutlines:
         assert outlined["datasets"] == plain["datasets"]
         assert len(outlined["datasets"]) == 1
         for panel, normal in zip(units(outlined), units(plain), strict=True):
-            assert "data" in panel and "transform" in panel
+            assert "data" in outlined and "data" not in panel
+            assert outlined["transform"][0] == {"type": "identifier"}
+            assert [t["type"] for t in outlined["transform"]] == [
+                "identifier",
+                "formula",
+                "formula",
+            ]
+            assert [t["as"] for t in outlined["transform"][1:]] == [
+                "_legend_opacity",
+                "_outline_opacity",
+            ]
+            assert "transform" in panel
             marks = leaf_marks(panel)
             assert len(marks) in (3, 4)
             assert all(("data" not in mark for mark in marks))
@@ -625,10 +646,7 @@ class TestEmbeddingEdges:
             np.testing.assert_array_equal(segments, reference.get_segments())
             assert len(edge["transform"]) == 2
             assert all(
-                (
-                    t["from"]["name"] == points(panel)["data"]["name"]
-                    for t in edge["transform"]
-                )
+                (t["from"]["name"] == spec["data"]["name"] for t in edge["transform"])
             )
             assert reference.get_zorder() == -2
             for axis, expected in [("x", ax.get_xlim()), ("y", ax.get_ylim())]:
@@ -860,11 +878,13 @@ class TestEmbeddingDensity:
             assert projection["fields"] == [
                 "_obs_id",
                 "_obs_label",
+                *(["__uniqueId"] if len(axes) > 1 else []),
                 *[mark["encoding"][axis]["field"] for axis in ("x", "y")],
                 f"_value_{i}",
                 f"_color_{i}",
                 f"_size_{i}",
                 f"_order_{i}",
+                *(["_legend_opacity"] if len(axes) > 1 else []),
             ]
             rows = sorted(data, key=lambda r: r[f"_order_{i}"])
             fields = [mark["encoding"][axis]["field"] for axis in ("x", "y")]

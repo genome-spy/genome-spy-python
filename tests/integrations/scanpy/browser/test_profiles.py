@@ -11,6 +11,7 @@ import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.interactions import (
     hover_at,
+    click_legend,
     point_coordinates,
     point_spacing,
     pointer,
@@ -919,7 +920,7 @@ class TestPresentation:
 
     @pytest.mark.smoke
     @pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
-    def test_profile_dropdown_dims_other_series_without_dropping_points(
+    def test_profile_legend_dims_other_series_without_dropping_points(
         self, page, family
     ):
         chart = getattr(gsc.pl, family)(
@@ -932,7 +933,7 @@ class TestPresentation:
         )
         presentation_render(page, chart)
         before = point_coordinates(page)[0]
-        page.locator("select").select_option(label="A")
+        click_legend(page, "A")
         circles = presentation_plot_points(page)
         assert len(circles) == 6
         assert (
@@ -940,7 +941,7 @@ class TestPresentation:
             == [0.12] * 3 + [0.85] * 3
         )
         np.testing.assert_array_equal(point_coordinates(page)[0], before)
-        page.locator("select").select_option(label="All")
+        click_legend(page, "A", shift=True)
         assert all(
             (
                 float(c.get("fill-opacity", "1")) == 0.85
@@ -952,6 +953,21 @@ class TestPresentation:
         assert any(
             (group.get("stroke") == "#64748b" for group in svg_root(page).iter())
         )
+
+    def test_hidden_series_legend_keeps_its_native_dropdown(self, page):
+        chart = gsc.pl.timeseries(
+            [[1, 2], [3, 4]],
+            var_names=["A", "B"],
+            legend=False,
+            series_select=True,
+            show=False,
+        )
+        presentation_render(page, chart)
+        page.locator("select").select_option(label="A")
+        opacity = [
+            float(p.get("fill-opacity", "1")) for p in presentation_plot_points(page)
+        ]
+        assert sorted(opacity) == [0.12, 0.12, 0.85, 0.85]
 
     @pytest.mark.parametrize("as_heatmap", [False, True])
     def test_adjacency_points_grow_on_y_zoom_and_stay_bounded(self, page, as_heatmap):
@@ -993,7 +1009,10 @@ class TestPresentation:
             show=False,
         )
         presentation_render(page, chart)
-        page.locator("select").select_option(label="g1")
+        if as_heatmap:
+            page.locator("select").select_option(label="g1")
+        else:
+            click_legend(page, "g1")
         root = svg_root(page)
         text = [e.text for e in root.iter() if e.tag.endswith("text")]
         assert "beta" in text and "alpha" in text
@@ -1010,9 +1029,8 @@ class TestPresentation:
         presentation_render(
             page, gs.hconcat(left, right).resolve_scale(default="independent")
         )
-        controls = page.locator("select")
-        assert controls.count() == 2
-        controls.nth(0).select_option(label="A")
+        assert page.locator("select").count() == 0
+        click_legend(page, "A")
         circles = presentation_plot_points(page)
         assert sum((float(c.get("fill-opacity", "1")) == 0.12 for c in circles)) == 2
 
@@ -1117,9 +1135,14 @@ class TestPresentation:
         )
         presentation_render(page, chart)
         controls = page.locator("select")
-        assert controls.count() == 2
-        controls.nth(0).select_option(label="A")
-        controls.nth(1).select_option(label="2")
+        if as_heatmap:
+            assert controls.count() == 2
+            controls.nth(0).select_option(label="A")
+            controls.nth(1).select_option(label="2")
+        else:
+            assert controls.count() == 1
+            click_legend(page, "A")
+            controls.select_option(label="2")
         marks = [
             child
             for group in svg_root(page).iter()

@@ -322,7 +322,9 @@ def build_paga_path(
                 text=title, font=FONT, fontSize=title_size, fontWeight="normal"
             )
         )
-    return chart.configure_legend(labelFont=FONT, labelFontSize=10 * PT)
+    return chart.configure_legend(
+        selectionLabel=False, labelFont=FONT, labelFontSize=10 * PT
+    )
 
 
 def build_paga_path_lines(
@@ -393,7 +395,9 @@ def build_paga_path_lines(
     focus = None
     opacity = gs.Expression("1")
     if series_select:
-        focus, opacity = series_focus(keys, "_key")
+        focus, opacity = series_focus(
+            keys, "_key", channel="color" if columns > 1 else None
+        )
     guide = (
         gs.Legend(title=None, orient="bottom", direction="horizontal", symbolSize=64)
         if columns > 1
@@ -421,6 +425,8 @@ def build_paga_path_lines(
         lines = lines.transform_calculate(_focus_opacity=opacity).encode(
             opacity=gs.Opacity("_focus_opacity:Q").scale(None).legend(None)
         )
+        if columns > 1:
+            lines = lines.add_params(focus.copy(push="outer"))
     if hover:
         lines = lines.encode(
             tooltip=[
@@ -456,7 +462,9 @@ def build_paga_path_lines(
         .resolve_legend(color="collected")
     )
     if focus is not None:
-        chart = chart.add_params(focus)
+        chart = chart.add_params(
+            gs.param(focus.name, value=None) if columns > 1 else focus
+        )
     if title is not None:
         chart = chart.properties(
             title=gs.Title(
@@ -464,7 +472,7 @@ def build_paga_path_lines(
             )
         )
     return chart.configure_legend(
-        labelFont=FONT, labelFontSize=legend_size
+        selectionLabel=False, labelFont=FONT, labelFontSize=legend_size
     ).configure_axis(
         AXIS_TEXT,
         titleFontWeight="normal",

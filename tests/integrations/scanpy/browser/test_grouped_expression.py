@@ -276,7 +276,9 @@ class TestDotplot:
             px = round(
                 index_position(
                     x,
-                    scales["x"]["domain"][1] + 1,
+                    len(scales["x"]["domain"])
+                    if scales["x"].get("type") == "band"
+                    else scales["x"]["domain"][1] + 1,
                     0.3,
                     bounds["width"],
                     scales["x"]["gapPositions"],
@@ -286,7 +288,9 @@ class TestDotplot:
             py = round(
                 index_position(
                     y,
-                    scales["y"]["domain"][1] + 1,
+                    len(scales["y"]["domain"])
+                    if scales["y"].get("type") == "band"
+                    else scales["y"]["domain"][1] + 1,
                     0.5,
                     bounds["height"],
                     scales["y"]["gapPositions"],

@@ -140,6 +140,9 @@ class GenomeSpyNotebook(Directive):
         if not path.is_relative_to(root) or path.suffix != ".ipynb":
             raise self.error("Expected a notebook path inside this repository.")
         env.note_dependency(str(path))
+        # Cached chart specs must also follow changes in their Python renderers.
+        for source in (core.REPO_ROOT / "src/genome_spy").rglob("*.py"):
+            env.note_dependency(str(source))
         notebook = json.loads(path.read_text(encoding="utf-8"))
         for prepared in _prepared_paths(notebook, root).values():
             env.note_dependency(str(prepared))

@@ -1,6 +1,7 @@
 """Zoomable t-SNE scatter plot.
 
 Explore a dense embedding with sample colors and points that grow on zoom.
+Click a sample in the legend to emphasize it.
 """
 
 import genome_spy as gs
@@ -18,6 +19,8 @@ zoom = gs.Expression("zoomLevel")
 width = gs.Expression("width")
 height = gs.Expression("height")
 
+samples = gs.selection_point("samples", encodings=["color"], bind="legend")
+
 points = (
     gs.Chart()
     .mark_point(
@@ -26,7 +29,11 @@ points = (
             * (width * height / (500 * 500))
         )
     )
-    .encode(color=gs.Color("sample:N"), opacity=gs.value(0.7))
+    .add_params(samples)
+    .encode(
+        color=gs.Color("sample:N"),
+        opacity=gs.when(samples).then(gs.value(0.7)).otherwise(gs.value(0.1)),
+    )
 )
 
 # Keep the original example's playful notes at their plotted positions.
@@ -54,3 +61,5 @@ chart = (
         y=gs.Y("y:Q").scale(domain=[-10, 10], zoom=True),
     )
 )
+
+chart = chart.configure_legend(selectionLabel=False)

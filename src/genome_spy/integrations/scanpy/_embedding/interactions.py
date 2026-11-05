@@ -46,6 +46,18 @@ def validate_brush(prepared: PreparedEmbedding) -> None:
         )
 
 
+def brush_membership(selection: gs.Parameter, fields: tuple[str, str]) -> gs.Expression:
+    """Return the native interval test used by cell counts and point highlighting."""
+    x, y = fields
+    name = selection.name
+    # Match the shader's lower-inclusive, upper-exclusive point membership.
+    return gs.Expression(
+        f"{name}.intervals.x && {name}.intervals.y && "
+        f"{name}.intervals.x[0] <= datum.{x} && datum.{x} < {name}.intervals.x[1] && "
+        f"{name}.intervals.y[0] <= datum.{y} && datum.{y} < {name}.intervals.y[1]"
+    )
+
+
 def brush_count(
     selection: gs.Parameter,
     fields: tuple[str, str],
@@ -53,32 +65,27 @@ def brush_count(
     name: str,
     width: float,
     within_brush: bool = False,
+    cell_filter: gs.Expression | None = None,
 ) -> gs.Chart:
     """Return native count text inheriting its cell data from the composition.
 
     Optionally fit the text inside the brush using native ranged-text encodings.
     """
-    x, y = fields
     parameter = selection.name
-
-    # shortcut: sum preserves zero counts in Core 1.2.0; replace after its fix ships.
-    # Match the shader's lower-inclusive, upper-exclusive point membership.
-    predicate = (
-        f"{parameter}.intervals.x && {parameter}.intervals.y && "
-        f"{parameter}.intervals.x[0] <= datum.{x} && datum.{x} < {parameter}.intervals.x[1] && "
-        f"{parameter}.intervals.y[0] <= datum.{y} && datum.{y} < {parameter}.intervals.y[1]"
-    )
+    predicate = str(brush_membership(selection, fields))
     active = f"{parameter}.intervals.x && {parameter}.intervals.y"
     label = (
         "format(datum.count, ',') + ' cells'"
         if within_brush
         else "datum.count + ' cells selected'"
     )
+    if cell_filter is not None:
+        predicate = str(gs.Expression(predicate) & cell_filter)
     count = (
         gs.Chart()
         .transform_collect()
-        .transform_formula(expr=f"({predicate}) ? 1 : 0", as_="selected")
-        .transform_aggregate(fields=["selected"], ops=["sum"], as_=["count"])
+        .transform_filter(predicate)
+        .transform_aggregate(as_=["count"])
         .transform_formula(expr=label, as_="label")
     )
     if within_brush:

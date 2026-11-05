@@ -235,9 +235,18 @@ def build_timeseries(
     size = 6 * (PT * path_width) ** 2
     focus = None
     opacity = gs.Expression("0.8")
+    legend_focus_enabled = (
+        series_select
+        and (prepared.legend or colorbar)
+        and (prepared.color_domain is None or not colorbar)
+    )
     if series_select:
         focus, opacity = series_focus(
-            list(dict.fromkeys(prepared.table["_series"])), "_series"
+            list(dict.fromkeys(prepared.table["_series"])),
+            "_series",
+            channel=("fill" if prepared.color_domain is None else "shape")
+            if legend_focus_enabled
+            else None,
         )
     source = gs.Chart(prepared.table)
     run = None
@@ -292,6 +301,9 @@ def build_timeseries(
         points = points.encode(opacity=gs.value(0.8))
     if prepared.color_domain is not None and guide is not None and not colorbar:
         points = _numeric_series_key(points, prepared, guide, shape)
+    if legend_focus_enabled:
+        assert focus is not None
+        points = points.add_params(focus.copy(push="outer"))
     if hover:
         points = points.encode(
             tooltip=[
@@ -344,10 +356,14 @@ def build_timeseries(
             spacing=0,
         ).resolve_legend(default="collected")
     if focus is not None:
-        result = result.add_params(focus)
+        result = result.add_params(
+            gs.param(focus.name, value=None) if legend_focus_enabled else focus
+        )
     if run is not None:
         result = result.add_params(run)
     return result.configure_axis(
         AXIS_TEXT,
         titleFontWeight="normal",
-    ).configure_legend(disable=True, labelFont=FONT, labelFontSize=10 * PT)
+    ).configure_legend(
+        selectionLabel=False, disable=True, labelFont=FONT, labelFontSize=10 * PT
+    )

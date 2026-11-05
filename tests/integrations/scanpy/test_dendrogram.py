@@ -317,7 +317,7 @@ def test_two_group_attachment_matches_scanpy_skip_and_standalone_tree_works():
             c = getattr(gsc.pl, family)(
                 a, ["g1", "g2"], "group", dendrogram=True, show=False
             )
-        assert set(c.to_dict()["surround"]) == {"left", "bottom"}
+        assert set(c.to_dict()["surround"]) == {"bottom"}
     assert len(gsc.pl.dendrogram(a, "group", show=False).to_dict()["datasets"])
 
 
@@ -499,4 +499,15 @@ def test_all_group_tree_callers_use_native_orthogonal_links(case):
     assert mark["mark"]["linkShape"] == "orthogonal"
     assert mark["mark"]["orient"] == ("vertical" if vertical else "horizontal")
     assert mark["mark"]["tooltip"] is None
-    assert len(spec["datasets"][mark["data"]["name"]]) == 6
+    rows = spec["datasets"][mark["data"]["name"]]
+    if any(t["type"] == "dendrogram" for t in mark.get("transform", [])):
+        assert len(rows) == 7
+        assert sum(row["parent"] is not None for row in rows) == 6
+        assert sorted(row["slot"] for row in rows if row["slot"] is not None) == [
+            0,
+            1,
+            2,
+            3,
+        ]
+    else:
+        assert len(rows) == 6

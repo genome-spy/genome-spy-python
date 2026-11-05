@@ -295,8 +295,13 @@ def test_group_names_require_explicit_labels_and_only_name_axes_and_tooltips(
             if mark["mark"]["type"] == "text"
         }
         assert text_fields.isdisjoint({"_source_label", "_target_label"})
-        assert text_fields == ({"label"} if supplied is not None else set())
-        if supplied is not None:
+        assert text_fields == (
+            {"label"} if supplied is not None and as_heatmap else set()
+        )
+        if supplied is not None and not as_heatmap:
+            assert dots["encoding"]["x"]["field"] == "_source_label"
+            assert dots["encoding"]["x"]["scale"]["domain"] == labels
+        if supplied is not None and as_heatmap:
             ticks = [
                 rows
                 for rows in spec["datasets"].values()

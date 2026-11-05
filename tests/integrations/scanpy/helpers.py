@@ -35,6 +35,14 @@ def leaf_marks(spec: dict[str, Any]) -> list[dict[str, Any]]:
     return [spec]
 
 
+def embedding_legend(panel: dict[str, Any]) -> dict[str, Any] | None:
+    """Read an embedding's native legend defaults and any explicit color override."""
+    color = points(panel)["encoding"]["color"]
+    if "legend" in color and color["legend"] is None:
+        return None
+    return {**panel.get("config", {}).get("legend", {}), **color.get("legend", {})}
+
+
 def name_embedding_scales(spec: dict[str, Any], prefix: str) -> dict[str, Any]:
     """Name only inspected test scales; production charts keep native scale identity."""
     for axis in ("x", "y"):
@@ -118,3 +126,13 @@ def records(chart):
     """Return the shared table of a single-source chart."""
     spec = chart.to_dict()
     return spec["datasets"][spec["data"]["name"]]
+
+
+def grid_labels(spec: dict[str, Any], axis: str) -> list[str]:
+    """Read native category labels or positional side labels from a matrix chart."""
+    scale = spec["scales"][axis]
+    if scale.get("type") == "band":
+        return list(scale["domain"])
+    side = "bottom" if axis == "x" else "left"
+    labels = spec["surround"][side][0]
+    return [row["label"] for row in spec["datasets"][labels["data"]["name"]]]

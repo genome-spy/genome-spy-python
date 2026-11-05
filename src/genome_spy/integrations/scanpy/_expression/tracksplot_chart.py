@@ -19,6 +19,7 @@ from genome_spy.integrations.scanpy._expression.grouped_data import (
 )
 from genome_spy.integrations.scanpy._expression.grouped_chart import _category_strip
 from genome_spy.integrations.scanpy._style import FONT
+from genome_spy.integrations.scanpy._legend_interactions import legend_focus
 
 
 def _track_bars(
@@ -117,6 +118,7 @@ def build_tracksplot(
     value_fields: list[str] | None = None,
     color_scale: gs.Scale | None = None,
     highlight: dict[str, Any] | None = None,
+    highlight_filter: gs.Expression | None = None,
     show_legend: bool = True,
 ) -> gs.VConcatChart:
     """Return one rect per cell and gene, with independent expression scales.
@@ -185,6 +187,10 @@ def build_tracksplot(
         .encode(y=gs.value(0) if log else gs.Y(datum=0, type="quantitative"))
     )
 
+    focus, match = (
+        legend_focus("tracks_groups", "_group") if show_legend else (None, None)
+    )
+
     # Each gene keeps its own value range while sharing cell positions.
     tracks: list[gs.TopLevelSpec] = []
     for slot, name in enumerate(values.columns):
@@ -192,16 +198,21 @@ def build_tracksplot(
         bars = _track_bars(
             numeric[:, slot], field, str(name), color, log=log, hover=hover
         )
+        if match is not None:
+            bars = bars.transform_calculate(
+                _group_opacity=gs.expr.if_(match, 1, 0.15)
+            ).encode(opacity=gs.Opacity("_group_opacity:Q").scale(None).legend(None))
         marks = [bars]
         if highlight is not None:
             # Keep the full profile as context; selected cells retain their fixed slots.
+            selected = bars.transform_filter(**highlight)
+            if highlight_filter is not None:
+                selected = selected.transform_filter(highlight_filter)
             marks = [
                 bars.encode(opacity=gs.value(0.15)).properties(
                     name=f"tracks-all-{slot}"
                 ),
-                bars.transform_filter(**highlight).properties(
-                    name=f"tracks-selected-{slot}"
-                ),
+                selected.properties(name=f"tracks-selected-{slot}"),
             ]
         track: gs.LayerChart | gs.SurroundChart = gs.layer(
             *marks, baseline, boundaries
@@ -244,6 +255,7 @@ def build_tracksplot(
         horizontal=True,
         title=groupby,
         hover=hover,
+        selection=focus,
     )
     if tree is not None:
         tracks.insert(
@@ -252,7 +264,7 @@ def build_tracksplot(
                 tree, prepared.intervals["center"].tolist(), horizontal=True, size=100
             ).properties(width=width),
         )
-    return (
+    result = (
         gs.vconcat(*tracks, strip, spacing=spacing)
         .properties(
             data=table,
@@ -273,5 +285,13 @@ def build_tracksplot(
         .resolve_legend(default="collected")
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_axis(labelFont=FONT)
-        .configure_legend(labelFont=FONT, layout={"anchor": "middle"})
+        .configure_legend(
+            selectionLabel=False, labelFont=FONT, layout={"anchor": "middle"}
+        )
+    )
+
+    return (
+        result.add_params(gs.param(focus.name, value=None))
+        if focus is not None
+        else result
     )

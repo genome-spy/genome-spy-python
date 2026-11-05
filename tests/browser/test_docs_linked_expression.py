@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 
 from tests.browser.test_docs_notebook import ROOT
+from tests.browser.test_docs_notebook import _expose_guide_api, _show_guide_chart
 from tests.browser.test_docs_notebook import page as page
 from tests.integrations.scanpy.browser.interactions import (
     position,
@@ -80,7 +81,7 @@ def _render_furo_guide(page, monkeypatch, tmp_path):
     indices = count()
     markup = re.sub(
         re.escape("{ bare: true }) : null;"),
-        lambda match: f"{match[0]} window.guideApis[{next(indices)}] = api;",
+        lambda match: _expose_guide_api(match[0], next(indices)),
         markup,
     )
 
@@ -106,17 +107,13 @@ def _render_furo_guide(page, monkeypatch, tmp_path):
 
     page.route("http://guide.test/**", serve)
     page.goto("http://guide.test/")
-    page.wait_for_function("window.guideApis?.filter(Boolean).length === 4")
-    page.locator(".gs-doc-embed").first.scroll_into_view_if_needed()
-    page.evaluate(
-        "async () => {await document.fonts.ready; await new Promise(requestAnimationFrame);}"
-    )
+    _show_guide_chart(page, 0)
 
 
 def test_linked_expression_means_histogram_and_clear(monkeypatch, page, tmp_path):
     sc = pytest.importorskip("scanpy")
     _render_furo_guide(page, monkeypatch, tmp_path)
-    page.evaluate("window.api = guideApis[2]")
+    _show_guide_chart(page, 2)
     size = page.evaluate("api.getLogicalCanvasSize()")
     assert size["width"] <= 736
     embed = page.locator(".gs-doc-embed").nth(2)
@@ -252,7 +249,7 @@ def test_additional_layouts_keep_summaries_correct_and_brushes_independent(
 ):
     sc = pytest.importorskip("scanpy")
     _render_furo_guide(page, monkeypatch, tmp_path)
-    page.evaluate("index => window.api = guideApis[index]", index)
+    _show_guide_chart(page, index)
     embed = page.locator(".gs-doc-embed").nth(index)
     embed.scroll_into_view_if_needed()
     size = page.evaluate("api.getLogicalCanvasSize()")
@@ -364,9 +361,14 @@ def test_additional_layouts_keep_summaries_correct_and_brushes_independent(
             )
     for other in set(range(4)) - {index}:
         selection = page.evaluate(
-            "index => guideApis[index].params.get('cells').getValue()", other
+            "index => guideApis[index]?.params.get('cells').getValue().intervals", other
         )
-        assert selection["intervals"] == {"x": None, "y": None}
+        if selection is None:
+            assert (
+                page.locator(".gs-doc-embed").nth(other).locator("canvas").count() == 0
+            )
+        else:
+            assert selection == {"x": None, "y": None}
     page.screenshot(path=str(tmp_path / f"linked-layout-{index}.png"), full_page=True)
     page.evaluate(
         "api.views.get({scope:[],view:'umap-brush-cells'}).params.getSelection('cells').clear()"
@@ -386,7 +388,7 @@ def test_pbmc3k_tracks_follow_the_brush_without_moving_cells(
     from anndata import read_h5ad
 
     _render_furo_guide(page, monkeypatch, tmp_path)
-    page.evaluate("window.api = guideApis[3]")
+    _show_guide_chart(page, 3)
     embed = page.locator(".gs-doc-embed").nth(3)
     embed.scroll_into_view_if_needed()
     size = page.evaluate("api.getLogicalCanvasSize()")
@@ -496,9 +498,15 @@ def test_pbmc3k_tracks_follow_the_brush_without_moving_cells(
         assert rows(f"tracks-selected-{i}") == selected[i]
         assert rows(f"tracks-all-{i}") == references[i]
     for other in range(3):
-        assert page.evaluate(
-            "i => guideApis[i].params.get('cells').getValue().intervals", other
-        ) == {"x": None, "y": None}
+        selection = page.evaluate(
+            "i => guideApis[i]?.params.get('cells').getValue().intervals", other
+        )
+        if selection is None:
+            assert (
+                page.locator(".gs-doc-embed").nth(other).locator("canvas").count() == 0
+            )
+        else:
+            assert selection == {"x": None, "y": None}
     page.screenshot(path=str(tmp_path / "linked-pbmc3k-tracks.png"), full_page=True)
     page.evaluate(
         "api.views.get({scope:[],view:'umap-brush-cells'}).params.getSelection('cells').clear()"
