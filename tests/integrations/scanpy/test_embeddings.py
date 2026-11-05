@@ -369,6 +369,9 @@ class TestUmap:
         chart = gsc.pl.umap(adata, color=colors, legend_controls=True, show=False)
         assert umap_rows(chart) == umap_rows(baseline)
         spec = chart.to_dict()
+        for key, value in baseline.to_dict()["config"]["legend"].items():
+            if key not in {"orient", "direction", "layout"}:
+                assert spec["config"]["legend"][key] == value
         controls = [p for p in spec["params"] if "bind" in p]
         assert len(controls) == 3
         assert controls[0]["bind"]["options"] == [None, "g1", "g2"]

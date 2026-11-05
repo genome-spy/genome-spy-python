@@ -307,6 +307,7 @@ def _panel(
     Draw points, missing values and labels in order, adding only requested interactions.
     """
     table = prepared.table
+    faint = min(style.alpha * 0.15, 0.04)
     x_field, y_field = [f"_coord_{d}" for d in panel.dimensions]
     limits = _panel_limits(prepared, panel, index)
     x = _coordinate(
@@ -397,7 +398,7 @@ def _panel(
         )
     if shared_legends is None and legend_selection is not None:
         points = points.transform_calculate(
-            _legend_opacity=gs.expr.if_(legend_selection[1], style.alpha, 0.04),
+            _legend_opacity=gs.expr.if_(legend_selection[1], style.alpha, faint),
             **(
                 {"_outline_opacity": gs.expr.if_(legend_selection[1], 1, 0.04)}
                 if style.outline_width is not None
@@ -415,7 +416,7 @@ def _panel(
             _legend_opacity=gs.expr.if_(
                 cell_filter,
                 gs.Expression("datum._legend_opacity") if focused else style.alpha,
-                0.04,
+                faint,
             ),
             **(
                 {
@@ -633,6 +634,7 @@ def _with_legend_controls(
         .resolve_legend(default="collected")
         ._configure_nested(
             "legend",
+            chart._config_object()._kwds.get("legend", Undefined),
             orient="right",
             direction="vertical",
             layout={
@@ -740,7 +742,9 @@ def build_embedding(
                 match = match & predicate
             # Compute membership once before each panel drops the other color fields.
             chart = chart.transform_calculate(
-                _legend_opacity=gs.expr.if_(match, style.alpha, 0.04),
+                _legend_opacity=gs.expr.if_(
+                    match, style.alpha, min(style.alpha * 0.15, 0.04)
+                ),
                 **(
                     {"_outline_opacity": gs.expr.if_(match, 1, 0.04)}
                     if style.outline_width is not None

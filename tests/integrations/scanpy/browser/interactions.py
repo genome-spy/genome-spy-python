@@ -148,6 +148,19 @@ def move_to(page, bounds, x, y, x_domain, y_domain, expected_id):
     return px, py
 
 
+def scale_state(page, names):
+    """Read domain and placement, since categorical zoom moves bands without renaming them."""
+    return page.evaluate(
+        """names => names.map(name => {
+            const resolution = api.getScaleResolutionByName(name);
+            const scale = resolution.getScale(), domain = scale.domain();
+            return {domain: resolution.getDomain(), first: scale(domain[0]),
+                    last: scale(domain.at(-1)), bandwidth: scale.bandwidth()};
+        })""",
+        names,
+    )
+
+
 def wait_for_navigation(page, family, probe=2, *, scale_names=None):
     """Wait for stable scale positions before measuring a completed zoom or pan."""
     page.evaluate(

@@ -18,6 +18,7 @@ from tests.integrations.scanpy.browser.interactions import (
     hover_at,
     pointer,
     position,
+    scale_state,
     svg_root,
     value_texts,
     wait_for_navigation,
@@ -666,9 +667,7 @@ class TestMatrix:
         for width, height in ((240, 200), (400, 280)):
             spec["spec"].update(width=width, height=height)
             bounds = matrix_render(page, gs.TopLevelSpec.from_dict(spec))
-            original = page.evaluate(
-                "api.getScaleResolutionByName('matrix-x').getScale()('gene0')"
-            )
+            original = scale_state(page, ["matrix-x"])
             for navigated in (False, True):
                 if navigated:
                     px, py = pointer(page, bounds)
@@ -709,12 +708,7 @@ class TestMatrix:
                             centers[slot],
                             ET.tostring(label),
                         )
-            assert (
-                page.evaluate(
-                    "api.getScaleResolutionByName('matrix-x').getScale()('gene0')"
-                )
-                != original
-            ) is (zoom == "xy")
+            assert (scale_state(page, ["matrix-x"]) != original) is (zoom == "xy")
 
     @pytest.mark.parametrize("explicit_labels", [False, True])
     @pytest.mark.parametrize("titles", ["both", "x", "y"])

@@ -42,6 +42,18 @@ pytest.importorskip("scanpy")
 pytest.importorskip("PIL.Image")
 
 
+def cell_values(page):
+    """Read prepared cell values, excluding opacity fields that change with selection."""
+    return [
+        {
+            key: value
+            for key, value in row.items()
+            if key not in {"_legend_opacity", "_outline_opacity"}
+        }
+        for row in rows(page, "umap-points")
+    ]
+
+
 class TestBrushing:
     """Observe native brush counts and ordinary widget trait delivery."""
 
@@ -587,7 +599,7 @@ class TestEmbeddingSummary:
         )
         canvas = page.locator("canvas").first.bounding_box()
         origin = (canvas["x"] + bounds["x"], canvas["y"] + bounds["y"])
-        before = rows(page, "umap-points")
+        before = cell_values(page)
 
         def label_geometry():
             root = svg_root(page)
@@ -631,7 +643,7 @@ class TestEmbeddingSummary:
         page.mouse.move(origin[0] + 5, origin[1] + bounds["height"] - 10, steps=6)
         second = label_geometry()
         assert second[0] < first[0]
-        assert rows(page, "umap-points") == before
+        assert cell_values(page) == before
         page.mouse.move(origin[0] + bounds["width"] * 0.5 + 2, origin[1] + 32)
         assert not any(
             (
@@ -665,7 +677,7 @@ class TestEmbeddingSummary:
             .to_chart()
         )
         names = render_summary(page, chart)
-        points = rows(page, "umap-points")
+        points = cell_values(page)
         reference = rows(page, "all-expression-histogram")
         bounds = page.evaluate(
             "name => api.views.getLayoutBounds({scope:[],view:name})",
@@ -695,7 +707,7 @@ class TestEmbeddingSummary:
         assert {row["_obs_id"] for row in rows(page, "tracks-selected-0")} == {
             f"cell-{i}" for i in range(5)
         }
-        assert rows(page, "umap-points") == points
+        assert cell_values(page) == points
         assert rows(page, "all-expression-histogram") == reference
         assert (
             page.evaluate("api.params.get('cells').getValue().intervals") == intervals
@@ -731,7 +743,7 @@ class TestEmbeddingSummary:
         assert heatmap_bounds["width"] >= 300
         assert heatmap_bounds["height"] >= 360
         reference = rows(page, "all-expression-histogram")
-        points_before = rows(page, "umap-points")
+        points_before = cell_values(page)
         assert rows(page, names["selected-expression"]) == []
         canvas = page.locator("canvas").first.bounding_box()
         x, y = (canvas["x"] + bounds["x"], canvas["y"] + bounds["y"])
@@ -750,7 +762,7 @@ class TestEmbeddingSummary:
             {"A": -0.5, "B": 3.5 / 3}
         )
         assert rows(page, "all-expression-histogram") == reference
-        assert rows(page, "umap-points") == points_before
+        assert cell_values(page) == points_before
         bins = rows(page, "selected-expression-histogram")
         assert {row["bin_start"]: row["count"] for row in bins} == {
             -1: 1,
@@ -992,7 +1004,7 @@ class TestEmbeddingSummaryTracks:
         ]
         assert [row["_cell"] for row in reference] == list(range(6))
         assert rows(page, "tracks-selected-0") == reference
-        points = rows(page, "umap-points")
+        points = cell_values(page)
         intervals = {"x": [-0.5, 1.5], "y": [-0.5, 0.5]}
         set_brush(page, intervals)
         for slot in (0, 1):
@@ -1001,7 +1013,7 @@ class TestEmbeddingSummaryTracks:
             } == {"cell-0", "cell-1"}
         assert rows(page, "umap-count-cells")[0]["count"] == 2
         assert rows(page, "tracks-all-0") == reference
-        assert rows(page, "umap-points") == points
+        assert cell_values(page) == points
         root = svg_root(page)
         rectangles = next(
             (group for group in root.iter() if group.get("data-name") == "tracks-all-0")
@@ -1090,7 +1102,7 @@ class TestEmbeddingSummaryTracks:
         page.evaluate(
             "() => {\n        window.embedding = api.debug.getViewRoot().getDescendants()\n            .find(v => v.spec.name === 'umap-points');\n        window.domains = () => ['x','y'].map(c => embedding.getScaleResolution(c).getDomain());\n    }"
         )
-        original = rows(page, "umap-points")
+        original = cell_values(page)
         track_scale = "api.debug.getViewRoot().getDescendants().find(v => v.spec.name === 'tracks-all-0').getScaleResolution('x')"
         track_domain = page.evaluate(f"{track_scale}.getDomain()")
 
@@ -1157,7 +1169,7 @@ class TestEmbeddingSummaryTracks:
         assert np.ptp(panned[0]) == pytest.approx(np.ptp(panned[1]))
         assert page.evaluate("api.params.get('cells').getValue()") == selection
         assert rows(page, "tracks-selected-0") == selected
-        assert rows(page, "umap-points") == original
+        assert cell_values(page) == original
         page.mouse.dblclick(*pointer(0.85, 0.85))
         assert page.evaluate("api.params.get('cells').getValue().intervals.x") is None
         select(0.1, 0.1, 0.8, 0.8)

@@ -108,15 +108,24 @@ class TestUmap:
             for node in svg_root(page).iter()
         )
 
-    @pytest.mark.parametrize("color", ["cell_type", "score"])
-    @pytest.mark.parametrize("outlines", [False, True])
+    @pytest.mark.parametrize(
+        "color,outlines,alpha",
+        [
+            ("cell_type", False, 0.7),
+            ("score", False, 0.7),
+            ("cell_type", True, 0.7),
+            ("score", True, 0.7),
+            ("cell_type", False, 0),
+        ],
+    )
     def test_native_legends_dim_cells_without_removing_them(
-        self, page, color, outlines
+        self, page, color, outlines, alpha
     ):
         chart = gsc.pl.umap(
             fixture(),
             color=color,
             add_outline=outlines,
+            alpha=alpha,
             size=50,
             width=240,
             height=240,
@@ -150,7 +159,10 @@ class TestUmap:
         ]
         assert len(circles) == 8 * (3 if outlines else 1)
         opacity = [float(e.get("fill-opacity", "1")) for e in circles]
-        assert 0.04 in opacity and 1 in opacity
+        if alpha == 0:
+            assert set(opacity) == {0}
+        else:
+            assert 0.04 in opacity and (1 if outlines else alpha) in opacity
         if outlines:
             groups = [
                 sorted(float(e.get("fill-opacity", "1")) for e in group)

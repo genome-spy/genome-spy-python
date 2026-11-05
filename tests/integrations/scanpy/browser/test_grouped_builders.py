@@ -7,7 +7,11 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from tests.integrations.scanpy.browser.interactions import hover_at, pointer
+from tests.integrations.scanpy.browser.interactions import (
+    hover_at,
+    pointer,
+    scale_state,
+)
 from tests.integrations.scanpy.browser.rendering import render
 from tests.integrations.scanpy.grid_fixture_support import builder
 from tests.integrations.scanpy.helpers import index_position
@@ -174,12 +178,12 @@ def test_native_snapshots_compose_and_navigate_independently(page, tmp_path, fam
         for axis in ("x", "y"):
             child["scales"][axis]["name"] = f"{prefix}-{axis}"
     bounds = render(page, spec)
-    domains = "['first-x','first-y','second-x','second-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"
-    before = page.evaluate(domains)
+    scales = ["first-x", "first-y", "second-x", "second-y"]
+    before = scale_state(page, scales)
     pointer(page, bounds)
     page.mouse.wheel(0, -300)
     page.wait_for_timeout(300)
-    after = page.evaluate(domains)
+    after = scale_state(page, scales)
     assert after[0] != before[0] and after[1] != before[1]
     assert after[2:] == before[2:]
     # Export the untouched production composition too, with no test scale names.
