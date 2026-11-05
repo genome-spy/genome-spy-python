@@ -13,6 +13,8 @@ unknown values.
 Pan and zoom to inspect the matrix. Both trees stay aligned with their leaves,
 and their merge-height scales fit branches contained in the visible range.
 Hover over a cell for its gene, cell-line metadata, and expression values.
+Click an annotation legend to dim other rows in the matrix. Drag the z-score
+colorbar brush to highlight a range of values. These selections work together.
 
 ## How the chart is built
 

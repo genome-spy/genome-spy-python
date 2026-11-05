@@ -122,7 +122,7 @@ row_tree = (
 lineages = gs.selection_point("lineages", encodings=["color"], bind="legend")
 lineage = (
     gs.Chart()
-    .add_params(lineages)
+    .add_params(lineages.copy(push="outer"))
     .mark_rect(clip="y")
     .encode(
         opacity=gs.when(lineages).then(gs.value(1)).otherwise(gs.value(0.15)),
@@ -166,7 +166,7 @@ growth_patterns = gs.selection_point(
 )
 growth = (
     gs.Chart()
-    .add_params(growth_patterns)
+    .add_params(growth_patterns.copy(push="outer"))
     .mark_rect(clip="y")
     .encode(
         opacity=gs.when(growth_patterns).then(gs.value(1)).otherwise(gs.value(0.15)),
@@ -188,7 +188,7 @@ sample_origins = gs.selection_point(
 )
 origin = (
     gs.Chart()
-    .add_params(sample_origins)
+    .add_params(sample_origins.copy(push="outer"))
     .mark_rect(clip="y")
     .encode(
         opacity=gs.when(sample_origins).then(gs.value(1)).otherwise(gs.value(0.15)),
@@ -255,6 +255,29 @@ annotations = gs.SurroundSideSpec(
     overhang=OverhangConfig(bottom=True),
 )
 
+# Match annotation values across views, even though their color scales differ.
+annotation_match = gs.Expression("true")
+for selection, field in (
+    (lineages, "lineage"),
+    (growth_patterns, "growthPattern"),
+    (sample_origins, "sampleOrigin"),
+):
+    reference = gs.Expression(selection.name)
+    annotation_match = annotation_match & (
+        ~gs.expr.selectionActive(reference)
+        | gs.expr.selectionContains(reference, "color", gs.datum[field])
+    )
+expression_range = gs.selection_interval(
+    "expression_range", encodings=["color"], bind="legend"
+)
+expression_bounds = gs.expr.selectionBounds(
+    gs.Expression(expression_range.name), "color"
+)
+expression_match = ~gs.expr.selectionActive(gs.Expression(expression_range.name)) | (
+    (gs.datum.value >= expression_bounds[0]) & (gs.datum.value < expression_bounds[1])
+)
+
+
 hovered = gs.selection_point(
     "hovered",
     on="mousemove",
@@ -267,7 +290,16 @@ cells = (
     gs.Chart(gs.Data(url=DATA + "expression-zscores.csv"))
     .transform_regex_fold(columnRegex=r"^(gene\d+)$", asKey="feature", asValue="value")
     .transform_lookup(
-        from_=cell_lines, key="sample", values=["row", "cellLine", "lineage", "subtype"]
+        from_=cell_lines,
+        key="sample",
+        values=[
+            "row",
+            "cellLine",
+            "lineage",
+            "subtype",
+            "growthPattern",
+            "sampleOrigin",
+        ],
     )
     .transform_lookup(
         from_=gs.Data(
@@ -287,9 +319,13 @@ cells = (
     .transform_formula(
         expr=gs.datum.value * gs.datum.sdLog2Tpm + gs.datum.meanLog2Tpm, as_="log2Tpm"
     )
-    .add_params(hovered)
+    .transform_calculate(
+        legend_opacity=gs.expr.if_(annotation_match & expression_match, 1, 0.1)
+    )
+    .add_params(hovered, expression_range)
     .mark_rect(stroke="#0f172a")
     .encode(
+        opacity=gs.Opacity("legend_opacity:Q").scale(None).legend(None),
         x=gs.X("column:I").axis(None),
         y=gs.Y("row:I").axis(None),
         color=gs.Color("value:Q")
@@ -369,6 +405,11 @@ chart = (
                 gapWidth=5,
             ),
         ),
+    )
+    .add_params(
+        gs.param(lineages.name, value=None),
+        gs.param(growth_patterns.name, value=None),
+        gs.param(sample_origins.name, value=None),
     )
     .resolve_legend(color="collected")
     .configure_style(

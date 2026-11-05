@@ -2,6 +2,11 @@ The first six panels show marker expression: darker purple means higher
 expression. They use the same color scale. The last two panels show total counts
 (`n_counts`) and cell types, with separate legends.
 
+Click a cell type or drag either colorbar brush to dim other cells in every
+panel. The expression brush selects cells by CD79A; the counts brush selects
+cells by total counts. Multiple selections work together. Clear a selection
+to show all cells again.
+
 Zoom with the mouse wheel and drag to pan; all eight panels move together.
 Hover over a dot for the cell and its annotation or expression value.
 Compare with the [cell-type UMAP](pbmc_umap.md).

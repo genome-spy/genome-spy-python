@@ -99,6 +99,19 @@ def test_basic_playground_examples_fit_the_embedder(name: str) -> None:
     assert (EXAMPLES_DIR / f"{name}.md").is_file()
 
 
+def test_torus_uses_native_generation_and_shared_legend_selection() -> None:
+    from docs.examples.legend_brush_torus import chart
+
+    spec = chart.to_dict()
+    assert spec["data"] == {"sequence": {"start": 0, "stop": 1_000_000, "as": "i"}}
+    assert spec["width"] == spec["height"] == "container"
+    assert spec["params"][0]["bind"] == "legend"
+    assert spec["predicates"]["selected"]["param"] == spec["params"][0]["name"]
+    for channel in ("opacity", "order"):
+        assert spec["encoding"][channel]["condition"]["test"] == {"ref": "selected"}
+    assert len(str(spec)) < 5000
+
+
 @pytest.mark.parametrize(
     ("name", "rows"),
     [
@@ -2143,6 +2156,26 @@ def test_intrinsic_heatmap_gallery_height_follows_the_spec() -> None:
     assert example.spec["spec"]["height"] == 480
     assert example.spec["surround"]["top"][0]["height"] == 96
     assert 'class="gs-doc-embed" style="height:auto;max-width:1100px"' in markdown
+
+
+def test_clustered_heatmap_legend_selections_reach_expression_cells() -> None:
+    from docs.examples.clustered_heatmap import chart
+
+    spec = chart.to_dict()
+    cells = spec["spec"]["layer"][0]
+    assert cells["encoding"]["opacity"]["field"] == "legend_opacity"
+    formula = next(
+        t["expr"] for t in cells["transform"] if t.get("as") == "legend_opacity"
+    )
+    for name in ("lineages", "growth_patterns", "sample_origins"):
+        assert {"name": name, "value": None} in spec["params"]
+        assert f"selectionActive({name})" in formula
+    metadata = next(t for t in cells["transform"] if t["type"] == "lookup")
+    assert {"lineage", "growthPattern", "sampleOrigin"} <= set(metadata["values"])
+    assert any(
+        p.get("bind") == "legend" and p["select"]["type"] == "interval"
+        for p in cells["params"]
+    )
 
 
 def test_minigallery_links_include_cache_busting_query(
