@@ -1959,4 +1959,5 @@ Scanpy computations, optional group gaps, opt-in values and existing data semant
   notebooks free of outputs/state. Integration/reference checks, browser
   interactions and strict docs pass; final validation is recorded in STATUS.md.
 
-Physical-phone verification remains a separate handoff. The 0.10.0 release is in preparation; STATUS.md records its checks and publication.
+Physical-phone verification remains a separate handoff. STATUS.md and the release
+workflow record the checks for 0.10.0.

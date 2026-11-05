@@ -2,9 +2,8 @@
 
 Updated: 2026-11-05. [PLAN.md](PLAN.md) owns scope and acceptance criteria;
 [README.md](README.md) maps the source files; [COMPATIBILITY.md](COMPATIBILITY.md)
-records detailed parameter contracts. Version 0.9.0 is published with Core 1.3.0.
-The short [future-work handoff](FUTURE.md) summarizes remaining coverage and the
-remaining options after native legend and PAGA outline adoption.
+records detailed parameter contracts. Version 0.10.0 uses Core 1.3.0.
+The short [future-work handoff](FUTURE.md) summarizes remaining coverage and options.
 
 ## Current position and next work
 
@@ -41,9 +40,9 @@ released behavior. Interactive legend declarations, Figwig sources, branch/value
 transforms and rule borders are generated; their plot adoption is described
 below. No local Core patch is used.
 
-### Native plot improvements in the 0.10.0 candidate
+### Native plot improvements in 0.10.0
 
-The working branch uses the published 1.3.0 bundle without local Core patches.
+The integration uses the published 1.3.0 bundle without local Core patches.
 Shared helpers now provide PAGA rule outlines, default linked hover across
 embedding panels, category/gradient legend focus, native series-legend controls,
 and native count aggregates. `linked_hover=False` keeps ordinary tooltips.
@@ -83,13 +82,13 @@ in JupyterLab; the strict docs build, Ruff, mypy and 32 JavaScript checks pass.
 The wheel and source distribution pass strict metadata, license and artifact
 checks. Follow-up browser regressions cover shared dimming (including transparent
 points), restored legend defaults, categorical navigation and linked cohort data.
-The complete browser runs and remote CI remain publication gates. All generated
+The release workflow gates publication on the complete browser and compatibility
+checks. All generated
 evidence stays outside Git; tracked notebooks contain no outputs or widget state.
 
 ### Current work queue
 
-1. Finish validation and publish the 0.10.0 candidate after CI and PR approval.
-   Version 0.9.0 remains the published release until that process completes.
+1. Continue plot-by-plot styling reviews and the documented coverage priorities.
 2. Recheck C22 when Core supports categorical viewport-derived domains; then move
    adaptive tree axes to categories without losing zoom fitting.
 3. Keep dependency expansion behind compatibility tests and recheck the upstream
