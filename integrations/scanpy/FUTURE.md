@@ -29,19 +29,19 @@ acceptance criteria. Keep detailed parameter contracts in
   Full coverage means native equivalents for the agreed Scanpy plotting scope,
   with documented rendering differences; it does not mean emulating Matplotlib.
 
-## Adopt the released GenomeSpy 1.3 capabilities
+## GenomeSpy 1.3 adoption
 
-- **Interactive legend selection:** replace the linked-expression examples' fixed
-  gene lists with the native legend-based selection released in 1.3.0. Reuse the shared
-  summary data and selection helpers. Verify clearing, repeated changes, linked
-  panels, layout and Python selection retrieval where offered. Do not restore
-  dropdowns as a substitute. The dynamic heatmap placement regression (C18) now passes.
-- **Rule outlines for PAGA:** use the released native outline properties to add
-  thin white borders to overlapping edges in the shared PAGA renderer. Verify
-  widths, crossings, zoom, picking and exports across PAGA plots. Remove the old
-  capability restriction (C17) only after validation. Do not draw duplicate edges.
-- Recheck the remaining native capability and expected-failure tests against the
-  actual release. Do not assume every issue is fixed by upgrading the bundle.
+Version 0.10.0 uses native PAGA rule outlines, linked embedding hover and
+interactive legends. Multipanel legends highlight the same cells across panels.
+EmbeddingSummary legends update every summary alongside its brush. Existing
+gene dropdowns remain supported.
+Documentation charts release their contexts when scrolled away and render again
+on return. A physical-phone recheck is still useful.
+
+Adaptive dendrograms keep index axes until Core can derive viewport heights from
+categorical scales (C22). Preserve their current zoom behavior. A Figwig example
+also needs a licensed, publicly hosted prepared file; keep the existing BigWig
+inputs until then. Neither item needs a local substitute or a browser listener.
 
 ## Gates for extending support
 

@@ -118,6 +118,9 @@ Set `gene_controls=True` on `add_histogram` or `add_heatmap` for native dropdown
 that choose from the constructor's loaded genes. The add method's gene list sets
 the initial choices and number of histograms or heatmap rows. Choices are separate
 per panel and preserve the shared cell brush. Duplicate heatmap choices show once.
+The embedding's category legend and brush update every summary together.
+When both are active, summaries use cells matching both selections. Clearing one
+keeps the other restriction. All-cell reference distributions remain unchanged.
 
 Missing expression is excluded from means and histogram denominators. The
 all-cell histogram remains fixed while brushing. Current Core upper-boundary selection semantics
@@ -1119,8 +1122,9 @@ GenomeSpy rather than Matplotlib's figure system. Global Matplotlib settings,
 axes/cycler/colormap objects, sparse/lazy sources, complex/infinite values,
 repeated series labels and differing per-subset marker shapes fail clearly.
 
-Set `series_select=True` to add a dropdown. Choose a gene or series to emphasize
-it while keeping the other points visible. Set `ruler=True` to follow the cursor
+Set `series_select=True` to choose a gene or series through its native legend.
+Click a label to emphasize it; Shift-click to add or remove labels. Other points
+stay visible. Plots without a series legend retain a dropdown. Set `ruler=True` to follow the cursor
 with a vertical guide. Both options are off by default and leave sample values,
 order and identities unchanged.
 
@@ -1187,7 +1191,7 @@ a sample-position guide. These controls reuse the profile and matrix renderers.
 For ordered simulations, set `connect=True` to join neighboring samples within
 each run. Missing values leave gaps. This is available for point output only.
 Set `run_select=True` to add a run dropdown in either view. Combine it with
-`series_select=True` to emphasize one gene in one run. Neither dropdown removes
+`series_select=True` to emphasize one gene in one run. These controls do not remove
 data. Shuffled output rejects both `connect` and `run_select`.
 The point legend sits below the run labels and x-axis title.
 
@@ -2021,3 +2025,37 @@ on both tested Scanpy versions and representative browser interactions once.
 Main/full/release runs add reference comparisons, the supported Python matrix,
 the complete browser suite and both JupyterLab workflow renders. See the
 [validation commands](README.md#validation).
+
+
+### Native interactions in Core 1.3.0
+
+Multipanel embeddings outline the hovered cell in every panel by default. This
+uses one native record identity before panel sorting. Set `linked_hover=False`
+to keep tooltips without linked outlines, or `hover=False` to disable both.
+Category legends focus groups; numeric legends brush value ranges. They change
+presentation only and leave stored Scanpy results untouched.
+
+PAGA rules use native white outside outlines. No duplicate Python edge layers
+are added. Canvas export approximates stroke alignment; WebGL and SVG retain
+outside alignment.
+
+Unique matrix labels use native band axes where positions do not carry another
+meaning. Repeated genes, positional overlays and adaptive dendrogram viewports
+retain index scales. Core 1.3.0 cannot fit a viewport-derived continuous tree
+height using a categorical positional axis. Attached trees therefore keep the
+existing zoom behavior. Python still computes clustering; native dendrogram
+layout handles integer leaf slots. Unequal cell-group centers keep their stored
+fractional geometry.
+
+### Embedding legend visibility
+
+Set `legend_controls=True` on `embedding`, `umap`, `tsne`, `diffmap` or `pca`
+to choose one gene colorbar and toggle observation legends. The first gene starts
+visible; numeric observation legends start hidden and category legends visible.
+Colorbars sit on the right and categorical legends below the panels.
+
+Embedding guide defaults use native automatic legends. Each color field has the
+native style name `embedding-legend-<field>`. Use `configure(style=...)` with a
+`disable` expression and ordinary bound parameters to show or hide individual
+legends. Hidden legends retain their selections. The UMAP guide demonstrates a
+gene-colorbar dropdown and count/group legend checkboxes without custom events.

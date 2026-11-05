@@ -1,10 +1,10 @@
 # Scanpy implementation status
 
-Updated: 2026-11-04. [PLAN.md](PLAN.md) owns scope and acceptance criteria;
+Updated: 2026-11-05. [PLAN.md](PLAN.md) owns scope and acceptance criteria;
 [README.md](README.md) maps the source files; [COMPATIBILITY.md](COMPATIBILITY.md)
-records detailed parameter contracts. Version 0.8.1 is published; 0.9.0 is being prepared.
+records detailed parameter contracts. Version 0.9.0 is published with Core 1.3.0.
 The short [future-work handoff](FUTURE.md) summarizes remaining coverage and the
-planned adoption of interactive legends and PAGA rule outlines.
+remaining options after native legend and PAGA outline adoption.
 
 ## Current position and next work
 
@@ -32,32 +32,76 @@ states below describe coverage; they do not require a preview release label.
 
 ### Core 1.3.0 upgrade
 
-Core, controls, Inspector and the generated schema/API now target 1.3.0. Native
-shared-hover, categorical row-placement (with and without labels), and
-multi-column legend regressions pass without expected failures. Empty ungrouped
-aggregates now emit zero-valued rows. Figwig, branch/values transforms, category
-and legend selections, and rule borders are generated automatically. Adopting
-these capabilities in additional Scanpy workflows remains separate work.
-Straight-link SVG export and zero-height viewport regressions still xfail.
+Version 0.9.0 publishes the Core, controls, Inspector and generated schema/API upgrade to 1.3.0.
+The native shared-hover regression (C19), categorical row-placement checks with
+and without labels (C18), and multi-column legend check (C11) pass. Their expected
+failures are removed. Multipanel default-hover integration is implemented below. C12 straight-link SVG export and C13 zero-height viewports still xfail.
+Empty ungrouped aggregates now emit zero-valued rows; coverage checks follow the
+released behavior. Interactive legend declarations, Figwig sources, branch/values
+transforms and rule borders are generated; their plot adoption is described
+below. No local Core patch is used.
+
+### Native plot improvements in the 0.10.0 candidate
+
+The working branch uses the published 1.3.0 bundle without local Core patches.
+Shared helpers now provide PAGA rule outlines, default linked hover across
+embedding panels, category/gradient legend focus, native series-legend controls,
+and native count aggregates. `linked_hover=False` keeps ordinary tooltips.
+
+Multipanel category and numeric legend selections now share one native cell
+predicate. EmbeddingSummary legends and its brush restrict the same cohort for
+heatmaps, histograms, composition bars and tracks. Numeric legend readouts are
+hidden with `selectionLabel=False`. The third guide keeps just the heatmap,
+without an extra gene-mean plot. Existing gene dropdowns remain optional.
+Composition bars compare narrower selected bars against faint reference bars
+using native band coverage, without offset-scale compensation. Point outlines,
+missing colors and foreground points share selection dimming. Summary brushes
+also dim unselected points; the native cell-count predicate is reused.
+Cropped profile heatmaps preserve their side-label styles and reserve enough
+outer padding for endpoint glyphs. Notebook pages now track library Python
+sources as build dependencies, so renderer edits invalidate cached chart specs.
+The UMAP grid shows one gene colorbar chosen by a native dropdown, plus
+independent count/group legend checkboxes. Colorbars sit on the right; the
+category legend sits below the grid.
+Embedding legends use automatic defaults and native field styles, so visibility
+controls update the layout without listeners. The shared `legend_controls=True`
+option now builds these controls, keeping the UMAP guide to a single plotting
+call instead of exposing parameter and style construction. Internal legend
+controls use automatic parameter names so caller-supplied brushes retain their
+names and values.
+
+Unique matrix names and summary groups use native categorical axes where no
+positional overlay, totals track or adaptive tree needs index slots. The shared
+tree renderer uses native dendrogram layout for integer leaves. Stored fractional
+cell-group centers retain their existing geometry. C22 explains why adaptive
+trees still keep index axes. Scanpy/Python still computes the clustering.
+
+Release validation: 2,723 Python tests pass with two existing expected failures
+and two data-cache-dependent skips. Scanpy 1.12.4 passes 1,966 integration tests
+with five existing expected failures. Both workflow notebooks execute and render
+in JupyterLab; the strict docs build, Ruff, mypy and 32 JavaScript checks pass.
+The wheel and source distribution pass strict metadata, license and artifact
+checks. Follow-up browser regressions cover shared dimming (including transparent
+points), restored legend defaults, categorical navigation and linked cohort data.
+The complete browser runs and remote CI remain publication gates. All generated
+evidence stays outside Git; tracked notebooks contain no outputs or widget state.
 
 ### Current work queue
 
-1. Prepare 0.9.0 with Core 1.3.0 for publication. Require the full Release dry run
-   and Docs build on the final candidate before merging and publishing. The native
-   shared-hover and categorical-domain blockers are resolved; complete integration
-   checks before enabling new multipanel-hover or legend-selection workflows.
-2. Keep future version expansions behind compatibility checks; maintain the
-   parameter contracts and recheck the upstream PAGA tree-layout issue.
-3. Classify known limitations below. Fix, reject or document user-visible cases
-   before advertising support; expected failures alone do not establish readiness.
-4. Finish the existing plot-by-plot publication reviews, installation checks,
-   clean-wheel examples, CI and strict docs build. New plot families remain deferred
-   except already authorized tracks work. The next M09 increment is ranked tracks.
-5. Adopt the forthcoming released interactive-legend capability before upgrading
-   linked-expression examples to legend-based gene selection. Their gene dropdowns
-   are currently absent. Preserve the C18 API regression until its released fix passes.
+1. Finish validation and publish the 0.10.0 candidate after CI and PR approval.
+   Version 0.9.0 remains the published release until that process completes.
+2. Recheck C22 when Core supports categorical viewport-derived domains; then move
+   adaptive tree axes to categories without losing zoom fitting.
+3. Keep dependency expansion behind compatibility tests and recheck the upstream
+   Scanpy PAGA tree-layout issue. Ranked tracks remain the next M09 increment.
+4. A Figwig gallery needs a licensed, prepared, publicly hosted Figwig input.
+   Existing BigWig examples keep their actual inputs; Figwig is not an AnnData
+   transport replacement. Do not manufacture a conversion or a substitute source.
+5. Check the long docs page on a physical phone. Automated desktop/phone-width
+   tests verify explicit context loss on disposal with the actual 1.3.0 bundle,
+   a four-context budget, rendered pixels on return and controls cleanup.
 
-The working guide uses fixed gene lists, native brushing/counts, UMAP-linked
+The guides use prepared gene pools, native brushing/counts, UMAP-linked
 histograms/means and PBMC3k tracks. Embedding and expression workflows remain
 separate; focused guides provide the user-facing pages and downloads. The UMAP
 guide includes a nine-panel gene/annotation grid, with square panels and
@@ -354,14 +398,16 @@ affected slice.
 | C08 | Native index slots plus label views retain repeated names; Core 1.2 axes lack arbitrary index-to-name mapping | Grouped grids, ranked plots and named PAGA connectivity strips | Shared slots and views align on zoom; named PAGA strips collect their key after the full axis. Recheck native axis name mapping before removing label views. |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |
 | C10 | Heatmap/clustermap bands and native gap navigation verified in their own viewports. | Closed for M05.f native WebGL/notebook/HTML scope | Native clipped rects use the released Core; no patched bundle or custom listeners. C12 remains independent. |
-| C11 | Core 1.3.0 fixes vertical multi-column legend width. | Native column clipping closed; large-symbol fitting remains separate | The native guide regression passes without xfail; upstream PR #591 is adopted. |
+| C11 | Core 1.3.0 fixes vertical multi-column legend width. | Native column clipping closed; large-symbol fitting remains separate | The [native guide regression](../../tests/integrations/scanpy/browser/test_embedding_style.py) passes without xfail. [PR #591](https://github.com/genome-spy/genome-spy/pull/591) is adopted. |
 | C12 | Core 1.2 SVG export bends `linkShape="line"` control points. | Upstream straight-link export; adapter trees now use verified orthogonal links. | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) still strictly xfails. No local bundle patch; recheck on a released fix. The [orthogonal renderer](#verification) passes complete-path SVG checks independently. |
 | C13 | A viewport containing only zero-height merges gives a degenerate `[0, 0]` height domain, centering zero in the track. | Native fitting of tied subtrees within larger trees | Minimal native regression in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) strictly xfails on Core 1.2.0. Whole zero-height trees retain their previous nonzero range. Recheck a released native solution; no custom browser logic or patched bundle. |
 | C14 | Native equilateral triangles differ from Scanpy's equal-width/height triangles; uniform sizing cannot match both dimensions. | Triangular markers in M07.d | The native SVG/WebGL investigation found mismatched bounds in all four orientations, with/without strokes. Its experimental probes were retired; unsupported triangles remain explicitly rejected. Recheck a released matching shape or native aspect control, including guides and outlines, before enabling support; no custom geometry. |
 | C15 | Scanpy 1.11.5's disconnected single_component=True call subsets colors but retains full coordinates and raises a shape error. | M11.c direct parent-reference gate | [Strict expected-failure check](../../tests/integrations/scanpy/test_paga.py) detects a fixed upstream entry. Intended native filtering is independently checked against explicitly subsetted public Scanpy inputs; recheck a compatible release before closing this gate. |
 | C16 | Scanpy 1.11.5 paga_path return_data calls .T on an unsmoothed annotation list | Default return_data parent-reference gate; heatmap/other return_data cases verified independently | Strict expected-failure check verifies the exact exception and asserts returned values if fixed; native chart/table return contract is explicit. |
-| C17 | Core 1.2 rule/link marks have one paint and no independent edge border. Audited 2026-10-25 against the installed schema/API and official [rule](https://genomespy.app/docs/grammar/mark/rule/) and [link](https://genomespy.app/docs/grammar/mark/link/) channels. Both Python mark methods reject stroke/strokeWidth. | White borders separating overlapping PAGA edges, M11.c/M14 styling | Core 1.3.0 exposes rule fill/stroke/strokeWidth/strokeAlign; verify this native outline capability with crossing, width, zoom, hover and export cases. No extra edge layers or custom geometry. PAGA charts and the expression notebook remain unchanged; notebook rerun was conditional on native support. |
-| C18 | Core 1.3.0 fixes stale categorical row slots after domain changes. | Closed for linked heatmap gene dropdown rendering | Both pixel regressions pass without xfail, with and without labels; upstream PR #595 is adopted. |
+| C17 | Closed for rules: Core 1.3.0 supplies native fill and outside stroke. | Overlapping PAGA edges | Shared PAGA rules use a thin white outside outline. Crossing, width, hover/navigation and export checks retain one native edge mark. Canvas approximates stroke alignment. Link outlines remain unsupported. |
+| C18 | Core 1.3.0 fixes stale categorical row slots after domain changes. | Closed for linked heatmap gene dropdown rendering | Both [pixel regressions](../../tests/integrations/scanpy/browser/test_linked_embeddings.py) pass without xfail, with and without labels. [PR #595](https://github.com/genome-spy/genome-spy/pull/595) is adopted. |
+| C19 | Closed: Core 1.3.0 shared hover and integration checks pass. | Multipanel embeddings | Default linked hover preserves identity through projections/sorting and works with outlines. Panel transitions and clearing are browser-tested; `linked_hover=False` and `hover=False` opt out. |
+| C20 | Automated gate closed with released Core 1.3.0; physical-phone recheck remains. | Long documentation pages | Shared embeds load nearby charts and dispose distant charts/controls. The four-context regression retains an old canvas and verifies its context is explicitly lost, then checks rendered pixels after returning. No retry or bundle patch. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental
@@ -490,3 +536,12 @@ repository no longer depends on those copies.
 No unfinished family or capability gate is cleared by this cleanup. Retire a
 working plan only after its contracts, tests, remaining work and provenance have
 permanent maintained owners, following [the shared lifecycle](../README.md#plan-lifecycle).
+
+The legend-placement and served-label follow-up passes all 33 notebook-doc tests,
+four responsive UMAP/profile browser cases, Ruff, mypy and the strict full docs
+rebuild. Its incremental-build regression fails before renderer dependencies
+are tracked and passes afterward. The UMAP workflow notebook is rerun cleanly.
+
+The compact legend-controls API passes 212 embedding checks, 33 notebook-doc
+checks and both responsive grid browser cases. The UMAP workflow notebook,
+strict docs build, lint and typing also pass; notebook outputs remain untracked.
