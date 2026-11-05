@@ -34,12 +34,31 @@ hovered = gs.selection_point(
     persist=False,
     empty=False,
 )
+cell_types = gs.selection_point("cell_types", encodings=["color"], bind="legend")
+gene_range = gs.selection_interval("gene_range", encodings=["color"], bind="legend")
+counts_range = gs.selection_interval("counts_range", encodings=["color"], bind="legend")
+
+# Test the same cell fields before splitting the data into panels.
+selected = ~gs.expr.selectionActive(gs.Expression(cell_types.name)) | (
+    gs.expr.selectionContains(
+        gs.Expression(cell_types.name), "color", gs.datum.cell_type
+    )
+)
+for selection, field in ((gene_range, genes[0]), (counts_range, "n_counts")):
+    reference = gs.Expression(selection.name)
+    bounds = gs.expr.selectionBounds(reference, "color")
+    selected = selected & (
+        ~gs.expr.selectionActive(reference)
+        | ((gs.datum[field] >= bounds[0]) & (gs.datum[field] < bounds[1]))
+    )
+
 points = (
     gs.Chart()
     .mark_point(size=gs.expr(gs.expr.min(8 * gs.expr.pow(zoom, 0.6), 40)), opacity=0.9)
     .add_params(hovered.copy(push="outer"))
     .encode(
         key=gs.Key("cell"),
+        opacity=gs.Opacity("legend_opacity:Q").scale(None).legend(None),
         stroke=gs.value("#111827"),
         strokeWidth=gs.when(hovered).then(gs.value(2)).otherwise(gs.value(0)),
         x=gs.X("X_umap-0:Q")
@@ -64,7 +83,8 @@ points = (
     .properties(width=gs.SizeDef(grow=1), height=210)
 )
 panels = [
-    points.transform_collect(sort=gs.compare(field=gene))
+    points.add_params(*([gene_range.copy(push="outer")] if i == 0 else []))
+    .transform_collect(sort=gs.compare(field=gene))
     .encode(
         color=gs.Color(f"{gene}:Q")
         .scale(
@@ -72,7 +92,7 @@ panels = [
             range=["#e8edf1", "#c9b2df", "#9976c4", "#70469c", "#48226f"],
         )
         .legend(
-            gs.Legend(title="log1p(counts)", orient="bottom", gradientLength=180)
+            gs.Legend(title=f"{gene} expression", orient="bottom", gradientLength=180)
             if i == 0
             else None
         ),
@@ -82,7 +102,8 @@ panels = [
     for i, gene in enumerate(genes)
 ]
 counts = (
-    points.transform_collect(sort=gs.compare(field="n_counts"))
+    points.add_params(counts_range.copy(push="outer"))
+    .transform_collect(sort=gs.compare(field="n_counts"))
     .encode(
         color=gs.Color("n_counts:Q")
         .scale(domain=[0, data["n_counts_limit"]], scheme="blues")
@@ -91,11 +112,9 @@ counts = (
     )
     .properties(title=gs.title("n_counts", fontSize=13))
 )
-cell_types = gs.selection_point("cell_types", encodings=["color"], bind="legend")
 labels = (
-    points.add_params(cell_types)
+    points.add_params(cell_types.copy(push="outer"))
     .encode(
-        opacity=gs.when(cell_types).then(gs.value(0.9)).otherwise(gs.value(0.15)),
         color=gs.Color("cell_type:N")
         .scale(
             domain=data["groups"]["cell_type"].tolist(),
@@ -110,7 +129,13 @@ chart = (
     gs.concat(*panels, counts, labels, columns=4, spacing=16)
     .properties(data=cells, title="PBMC markers and cell annotations")
     .transform_identifier()
-    .add_params(gs.param("cell_hover", value=None))
+    .add_params(
+        gs.param("cell_hover", value=None),
+        gs.param(cell_types.name, value=None),
+        gs.param(gene_range.name, value=None),
+        gs.param(counts_range.name, value=None),
+    )
+    .transform_calculate(legend_opacity=gs.expr.if_(selected, 0.9, 0.04))
     .resolve_scale(x="shared", y="shared", color="independent")
     .resolve_legend(default="collected")
     .configure_legend(

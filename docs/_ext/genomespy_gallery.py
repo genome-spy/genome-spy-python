@@ -128,6 +128,7 @@ GALLERY_CARD_LABELS = {
     "coverage_pileup": ("Coverage and interval pileup", "Synthetic intervals"),
     "geometric_zoom": ("Points that grow when zooming", "200,000 generated points"),
     "penguin_brush": ("Brush-linked penguin summaries", "Palmer Penguins"),
+    "legend_brush_torus": ("Brush a million-point torus", "1,000,000 generated points"),
     "bam_read_pileup": ("BAM coverage and read pileup", "1000 Genomes NA12878 · hg18"),
     "heatmap_with_text": ("Heatmap with zoomable values", "Synthetic wave pattern"),
     "tsne": ("Zoomable t-SNE scatter plot", "GenomeSpy example embedding"),

@@ -23,11 +23,33 @@ projection = from_anndata(
 )
 expression = expression_table(projection, genes)
 cell_y = gs.Y("cell_order:Q").axis(None)
+cell_types = gs.selection_point("cell_types", encodings=["color"], bind="legend")
+cell_type_match = ~gs.expr.selectionActive(gs.Expression(cell_types.name)) | (
+    gs.expr.selectionContains(
+        gs.Expression(cell_types.name), "color", gs.datum.cell_type
+    )
+)
+expression_range = gs.selection_interval(
+    "expression_range", encodings=["color"], bind="legend"
+)
+expression_bounds = gs.expr.selectionBounds(
+    gs.Expression(expression_range.name), "color"
+)
+expression_match = ~gs.expr.selectionActive(gs.Expression(expression_range.name)) | (
+    (gs.datum.expression >= expression_bounds[0])
+    & (gs.datum.expression < expression_bounds[1])
+)
+
 
 tiles = (
     gs.Chart(expression)
+    .add_params(expression_range)
+    .transform_calculate(
+        legend_opacity=gs.expr.if_(cell_type_match & expression_match, 1, 0.08)
+    )
     .mark_rect(minHeight=0, minOpacity=1)
     .encode(
+        opacity=gs.Opacity("legend_opacity:Q").scale(None).legend(None),
         x=gs.X("gene:O")
         .scale(domain=genes, padding=0, zoom=False)
         .axis(title=None, orient="top", labelAngle=-45, labelFontSize=11),
@@ -43,7 +65,7 @@ tiles = (
             gs.Tooltip("expression:Q", format=".3f"),
         ],
     )
-    .properties(width=gs.SizeDef(grow=1), height=560)
+    .properties(name="expressionCells", width=gs.SizeDef(grow=1), height=560)
 )
 boundaries = (
     gs.Chart(data["groups"])
@@ -54,10 +76,9 @@ colors = gs.Scale(
     domain=data["groups"]["cell_type"].tolist(), range=data["groups"]["color"].tolist()
 )
 # Native AnnData inputs expose obs directly for the cell annotation rail.
-cell_types = gs.selection_point("cell_types", encodings=["color"], bind="legend")
 rail = (
     gs.Chart(adata)
-    .add_params(cell_types)
+    .add_params(cell_types.copy(push="outer"))
     .mark_rect(minHeight=0, minOpacity=1)
     .encode(
         opacity=gs.when(cell_types).then(gs.value(1)).otherwise(gs.value(0.15)),
@@ -101,6 +122,7 @@ chart = (
         ),
         title="PBMC marker expression in individual cells",
     )
+    .add_params(gs.param(cell_types.name, value=None))
     .resolve_legend(default="collected")
     .configure_legend(
         selectionLabel=False,

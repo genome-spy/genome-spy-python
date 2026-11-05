@@ -4,6 +4,8 @@ rows.
 
 Use the mouse wheel to zoom and drag to pan. Hover over a tile for the cell,
 gene, and exact value. The color scale stays fixed while zooming.
+Click a cell-type legend entry to dim other rows. Drag the colorbar brush to
+highlight a range of expression values. The two selections work together.
 
 `gs.surround()` aligns the cell-type strip and prepared group tree with the
 matrix's shared cell-coordinate scale. Python reshapes the packaged AnnData

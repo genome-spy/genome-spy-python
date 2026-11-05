@@ -35,7 +35,8 @@ window.api = await embed(document.querySelector('#chart'), SPEC, {bare:true});
             page.goto("http://composition.test/")
             page.wait_for_function("window.api")
             page.locator(".canvas-wrapper.loading").wait_for(state="hidden")
-            page.get_by_text("Loading...", exact=True).wait_for(state="hidden")
+            for loading in page.get_by_text("Loading...", exact=True).all():
+                loading.wait_for(state="hidden")
             for width in (700, 1100):
                 page.set_viewport_size({"width": width, "height": 450})
                 page.wait_for_timeout(200)
@@ -107,7 +108,8 @@ window.api = await embed(document.querySelector('#chart'), SPEC, {bare:true});
             page.goto("http://composition.test/")
             page.wait_for_function("window.api")
             page.locator(".canvas-wrapper.loading").wait_for(state="hidden")
-            page.get_by_text("Loading...", exact=True).wait_for(state="hidden")
+            for loading in page.get_by_text("Loading...", exact=True).all():
+                loading.wait_for(state="hidden")
             page.evaluate("""() => {
                 const views = api.debug.getViewRoot().getDescendants();
                 window.center = views.find(view => view.spec?.name === 'center');
@@ -161,5 +163,82 @@ window.api = await embed(document.querySelector('#chart'), SPEC, {bare:true});
             assert not errors
             assert page.locator(".message-box").count() == 0
             page.screenshot(path=str(tmp_path / f"{chart_name}.png"))
+        finally:
+            browser.close()
+
+
+@pytest.mark.parametrize("example", ["pbmc_umap_genes", "pbmc_cell_heatmap"])
+def test_gallery_legends_dim_the_same_cells_across_views(example: str) -> None:
+    from importlib import import_module
+
+    from genome_spy._embed import bundled_module_url
+
+    chart = import_module(f"docs.examples.{example}").chart
+    with playwright.sync_playwright() as runtime:
+        browser = runtime.chromium.launch()
+        try:
+            page = browser.new_page(viewport={"width": 1100, "height": 1000})
+            page.set_content(
+                '<style>body{margin:0}</style><div id="chart" style="width:1000px;height:800px"></div>'
+            )
+            page.evaluate(
+                """async ({url,spec}) => {
+                    const {embed} = await import(url);
+                    window.api = await embed(document.querySelector('#chart'),spec,{bare:true});
+                }""",
+                {"url": bundled_module_url("embed"), "spec": chart.to_dict()},
+            )
+            page.locator(".canvas-wrapper.loading").wait_for(state="hidden")
+            page.evaluate(
+                """async()=>{await document.fonts.ready;await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame)}"""
+            )
+            page.wait_for_timeout(500)
+            entry = page.evaluate("""() => {
+                const v=api.debug.getViewRoot().getDescendants().find(v=>v.spec.name==='symbols');
+                const d=v.getCollector().getData()[0];
+                return {x:v.coords.x+v.mark.encoders.x(d)*v.coords.width,y:v.coords.y+(1-v.mark.encoders.y(d))*v.coords.height,value:d.value};
+            }""")
+            page.mouse.move(entry["x"], entry["y"])
+            page.wait_for_timeout(100)
+            page.mouse.click(entry["x"], entry["y"])
+            checks = """() => api.debug.getViewRoot().getDescendants()
+                .filter(v=>v.spec.encoding?.opacity?.field==='legend_opacity')
+                .map(v=>[...v.getCollector().getData()].map(d=>({
+                    group:d.cell_type,opacity:d.legend_opacity,counts:d.n_counts,
+                })))"""
+            page.wait_for_function("""() => api.debug.getViewRoot().getDescendants()
+                .filter(v=>v.spec.encoding?.opacity?.field==='legend_opacity')
+                .every(v=>[...v.getCollector().getData()].some(d=>d.legend_opacity<.1))""")
+            rows = page.evaluate(checks)
+            assert len(rows) == (8 if example == "pbmc_umap_genes" else 1)
+            for panel in rows:
+                bright = [row for row in panel if row["group"] == entry["value"]]
+                dim = [row for row in panel if row["group"] != entry["value"]]
+                assert bright and dim
+                assert min(row["opacity"] for row in bright) >= 0.9
+                assert max(row["opacity"] for row in dim) <= 0.08
+
+            # Both controls narrow the selection rather than replacing one another.
+            if example == "pbmc_umap_genes":
+                page.evaluate("""()=>{api.params.get('counts_range').setValue({
+                    type:'interval',intervals:{color:[1000,2000]}})}""")
+                expected = "d.n_counts>=1000 && d.n_counts<2000"
+            else:
+                page.evaluate("""()=>{api.views.get({scope:[],view:'expressionCells'})
+                    .params.get('expression_range').setValue({
+                    type:'interval',intervals:{color:[1,2]}})}""")
+                expected = "d.expression>=1 && d.expression<2"
+            page.wait_for_function(
+                """group => api.debug.getViewRoot().getDescendants()
+                .filter(v=>v.spec.encoding?.opacity?.field==='legend_opacity')
+                .every(v=>[...v.getCollector().getData()].every(d=>
+                    d.legend_opacity === (d.cell_type===group && (EXPRESSION) ? BRIGHT : DIM)))""".replace(
+                    "EXPRESSION", expected
+                )
+                .replace("BRIGHT", "0.9" if example == "pbmc_umap_genes" else "1")
+                .replace("DIM", "0.04" if example == "pbmc_umap_genes" else "0.08"),
+                arg=entry["value"],
+            )
+            assert page.locator(".message-box").count() == 0
         finally:
             browser.close()
