@@ -729,3 +729,65 @@ def test_diagnostic_guides_read_stored_results(
                     group = original.obs["bulk_labels"] == row["_group"]
                     fraction = (expression.loc[group, row["_gene"]] > 0).mean()
                     assert row["_percent"] == pytest.approx(100 * fraction)
+
+
+def test_incremental_build_refreshes_charts_after_renderer_changes(
+    notebook_extension, monkeypatch, tmp_path
+):
+    from sphinx.testing.util import SphinxTestApp
+
+    source = tmp_path / "docs"
+    source.mkdir()
+    library = tmp_path / "src/genome_spy"
+    library.mkdir(parents=True)
+    renderer = library / "renderer.py"
+    renderer.write_text("POINT_SIZE = 10\n")
+    monkeypatch.setattr(notebook_extension.core, "REPO_ROOT", tmp_path)
+    notebook = tmp_path / "example.ipynb"
+    notebook.write_text(
+        json.dumps(
+            {
+                "cells": [
+                    {"cell_type": "markdown", "source": ["# Renderer example"]},
+                    {
+                        "cell_type": "code",
+                        "metadata": {
+                            "genomespy": {
+                                "chart": "chart",
+                                "height": 200,
+                                "title": "Renderer example",
+                            }
+                        },
+                        "source": [
+                            "import runpy\nimport genome_spy as gs\n",
+                            f"size = runpy.run_path({str(renderer)!r})['POINT_SIZE']\n",
+                            "chart = gs.Chart([{'x': 1, 'y': 2}]).mark_point(size=size).encode(x='x:Q', y='y:Q')",
+                        ],
+                    },
+                ],
+                "metadata": {},
+            }
+        )
+    )
+    (source / "conf.py").write_text(
+        'extensions = ["myst_parser", "genomespy_notebook"]\n'
+        'myst_enable_extensions = ["colon_fence"]\n'
+    )
+    (source / "index.md").write_text("```{genomespy-notebook} example.ipynb\n```\n")
+    warnings = io.StringIO()
+    app = SphinxTestApp(srcdir=source, builddir=tmp_path / "build", warning=warnings)
+    output = Path(app.outdir) / "index.html"
+    try:
+        app.build()
+        before = output.read_text()
+        renderer.write_text("POINT_SIZE = 20\n")
+        app.build()
+        after = output.read_text()
+    finally:
+        app.cleanup()
+    assert not warnings.getvalue()
+    specs = [
+        json.loads(re.search(r"const spec = (.*);", html)[1])
+        for html in (before, after)
+    ]
+    assert [spec["mark"]["size"] for spec in specs] == [10, 20]

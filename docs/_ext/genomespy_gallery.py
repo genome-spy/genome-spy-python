@@ -28,6 +28,7 @@ from copy import deepcopy
 from dataclasses import replace
 from hashlib import sha256
 from pathlib import Path
+from textwrap import indent
 from typing import Any
 
 from docutils import nodes
@@ -379,7 +380,7 @@ def _tutorial_embed_html(
     control_definitions: dict[str, dict[str, str]] | None = None,
     control_module_urls: dict[str, str] | None = None,
 ) -> str:
-    """Return a direct, wrapper-free GenomeSpy embed for a prose page."""
+    """Keep a prose page's chart and controls alive only near the viewport."""
     token = sha256(f"{target}:{identity}".encode()).hexdigest()[:12]
     container_id = f"gs-tutorial-{token}"
     controls_script = ""
@@ -402,12 +403,25 @@ def _tutorial_embed_html(
             "      }\n"
             "      mounted.push(modules[definition.module][definition.export]());\n"
             "    }\n"
-            "    controlsModule.attachControls(c, api, { controls: mounted });\n"
+            "    controls = controlsModule.attachControls(c, api, { controls: mounted });\n"
             "  } catch (error) {\n"
             "    console.error('GenomeSpy controls failed to load', error);\n"
             "  }\n"
             "}\n"
         )
+    mount_script = (
+        f"const spec = {json.dumps(spec, separators=(',', ':'))};\n"
+        "const api = c ? await embed(c, spec, { bare: true }) : null;\n"
+        "let controls;\n"
+        "dispose = () => {\n"
+        "  try {\n"
+        "    controls?.dispose();\n"
+        "  } finally {\n"
+        "    api.finalize();\n"
+        "  }\n"
+        "};\n"
+        f"{controls_script}"
+    )
     return (
         f'<div id="{container_id}" class="gs-doc-embed" '
         f'style="height:{height}px" role="img" '
@@ -415,9 +429,34 @@ def _tutorial_embed_html(
         '<script type="module">\n'
         f"import {{ embed }} from {json.dumps(bundle_url)};\n"
         f"const c = document.getElementById({json.dumps(container_id)});\n"
-        f"const spec = {json.dumps(spec, separators=(',', ':'))};\n"
-        "const api = c ? await embed(c, spec, { bare: true }) : null;\n"
-        f"{controls_script}"
+        "let nearby = false;\n"
+        "let loading = false;\n"
+        "let dispose = null;\n"
+        "async function update() {\n"
+        "  if (loading) return;\n"
+        "  loading = true;\n"
+        "  try {\n"
+        "    // Finish a pending load before applying the latest scroll position.\n"
+        "    while (nearby !== Boolean(dispose)) {\n"
+        "      if (!nearby) {\n"
+        "        const cleanup = dispose;\n"
+        "        dispose = null;\n"
+        "        cleanup();\n"
+        "        continue;\n"
+        "      }\n"
+        f"{indent(mount_script, '      ')}"
+        "    }\n"
+        "  } catch (error) {\n"
+        "    console.error('GenomeSpy chart failed', error);\n"
+        "  } finally {\n"
+        "    loading = false;\n"
+        "  }\n"
+        "}\n"
+        "const observer = new IntersectionObserver(([entry]) => {\n"
+        "  nearby = entry.isIntersecting;\n"
+        "  void update();\n"
+        "}, { rootMargin: '300px 0px' });\n"
+        "if (c) observer.observe(c);\n"
         "</script>"
     )
 

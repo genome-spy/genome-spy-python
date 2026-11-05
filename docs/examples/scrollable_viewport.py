@@ -1,7 +1,7 @@
 """Scrollable viewport.
 
 A unit view keeps its row height while the outer container provides a vertical
-viewport for a longer categorical list.
+viewport. It starts at the last rows and keeps their distance from the bottom.
 """
 
 import genome_spy as gs
@@ -28,8 +28,10 @@ chart = (
     # Keep rows 20 pixels tall and scroll when they do not all fit.
     .properties(
         height=gs.step(20),
-        viewportHeight="container",
+        viewportHeight=gs.ViewportSizeDef(grow=1, anchor="end"),
         title="Scrollable viewport",
     )
     .with_view(stroke="lightgray")
 )
+
+chart = chart.configure_legend(selectionLabel=False)
